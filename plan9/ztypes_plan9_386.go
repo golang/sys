@@ -2,7 +2,7 @@
 
 // MACHINE GENERATED - DO NOT EDIT.
 
-package syscall
+package plan9
 
 // Constants
 const (

@@ -5,7 +5,7 @@
 // TODO(rsc): Rewrite all nn(SP) references into name+(nn-8)(FP)
 // so that go vet can check that they are correct.
 
-#include "../../cmd/ld/textflag.h"
+#include "../../cmd/ld/textflag.h" // TODO: How to refer to this?
 
 //
 // System call support for 386, Plan 9
@@ -139,7 +139,7 @@ TEXT ·seek(SB),NOSPLIT,$0-36
 	MOVL	AX, 28(SP)	// newoffset high
 	
 	SUBL	$8, SP
-	CALL	syscall·errstr(SB)
+	CALL	plan9·errstr(SB)
 	MOVL	SP, SI
 	ADDL	$8, SP	
 	JMP	copyresult6

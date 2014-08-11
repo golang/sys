@@ -5,7 +5,7 @@
 // Native Client SRPC message passing.
 // This code is needed to invoke SecureRandom, the NaCl equivalent of /dev/random.
 
-package syscall
+package unix
 
 import (
 	"errors"

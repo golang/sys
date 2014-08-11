@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#include "../../cmd/ld/textflag.h"
-#include "../runtime/syscall_nacl.h"
+#include "../../cmd/ld/textflag.h" // TODO: how to refer to this?
+#include "../runtime/syscall_nacl.h" // TODO: how to refer to this?
 
 //
 // System call support for 386, Native Client
@@ -15,7 +15,7 @@
 #define NACL_SYSJMP(code) \
 	MOVL $(0x10000 + ((code)<<5)), AX; JMP AX
 
-TEXT syscall·Syscall(SB),NOSPLIT,$12-28
+TEXT unix·Syscall(SB),NOSPLIT,$12-28
 	CALL	runtime·entersyscall(SB)
 	MOVL	trap+0(FP), AX
 	MOVL	a1+4(FP), BX

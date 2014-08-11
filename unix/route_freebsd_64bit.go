@@ -4,7 +4,7 @@
 
 // +build freebsd,amd64
 
-package syscall
+package unix
 
 import "unsafe"
 

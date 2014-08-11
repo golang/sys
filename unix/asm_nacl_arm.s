@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#include "../../cmd/ld/textflag.h"
-#include "../runtime/syscall_nacl.h"
+#include "../../cmd/ld/textflag.h" // TODO: how to refer to this?
+#include "../runtime/syscall_nacl.h" // TODO: how to refer to this?
 
 //
 // System call support for ARM, Native Client
@@ -15,7 +15,7 @@
 #define NACL_SYSJMP(code) \
 	MOVW $(0x10000 + ((code)<<5)), R8; B (R8)
 
-TEXT syscall·Syscall(SB),NOSPLIT,$0-28
+TEXT unix·Syscall(SB),NOSPLIT,$0-28
 	BL	runtime·entersyscall(SB)
 	MOVW	trap+0(FP), R8
 	MOVW	a1+4(FP), R0

@@ -4,7 +4,7 @@
 
 // +build freebsd,386 freebsd,arm
 
-package syscall
+package unix
 
 import "unsafe"
 

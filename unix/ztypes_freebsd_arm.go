@@ -1,7 +1,7 @@
 // Created by cgo -godefs - DO NOT EDIT
 // cgo -godefs -- -fsigned-char types_freebsd.go
 
-package syscall
+package unix
 
 const (
 	sizeofPtr      = 0x4

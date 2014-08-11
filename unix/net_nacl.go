@@ -6,7 +6,7 @@
 // The simulation is not particularly tied to NaCl,
 // but other systems have real networks.
 
-package syscall
+package unix
 
 import (
 	"sync"

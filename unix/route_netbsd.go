@@ -4,7 +4,7 @@
 
 // Routing sockets and messages for NetBSD
 
-package syscall
+package unix
 
 import "unsafe"
 

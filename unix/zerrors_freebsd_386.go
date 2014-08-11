@@ -4,7 +4,7 @@
 // Created by cgo -godefs - DO NOT EDIT
 // cgo -godefs -- -m32 _const.go
 
-package syscall
+package unix
 
 const (
 	AF_APPLETALK                      = 0x10

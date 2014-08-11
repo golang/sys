@@ -7,7 +7,7 @@
 // and a modified copy of the zip reader in package time.
 // (The one in package time does not support decompression; this one does.)
 
-package syscall
+package unix
 
 const (
 	maxCodeLen = 16    // max length of Huffman code

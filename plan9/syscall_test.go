@@ -2,19 +2,20 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package syscall_test
+package plan9_test
 
 import (
-	"syscall"
 	"testing"
+
+	"code.google.com/p/go.sys/plan9"
 )
 
 func testSetGetenv(t *testing.T, key, value string) {
-	err := syscall.Setenv(key, value)
+	err := plan9.Setenv(key, value)
 	if err != nil {
 		t.Fatalf("Setenv failed to set %q: %v", value, err)
 	}
-	newvalue, found := syscall.Getenv(key)
+	newvalue, found := plan9.Getenv(key)
 	if !found {
 		t.Fatalf("Getenv failed to find %v variable (want value %q)", key, value)
 	}

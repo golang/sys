@@ -6,7 +6,7 @@
 
 // Routing sockets and messages
 
-package syscall
+package unix
 
 import "unsafe"
 

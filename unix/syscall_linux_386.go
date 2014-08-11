@@ -5,7 +5,7 @@
 // TODO(rsc): Rewrite all nn(SP) references into name+(nn-8)(FP)
 // so that go vet can check that they are correct.
 
-package syscall
+package unix
 
 import "unsafe"
 

@@ -5,7 +5,7 @@
 // TODO(rsc): Rewrite all nn(SP) references into name+(nn-8)(FP)
 // so that go vet can check that they are correct.
 
-#include "../../cmd/ld/textflag.h"
+#include "../../cmd/ld/textflag.h" // TODO: how to refer to this?
 
 //
 // System call support for AMD64, NetBSD

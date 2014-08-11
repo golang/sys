@@ -6,7 +6,7 @@
 
 // Berkeley packet filter for BSD variants
 
-package syscall
+package unix
 
 import (
 	"unsafe"

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package syscall
+package unix
 
 import (
 	"sync"
@@ -19,12 +19,12 @@ type soError struct {
 
 func (e *soError) Error() string { return e.Msg }
 
-// Implemented in ../runtime/syscall_solaris.goc.
-func rawSysvicall6(trap, nargs, a1, a2, a3, a4, a5, a6 uintptr) (r1, r2 uintptr, err Errno)
-func sysvicall6(trap, nargs, a1, a2, a3, a4, a5, a6 uintptr) (r1, r2 uintptr, err Errno)
-func dlclose(handle uintptr) (err Errno)
-func dlopen(name *uint8, mode uintptr) (handle uintptr, err Errno)
-func dlsym(handle uintptr, name *uint8) (proc uintptr, err Errno)
+// Implemented in runtime/syscall_solaris.goc.
+func rawSysvicall6(trap, nargs, a1, a2, a3, a4, a5, a6 uintptr) (r1, r2 uintptr, err Errno) // TODO: export
+func sysvicall6(trap, nargs, a1, a2, a3, a4, a5, a6 uintptr) (r1, r2 uintptr, err Errno)    // TODO: export
+func dlclose(handle uintptr) (err Errno)                                                    // TODO: export
+func dlopen(name *uint8, mode uintptr) (handle uintptr, err Errno)                          // TODO: export
+func dlsym(handle uintptr, name *uint8) (proc uintptr, err Errno)                           // TODO: export
 
 // A so implements access to a single shared library object.
 type so struct {
@@ -119,7 +119,7 @@ func (p *proc) Addr() uintptr {
 // GetLastError.  Callers must inspect the primary return value to decide
 // whether an error occurred (according to the semantics of the specific
 // function being called) before consulting the error. The error will be
-// guaranteed to contain syscall.Errno.
+// guaranteed to contain unix.Errno.
 func (p *proc) Call(a ...uintptr) (r1, r2 uintptr, lastErr error) {
 	switch len(a) {
 	case 0:
@@ -253,7 +253,7 @@ func (p *lazyProc) Addr() uintptr {
 // GetLastError.  Callers must inspect the primary return value to decide
 // whether an error occurred (according to the semantics of the specific
 // function being called) before consulting the error. The error will be
-// guaranteed to contain syscall.Errno.
+// guaranteed to contain unix.Errno.
 func (p *lazyProc) Call(a ...uintptr) (r1, r2 uintptr, lastErr error) {
 	p.mustFind()
 	return p.proc.Call(a...)

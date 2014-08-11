@@ -4,14 +4,14 @@
 
 // +build linux
 
-package syscall_test
+package unix_test
 
 import (
 	"bytes"
 	"net"
 	"os"
-	"syscall"
 	"testing"
+	"unix"
 )
 
 // TestSCMCredentials tests the sending and receiving of credentials
@@ -19,14 +19,14 @@ import (
 // sockets. The SO_PASSCRED socket option is enabled on the sending
 // socket for this to work.
 func TestSCMCredentials(t *testing.T) {
-	fds, err := syscall.Socketpair(syscall.AF_LOCAL, syscall.SOCK_STREAM, 0)
+	fds, err := unix.Socketpair(unix.AF_LOCAL, unix.SOCK_STREAM, 0)
 	if err != nil {
 		t.Fatalf("Socketpair: %v", err)
 	}
-	defer syscall.Close(fds[0])
-	defer syscall.Close(fds[1])
+	defer unix.Close(fds[0])
+	defer unix.Close(fds[1])
 
-	err = syscall.SetsockoptInt(fds[0], syscall.SOL_SOCKET, syscall.SO_PASSCRED, 1)
+	err = unix.SetsockoptInt(fds[0], unix.SOL_SOCKET, unix.SO_PASSCRED, 1)
 	if err != nil {
 		t.Fatalf("SetsockoptInt: %v", err)
 	}
@@ -49,14 +49,14 @@ func TestSCMCredentials(t *testing.T) {
 	}
 	defer cli.Close()
 
-	var ucred syscall.Ucred
+	var ucred unix.Ucred
 	if os.Getuid() != 0 {
 		ucred.Pid = int32(os.Getpid())
 		ucred.Uid = 0
 		ucred.Gid = 0
-		oob := syscall.UnixCredentials(&ucred)
+		oob := unix.UnixCredentials(&ucred)
 		_, _, err := cli.(*net.UnixConn).WriteMsgUnix(nil, oob, nil)
-		if err.(*net.OpError).Err != syscall.EPERM {
+		if err.(*net.OpError).Err != unix.EPERM {
 			t.Fatalf("WriteMsgUnix failed with %v, want EPERM", err)
 		}
 	}
@@ -64,7 +64,7 @@ func TestSCMCredentials(t *testing.T) {
 	ucred.Pid = int32(os.Getpid())
 	ucred.Uid = uint32(os.Getuid())
 	ucred.Gid = uint32(os.Getgid())
-	oob := syscall.UnixCredentials(&ucred)
+	oob := unix.UnixCredentials(&ucred)
 
 	// this is going to send a dummy byte
 	n, oobn, err := cli.(*net.UnixConn).WriteMsgUnix(nil, oob, nil)
@@ -99,11 +99,11 @@ func TestSCMCredentials(t *testing.T) {
 		t.Fatal("ReadMsgUnix oob bytes don't match")
 	}
 
-	scm, err := syscall.ParseSocketControlMessage(oob2)
+	scm, err := unix.ParseSocketControlMessage(oob2)
 	if err != nil {
 		t.Fatalf("ParseSocketControlMessage: %v", err)
 	}
-	newUcred, err := syscall.ParseUnixCredentials(&scm[0])
+	newUcred, err := unix.ParseUnixCredentials(&scm[0])
 	if err != nil {
 		t.Fatalf("ParseUnixCredentials: %v", err)
 	}

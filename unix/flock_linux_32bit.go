@@ -4,7 +4,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package syscall
+package unix
 
 func init() {
 	// On 32-bit Linux systems, the fcntl syscall that matches Go's

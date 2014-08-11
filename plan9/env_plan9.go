@@ -4,7 +4,7 @@
 
 // Plan 9 environment variables.
 
-package syscall
+package plan9
 
 import (
 	"errors"

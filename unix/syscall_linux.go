@@ -9,7 +9,7 @@
 // Note that sometimes we use a lowercase //sys name and
 // wrap it in our own nicer implementation.
 
-package syscall
+package unix
 
 import "unsafe"
 

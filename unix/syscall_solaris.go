@@ -10,7 +10,7 @@
 // it in our own nicer implementation, either here or in
 // syscall_solaris.go or syscall_unix.go.
 
-package syscall
+package unix
 
 import "unsafe"
 

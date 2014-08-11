@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package syscall
+package plan9
 
 func itoa(val int) string { // do it here rather than with fmt to avoid dependency
 	if val < 0 {

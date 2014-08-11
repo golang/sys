@@ -4,19 +4,19 @@
 
 // +build darwin dragonfly freebsd linux netbsd openbsd
 
-package syscall_test
+package unix_test
 
 import (
-	"syscall"
 	"testing"
+	"unix"
 )
 
 func TestMmap(t *testing.T) {
-	b, err := syscall.Mmap(-1, 0, syscall.Getpagesize(), syscall.PROT_NONE, syscall.MAP_ANON|syscall.MAP_PRIVATE)
+	b, err := unix.Mmap(-1, 0, unix.Getpagesize(), unix.PROT_NONE, unix.MAP_ANON|unix.MAP_PRIVATE)
 	if err != nil {
 		t.Fatalf("Mmap: %v", err)
 	}
-	if err := syscall.Munmap(b); err != nil {
+	if err := unix.Munmap(b); err != nil {
 		t.Fatalf("Munmap: %v", err)
 	}
 }

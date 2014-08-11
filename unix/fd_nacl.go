@@ -7,7 +7,7 @@
 // Native Client allows, so we maintain our own file descriptor table exposed
 // to higher-level packages.
 
-package syscall
+package unix
 
 import (
 	"sync"

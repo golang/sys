@@ -4,7 +4,7 @@
 
 // +build dragonfly freebsd netbsd openbsd
 
-package syscall
+package unix
 
 const ImplementsGetwd = false
 

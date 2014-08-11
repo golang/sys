@@ -3,7 +3,7 @@
 # Use of this source code is governed by a BSD-style
 # license that can be found in the LICENSE file.
 
-# The syscall package provides access to the raw system call
+# The unix package provides access to the raw system call
 # interface of the underlying operating system.  Porting Go to
 # a new architecture/operating system combination requires
 # some manual effort, though there are tools that automate
@@ -216,22 +216,11 @@ openbsd_amd64)
 	mksysnum="curl -s 'http://www.openbsd.org/cgi-bin/cvsweb/~checkout~/src/sys/kern/syscalls.master' | ./mksysnum_openbsd.pl"
 	mktypes="GOARCH=$GOARCH go tool cgo -godefs"
 	;;
-plan9_386)
-	mkerrors=
-	mksyscall="./mksyscall.pl -l32 -plan9"
-	mksysnum="./mksysnum_plan9.sh /n/sources/plan9/sys/src/libc/9syscall/sys.h"
-	mktypes="XXX"
-	;;
 solaris_amd64)
 	mksyscall="./mksyscall_solaris.pl"
 	mkerrors="$mkerrors -m64"
 	mksysnum=
 	mktypes="GOARCH=$GOARCH go tool cgo -godefs"
-	;;
-windows_*)
-	mksyscall=
-	mkerrors=
-	zerrors=
 	;;
 *)
 	echo 'unrecognized $GOOS_$GOARCH: ' "$GOOSARCH" 1>&2
@@ -242,11 +231,6 @@ esac
 (
 	if [ -n "$mkerrors" ]; then echo "$mkerrors |gofmt >$zerrors"; fi
 	case "$GOOS" in
-	windows)
-		echo "GOOS= GOARCH= go build mksyscall_windows.go"
-		echo "./mksyscall_windows syscall_windows.go security_windows.go syscall_$GOOSARCH.go |gofmt >zsyscall_$GOOSARCH.go"
-		echo "rm -f ./mksyscall_windows"
-		;;
 	*)
 		syscall_goos="syscall_$GOOS.go"
 		case "$GOOS" in

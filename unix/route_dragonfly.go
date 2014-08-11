@@ -4,7 +4,7 @@
 
 // Routing sockets and messages for Dragonfly
 
-package syscall
+package unix
 
 import "unsafe"
 

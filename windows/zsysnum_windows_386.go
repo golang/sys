@@ -1,3 +1,3 @@
 // nothing to see here
 
-package syscall
+package windows

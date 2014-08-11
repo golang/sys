@@ -4,7 +4,7 @@
 
 // +build !race
 
-package syscall
+package unix
 
 import (
 	"unsafe"

@@ -4,7 +4,7 @@
 
 // Windows environment variables.
 
-package syscall
+package windows
 
 import (
 	"unicode/utf16"

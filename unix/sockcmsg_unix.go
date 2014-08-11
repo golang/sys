@@ -6,7 +6,7 @@
 
 // Socket control messages
 
-package syscall
+package unix
 
 import "unsafe"
 

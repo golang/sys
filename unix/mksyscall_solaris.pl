@@ -264,7 +264,7 @@ package $package
 import "unsafe"
 EOF
 
-print "import \"syscall\"\n" if $package ne "syscall";
+print "import \"unix\"\n" if $package ne "unix";
 
 print <<EOF;
 

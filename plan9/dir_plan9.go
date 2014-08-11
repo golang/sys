@@ -4,7 +4,7 @@
 
 // Plan 9 directory marshalling. See intro(5).
 
-package syscall
+package plan9
 
 import "errors"
 
@@ -18,7 +18,7 @@ var (
 type Qid struct {
 	Path uint64 // the file server's unique identification for the file
 	Vers uint32 // version number for given Path
-	Type uint8  // the type of the file (syscall.QTDIR for example)
+	Type uint8  // the type of the file (plan9.QTDIR for example)
 }
 
 // A Dir contains the metadata for a file.
@@ -54,7 +54,7 @@ var nullDir = Dir{
 }
 
 // Null assigns special "don't touch" values to members of d to
-// avoid modifying them during syscall.Wstat.
+// avoid modifying them during plan9.Wstat.
 func (d *Dir) Null() { *d = nullDir }
 
 // Marshal encodes a 9P stat message corresponding to d into b

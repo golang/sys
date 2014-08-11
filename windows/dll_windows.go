@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package syscall
+package windows
 
 import (
 	"sync"
@@ -19,14 +19,14 @@ type DLLError struct {
 
 func (e *DLLError) Error() string { return e.Msg }
 
-// Implemented in ../runtime/syscall_windows.goc.
+// Implemented in runtime/syscall_windows.goc.
 func Syscall(trap, nargs, a1, a2, a3 uintptr) (r1, r2 uintptr, err Errno)
 func Syscall6(trap, nargs, a1, a2, a3, a4, a5, a6 uintptr) (r1, r2 uintptr, err Errno)
 func Syscall9(trap, nargs, a1, a2, a3, a4, a5, a6, a7, a8, a9 uintptr) (r1, r2 uintptr, err Errno)
 func Syscall12(trap, nargs, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12 uintptr) (r1, r2 uintptr, err Errno)
 func Syscall15(trap, nargs, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15 uintptr) (r1, r2 uintptr, err Errno)
-func loadlibrary(filename *uint16) (handle uintptr, err Errno)
-func getprocaddress(handle uintptr, procname *uint8) (proc uintptr, err Errno)
+func loadlibrary(filename *uint16) (handle uintptr, err Errno)                 // TODO: must be exported.
+func getprocaddress(handle uintptr, procname *uint8) (proc uintptr, err Errno) // TODO: must be exported.
 
 // A DLL implements access to a single DLL.
 type DLL struct {
@@ -120,7 +120,7 @@ func (p *Proc) Addr() uintptr {
 // The returned error is always non-nil, constructed from the result of GetLastError.
 // Callers must inspect the primary return value to decide whether an error occurred
 // (according to the semantics of the specific function being called) before consulting
-// the error. The error will be guaranteed to contain syscall.Errno.
+// the error. The error will be guaranteed to contain windows.Errno.
 func (p *Proc) Call(a ...uintptr) (r1, r2 uintptr, lastErr error) {
 	switch len(a) {
 	case 0:
@@ -272,7 +272,7 @@ func (p *LazyProc) Addr() uintptr {
 // The returned error is always non-nil, constructed from the result of GetLastError.
 // Callers must inspect the primary return value to decide whether an error occurred
 // (according to the semantics of the specific function being called) before consulting
-// the error. The error will be guaranteed to contain syscall.Errno.
+// the error. The error will be guaranteed to contain windows.Errno.
 func (p *LazyProc) Call(a ...uintptr) (r1, r2 uintptr, lastErr error) {
 	p.mustFind()
 	return p.proc.Call(a...)

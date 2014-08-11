@@ -3,5 +3,5 @@
 // license that can be found in the LICENSE file.
 
 //
-// System calls for 386, Windows are implemented in ../runtime/syscall_windows.goc
+// System calls for 386, Windows are implemented in runtime/syscall_windows.goc
 //

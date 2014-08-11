@@ -69,11 +69,11 @@ func packagename() string {
 	return packageName
 }
 
-func syscalldot() string {
-	if packageName == "syscall" {
+func windowsdot() string {
+	if packageName == "windows" {
 		return ""
 	}
-	return "syscall."
+	return "windows."
 }
 
 // Param is function parameter
@@ -265,7 +265,7 @@ func (r *Rets) useLongHandleErrorCode(retvar string) string {
 	if r.FailCond != "" {
 		cond = strings.Replace(r.FailCond, "failretval", retvar, 1)
 	}
-	return fmt.Sprintf(code, cond, syscalldot())
+	return fmt.Sprintf(code, cond, windowsdot())
 }
 
 // SetErrorCode returns source code that sets return parameters.
@@ -280,7 +280,7 @@ func (r *Rets) SetErrorCode() string {
 		return r.useLongHandleErrorCode("r1")
 	}
 	if r.Type == "error" {
-		return fmt.Sprintf(code, r.Name, syscalldot())
+		return fmt.Sprintf(code, r.Name, windowsdot())
 	}
 	s := ""
 	switch {
@@ -297,7 +297,7 @@ func (r *Rets) SetErrorCode() string {
 	return s + "\n\t" + r.useLongHandleErrorCode(r.Name)
 }
 
-// Fn describes syscall function.
+// Fn describes a syscall function.
 type Fn struct {
 	Name        string
 	Params      []*Param
@@ -493,9 +493,9 @@ func (f *Fn) SyscallParamCount() int {
 func (f *Fn) Syscall() string {
 	c := f.SyscallParamCount()
 	if c == 3 {
-		return syscalldot() + "Syscall"
+		return windowsdot() + "Syscall"
 	}
-	return syscalldot() + "Syscall" + strconv.Itoa(c)
+	return windowsdot() + "Syscall" + strconv.Itoa(c)
 }
 
 // SyscallParamList returns source code for SyscallX parameters for function f.
@@ -520,9 +520,9 @@ func (f *Fn) IsUTF16() bool {
 // StrconvFunc returns name of Go string to OS string function for f.
 func (f *Fn) StrconvFunc() string {
 	if f.IsUTF16() {
-		return syscalldot() + "UTF16PtrFromString"
+		return windowsdot() + "UTF16PtrFromString"
 	}
-	return syscalldot() + "BytePtrFromString"
+	return windowsdot() + "BytePtrFromString"
 }
 
 // StrconvType returns Go type name used for OS string for f.
@@ -619,7 +619,7 @@ func (src *Source) ParseFile(path string) error {
 // Generate output source file from a source set src.
 func (src *Source) Generate(w io.Writer) error {
 	funcMap := template.FuncMap{
-		"syscalldot":  syscalldot,
+		"windowsdot":  windowsdot,
 		"packagename": packagename,
 	}
 	t := template.Must(template.New("main").Funcs(funcMap).Parse(srcTemplate))
@@ -660,8 +660,8 @@ const srcTemplate = `
 
 package {{packagename}}
 
-import "unsafe"{{if syscalldot}}
-import "syscall"{{end}}
+import "unsafe"{{if windowsdot}}
+import "windows"{{end}}
 
 var (
 {{template "dlls" .}}
@@ -671,7 +671,7 @@ var (
 
 {{/* help functions */}}
 
-{{define "dlls"}}{{range .DLLs}}	mod{{.}} = {{syscalldot}}NewLazyDLL("{{.}}.dll")
+{{define "dlls"}}{{range .DLLs}}	mod{{.}} = {{windowsdot}}NewLazyDLL("{{.}}.dll")
 {{end}}{{end}}
 
 {{define "funcnames"}}{{range .Funcs}}	proc{{.DLLFuncName}} = mod{{.DLLName}}.NewProc("{{.DLLFuncName}}")

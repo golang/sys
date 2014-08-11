@@ -4,7 +4,7 @@
 
 // Linux socket filter
 
-package syscall
+package unix
 
 import (
 	"unsafe"

@@ -4,7 +4,7 @@
 
 // Windows system calls.
 
-package syscall
+package windows
 
 import (
 	errorspkg "errors"
@@ -23,7 +23,7 @@ const InvalidHandle = ^Handle(0)
 func StringToUTF16(s string) []uint16 {
 	a, err := UTF16FromString(s)
 	if err != nil {
-		panic("syscall: string with NUL passed to StringToUTF16")
+		panic("windows: string with NUL passed to StringToUTF16")
 	}
 	return a
 }
@@ -108,7 +108,7 @@ func (e Errno) Timeout() bool {
 // Converts a Go function to a function pointer conforming
 // to the stdcall or cdecl calling convention.  This is useful when
 // interoperating with Windows code requiring callbacks.
-// Implemented in ../runtime/syscall_windows.goc
+// Implemented in runtime/syscall_windows.goc
 func NewCallback(fn interface{}) uintptr
 func NewCallbackCDecl(fn interface{}) uintptr
 
@@ -816,7 +816,7 @@ func (w WaitStatus) Signaled() bool { return false }
 func (w WaitStatus) TrapCause() int { return -1 }
 
 // Timespec is an invented structure on Windows, but here for
-// consistency with the syscall package for other operating systems.
+// consistency with the corresponding package for other operating systems.
 type Timespec struct {
 	Sec  int64
 	Nsec int64

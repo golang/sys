@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package syscall_test
+package windows_test
 
 import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
-	"syscall"
 	"testing"
+	"windows"
 )
 
 func TestWin32finddata(t *testing.T) {
@@ -27,7 +27,7 @@ func TestWin32finddata(t *testing.T) {
 	f.Close()
 
 	type X struct {
-		fd  syscall.Win32finddata
+		fd  windows.Win32finddata
 		got byte
 		pad [10]byte // to protect ourselves
 
@@ -35,12 +35,12 @@ func TestWin32finddata(t *testing.T) {
 	var want byte = 2 // it is unlikely to have this character in the filename
 	x := X{got: want}
 
-	pathp, _ := syscall.UTF16PtrFromString(path)
-	h, err := syscall.FindFirstFile(pathp, &(x.fd))
+	pathp, _ := windows.UTF16PtrFromString(path)
+	h, err := windows.FindFirstFile(pathp, &(x.fd))
 	if err != nil {
 		t.Fatalf("FindFirstFile failed: %v", err)
 	}
-	err = syscall.FindClose(h)
+	err = windows.FindClose(h)
 	if err != nil {
 		t.Fatalf("FindClose failed: %v", err)
 	}
@@ -55,16 +55,16 @@ func abort(funcname string, err error) {
 }
 
 func ExampleLoadLibrary() {
-	h, err := syscall.LoadLibrary("kernel32.dll")
+	h, err := windows.LoadLibrary("kernel32.dll")
 	if err != nil {
 		abort("LoadLibrary", err)
 	}
-	defer syscall.FreeLibrary(h)
-	proc, err := syscall.GetProcAddress(h, "GetVersion")
+	defer windows.FreeLibrary(h)
+	proc, err := windows.GetProcAddress(h, "GetVersion")
 	if err != nil {
 		abort("GetProcAddress", err)
 	}
-	r, _, _ := syscall.Syscall(uintptr(proc), 0, 0, 0, 0)
+	r, _, _ := windows.Syscall(uintptr(proc), 0, 0, 0, 0)
 	major := byte(r)
 	minor := uint8(r >> 8)
 	build := uint16(r >> 16)

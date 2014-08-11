@@ -6,7 +6,7 @@
 
 // Unix environment variables.
 
-package syscall
+package unix
 
 import "sync"
 

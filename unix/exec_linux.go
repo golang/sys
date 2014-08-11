@@ -4,7 +4,7 @@
 
 // +build linux
 
-package syscall
+package unix
 
 import (
 	"unsafe"

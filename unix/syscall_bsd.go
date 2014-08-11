@@ -10,7 +10,7 @@
 // used as input to mksyscall which parses the //sys
 // lines and generates system call stubs.
 
-package syscall
+package unix
 
 import (
 	"runtime"

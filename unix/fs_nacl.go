@@ -12,7 +12,7 @@
 //
 // TODO: Perhaps support symlinks, although they muck everything up.
 
-package syscall
+package unix
 
 import (
 	"sync"

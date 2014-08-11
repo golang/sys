@@ -4,7 +4,7 @@
 
 // +build darwin dragonfly freebsd netbsd openbsd
 
-package syscall
+package unix
 
 import (
 	"runtime"

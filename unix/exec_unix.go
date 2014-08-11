@@ -6,7 +6,7 @@
 
 // Fork, exec, wait, etc.
 
-package syscall
+package unix
 
 import (
 	"runtime"

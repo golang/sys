@@ -1,7 +1,7 @@
 // Created by cgo -godefs - DO NOT EDIT
 // cgo -godefs types_solaris.go
 
-package syscall
+package unix
 
 const (
 	sizeofPtr      = 0x8

@@ -4,7 +4,7 @@
 
 // +build darwin dragonfly freebsd linux netbsd openbsd solaris
 
-package syscall_test
+package unix_test
 
 import (
 	"flag"
@@ -15,9 +15,9 @@ import (
 	"os/exec"
 	"path/filepath"
 	"runtime"
-	"syscall"
 	"testing"
 	"time"
+	"unix"
 )
 
 // Tests that below functions, structures and constants are consistent
@@ -25,25 +25,25 @@ import (
 func _() {
 	// program scheduling priority functions and constants
 	var (
-		_ func(int, int, int) error   = syscall.Setpriority
-		_ func(int, int) (int, error) = syscall.Getpriority
+		_ func(int, int, int) error   = unix.Setpriority
+		_ func(int, int) (int, error) = unix.Getpriority
 	)
 	const (
-		_ int = syscall.PRIO_USER
-		_ int = syscall.PRIO_PROCESS
-		_ int = syscall.PRIO_PGRP
+		_ int = unix.PRIO_USER
+		_ int = unix.PRIO_PROCESS
+		_ int = unix.PRIO_PGRP
 	)
 
 	// termios constants
 	const (
-		_ int = syscall.TCIFLUSH
-		_ int = syscall.TCIOFLUSH
-		_ int = syscall.TCOFLUSH
+		_ int = unix.TCIFLUSH
+		_ int = unix.TCIOFLUSH
+		_ int = unix.TCOFLUSH
 	)
 
 	// fcntl file locking structure and constants
 	var (
-		_ = syscall.Flock_t{
+		_ = unix.Flock_t{
 			Type:   int16(0),
 			Whence: int16(0),
 			Start:  int64(0),
@@ -52,9 +52,9 @@ func _() {
 		}
 	)
 	const (
-		_ = syscall.F_GETLK
-		_ = syscall.F_SETLK
-		_ = syscall.F_SETLKW
+		_ = unix.F_GETLK
+		_ = unix.F_SETLK
+		_ = unix.F_SETLKW
 	)
 }
 
@@ -62,17 +62,17 @@ func _() {
 // the calling convention of each kernel.
 func TestFcntlFlock(t *testing.T) {
 	name := filepath.Join(os.TempDir(), "TestFcntlFlock")
-	fd, err := syscall.Open(name, syscall.O_CREAT|syscall.O_RDWR|syscall.O_CLOEXEC, 0)
+	fd, err := unix.Open(name, unix.O_CREAT|unix.O_RDWR|unix.O_CLOEXEC, 0)
 	if err != nil {
 		t.Fatalf("Open failed: %v", err)
 	}
-	defer syscall.Unlink(name)
-	defer syscall.Close(fd)
-	flock := syscall.Flock_t{
-		Type:  syscall.F_RDLCK,
+	defer unix.Unlink(name)
+	defer unix.Close(fd)
+	flock := unix.Flock_t{
+		Type:  unix.F_RDLCK,
 		Start: 0, Len: 0, Whence: 1,
 	}
-	if err := syscall.FcntlFlock(uintptr(fd), syscall.F_GETLK, &flock); err != nil {
+	if err := unix.FcntlFlock(uintptr(fd), unix.F_GETLK, &flock); err != nil {
 		t.Fatalf("FcntlFlock failed: %v", err)
 	}
 }
@@ -104,12 +104,12 @@ func TestPassFD(t *testing.T) {
 	}
 	defer os.RemoveAll(tempDir)
 
-	fds, err := syscall.Socketpair(syscall.AF_LOCAL, syscall.SOCK_STREAM, 0)
+	fds, err := unix.Socketpair(unix.AF_LOCAL, unix.SOCK_STREAM, 0)
 	if err != nil {
 		t.Fatalf("Socketpair: %v", err)
 	}
-	defer syscall.Close(fds[0])
-	defer syscall.Close(fds[1])
+	defer unix.Close(fds[0])
+	defer unix.Close(fds[1])
 	writeFile := os.NewFile(uintptr(fds[0]), "child-writes")
 	readFile := os.NewFile(uintptr(fds[1]), "parent-reads")
 	defer writeFile.Close()
@@ -144,7 +144,7 @@ func TestPassFD(t *testing.T) {
 	_, oobn, _, _, err := uc.ReadMsgUnix(buf, oob)
 	closeUnix.Stop()
 
-	scms, err := syscall.ParseSocketControlMessage(oob[:oobn])
+	scms, err := unix.ParseSocketControlMessage(oob[:oobn])
 	if err != nil {
 		t.Fatalf("ParseSocketControlMessage: %v", err)
 	}
@@ -152,9 +152,9 @@ func TestPassFD(t *testing.T) {
 		t.Fatalf("expected 1 SocketControlMessage; got scms = %#v", scms)
 	}
 	scm := scms[0]
-	gotFds, err := syscall.ParseUnixRights(&scm)
+	gotFds, err := unix.ParseUnixRights(&scm)
 	if err != nil {
-		t.Fatalf("syscall.ParseUnixRights: %v", err)
+		t.Fatalf("unix.ParseUnixRights: %v", err)
 	}
 	if len(gotFds) != 1 {
 		t.Fatalf("wanted 1 fd; got %#v", gotFds)
@@ -204,7 +204,7 @@ func passFDChild() {
 	f.Write([]byte("Hello from child process!\n"))
 	f.Seek(0, 0)
 
-	rights := syscall.UnixRights(int(f.Fd()))
+	rights := unix.UnixRights(int(f.Fd()))
 	dummyByte := []byte("x")
 	n, oobn, err := uc.WriteMsgUnix(dummyByte, rights, nil)
 	if err != nil {
@@ -232,13 +232,13 @@ func TestUnixRightsRoundtrip(t *testing.T) {
 		var n int
 		for _, fds := range testCase {
 			// Last assignment to n wins
-			n = len(b) + syscall.CmsgLen(4*len(fds))
-			b = append(b, syscall.UnixRights(fds...)...)
+			n = len(b) + unix.CmsgLen(4*len(fds))
+			b = append(b, unix.UnixRights(fds...)...)
 		}
 		// Truncate b
 		b = b[:n]
 
-		scms, err := syscall.ParseSocketControlMessage(b)
+		scms, err := unix.ParseSocketControlMessage(b)
 		if err != nil {
 			t.Fatalf("ParseSocketControlMessage: %v", err)
 		}
@@ -246,7 +246,7 @@ func TestUnixRightsRoundtrip(t *testing.T) {
 			t.Fatalf("expected %v SocketControlMessage; got scms = %#v", len(testCase), scms)
 		}
 		for i, scm := range scms {
-			gotFds, err := syscall.ParseUnixRights(&scm)
+			gotFds, err := unix.ParseUnixRights(&scm)
 			if err != nil {
 				t.Fatalf("ParseUnixRights: %v", err)
 			}
@@ -264,8 +264,8 @@ func TestUnixRightsRoundtrip(t *testing.T) {
 }
 
 func TestRlimit(t *testing.T) {
-	var rlimit, zero syscall.Rlimit
-	err := syscall.Getrlimit(syscall.RLIMIT_NOFILE, &rlimit)
+	var rlimit, zero unix.Rlimit
+	err := unix.Getrlimit(unix.RLIMIT_NOFILE, &rlimit)
 	if err != nil {
 		t.Fatalf("Getrlimit: save failed: %v", err)
 	}
@@ -274,12 +274,12 @@ func TestRlimit(t *testing.T) {
 	}
 	set := rlimit
 	set.Cur = set.Max - 1
-	err = syscall.Setrlimit(syscall.RLIMIT_NOFILE, &set)
+	err = unix.Setrlimit(unix.RLIMIT_NOFILE, &set)
 	if err != nil {
 		t.Fatalf("Setrlimit: set failed: %#v %v", set, err)
 	}
-	var get syscall.Rlimit
-	err = syscall.Getrlimit(syscall.RLIMIT_NOFILE, &get)
+	var get unix.Rlimit
+	err = unix.Getrlimit(unix.RLIMIT_NOFILE, &get)
 	if err != nil {
 		t.Fatalf("Getrlimit: get failed: %v", err)
 	}
@@ -295,14 +295,14 @@ func TestRlimit(t *testing.T) {
 			t.Fatalf("Rlimit: change failed: wanted %#v got %#v", set, get)
 		}
 	}
-	err = syscall.Setrlimit(syscall.RLIMIT_NOFILE, &rlimit)
+	err = unix.Setrlimit(unix.RLIMIT_NOFILE, &rlimit)
 	if err != nil {
 		t.Fatalf("Setrlimit: restore failed: %#v %v", rlimit, err)
 	}
 }
 
 func TestSeekFailure(t *testing.T) {
-	_, err := syscall.Seek(-1, 0, 0)
+	_, err := unix.Seek(-1, 0, 0)
 	if err == nil {
 		t.Fatalf("Seek(-1, 0, 0) did not fail")
 	}

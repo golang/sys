@@ -4,7 +4,7 @@
 
 // Fork, exec, wait, etc.
 
-package syscall
+package plan9
 
 import (
 	"runtime"
