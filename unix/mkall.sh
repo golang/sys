@@ -120,7 +120,7 @@ darwin_386)
 	;;
 darwin_amd64)
 	mkerrors="$mkerrors -m64"
-	mksysnum="./mksysnum_darwin.pl /usr/include/sys/syscall.h"
+	mksysnum="./mksysnum_darwin.pl /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk/usr/include/sys/syscall.h"
 	mktypes="GOARCH=$GOARCH go tool cgo -godefs"
 	;;
 dragonfly_386)
