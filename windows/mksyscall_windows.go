@@ -492,10 +492,7 @@ func (f *Fn) SyscallParamCount() int {
 // Syscall determines which SyscallX function to use for function f.
 func (f *Fn) Syscall() string {
 	c := f.SyscallParamCount()
-	if c == 3 {
-		return windowsdot() + "Syscall"
-	}
-	return windowsdot() + "Syscall" + strconv.Itoa(c)
+	return "syscall.Syscall" + strconv.Itoa(c)
 }
 
 // SyscallParamList returns source code for SyscallX parameters for function f.
