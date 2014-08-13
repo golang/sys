@@ -10,6 +10,7 @@ import (
 	"bytes"
 	"net"
 	"os"
+	"syscall"
 	"testing"
 
 	"code.google.com/p/go.sys/unix"
@@ -57,7 +58,7 @@ func TestSCMCredentials(t *testing.T) {
 		ucred.Gid = 0
 		oob := unix.UnixCredentials(&ucred)
 		_, _, err := cli.(*net.UnixConn).WriteMsgUnix(nil, oob, nil)
-		if err.(*net.OpError).Err != unix.EPERM {
+		if err.(*net.OpError).Err != syscall.EPERM {
 			t.Fatalf("WriteMsgUnix failed with %v, want EPERM", err)
 		}
 	}
