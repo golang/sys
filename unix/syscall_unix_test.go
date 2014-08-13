@@ -17,7 +17,8 @@ import (
 	"runtime"
 	"testing"
 	"time"
-	"unix"
+
+	"code.google.com/p/go.sys/unix"
 )
 
 // Tests that below functions, structures and constants are consistent

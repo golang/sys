@@ -11,7 +11,8 @@ import (
 	"net"
 	"os"
 	"testing"
-	"unix"
+
+	"code.google.com/p/go.sys/unix"
 )
 
 // TestSCMCredentials tests the sending and receiving of credentials

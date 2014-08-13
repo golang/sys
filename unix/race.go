@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// +build race
+// +build darwin,race dragonfly,race freebsd,race linux,race netbsd,race openbsd,race
 
 package unix
 

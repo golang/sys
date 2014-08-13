@@ -2,11 +2,14 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// +build darwin dragonfly freebsd linux netbsd openbsd
+
 package unix_test
 
 import (
 	"testing"
-	"unix"
+
+	"code.google.com/p/go.sys/unix"
 )
 
 func testSetGetenv(t *testing.T, key, value string) {

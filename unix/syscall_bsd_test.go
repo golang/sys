@@ -8,7 +8,8 @@ package unix_test
 
 import (
 	"testing"
-	"unix"
+
+	"code.google.com/p/go.sys/unix"
 )
 
 const MNT_WAIT = 1

@@ -2,11 +2,14 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// +build windows
+
 package windows_test
 
 import (
 	"testing"
-	"windows"
+
+	"code.google.com/p/go.sys/windows"
 )
 
 func testSetGetenv(t *testing.T, key, value string) {

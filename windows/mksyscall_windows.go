@@ -661,7 +661,7 @@ const srcTemplate = `
 package {{packagename}}
 
 import "unsafe"{{if windowsdot}}
-import "windows"{{end}}
+import "code.google.com/p/go.sys/windows"{{end}}
 
 var (
 {{template "dlls" .}}

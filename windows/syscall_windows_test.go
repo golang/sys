@@ -9,7 +9,8 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
-	"windows"
+
+	"code.google.com/p/go.sys/windows"
 )
 
 func TestWin32finddata(t *testing.T) {
