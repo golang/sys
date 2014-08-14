@@ -61,18 +61,6 @@ import (
 
 var ForkLock sync.RWMutex
 
-// StringSlicePtr is deprecated. Use SlicePtrFromStrings instead.
-// If any string contains a NUL byte this function panics instead
-// of returning an error.
-func StringSlicePtr(ss []string) []*byte {
-	bb := make([]*byte, len(ss)+1)
-	for i := 0; i < len(ss); i++ {
-		bb[i] = StringBytePtr(ss[i])
-	}
-	bb[len(ss)] = nil
-	return bb
-}
-
 // SlicePtrFromStrings converts a slice of strings to a slice of
 // pointers to NUL-terminated byte slices. If any string contains
 // a NUL byte, it returns (nil, EINVAL).
@@ -323,11 +311,6 @@ childerror:
 	for {
 		RawSyscall(SYS_EXITS, 0, 0, 0)
 	}
-
-	// Calling panic is not actually safe,
-	// but the for loop above won't break
-	// and this shuts up the compiler.
-	panic("unreached")
 }
 
 func cexecPipe(p []int) error {

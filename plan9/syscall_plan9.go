@@ -11,25 +11,10 @@
 
 package plan9
 
-import "unsafe"
-
-const ImplementsGetwd = true
-
-// ErrorString implements Error's String method by returning itself.
-type ErrorString string
-
-func (e ErrorString) Error() string { return string(e) }
-
-// NewError converts s to an ErrorString, which satisfies the Error interface.
-func NewError(s string) error { return ErrorString(s) }
-
-func (e ErrorString) Temporary() bool {
-	return e == EINTR || e == EMFILE || e.Timeout()
-}
-
-func (e ErrorString) Timeout() bool {
-	return e == EBUSY || e == ETIMEDOUT
-}
+import (
+	"syscall"
+	"unsafe"
+)
 
 // A Note is a string describing a process note.
 // It implements the os.Signal interface.
@@ -51,8 +36,8 @@ var (
 // creation of IPv6 sockets to return EAFNOSUPPORT.
 var SocketDisableIPv6 bool
 
-func Syscall(trap, a1, a2, a3 uintptr) (r1, r2 uintptr, err ErrorString)
-func Syscall6(trap, a1, a2, a3, a4, a5, a6 uintptr) (r1, r2 uintptr, err ErrorString)
+func Syscall(trap, a1, a2, a3 uintptr) (r1, r2 uintptr, err syscall.ErrorString)
+func Syscall6(trap, a1, a2, a3, a4, a5, a6 uintptr) (r1, r2 uintptr, err syscall.ErrorString)
 func RawSyscall(trap, a1, a2, a3 uintptr) (r1, r2, err uintptr)
 func RawSyscall6(trap, a1, a2, a3, a4, a5, a6 uintptr) (r1, r2, err uintptr)
 
@@ -249,7 +234,7 @@ func Unmount(name, old string) (err error) {
 	oldptr := uintptr(unsafe.Pointer(oldp))
 
 	var r0 uintptr
-	var e ErrorString
+	var e syscall.ErrorString
 
 	// bind(2) man page: If name is zero, everything bound or mounted upon old is unbound or unmounted.
 	if name == "" {
