@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"syscall"
 	"testing"
 
 	"code.google.com/p/go.sys/windows"
@@ -65,7 +66,7 @@ func ExampleLoadLibrary() {
 	if err != nil {
 		abort("GetProcAddress", err)
 	}
-	r, _, _ := windows.Syscall(uintptr(proc), 0, 0, 0, 0)
+	r, _, _ := syscall.Syscall(uintptr(proc), 0, 0, 0, 0)
 	major := byte(r)
 	minor := uint8(r >> 8)
 	build := uint16(r >> 16)

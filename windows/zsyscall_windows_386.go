@@ -3,6 +3,7 @@
 
 package windows
 
+import "syscall"
 import "unsafe"
 
 var (

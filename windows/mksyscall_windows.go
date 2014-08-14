@@ -657,6 +657,7 @@ const srcTemplate = `
 
 package {{packagename}}
 
+import "syscall"
 import "unsafe"{{if windowsdot}}
 import "code.google.com/p/go.sys/windows"{{end}}
 
