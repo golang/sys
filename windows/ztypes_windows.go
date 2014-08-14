@@ -6,27 +6,27 @@ package windows
 
 const (
 	// Windows errors.
-	ERROR_FILE_NOT_FOUND      Errno = 2
-	ERROR_PATH_NOT_FOUND      Errno = 3
-	ERROR_ACCESS_DENIED       Errno = 5
-	ERROR_NO_MORE_FILES       Errno = 18
-	ERROR_HANDLE_EOF          Errno = 38
-	ERROR_NETNAME_DELETED     Errno = 64
-	ERROR_FILE_EXISTS         Errno = 80
-	ERROR_BROKEN_PIPE         Errno = 109
-	ERROR_BUFFER_OVERFLOW     Errno = 111
-	ERROR_INSUFFICIENT_BUFFER Errno = 122
-	ERROR_MOD_NOT_FOUND       Errno = 126
-	ERROR_PROC_NOT_FOUND      Errno = 127
-	ERROR_ALREADY_EXISTS      Errno = 183
-	ERROR_ENVVAR_NOT_FOUND    Errno = 203
-	ERROR_MORE_DATA           Errno = 234
-	ERROR_OPERATION_ABORTED   Errno = 995
-	ERROR_IO_PENDING          Errno = 997
-	ERROR_NOT_FOUND           Errno = 1168
-	ERROR_PRIVILEGE_NOT_HELD  Errno = 1314
-	WSAEACCES                 Errno = 10013
-	WSAECONNRESET             Errno = 10054
+	ERROR_FILE_NOT_FOUND      syscall.Errno = 2
+	ERROR_PATH_NOT_FOUND      syscall.Errno = 3
+	ERROR_ACCESS_DENIED       syscall.Errno = 5
+	ERROR_NO_MORE_FILES       syscall.Errno = 18
+	ERROR_HANDLE_EOF          syscall.Errno = 38
+	ERROR_NETNAME_DELETED     syscall.Errno = 64
+	ERROR_FILE_EXISTS         syscall.Errno = 80
+	ERROR_BROKEN_PIPE         syscall.Errno = 109
+	ERROR_BUFFER_OVERFLOW     syscall.Errno = 111
+	ERROR_INSUFFICIENT_BUFFER syscall.Errno = 122
+	ERROR_MOD_NOT_FOUND       syscall.Errno = 126
+	ERROR_PROC_NOT_FOUND      syscall.Errno = 127
+	ERROR_ALREADY_EXISTS      syscall.Errno = 183
+	ERROR_ENVVAR_NOT_FOUND    syscall.Errno = 203
+	ERROR_MORE_DATA           syscall.Errno = 234
+	ERROR_OPERATION_ABORTED   syscall.Errno = 995
+	ERROR_IO_PENDING          syscall.Errno = 997
+	ERROR_NOT_FOUND           syscall.Errno = 1168
+	ERROR_PRIVILEGE_NOT_HELD  syscall.Errno = 1314
+	WSAEACCES                 syscall.Errno = 10013
+	WSAECONNRESET             syscall.Errno = 10054
 )
 
 const (

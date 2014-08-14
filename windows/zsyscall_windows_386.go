@@ -165,7 +165,7 @@ var (
 func GetLastError() (lasterr error) {
 	r0, _, _ := syscall.Syscall(procGetLastError.Addr(), 0, 0, 0, 0)
 	if r0 != 0 {
-		lasterr = Errno(r0)
+		lasterr = syscall.Errno(r0)
 	}
 	return
 }
@@ -1182,7 +1182,7 @@ func CertVerifyCertificateChainPolicy(policyOID uintptr, chain *CertChainContext
 func RegOpenKeyEx(key Handle, subkey *uint16, options uint32, desiredAccess uint32, result *Handle) (regerrno error) {
 	r0, _, _ := syscall.Syscall6(procRegOpenKeyExW.Addr(), 5, uintptr(key), uintptr(unsafe.Pointer(subkey)), uintptr(options), uintptr(desiredAccess), uintptr(unsafe.Pointer(result)), 0)
 	if r0 != 0 {
-		regerrno = Errno(r0)
+		regerrno = syscall.Errno(r0)
 	}
 	return
 }
@@ -1190,7 +1190,7 @@ func RegOpenKeyEx(key Handle, subkey *uint16, options uint32, desiredAccess uint
 func RegCloseKey(key Handle) (regerrno error) {
 	r0, _, _ := syscall.Syscall(procRegCloseKey.Addr(), 1, uintptr(key), 0, 0)
 	if r0 != 0 {
-		regerrno = Errno(r0)
+		regerrno = syscall.Errno(r0)
 	}
 	return
 }
@@ -1198,7 +1198,7 @@ func RegCloseKey(key Handle) (regerrno error) {
 func RegQueryInfoKey(key Handle, class *uint16, classLen *uint32, reserved *uint32, subkeysLen *uint32, maxSubkeyLen *uint32, maxClassLen *uint32, valuesLen *uint32, maxValueNameLen *uint32, maxValueLen *uint32, saLen *uint32, lastWriteTime *Filetime) (regerrno error) {
 	r0, _, _ := syscall.Syscall12(procRegQueryInfoKeyW.Addr(), 12, uintptr(key), uintptr(unsafe.Pointer(class)), uintptr(unsafe.Pointer(classLen)), uintptr(unsafe.Pointer(reserved)), uintptr(unsafe.Pointer(subkeysLen)), uintptr(unsafe.Pointer(maxSubkeyLen)), uintptr(unsafe.Pointer(maxClassLen)), uintptr(unsafe.Pointer(valuesLen)), uintptr(unsafe.Pointer(maxValueNameLen)), uintptr(unsafe.Pointer(maxValueLen)), uintptr(unsafe.Pointer(saLen)), uintptr(unsafe.Pointer(lastWriteTime)))
 	if r0 != 0 {
-		regerrno = Errno(r0)
+		regerrno = syscall.Errno(r0)
 	}
 	return
 }
@@ -1206,7 +1206,7 @@ func RegQueryInfoKey(key Handle, class *uint16, classLen *uint32, reserved *uint
 func RegEnumKeyEx(key Handle, index uint32, name *uint16, nameLen *uint32, reserved *uint32, class *uint16, classLen *uint32, lastWriteTime *Filetime) (regerrno error) {
 	r0, _, _ := syscall.Syscall9(procRegEnumKeyExW.Addr(), 8, uintptr(key), uintptr(index), uintptr(unsafe.Pointer(name)), uintptr(unsafe.Pointer(nameLen)), uintptr(unsafe.Pointer(reserved)), uintptr(unsafe.Pointer(class)), uintptr(unsafe.Pointer(classLen)), uintptr(unsafe.Pointer(lastWriteTime)), 0)
 	if r0 != 0 {
-		regerrno = Errno(r0)
+		regerrno = syscall.Errno(r0)
 	}
 	return
 }
@@ -1214,7 +1214,7 @@ func RegEnumKeyEx(key Handle, index uint32, name *uint16, nameLen *uint32, reser
 func RegQueryValueEx(key Handle, name *uint16, reserved *uint32, valtype *uint32, buf *byte, buflen *uint32) (regerrno error) {
 	r0, _, _ := syscall.Syscall6(procRegQueryValueExW.Addr(), 6, uintptr(key), uintptr(unsafe.Pointer(name)), uintptr(unsafe.Pointer(reserved)), uintptr(unsafe.Pointer(valtype)), uintptr(unsafe.Pointer(buf)), uintptr(unsafe.Pointer(buflen)))
 	if r0 != 0 {
-		regerrno = Errno(r0)
+		regerrno = syscall.Errno(r0)
 	}
 	return
 }
@@ -1337,7 +1337,7 @@ func CreateHardLink(filename *uint16, existingfilename *uint16, reserved uintptr
 func WSAStartup(verreq uint32, data *WSAData) (sockerr error) {
 	r0, _, _ := syscall.Syscall(procWSAStartup.Addr(), 2, uintptr(verreq), uintptr(unsafe.Pointer(data)), 0)
 	if r0 != 0 {
-		sockerr = Errno(r0)
+		sockerr = syscall.Errno(r0)
 	}
 	return
 }
@@ -1625,7 +1625,7 @@ func DnsQuery(name string, qtype uint16, options uint32, extra *byte, qrs **DNSR
 	}
 	r0, _, _ := syscall.Syscall6(procDnsQuery_W.Addr(), 6, uintptr(unsafe.Pointer(_p0)), uintptr(qtype), uintptr(options), uintptr(unsafe.Pointer(extra)), uintptr(unsafe.Pointer(qrs)), uintptr(unsafe.Pointer(pr)))
 	if r0 != 0 {
-		status = Errno(r0)
+		status = syscall.Errno(r0)
 	}
 	return
 }
@@ -1638,7 +1638,7 @@ func DnsRecordListFree(rl *DNSRecord, freetype uint32) {
 func GetAddrInfoW(nodename *uint16, servicename *uint16, hints *AddrinfoW, result **AddrinfoW) (sockerr error) {
 	r0, _, _ := syscall.Syscall6(procGetAddrInfoW.Addr(), 4, uintptr(unsafe.Pointer(nodename)), uintptr(unsafe.Pointer(servicename)), uintptr(unsafe.Pointer(hints)), uintptr(unsafe.Pointer(result)), 0, 0)
 	if r0 != 0 {
-		sockerr = Errno(r0)
+		sockerr = syscall.Errno(r0)
 	}
 	return
 }
@@ -1651,7 +1651,7 @@ func FreeAddrInfoW(addrinfo *AddrinfoW) {
 func GetIfEntry(pIfRow *MibIfRow) (errcode error) {
 	r0, _, _ := syscall.Syscall(procGetIfEntry.Addr(), 1, uintptr(unsafe.Pointer(pIfRow)), 0, 0)
 	if r0 != 0 {
-		errcode = Errno(r0)
+		errcode = syscall.Errno(r0)
 	}
 	return
 }
@@ -1659,7 +1659,7 @@ func GetIfEntry(pIfRow *MibIfRow) (errcode error) {
 func GetAdaptersInfo(ai *IpAdapterInfo, ol *uint32) (errcode error) {
 	r0, _, _ := syscall.Syscall(procGetAdaptersInfo.Addr(), 2, uintptr(unsafe.Pointer(ai)), uintptr(unsafe.Pointer(ol)), 0)
 	if r0 != 0 {
-		errcode = Errno(r0)
+		errcode = syscall.Errno(r0)
 	}
 	return
 }
@@ -1716,7 +1716,7 @@ func GetUserNameEx(nameFormat uint32, nameBuffre *uint16, nSize *uint32) (err er
 func NetUserGetInfo(serverName *uint16, userName *uint16, level uint32, buf **byte) (neterr error) {
 	r0, _, _ := syscall.Syscall6(procNetUserGetInfo.Addr(), 4, uintptr(unsafe.Pointer(serverName)), uintptr(unsafe.Pointer(userName)), uintptr(level), uintptr(unsafe.Pointer(buf)), 0, 0)
 	if r0 != 0 {
-		neterr = Errno(r0)
+		neterr = syscall.Errno(r0)
 	}
 	return
 }
@@ -1724,7 +1724,7 @@ func NetUserGetInfo(serverName *uint16, userName *uint16, level uint32, buf **by
 func NetGetJoinInformation(server *uint16, name **uint16, bufType *uint32) (neterr error) {
 	r0, _, _ := syscall.Syscall(procNetGetJoinInformation.Addr(), 3, uintptr(unsafe.Pointer(server)), uintptr(unsafe.Pointer(name)), uintptr(unsafe.Pointer(bufType)))
 	if r0 != 0 {
-		neterr = Errno(r0)
+		neterr = syscall.Errno(r0)
 	}
 	return
 }
@@ -1732,7 +1732,7 @@ func NetGetJoinInformation(server *uint16, name **uint16, bufType *uint32) (nete
 func NetApiBufferFree(buf *byte) (neterr error) {
 	r0, _, _ := syscall.Syscall(procNetApiBufferFree.Addr(), 1, uintptr(unsafe.Pointer(buf)), 0, 0)
 	if r0 != 0 {
-		neterr = Errno(r0)
+		neterr = syscall.Errno(r0)
 	}
 	return
 }

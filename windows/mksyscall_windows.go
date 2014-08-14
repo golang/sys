@@ -271,7 +271,7 @@ func (r *Rets) useLongHandleErrorCode(retvar string) string {
 // SetErrorCode returns source code that sets return parameters.
 func (r *Rets) SetErrorCode() string {
 	const code = `if r0 != 0 {
-		%s = %sErrno(r0)
+		%s = syscall.Errno(r0)
 	}`
 	if r.Name == "" && !r.ReturnsError {
 		return ""
@@ -280,7 +280,7 @@ func (r *Rets) SetErrorCode() string {
 		return r.useLongHandleErrorCode("r1")
 	}
 	if r.Type == "error" {
-		return fmt.Sprintf(code, r.Name, windowsdot())
+		return fmt.Sprintf(code, r.Name)
 	}
 	s := ""
 	switch {

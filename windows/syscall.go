@@ -17,20 +17,9 @@
 // For details of the functions and data types in this package consult
 // the manuals for the appropriate operating system.
 // These calls return err == nil to indicate success; otherwise
-// err is an operating system error describing the failure.
-// That error has type windows.Errno.
+// err represents an operating system error describing the failure and
+// holds a value of type syscall.Errno.
 package windows
-
-// StringByteSlice is deprecated. Use ByteSliceFromString instead.
-// If s contains a NUL byte this function panics instead of
-// returning an error.
-func StringByteSlice(s string) []byte {
-	a, err := ByteSliceFromString(s)
-	if err != nil {
-		panic("windows: string with NUL passed to StringByteSlice")
-	}
-	return a
-}
 
 // ByteSliceFromString returns a NUL-terminated slice of bytes
 // containing the text of s. If s contains a NUL byte at any
@@ -45,11 +34,6 @@ func ByteSliceFromString(s string) ([]byte, error) {
 	copy(a, s)
 	return a, nil
 }
-
-// StringBytePtr is deprecated. Use BytePtrFromString instead.
-// If s contains a NUL byte this function panics instead of
-// returning an error.
-func StringBytePtr(s string) *byte { return &StringByteSlice(s)[0] }
 
 // BytePtrFromString returns a pointer to a NUL-terminated array of
 // bytes containing the text of s. If s contains a NUL byte at any
