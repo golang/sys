@@ -8,6 +8,7 @@ package windows
 
 import (
 	"sync"
+	"syscall"
 	"unicode/utf16"
 	"unsafe"
 )
@@ -149,7 +150,7 @@ func getFullPath(name string) (path string, err error) {
 			return "", err
 		}
 		if n > uint32(len(buf)) {
-			return "", EINVAL
+			return "", syscall.EINVAL
 		}
 	}
 	return UTF16ToString(buf[:n]), nil
@@ -166,7 +167,7 @@ func normalizeDir(dir string) (name string, err error) {
 	}
 	if len(ndir) > 2 && isSlash(ndir[0]) && isSlash(ndir[1]) {
 		// dir cannot have \\server\share\path form
-		return "", EINVAL
+		return "", syscall.EINVAL
 	}
 	return ndir, nil
 }
@@ -180,7 +181,7 @@ func volToUpper(ch int) int {
 
 func joinExeDirAndFName(dir, p string) (name string, err error) {
 	if len(p) == 0 {
-		return "", EINVAL
+		return "", syscall.EINVAL
 	}
 	if len(p) > 2 && isSlash(p[0]) && isSlash(p[1]) {
 		// \\server\share\path form
@@ -189,7 +190,7 @@ func joinExeDirAndFName(dir, p string) (name string, err error) {
 	if len(p) > 1 && p[1] == ':' {
 		// has drive letter
 		if len(p) == 2 {
-			return "", EINVAL
+			return "", syscall.EINVAL
 		}
 		if isSlash(p[2]) {
 			return p, nil
@@ -217,7 +218,7 @@ func joinExeDirAndFName(dir, p string) (name string, err error) {
 		}
 	}
 	// we shouldn't be here
-	return "", EINVAL
+	return "", syscall.EINVAL
 }
 
 type ProcAttr struct {
@@ -238,7 +239,7 @@ var zeroSysProcAttr SysProcAttr
 
 func StartProcess(argv0 string, argv []string, attr *ProcAttr) (pid int, handle uintptr, err error) {
 	if len(argv0) == 0 {
-		return 0, 0, EWINDOWS
+		return 0, 0, syscall.EWINDOWS
 	}
 	if attr == nil {
 		attr = &zeroProcAttr
@@ -249,7 +250,7 @@ func StartProcess(argv0 string, argv []string, attr *ProcAttr) (pid int, handle 
 	}
 
 	if len(attr.Files) > 3 {
-		return 0, 0, EWINDOWS
+		return 0, 0, syscall.EWINDOWS
 	}
 
 	if len(attr.Dir) != 0 {
@@ -337,5 +338,5 @@ func StartProcess(argv0 string, argv []string, attr *ProcAttr) (pid int, handle 
 }
 
 func Exec(argv0 string, argv []string, envv []string) (err error) {
-	return EWINDOWS
+	return syscall.EWINDOWS
 }

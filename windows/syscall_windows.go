@@ -31,11 +31,11 @@ func StringToUTF16(s string) []uint16 {
 
 // UTF16FromString returns the UTF-16 encoding of the UTF-8 string
 // s, with a terminating NUL added. If s contains a NUL byte at any
-// location, it returns (nil, EINVAL).
+// location, it returns (nil, syscall.EINVAL).
 func UTF16FromString(s string) ([]uint16, error) {
 	for i := 0; i < len(s); i++ {
 		if s[i] == 0 {
-			return nil, EINVAL
+			return nil, syscall.EINVAL
 		}
 	}
 	return utf16.Encode([]rune(s + "\x00")), nil
@@ -60,7 +60,7 @@ func StringToUTF16Ptr(s string) *uint16 { return &StringToUTF16(s)[0] }
 
 // UTF16PtrFromString returns pointer to the UTF-16 encoding of
 // the UTF-8 string s, with a terminating NUL added. If s
-// contains a NUL byte at any location, it returns (nil, EINVAL).
+// contains a NUL byte at any location, it returns (nil, syscall.EINVAL).
 func UTF16PtrFromString(s string) (*uint16, error) {
 	a, err := UTF16FromString(s)
 	if err != nil {
@@ -70,41 +70,6 @@ func UTF16PtrFromString(s string) (*uint16, error) {
 }
 
 func Getpagesize() int { return 4096 }
-
-// Errno is the Windows error number.
-type Errno uintptr
-
-func langid(pri, sub uint16) uint32 { return uint32(sub)<<10 | uint32(pri) }
-
-func (e Errno) Error() string {
-	// deal with special go errors
-	idx := int(e - APPLICATION_ERROR)
-	if 0 <= idx && idx < len(errors) {
-		return errors[idx]
-	}
-	// ask windows for the remaining errors
-	var flags uint32 = FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_ARGUMENT_ARRAY | FORMAT_MESSAGE_IGNORE_INSERTS
-	b := make([]uint16, 300)
-	n, err := FormatMessage(flags, 0, uint32(e), langid(LANG_ENGLISH, SUBLANG_ENGLISH_US), b, nil)
-	if err != nil {
-		n, err = FormatMessage(flags, 0, uint32(e), 0, b, nil)
-		if err != nil {
-			return "winapi error #" + itoa(int(e))
-		}
-	}
-	// trim terminating \r and \n
-	for ; n > 0 && (b[n-1] == '\n' || b[n-1] == '\r'); n-- {
-	}
-	return string(utf16.Decode(b[:n]))
-}
-
-func (e Errno) Temporary() bool {
-	return e == EINTR || e == EMFILE || e.Timeout()
-}
-
-func (e Errno) Timeout() bool {
-	return e == EAGAIN || e == EWOULDBLOCK || e == ETIMEDOUT
-}
 
 // Converts a Go function to a function pointer conforming
 // to the stdcall or cdecl calling convention.  This is useful when
@@ -321,7 +286,7 @@ func Seek(fd Handle, offset int64, whence int) (newoffset int64, err error) {
 	// use GetFileType to check pipe, pipe can't do seek
 	ft, _ := GetFileType(fd)
 	if ft == FILE_TYPE_PIPE {
-		return 0, EPIPE
+		return 0, syscall.EPIPE
 	}
 	rlo, e := SetFilePointer(fd, lo, &hi, w)
 	if e != nil {
@@ -437,7 +402,7 @@ func Gettimeofday(tv *Timeval) (err error) {
 
 func Pipe(p []Handle) (err error) {
 	if len(p) != 2 {
-		return EINVAL
+		return syscall.EINVAL
 	}
 	var r, w Handle
 	e := CreatePipe(&r, &w, makeInheritSa(), 0)
@@ -451,7 +416,7 @@ func Pipe(p []Handle) (err error) {
 
 func Utimes(path string, tv []Timeval) (err error) {
 	if len(tv) != 2 {
-		return EINVAL
+		return syscall.EINVAL
 	}
 	pathp, e := UTF16PtrFromString(path)
 	if e != nil {
@@ -471,7 +436,7 @@ func Utimes(path string, tv []Timeval) (err error) {
 
 func UtimesNano(path string, ts []Timespec) (err error) {
 	if len(ts) != 2 {
-		return EINVAL
+		return syscall.EINVAL
 	}
 	pathp, e := UTF16PtrFromString(path)
 	if e != nil {
@@ -495,7 +460,7 @@ func Fsync(fd Handle) (err error) {
 
 func Chmod(path string, mode uint32) (err error) {
 	if mode == 0 {
-		return EINVAL
+		return syscall.EINVAL
 	}
 	p, e := UTF16PtrFromString(path)
 	if e != nil {
@@ -598,7 +563,7 @@ type SockaddrInet4 struct {
 
 func (sa *SockaddrInet4) sockaddr() (unsafe.Pointer, int32, error) {
 	if sa.Port < 0 || sa.Port > 0xFFFF {
-		return nil, 0, EINVAL
+		return nil, 0, syscall.EINVAL
 	}
 	sa.raw.Family = AF_INET
 	p := (*[2]byte)(unsafe.Pointer(&sa.raw.Port))
@@ -619,7 +584,7 @@ type SockaddrInet6 struct {
 
 func (sa *SockaddrInet6) sockaddr() (unsafe.Pointer, int32, error) {
 	if sa.Port < 0 || sa.Port > 0xFFFF {
-		return nil, 0, EINVAL
+		return nil, 0, syscall.EINVAL
 	}
 	sa.raw.Family = AF_INET6
 	p := (*[2]byte)(unsafe.Pointer(&sa.raw.Port))
@@ -638,13 +603,13 @@ type SockaddrUnix struct {
 
 func (sa *SockaddrUnix) sockaddr() (unsafe.Pointer, int32, error) {
 	// TODO(brainman): implement SockaddrUnix.sockaddr()
-	return nil, 0, EWINDOWS
+	return nil, 0, syscall.EWINDOWS
 }
 
 func (rsa *RawSockaddrAny) Sockaddr() (Sockaddr, error) {
 	switch rsa.Addr.Family {
 	case AF_UNIX:
-		return nil, EWINDOWS
+		return nil, syscall.EWINDOWS
 
 	case AF_INET:
 		pp := (*RawSockaddrInet4)(unsafe.Pointer(rsa))
@@ -667,12 +632,12 @@ func (rsa *RawSockaddrAny) Sockaddr() (Sockaddr, error) {
 		}
 		return sa, nil
 	}
-	return nil, EAFNOSUPPORT
+	return nil, syscall.EAFNOSUPPORT
 }
 
 func Socket(domain, typ, proto int) (fd Handle, err error) {
 	if domain == AF_INET6 && SocketDisableIPv6 {
-		return InvalidHandle, EAFNOSUPPORT
+		return InvalidHandle, syscall.EAFNOSUPPORT
 	}
 	return socket(int32(domain), int32(typ), int32(proto))
 }
@@ -768,7 +733,7 @@ func connectEx(s Handle, name unsafe.Pointer, namelen int32, sendBuf *byte, send
 		if e1 != 0 {
 			err = error(e1)
 		} else {
-			err = EINVAL
+			err = syscall.EINVAL
 		}
 	}
 	return
@@ -833,12 +798,12 @@ func NsecToTimespec(nsec int64) (ts Timespec) {
 
 // TODO(brainman): fix all needed for net
 
-func Accept(fd Handle) (nfd Handle, sa Sockaddr, err error) { return 0, nil, EWINDOWS }
+func Accept(fd Handle) (nfd Handle, sa Sockaddr, err error) { return 0, nil, syscall.EWINDOWS }
 func Recvfrom(fd Handle, p []byte, flags int) (n int, from Sockaddr, err error) {
-	return 0, nil, EWINDOWS
+	return 0, nil, syscall.EWINDOWS
 }
-func Sendto(fd Handle, p []byte, flags int, to Sockaddr) (err error)       { return EWINDOWS }
-func SetsockoptTimeval(fd Handle, level, opt int, tv *Timeval) (err error) { return EWINDOWS }
+func Sendto(fd Handle, p []byte, flags int, to Sockaddr) (err error)       { return syscall.EWINDOWS }
+func SetsockoptTimeval(fd Handle, level, opt int, tv *Timeval) (err error) { return syscall.EWINDOWS }
 
 // The Linger struct is wrong but we only noticed after Go 1.
 // sysLinger is the real system call structure.
@@ -867,7 +832,7 @@ type IPv6Mreq struct {
 	Interface uint32
 }
 
-func GetsockoptInt(fd Handle, level, opt int) (int, error) { return -1, EWINDOWS }
+func GetsockoptInt(fd Handle, level, opt int) (int, error) { return -1, syscall.EWINDOWS }
 
 func SetsockoptLinger(fd Handle, level, opt int, l *Linger) (err error) {
 	sys := sysLinger{Onoff: uint16(l.Onoff), Linger: uint16(l.Linger)}
@@ -880,7 +845,9 @@ func SetsockoptInet4Addr(fd Handle, level, opt int, value [4]byte) (err error) {
 func SetsockoptIPMreq(fd Handle, level, opt int, mreq *IPMreq) (err error) {
 	return Setsockopt(fd, int32(level), int32(opt), (*byte)(unsafe.Pointer(mreq)), int32(unsafe.Sizeof(*mreq)))
 }
-func SetsockoptIPv6Mreq(fd Handle, level, opt int, mreq *IPv6Mreq) (err error) { return EWINDOWS }
+func SetsockoptIPv6Mreq(fd Handle, level, opt int, mreq *IPv6Mreq) (err error) {
+	return syscall.EWINDOWS
+}
 
 func Getpid() (pid int) { return int(getCurrentProcessId()) }
 
@@ -941,20 +908,20 @@ func Getppid() (ppid int) {
 }
 
 // TODO(brainman): fix all needed for os
-func Fchdir(fd Handle) (err error)             { return EWINDOWS }
-func Link(oldpath, newpath string) (err error) { return EWINDOWS }
-func Symlink(path, link string) (err error)    { return EWINDOWS }
+func Fchdir(fd Handle) (err error)             { return syscall.EWINDOWS }
+func Link(oldpath, newpath string) (err error) { return syscall.EWINDOWS }
+func Symlink(path, link string) (err error)    { return syscall.EWINDOWS }
 
-func Fchmod(fd Handle, mode uint32) (err error)        { return EWINDOWS }
-func Chown(path string, uid int, gid int) (err error)  { return EWINDOWS }
-func Lchown(path string, uid int, gid int) (err error) { return EWINDOWS }
-func Fchown(fd Handle, uid int, gid int) (err error)   { return EWINDOWS }
+func Fchmod(fd Handle, mode uint32) (err error)        { return syscall.EWINDOWS }
+func Chown(path string, uid int, gid int) (err error)  { return syscall.EWINDOWS }
+func Lchown(path string, uid int, gid int) (err error) { return syscall.EWINDOWS }
+func Fchown(fd Handle, uid int, gid int) (err error)   { return syscall.EWINDOWS }
 
 func Getuid() (uid int)                  { return -1 }
 func Geteuid() (euid int)                { return -1 }
 func Getgid() (gid int)                  { return -1 }
 func Getegid() (egid int)                { return -1 }
-func Getgroups() (gids []int, err error) { return nil, EWINDOWS }
+func Getgroups() (gids []int, err error) { return nil, syscall.EWINDOWS }
 
 type Signal int
 
@@ -994,7 +961,7 @@ func Readlink(path string, buf []byte) (n int, err error) {
 	if uintptr(bytesReturned) < unsafe.Sizeof(*rdb) ||
 		rdb.ReparseTag != IO_REPARSE_TAG_SYMLINK {
 		// the path is not a symlink but another type of reparse point
-		return -1, ENOENT
+		return -1, syscall.ENOENT
 	}
 
 	s := UTF16ToString((*[0xffff]uint16)(unsafe.Pointer(&rdb.PathBuffer[0]))[:rdb.PrintNameLength/2])

@@ -5,6 +5,7 @@
 package windows
 
 import (
+	"syscall"
 	"unsafe"
 )
 
@@ -123,7 +124,7 @@ func StringToSid(s string) (*SID, error) {
 // System specify target computer to search.
 func LookupSID(system, account string) (sid *SID, domain string, accType uint32, err error) {
 	if len(account) == 0 {
-		return nil, "", 0, EINVAL
+		return nil, "", 0, syscall.EINVAL
 	}
 	acc, e := UTF16PtrFromString(account)
 	if e != nil {

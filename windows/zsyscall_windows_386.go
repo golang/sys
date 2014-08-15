@@ -182,7 +182,7 @@ func LoadLibrary(libname string) (handle Handle, err error) {
 		if e1 != 0 {
 			err = error(e1)
 		} else {
-			err = EINVAL
+			err = syscall.EINVAL
 		}
 	}
 	return
@@ -194,7 +194,7 @@ func FreeLibrary(handle Handle) (err error) {
 		if e1 != 0 {
 			err = error(e1)
 		} else {
-			err = EINVAL
+			err = syscall.EINVAL
 		}
 	}
 	return
@@ -212,7 +212,7 @@ func GetProcAddress(module Handle, procname string) (proc uintptr, err error) {
 		if e1 != 0 {
 			err = error(e1)
 		} else {
-			err = EINVAL
+			err = syscall.EINVAL
 		}
 	}
 	return
@@ -225,7 +225,7 @@ func GetVersion() (ver uint32, err error) {
 		if e1 != 0 {
 			err = error(e1)
 		} else {
-			err = EINVAL
+			err = syscall.EINVAL
 		}
 	}
 	return
@@ -242,7 +242,7 @@ func FormatMessage(flags uint32, msgsrc uint32, msgid uint32, langid uint32, buf
 		if e1 != 0 {
 			err = error(e1)
 		} else {
-			err = EINVAL
+			err = syscall.EINVAL
 		}
 	}
 	return
@@ -260,7 +260,7 @@ func CreateFile(name *uint16, access uint32, mode uint32, sa *SecurityAttributes
 		if e1 != 0 {
 			err = error(e1)
 		} else {
-			err = EINVAL
+			err = syscall.EINVAL
 		}
 	}
 	return
@@ -276,7 +276,7 @@ func ReadFile(handle Handle, buf []byte, done *uint32, overlapped *Overlapped) (
 		if e1 != 0 {
 			err = error(e1)
 		} else {
-			err = EINVAL
+			err = syscall.EINVAL
 		}
 	}
 	return
@@ -292,7 +292,7 @@ func WriteFile(handle Handle, buf []byte, done *uint32, overlapped *Overlapped) 
 		if e1 != 0 {
 			err = error(e1)
 		} else {
-			err = EINVAL
+			err = syscall.EINVAL
 		}
 	}
 	return
@@ -305,7 +305,7 @@ func SetFilePointer(handle Handle, lowoffset int32, highoffsetptr *int32, whence
 		if e1 != 0 {
 			err = error(e1)
 		} else {
-			err = EINVAL
+			err = syscall.EINVAL
 		}
 	}
 	return
@@ -317,7 +317,7 @@ func CloseHandle(handle Handle) (err error) {
 		if e1 != 0 {
 			err = error(e1)
 		} else {
-			err = EINVAL
+			err = syscall.EINVAL
 		}
 	}
 	return
@@ -330,7 +330,7 @@ func GetStdHandle(stdhandle int) (handle Handle, err error) {
 		if e1 != 0 {
 			err = error(e1)
 		} else {
-			err = EINVAL
+			err = syscall.EINVAL
 		}
 	}
 	return
@@ -343,7 +343,7 @@ func findFirstFile1(name *uint16, data *win32finddata1) (handle Handle, err erro
 		if e1 != 0 {
 			err = error(e1)
 		} else {
-			err = EINVAL
+			err = syscall.EINVAL
 		}
 	}
 	return
@@ -355,7 +355,7 @@ func findNextFile1(handle Handle, data *win32finddata1) (err error) {
 		if e1 != 0 {
 			err = error(e1)
 		} else {
-			err = EINVAL
+			err = syscall.EINVAL
 		}
 	}
 	return
@@ -367,7 +367,7 @@ func FindClose(handle Handle) (err error) {
 		if e1 != 0 {
 			err = error(e1)
 		} else {
-			err = EINVAL
+			err = syscall.EINVAL
 		}
 	}
 	return
@@ -379,7 +379,7 @@ func GetFileInformationByHandle(handle Handle, data *ByHandleFileInformation) (e
 		if e1 != 0 {
 			err = error(e1)
 		} else {
-			err = EINVAL
+			err = syscall.EINVAL
 		}
 	}
 	return
@@ -392,7 +392,7 @@ func GetCurrentDirectory(buflen uint32, buf *uint16) (n uint32, err error) {
 		if e1 != 0 {
 			err = error(e1)
 		} else {
-			err = EINVAL
+			err = syscall.EINVAL
 		}
 	}
 	return
@@ -404,7 +404,7 @@ func SetCurrentDirectory(path *uint16) (err error) {
 		if e1 != 0 {
 			err = error(e1)
 		} else {
-			err = EINVAL
+			err = syscall.EINVAL
 		}
 	}
 	return
@@ -416,7 +416,7 @@ func CreateDirectory(path *uint16, sa *SecurityAttributes) (err error) {
 		if e1 != 0 {
 			err = error(e1)
 		} else {
-			err = EINVAL
+			err = syscall.EINVAL
 		}
 	}
 	return
@@ -428,7 +428,7 @@ func RemoveDirectory(path *uint16) (err error) {
 		if e1 != 0 {
 			err = error(e1)
 		} else {
-			err = EINVAL
+			err = syscall.EINVAL
 		}
 	}
 	return
@@ -440,7 +440,7 @@ func DeleteFile(path *uint16) (err error) {
 		if e1 != 0 {
 			err = error(e1)
 		} else {
-			err = EINVAL
+			err = syscall.EINVAL
 		}
 	}
 	return
@@ -452,7 +452,7 @@ func MoveFile(from *uint16, to *uint16) (err error) {
 		if e1 != 0 {
 			err = error(e1)
 		} else {
-			err = EINVAL
+			err = syscall.EINVAL
 		}
 	}
 	return
@@ -464,7 +464,7 @@ func GetComputerName(buf *uint16, n *uint32) (err error) {
 		if e1 != 0 {
 			err = error(e1)
 		} else {
-			err = EINVAL
+			err = syscall.EINVAL
 		}
 	}
 	return
@@ -476,7 +476,7 @@ func SetEndOfFile(handle Handle) (err error) {
 		if e1 != 0 {
 			err = error(e1)
 		} else {
-			err = EINVAL
+			err = syscall.EINVAL
 		}
 	}
 	return
@@ -494,7 +494,7 @@ func GetTimeZoneInformation(tzi *Timezoneinformation) (rc uint32, err error) {
 		if e1 != 0 {
 			err = error(e1)
 		} else {
-			err = EINVAL
+			err = syscall.EINVAL
 		}
 	}
 	return
@@ -507,7 +507,7 @@ func CreateIoCompletionPort(filehandle Handle, cphandle Handle, key uint32, thre
 		if e1 != 0 {
 			err = error(e1)
 		} else {
-			err = EINVAL
+			err = syscall.EINVAL
 		}
 	}
 	return
@@ -519,7 +519,7 @@ func GetQueuedCompletionStatus(cphandle Handle, qty *uint32, key *uint32, overla
 		if e1 != 0 {
 			err = error(e1)
 		} else {
-			err = EINVAL
+			err = syscall.EINVAL
 		}
 	}
 	return
@@ -531,7 +531,7 @@ func PostQueuedCompletionStatus(cphandle Handle, qty uint32, key uint32, overlap
 		if e1 != 0 {
 			err = error(e1)
 		} else {
-			err = EINVAL
+			err = syscall.EINVAL
 		}
 	}
 	return
@@ -543,7 +543,7 @@ func CancelIo(s Handle) (err error) {
 		if e1 != 0 {
 			err = error(e1)
 		} else {
-			err = EINVAL
+			err = syscall.EINVAL
 		}
 	}
 	return
@@ -555,7 +555,7 @@ func CancelIoEx(s Handle, o *Overlapped) (err error) {
 		if e1 != 0 {
 			err = error(e1)
 		} else {
-			err = EINVAL
+			err = syscall.EINVAL
 		}
 	}
 	return
@@ -573,7 +573,7 @@ func CreateProcess(appName *uint16, commandLine *uint16, procSecurity *SecurityA
 		if e1 != 0 {
 			err = error(e1)
 		} else {
-			err = EINVAL
+			err = syscall.EINVAL
 		}
 	}
 	return
@@ -592,7 +592,7 @@ func OpenProcess(da uint32, inheritHandle bool, pid uint32) (handle Handle, err 
 		if e1 != 0 {
 			err = error(e1)
 		} else {
-			err = EINVAL
+			err = syscall.EINVAL
 		}
 	}
 	return
@@ -604,7 +604,7 @@ func TerminateProcess(handle Handle, exitcode uint32) (err error) {
 		if e1 != 0 {
 			err = error(e1)
 		} else {
-			err = EINVAL
+			err = syscall.EINVAL
 		}
 	}
 	return
@@ -616,7 +616,7 @@ func GetExitCodeProcess(handle Handle, exitcode *uint32) (err error) {
 		if e1 != 0 {
 			err = error(e1)
 		} else {
-			err = EINVAL
+			err = syscall.EINVAL
 		}
 	}
 	return
@@ -628,7 +628,7 @@ func GetStartupInfo(startupInfo *StartupInfo) (err error) {
 		if e1 != 0 {
 			err = error(e1)
 		} else {
-			err = EINVAL
+			err = syscall.EINVAL
 		}
 	}
 	return
@@ -641,7 +641,7 @@ func GetCurrentProcess() (pseudoHandle Handle, err error) {
 		if e1 != 0 {
 			err = error(e1)
 		} else {
-			err = EINVAL
+			err = syscall.EINVAL
 		}
 	}
 	return
@@ -653,7 +653,7 @@ func GetProcessTimes(handle Handle, creationTime *Filetime, exitTime *Filetime, 
 		if e1 != 0 {
 			err = error(e1)
 		} else {
-			err = EINVAL
+			err = syscall.EINVAL
 		}
 	}
 	return
@@ -671,7 +671,7 @@ func DuplicateHandle(hSourceProcessHandle Handle, hSourceHandle Handle, hTargetP
 		if e1 != 0 {
 			err = error(e1)
 		} else {
-			err = EINVAL
+			err = syscall.EINVAL
 		}
 	}
 	return
@@ -684,7 +684,7 @@ func WaitForSingleObject(handle Handle, waitMilliseconds uint32) (event uint32, 
 		if e1 != 0 {
 			err = error(e1)
 		} else {
-			err = EINVAL
+			err = syscall.EINVAL
 		}
 	}
 	return
@@ -697,7 +697,7 @@ func GetTempPath(buflen uint32, buf *uint16) (n uint32, err error) {
 		if e1 != 0 {
 			err = error(e1)
 		} else {
-			err = EINVAL
+			err = syscall.EINVAL
 		}
 	}
 	return
@@ -709,7 +709,7 @@ func CreatePipe(readhandle *Handle, writehandle *Handle, sa *SecurityAttributes,
 		if e1 != 0 {
 			err = error(e1)
 		} else {
-			err = EINVAL
+			err = syscall.EINVAL
 		}
 	}
 	return
@@ -722,7 +722,7 @@ func GetFileType(filehandle Handle) (n uint32, err error) {
 		if e1 != 0 {
 			err = error(e1)
 		} else {
-			err = EINVAL
+			err = syscall.EINVAL
 		}
 	}
 	return
@@ -734,7 +734,7 @@ func CryptAcquireContext(provhandle *Handle, container *uint16, provider *uint16
 		if e1 != 0 {
 			err = error(e1)
 		} else {
-			err = EINVAL
+			err = syscall.EINVAL
 		}
 	}
 	return
@@ -746,7 +746,7 @@ func CryptReleaseContext(provhandle Handle, flags uint32) (err error) {
 		if e1 != 0 {
 			err = error(e1)
 		} else {
-			err = EINVAL
+			err = syscall.EINVAL
 		}
 	}
 	return
@@ -758,7 +758,7 @@ func CryptGenRandom(provhandle Handle, buflen uint32, buf *byte) (err error) {
 		if e1 != 0 {
 			err = error(e1)
 		} else {
-			err = EINVAL
+			err = syscall.EINVAL
 		}
 	}
 	return
@@ -771,7 +771,7 @@ func GetEnvironmentStrings() (envs *uint16, err error) {
 		if e1 != 0 {
 			err = error(e1)
 		} else {
-			err = EINVAL
+			err = syscall.EINVAL
 		}
 	}
 	return
@@ -783,7 +783,7 @@ func FreeEnvironmentStrings(envs *uint16) (err error) {
 		if e1 != 0 {
 			err = error(e1)
 		} else {
-			err = EINVAL
+			err = syscall.EINVAL
 		}
 	}
 	return
@@ -796,7 +796,7 @@ func GetEnvironmentVariable(name *uint16, buffer *uint16, size uint32) (n uint32
 		if e1 != 0 {
 			err = error(e1)
 		} else {
-			err = EINVAL
+			err = syscall.EINVAL
 		}
 	}
 	return
@@ -808,7 +808,7 @@ func SetEnvironmentVariable(name *uint16, value *uint16) (err error) {
 		if e1 != 0 {
 			err = error(e1)
 		} else {
-			err = EINVAL
+			err = syscall.EINVAL
 		}
 	}
 	return
@@ -820,7 +820,7 @@ func SetFileTime(handle Handle, ctime *Filetime, atime *Filetime, wtime *Filetim
 		if e1 != 0 {
 			err = error(e1)
 		} else {
-			err = EINVAL
+			err = syscall.EINVAL
 		}
 	}
 	return
@@ -833,7 +833,7 @@ func GetFileAttributes(name *uint16) (attrs uint32, err error) {
 		if e1 != 0 {
 			err = error(e1)
 		} else {
-			err = EINVAL
+			err = syscall.EINVAL
 		}
 	}
 	return
@@ -845,7 +845,7 @@ func SetFileAttributes(name *uint16, attrs uint32) (err error) {
 		if e1 != 0 {
 			err = error(e1)
 		} else {
-			err = EINVAL
+			err = syscall.EINVAL
 		}
 	}
 	return
@@ -857,7 +857,7 @@ func GetFileAttributesEx(name *uint16, level uint32, info *byte) (err error) {
 		if e1 != 0 {
 			err = error(e1)
 		} else {
-			err = EINVAL
+			err = syscall.EINVAL
 		}
 	}
 	return
@@ -876,7 +876,7 @@ func CommandLineToArgv(cmd *uint16, argc *int32) (argv *[8192]*[8192]uint16, err
 		if e1 != 0 {
 			err = error(e1)
 		} else {
-			err = EINVAL
+			err = syscall.EINVAL
 		}
 	}
 	return
@@ -889,7 +889,7 @@ func LocalFree(hmem Handle) (handle Handle, err error) {
 		if e1 != 0 {
 			err = error(e1)
 		} else {
-			err = EINVAL
+			err = syscall.EINVAL
 		}
 	}
 	return
@@ -901,7 +901,7 @@ func SetHandleInformation(handle Handle, mask uint32, flags uint32) (err error) 
 		if e1 != 0 {
 			err = error(e1)
 		} else {
-			err = EINVAL
+			err = syscall.EINVAL
 		}
 	}
 	return
@@ -913,7 +913,7 @@ func FlushFileBuffers(handle Handle) (err error) {
 		if e1 != 0 {
 			err = error(e1)
 		} else {
-			err = EINVAL
+			err = syscall.EINVAL
 		}
 	}
 	return
@@ -926,7 +926,7 @@ func GetFullPathName(path *uint16, buflen uint32, buf *uint16, fname **uint16) (
 		if e1 != 0 {
 			err = error(e1)
 		} else {
-			err = EINVAL
+			err = syscall.EINVAL
 		}
 	}
 	return
@@ -939,7 +939,7 @@ func GetLongPathName(path *uint16, buf *uint16, buflen uint32) (n uint32, err er
 		if e1 != 0 {
 			err = error(e1)
 		} else {
-			err = EINVAL
+			err = syscall.EINVAL
 		}
 	}
 	return
@@ -952,7 +952,7 @@ func GetShortPathName(longpath *uint16, shortpath *uint16, buflen uint32) (n uin
 		if e1 != 0 {
 			err = error(e1)
 		} else {
-			err = EINVAL
+			err = syscall.EINVAL
 		}
 	}
 	return
@@ -965,7 +965,7 @@ func CreateFileMapping(fhandle Handle, sa *SecurityAttributes, prot uint32, maxS
 		if e1 != 0 {
 			err = error(e1)
 		} else {
-			err = EINVAL
+			err = syscall.EINVAL
 		}
 	}
 	return
@@ -978,7 +978,7 @@ func MapViewOfFile(handle Handle, access uint32, offsetHigh uint32, offsetLow ui
 		if e1 != 0 {
 			err = error(e1)
 		} else {
-			err = EINVAL
+			err = syscall.EINVAL
 		}
 	}
 	return
@@ -990,7 +990,7 @@ func UnmapViewOfFile(addr uintptr) (err error) {
 		if e1 != 0 {
 			err = error(e1)
 		} else {
-			err = EINVAL
+			err = syscall.EINVAL
 		}
 	}
 	return
@@ -1002,7 +1002,7 @@ func FlushViewOfFile(addr uintptr, length uintptr) (err error) {
 		if e1 != 0 {
 			err = error(e1)
 		} else {
-			err = EINVAL
+			err = syscall.EINVAL
 		}
 	}
 	return
@@ -1014,7 +1014,7 @@ func VirtualLock(addr uintptr, length uintptr) (err error) {
 		if e1 != 0 {
 			err = error(e1)
 		} else {
-			err = EINVAL
+			err = syscall.EINVAL
 		}
 	}
 	return
@@ -1026,7 +1026,7 @@ func VirtualUnlock(addr uintptr, length uintptr) (err error) {
 		if e1 != 0 {
 			err = error(e1)
 		} else {
-			err = EINVAL
+			err = syscall.EINVAL
 		}
 	}
 	return
@@ -1038,7 +1038,7 @@ func TransmitFile(s Handle, handle Handle, bytesToWrite uint32, bytsPerSend uint
 		if e1 != 0 {
 			err = error(e1)
 		} else {
-			err = EINVAL
+			err = syscall.EINVAL
 		}
 	}
 	return
@@ -1056,7 +1056,7 @@ func ReadDirectoryChanges(handle Handle, buf *byte, buflen uint32, watchSubTree 
 		if e1 != 0 {
 			err = error(e1)
 		} else {
-			err = EINVAL
+			err = syscall.EINVAL
 		}
 	}
 	return
@@ -1069,7 +1069,7 @@ func CertOpenSystemStore(hprov Handle, name *uint16) (store Handle, err error) {
 		if e1 != 0 {
 			err = error(e1)
 		} else {
-			err = EINVAL
+			err = syscall.EINVAL
 		}
 	}
 	return
@@ -1082,7 +1082,7 @@ func CertOpenStore(storeProvider uintptr, msgAndCertEncodingType uint32, cryptPr
 		if e1 != 0 {
 			err = error(e1)
 		} else {
-			err = EINVAL
+			err = syscall.EINVAL
 		}
 	}
 	return
@@ -1095,7 +1095,7 @@ func CertEnumCertificatesInStore(store Handle, prevContext *CertContext) (contex
 		if e1 != 0 {
 			err = error(e1)
 		} else {
-			err = EINVAL
+			err = syscall.EINVAL
 		}
 	}
 	return
@@ -1107,7 +1107,7 @@ func CertAddCertificateContextToStore(store Handle, certContext *CertContext, ad
 		if e1 != 0 {
 			err = error(e1)
 		} else {
-			err = EINVAL
+			err = syscall.EINVAL
 		}
 	}
 	return
@@ -1119,7 +1119,7 @@ func CertCloseStore(store Handle, flags uint32) (err error) {
 		if e1 != 0 {
 			err = error(e1)
 		} else {
-			err = EINVAL
+			err = syscall.EINVAL
 		}
 	}
 	return
@@ -1131,7 +1131,7 @@ func CertGetCertificateChain(engine Handle, leaf *CertContext, time *Filetime, a
 		if e1 != 0 {
 			err = error(e1)
 		} else {
-			err = EINVAL
+			err = syscall.EINVAL
 		}
 	}
 	return
@@ -1149,7 +1149,7 @@ func CertCreateCertificateContext(certEncodingType uint32, certEncoded *byte, en
 		if e1 != 0 {
 			err = error(e1)
 		} else {
-			err = EINVAL
+			err = syscall.EINVAL
 		}
 	}
 	return
@@ -1161,7 +1161,7 @@ func CertFreeCertificateContext(ctx *CertContext) (err error) {
 		if e1 != 0 {
 			err = error(e1)
 		} else {
-			err = EINVAL
+			err = syscall.EINVAL
 		}
 	}
 	return
@@ -1173,7 +1173,7 @@ func CertVerifyCertificateChainPolicy(policyOID uintptr, chain *CertChainContext
 		if e1 != 0 {
 			err = error(e1)
 		} else {
-			err = EINVAL
+			err = syscall.EINVAL
 		}
 	}
 	return
@@ -1231,7 +1231,7 @@ func GetConsoleMode(console Handle, mode *uint32) (err error) {
 		if e1 != 0 {
 			err = error(e1)
 		} else {
-			err = EINVAL
+			err = syscall.EINVAL
 		}
 	}
 	return
@@ -1243,7 +1243,7 @@ func WriteConsole(console Handle, buf *uint16, towrite uint32, written *uint32, 
 		if e1 != 0 {
 			err = error(e1)
 		} else {
-			err = EINVAL
+			err = syscall.EINVAL
 		}
 	}
 	return
@@ -1255,7 +1255,7 @@ func ReadConsole(console Handle, buf *uint16, toread uint32, read *uint32, input
 		if e1 != 0 {
 			err = error(e1)
 		} else {
-			err = EINVAL
+			err = syscall.EINVAL
 		}
 	}
 	return
@@ -1268,7 +1268,7 @@ func CreateToolhelp32Snapshot(flags uint32, processId uint32) (handle Handle, er
 		if e1 != 0 {
 			err = error(e1)
 		} else {
-			err = EINVAL
+			err = syscall.EINVAL
 		}
 	}
 	return
@@ -1280,7 +1280,7 @@ func Process32First(snapshot Handle, procEntry *ProcessEntry32) (err error) {
 		if e1 != 0 {
 			err = error(e1)
 		} else {
-			err = EINVAL
+			err = syscall.EINVAL
 		}
 	}
 	return
@@ -1292,7 +1292,7 @@ func Process32Next(snapshot Handle, procEntry *ProcessEntry32) (err error) {
 		if e1 != 0 {
 			err = error(e1)
 		} else {
-			err = EINVAL
+			err = syscall.EINVAL
 		}
 	}
 	return
@@ -1304,7 +1304,7 @@ func DeviceIoControl(handle Handle, ioControlCode uint32, inBuffer *byte, inBuff
 		if e1 != 0 {
 			err = error(e1)
 		} else {
-			err = EINVAL
+			err = syscall.EINVAL
 		}
 	}
 	return
@@ -1316,7 +1316,7 @@ func CreateSymbolicLink(symlinkfilename *uint16, targetfilename *uint16, flags u
 		if e1 != 0 {
 			err = error(e1)
 		} else {
-			err = EINVAL
+			err = syscall.EINVAL
 		}
 	}
 	return
@@ -1328,7 +1328,7 @@ func CreateHardLink(filename *uint16, existingfilename *uint16, reserved uintptr
 		if e1 != 0 {
 			err = error(e1)
 		} else {
-			err = EINVAL
+			err = syscall.EINVAL
 		}
 	}
 	return
@@ -1348,7 +1348,7 @@ func WSACleanup() (err error) {
 		if e1 != 0 {
 			err = error(e1)
 		} else {
-			err = EINVAL
+			err = syscall.EINVAL
 		}
 	}
 	return
@@ -1360,7 +1360,7 @@ func WSAIoctl(s Handle, iocc uint32, inbuf *byte, cbif uint32, outbuf *byte, cbo
 		if e1 != 0 {
 			err = error(e1)
 		} else {
-			err = EINVAL
+			err = syscall.EINVAL
 		}
 	}
 	return
@@ -1373,7 +1373,7 @@ func socket(af int32, typ int32, protocol int32) (handle Handle, err error) {
 		if e1 != 0 {
 			err = error(e1)
 		} else {
-			err = EINVAL
+			err = syscall.EINVAL
 		}
 	}
 	return
@@ -1385,7 +1385,7 @@ func Setsockopt(s Handle, level int32, optname int32, optval *byte, optlen int32
 		if e1 != 0 {
 			err = error(e1)
 		} else {
-			err = EINVAL
+			err = syscall.EINVAL
 		}
 	}
 	return
@@ -1397,7 +1397,7 @@ func Getsockopt(s Handle, level int32, optname int32, optval *byte, optlen *int3
 		if e1 != 0 {
 			err = error(e1)
 		} else {
-			err = EINVAL
+			err = syscall.EINVAL
 		}
 	}
 	return
@@ -1409,7 +1409,7 @@ func bind(s Handle, name unsafe.Pointer, namelen int32) (err error) {
 		if e1 != 0 {
 			err = error(e1)
 		} else {
-			err = EINVAL
+			err = syscall.EINVAL
 		}
 	}
 	return
@@ -1421,7 +1421,7 @@ func connect(s Handle, name unsafe.Pointer, namelen int32) (err error) {
 		if e1 != 0 {
 			err = error(e1)
 		} else {
-			err = EINVAL
+			err = syscall.EINVAL
 		}
 	}
 	return
@@ -1433,7 +1433,7 @@ func getsockname(s Handle, rsa *RawSockaddrAny, addrlen *int32) (err error) {
 		if e1 != 0 {
 			err = error(e1)
 		} else {
-			err = EINVAL
+			err = syscall.EINVAL
 		}
 	}
 	return
@@ -1445,7 +1445,7 @@ func getpeername(s Handle, rsa *RawSockaddrAny, addrlen *int32) (err error) {
 		if e1 != 0 {
 			err = error(e1)
 		} else {
-			err = EINVAL
+			err = syscall.EINVAL
 		}
 	}
 	return
@@ -1457,7 +1457,7 @@ func listen(s Handle, backlog int32) (err error) {
 		if e1 != 0 {
 			err = error(e1)
 		} else {
-			err = EINVAL
+			err = syscall.EINVAL
 		}
 	}
 	return
@@ -1469,7 +1469,7 @@ func shutdown(s Handle, how int32) (err error) {
 		if e1 != 0 {
 			err = error(e1)
 		} else {
-			err = EINVAL
+			err = syscall.EINVAL
 		}
 	}
 	return
@@ -1481,7 +1481,7 @@ func Closesocket(s Handle) (err error) {
 		if e1 != 0 {
 			err = error(e1)
 		} else {
-			err = EINVAL
+			err = syscall.EINVAL
 		}
 	}
 	return
@@ -1493,7 +1493,7 @@ func AcceptEx(ls Handle, as Handle, buf *byte, rxdatalen uint32, laddrlen uint32
 		if e1 != 0 {
 			err = error(e1)
 		} else {
-			err = EINVAL
+			err = syscall.EINVAL
 		}
 	}
 	return
@@ -1510,7 +1510,7 @@ func WSARecv(s Handle, bufs *WSABuf, bufcnt uint32, recvd *uint32, flags *uint32
 		if e1 != 0 {
 			err = error(e1)
 		} else {
-			err = EINVAL
+			err = syscall.EINVAL
 		}
 	}
 	return
@@ -1522,7 +1522,7 @@ func WSASend(s Handle, bufs *WSABuf, bufcnt uint32, sent *uint32, flags uint32, 
 		if e1 != 0 {
 			err = error(e1)
 		} else {
-			err = EINVAL
+			err = syscall.EINVAL
 		}
 	}
 	return
@@ -1534,7 +1534,7 @@ func WSARecvFrom(s Handle, bufs *WSABuf, bufcnt uint32, recvd *uint32, flags *ui
 		if e1 != 0 {
 			err = error(e1)
 		} else {
-			err = EINVAL
+			err = syscall.EINVAL
 		}
 	}
 	return
@@ -1546,7 +1546,7 @@ func WSASendTo(s Handle, bufs *WSABuf, bufcnt uint32, sent *uint32, flags uint32
 		if e1 != 0 {
 			err = error(e1)
 		} else {
-			err = EINVAL
+			err = syscall.EINVAL
 		}
 	}
 	return
@@ -1564,7 +1564,7 @@ func GetHostByName(name string) (h *Hostent, err error) {
 		if e1 != 0 {
 			err = error(e1)
 		} else {
-			err = EINVAL
+			err = syscall.EINVAL
 		}
 	}
 	return
@@ -1587,7 +1587,7 @@ func GetServByName(name string, proto string) (s *Servent, err error) {
 		if e1 != 0 {
 			err = error(e1)
 		} else {
-			err = EINVAL
+			err = syscall.EINVAL
 		}
 	}
 	return
@@ -1611,7 +1611,7 @@ func GetProtoByName(name string) (p *Protoent, err error) {
 		if e1 != 0 {
 			err = error(e1)
 		} else {
-			err = EINVAL
+			err = syscall.EINVAL
 		}
 	}
 	return
@@ -1670,7 +1670,7 @@ func SetFileCompletionNotificationModes(handle Handle, flags uint8) (err error) 
 		if e1 != 0 {
 			err = error(e1)
 		} else {
-			err = EINVAL
+			err = syscall.EINVAL
 		}
 	}
 	return
@@ -1683,7 +1683,7 @@ func WSAEnumProtocols(protocols *int32, protocolBuffer *WSAProtocolInfo, bufferL
 		if e1 != 0 {
 			err = error(e1)
 		} else {
-			err = EINVAL
+			err = syscall.EINVAL
 		}
 	}
 	return
@@ -1695,7 +1695,7 @@ func TranslateName(accName *uint16, accNameFormat uint32, desiredNameFormat uint
 		if e1 != 0 {
 			err = error(e1)
 		} else {
-			err = EINVAL
+			err = syscall.EINVAL
 		}
 	}
 	return
@@ -1707,7 +1707,7 @@ func GetUserNameEx(nameFormat uint32, nameBuffre *uint16, nSize *uint32) (err er
 		if e1 != 0 {
 			err = error(e1)
 		} else {
-			err = EINVAL
+			err = syscall.EINVAL
 		}
 	}
 	return
@@ -1743,7 +1743,7 @@ func LookupAccountSid(systemName *uint16, sid *SID, name *uint16, nameLen *uint3
 		if e1 != 0 {
 			err = error(e1)
 		} else {
-			err = EINVAL
+			err = syscall.EINVAL
 		}
 	}
 	return
@@ -1755,7 +1755,7 @@ func LookupAccountName(systemName *uint16, accountName *uint16, sid *SID, sidLen
 		if e1 != 0 {
 			err = error(e1)
 		} else {
-			err = EINVAL
+			err = syscall.EINVAL
 		}
 	}
 	return
@@ -1767,7 +1767,7 @@ func ConvertSidToStringSid(sid *SID, stringSid **uint16) (err error) {
 		if e1 != 0 {
 			err = error(e1)
 		} else {
-			err = EINVAL
+			err = syscall.EINVAL
 		}
 	}
 	return
@@ -1779,7 +1779,7 @@ func ConvertStringSidToSid(stringSid *uint16, sid **SID) (err error) {
 		if e1 != 0 {
 			err = error(e1)
 		} else {
-			err = EINVAL
+			err = syscall.EINVAL
 		}
 	}
 	return
@@ -1797,7 +1797,7 @@ func CopySid(destSidLen uint32, destSid *SID, srcSid *SID) (err error) {
 		if e1 != 0 {
 			err = error(e1)
 		} else {
-			err = EINVAL
+			err = syscall.EINVAL
 		}
 	}
 	return
@@ -1809,7 +1809,7 @@ func OpenProcessToken(h Handle, access uint32, token *Token) (err error) {
 		if e1 != 0 {
 			err = error(e1)
 		} else {
-			err = EINVAL
+			err = syscall.EINVAL
 		}
 	}
 	return
@@ -1821,7 +1821,7 @@ func GetTokenInformation(t Token, infoClass uint32, info *byte, infoLen uint32, 
 		if e1 != 0 {
 			err = error(e1)
 		} else {
-			err = EINVAL
+			err = syscall.EINVAL
 		}
 	}
 	return
@@ -1833,7 +1833,7 @@ func GetUserProfileDirectory(t Token, dir *uint16, dirLen *uint32) (err error) {
 		if e1 != 0 {
 			err = error(e1)
 		} else {
-			err = EINVAL
+			err = syscall.EINVAL
 		}
 	}
 	return

@@ -4,6 +4,8 @@
 
 package windows
 
+import "syscall"
+
 const (
 	// Windows errors.
 	ERROR_FILE_NOT_FOUND      syscall.Errno = 2
@@ -176,6 +178,9 @@ const (
 
 	CTRL_C_EVENT     = 0
 	CTRL_BREAK_EVENT = 1
+
+	// Windows reserves errors >= 1<<29 for application use.
+	APPLICATION_ERROR = 1 << 29
 )
 
 const (
