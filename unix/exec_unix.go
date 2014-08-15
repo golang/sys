@@ -11,6 +11,7 @@ package unix
 import (
 	"runtime"
 	"sync"
+	"syscall"
 	"unsafe"
 )
 
@@ -62,18 +63,6 @@ import (
 //             instead of the ForkLock, but only for dup(fd, -1).
 
 var ForkLock sync.RWMutex
-
-// StringSlicePtr is deprecated. Use SlicePtrFromStrings instead.
-// If any string contains a NUL byte this function panics instead
-// of returning an error.
-func StringSlicePtr(ss []string) []*byte {
-	bb := make([]*byte, len(ss)+1)
-	for i := 0; i < len(ss); i++ {
-		bb[i] = StringBytePtr(ss[i])
-	}
-	bb[len(ss)] = nil
-	return bb
-}
 
 // SlicePtrFromStrings converts a slice of strings to a slice of
 // pointers to NUL-terminated byte slices. If any string contains
@@ -130,7 +119,7 @@ var zeroSysProcAttr SysProcAttr
 func forkExec(argv0 string, argv []string, attr *ProcAttr) (pid int, err error) {
 	var p [2]int
 	var n int
-	var err1 Errno
+	var err1 syscall.Errno
 	var wstatus WaitStatus
 
 	if attr == nil {
@@ -190,7 +179,7 @@ func forkExec(argv0 string, argv []string, attr *ProcAttr) (pid int, err error) 
 	// Kick off child.
 	pid, err1 = forkAndExecInChild(argv0p, argvp, envvp, chroot, dir, attr, sys, p[1])
 	if err1 != 0 {
-		err = Errno(err1)
+		err = syscall.Errno(err1)
 		goto error
 	}
 	ForkLock.Unlock()
@@ -201,7 +190,7 @@ func forkExec(argv0 string, argv []string, attr *ProcAttr) (pid int, err error) 
 	Close(p[0])
 	if err != nil || n != 0 {
 		if n == int(unsafe.Sizeof(err1)) {
-			err = Errno(err1)
+			err = syscall.Errno(err1)
 		}
 		if err == nil {
 			err = EPIPE
@@ -257,5 +246,5 @@ func Exec(argv0 string, argv []string, envv []string) (err error) {
 		uintptr(unsafe.Pointer(argv0p)),
 		uintptr(unsafe.Pointer(&argvp[0])),
 		uintptr(unsafe.Pointer(&envvp[0])))
-	return Errno(err1)
+	return syscall.Errno(err1)
 }

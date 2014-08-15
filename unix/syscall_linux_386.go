@@ -7,7 +7,10 @@
 
 package unix
 
-import "unsafe"
+import (
+	"syscall"
+	"unsafe"
+)
 
 func Getpagesize() int { return 4096 }
 
@@ -134,7 +137,7 @@ func Setrlimit(resource int, rlim *Rlimit) (err error) {
 
 // Underlying system call writes to newoffset via pointer.
 // Implemented in assembly to avoid allocation.
-func seek(fd int, offset int64, whence int) (newoffset int64, err Errno)
+func seek(fd int, offset int64, whence int) (newoffset int64, err syscall.Errno)
 
 func Seek(fd int, offset int64, whence int) (newoffset int64, err error) {
 	newoffset, errno := seek(fd, offset, whence)
@@ -179,8 +182,8 @@ const (
 	_SENDMMSG    = 20
 )
 
-func socketcall(call int, a0, a1, a2, a3, a4, a5 uintptr) (n int, err Errno)
-func rawsocketcall(call int, a0, a1, a2, a3, a4, a5 uintptr) (n int, err Errno)
+func socketcall(call int, a0, a1, a2, a3, a4, a5 uintptr) (n int, err syscall.Errno)
+func rawsocketcall(call int, a0, a1, a2, a3, a4, a5 uintptr) (n int, err syscall.Errno)
 
 func accept(s int, rsa *RawSockaddrAny, addrlen *_Socklen) (fd int, err error) {
 	fd, e := socketcall(_ACCEPT, uintptr(s), uintptr(unsafe.Pointer(rsa)), uintptr(unsafe.Pointer(addrlen)), 0, 0, 0)

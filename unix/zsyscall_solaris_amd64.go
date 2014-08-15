@@ -3,7 +3,10 @@
 
 package unix
 
-import "unsafe"
+import (
+	"syscall"
+	"unsafe"
+)
 
 var (
 	modlibc      = newLazySO("libc.so")
@@ -345,7 +348,7 @@ func Getuid() (uid int) {
 	return
 }
 
-func Kill(pid int, signum Signal) (err error) {
+func Kill(pid int, signum syscall.Signal) (err error) {
 	_, _, e1 := sysvicall6(procKill.Addr(), 2, uintptr(pid), uintptr(signum), 0, 0, 0, 0)
 	if e1 != 0 {
 		err = e1

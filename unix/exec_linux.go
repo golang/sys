@@ -7,20 +7,21 @@
 package unix
 
 import (
+	"syscall"
 	"unsafe"
 )
 
 type SysProcAttr struct {
-	Chroot     string      // Chroot.
-	Credential *Credential // Credential.
-	Ptrace     bool        // Enable tracing.
-	Setsid     bool        // Create session.
-	Setpgid    bool        // Set process group ID to new pid (SYSV setpgrp)
-	Setctty    bool        // Set controlling terminal to fd Ctty (only meaningful if Setsid is set)
-	Noctty     bool        // Detach fd 0 from controlling terminal
-	Ctty       int         // Controlling TTY fd (Linux only)
-	Pdeathsig  Signal      // Signal that the process will get when its parent dies (Linux only)
-	Cloneflags uintptr     // Flags for clone calls (Linux only)
+	Chroot     string         // Chroot.
+	Credential *Credential    // Credential.
+	Ptrace     bool           // Enable tracing.
+	Setsid     bool           // Create session.
+	Setpgid    bool           // Set process group ID to new pid (SYSV setpgrp)
+	Setctty    bool           // Set controlling terminal to fd Ctty (only meaningful if Setsid is set)
+	Noctty     bool           // Detach fd 0 from controlling terminal
+	Ctty       int            // Controlling TTY fd (Linux only)
+	Pdeathsig  syscall.Signal // Signal that the process will get when its parent dies (Linux only)
+	Cloneflags uintptr        // Flags for clone calls (Linux only)
 }
 
 // Implemented in runtime package.
@@ -36,12 +37,12 @@ func runtime_AfterFork()
 // For the same reason compiler does not race instrument it.
 // The calls to RawSyscall are okay because they are assembly
 // functions that do not grow the stack.
-func forkAndExecInChild(argv0 *byte, argv, envv []*byte, chroot, dir *byte, attr *ProcAttr, sys *SysProcAttr, pipe int) (pid int, err Errno) {
+func forkAndExecInChild(argv0 *byte, argv, envv []*byte, chroot, dir *byte, attr *ProcAttr, sys *SysProcAttr, pipe int) (pid int, err syscall.Errno) {
 	// Declare all variables at top in case any
 	// declarations require heap allocation (e.g., err1).
 	var (
 		r1     uintptr
-		err1   Errno
+		err1   syscall.Errno
 		nextfd int
 		i      int
 	)

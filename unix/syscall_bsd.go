@@ -14,6 +14,7 @@ package unix
 
 import (
 	"runtime"
+	"syscall"
 	"unsafe"
 )
 
@@ -132,8 +133,8 @@ func (w WaitStatus) ExitStatus() int {
 
 func (w WaitStatus) Signaled() bool { return w&mask != stopped && w&mask != 0 }
 
-func (w WaitStatus) Signal() Signal {
-	sig := Signal(w & mask)
+func (w WaitStatus) Signal() syscall.Signal {
+	sig := syscall.Signal(w & mask)
 	if sig == stopped || sig == 0 {
 		return -1
 	}
@@ -142,15 +143,15 @@ func (w WaitStatus) Signal() Signal {
 
 func (w WaitStatus) CoreDump() bool { return w.Signaled() && w&core != 0 }
 
-func (w WaitStatus) Stopped() bool { return w&mask == stopped && Signal(w>>shift) != SIGSTOP }
+func (w WaitStatus) Stopped() bool { return w&mask == stopped && syscall.Signal(w>>shift) != SIGSTOP }
 
-func (w WaitStatus) Continued() bool { return w&mask == stopped && Signal(w>>shift) == SIGSTOP }
+func (w WaitStatus) Continued() bool { return w&mask == stopped && syscall.Signal(w>>shift) == SIGSTOP }
 
-func (w WaitStatus) StopSignal() Signal {
+func (w WaitStatus) StopSignal() syscall.Signal {
 	if !w.Stopped() {
 		return -1
 	}
-	return Signal(w>>shift) & 0xFF
+	return syscall.Signal(w>>shift) & 0xFF
 }
 
 func (w WaitStatus) TrapCause() int { return -1 }

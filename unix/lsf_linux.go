@@ -7,6 +7,7 @@
 package unix
 
 import (
+	"syscall"
 	"unsafe"
 )
 
@@ -51,7 +52,7 @@ func SetLsfPromisc(name string, m bool) error {
 	copy(ifl.name[:], []byte(name))
 	_, _, ep := Syscall(SYS_IOCTL, uintptr(s), SIOCGIFFLAGS, uintptr(unsafe.Pointer(&ifl)))
 	if ep != 0 {
-		return Errno(ep)
+		return syscall.Errno(ep)
 	}
 	if m {
 		ifl.flags |= uint16(IFF_PROMISC)
@@ -60,7 +61,7 @@ func SetLsfPromisc(name string, m bool) error {
 	}
 	_, _, ep = Syscall(SYS_IOCTL, uintptr(s), SIOCSIFFLAGS, uintptr(unsafe.Pointer(&ifl)))
 	if ep != 0 {
-		return Errno(ep)
+		return syscall.Errno(ep)
 	}
 	return nil
 }

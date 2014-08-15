@@ -11,7 +11,10 @@
 
 package unix
 
-import "unsafe"
+import (
+	"syscall"
+	"unsafe"
+)
 
 /*
  * Wrapped
@@ -194,18 +197,18 @@ func (w WaitStatus) ExitStatus() int {
 	return int(w>>shift) & 0xFF
 }
 
-func (w WaitStatus) Signal() Signal {
+func (w WaitStatus) Signal() syscall.Signal {
 	if !w.Signaled() {
 		return -1
 	}
-	return Signal(w & mask)
+	return syscall.Signal(w & mask)
 }
 
-func (w WaitStatus) StopSignal() Signal {
+func (w WaitStatus) StopSignal() syscall.Signal {
 	if !w.Stopped() {
 		return -1
 	}
-	return Signal(w>>shift) & 0xFF
+	return syscall.Signal(w>>shift) & 0xFF
 }
 
 func (w WaitStatus) TrapCause() int {
@@ -818,7 +821,7 @@ func Mount(source string, target string, fstype string, flags uintptr, data stri
 //sysnb	InotifyInit() (fd int, err error)
 //sysnb	InotifyInit1(flags int) (fd int, err error)
 //sysnb	InotifyRmWatch(fd int, watchdesc uint32) (success int, err error)
-//sysnb	Kill(pid int, sig Signal) (err error)
+//sysnb	Kill(pid int, sig syscall.Signal) (err error)
 //sys	Klogctl(typ int, buf []byte) (n int, err error) = SYS_SYSLOG
 //sys	Link(oldpath string, newpath string) (err error)
 //sys	Listxattr(path string, dest []byte) (sz int, err error)
@@ -861,7 +864,7 @@ func Setgid(uid int) (err error) {
 //sys	Sync()
 //sysnb	Sysinfo(info *Sysinfo_t) (err error)
 //sys	Tee(rfd int, wfd int, len int, flags int) (n int64, err error)
-//sysnb	Tgkill(tgid int, tid int, sig Signal) (err error)
+//sysnb	Tgkill(tgid int, tid int, sig syscall.Signal) (err error)
 //sysnb	Times(tms *Tms) (ticks uintptr, err error)
 //sysnb	Umask(mask int) (oldmask int)
 //sysnb	Uname(buf *Utsname) (err error)

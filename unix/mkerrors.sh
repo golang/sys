@@ -42,6 +42,7 @@ ccflags="$@"
 	echo "${!indirect} $includes"
 	echo '*/'
 	echo 'import "C"'
+	echo 'import "syscall"'
 	echo
 	echo 'const ('
 
@@ -147,13 +148,13 @@ cat _error.out | grep -vf _error.grep | grep -vf _signal.grep
 echo
 echo '// Errors'
 echo 'const ('
-cat _error.out | grep -f _error.grep | sed 's/=\(.*\)/= Errno(\1)/'
+cat _error.out | grep -f _error.grep | sed 's/=\(.*\)/= syscall.Errno(\1)/'
 echo ')'
 
 echo
 echo '// Signals'
 echo 'const ('
-cat _error.out | grep -f _signal.grep | sed 's/=\(.*\)/= Signal(\1)/'
+cat _error.out | grep -f _signal.grep | sed 's/=\(.*\)/= syscall.Signal(\1)/'
 echo ')'
 
 # Run C program to print error and syscall strings.

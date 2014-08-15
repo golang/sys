@@ -14,6 +14,7 @@ package unix
 
 import (
 	errorspkg "errors"
+	"syscall"
 	"unsafe"
 )
 
@@ -208,7 +209,7 @@ func Getfsstat(buf []Statfs_t, flags int) (n int, err error) {
 
 //sys	kill(pid int, signum int, posix int) (err error)
 
-func Kill(pid int, signum Signal) (err error) { return kill(pid, int(signum), 1) }
+func Kill(pid int, signum syscall.Signal) (err error) { return kill(pid, int(signum), 1) }
 
 /*
  * Exposed directly

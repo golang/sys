@@ -9,6 +9,7 @@ package unix
 import (
 	"runtime"
 	"sync"
+	"syscall"
 	"unsafe"
 )
 
@@ -24,10 +25,10 @@ const (
 	netbsd32Bit    = runtime.GOOS == "netbsd" && sizeofPtr == 4
 )
 
-func Syscall(trap, a1, a2, a3 uintptr) (r1, r2 uintptr, err Errno)
-func Syscall6(trap, a1, a2, a3, a4, a5, a6 uintptr) (r1, r2 uintptr, err Errno)
-func RawSyscall(trap, a1, a2, a3 uintptr) (r1, r2 uintptr, err Errno)
-func RawSyscall6(trap, a1, a2, a3, a4, a5, a6 uintptr) (r1, r2 uintptr, err Errno)
+func Syscall(trap, a1, a2, a3 uintptr) (r1, r2 uintptr, err syscall.Errno)
+func Syscall6(trap, a1, a2, a3, a4, a5, a6 uintptr) (r1, r2 uintptr, err syscall.Errno)
+func RawSyscall(trap, a1, a2, a3 uintptr) (r1, r2 uintptr, err syscall.Errno)
+func RawSyscall6(trap, a1, a2, a3, a4, a5, a6 uintptr) (r1, r2 uintptr, err syscall.Errno)
 
 // Mmap manager, for use by operating system-specific implementations.
 
@@ -87,49 +88,6 @@ func (m *mmapper) Munmap(data []byte) (err error) {
 	}
 	delete(m.active, p)
 	return nil
-}
-
-// An Errno is an unsigned number describing an error condition.
-// It implements the error interface.  The zero Errno is by convention
-// a non-error, so code to convert from Errno to error should use:
-//	err = nil
-//	if errno != 0 {
-//		err = errno
-//	}
-type Errno uintptr
-
-func (e Errno) Error() string {
-	if 0 <= int(e) && int(e) < len(errors) {
-		s := errors[e]
-		if s != "" {
-			return s
-		}
-	}
-	return "errno " + itoa(int(e))
-}
-
-func (e Errno) Temporary() bool {
-	return e == EINTR || e == EMFILE || e.Timeout()
-}
-
-func (e Errno) Timeout() bool {
-	return e == EAGAIN || e == EWOULDBLOCK || e == ETIMEDOUT
-}
-
-// A Signal is a number describing a process signal.
-// It implements the os.Signal interface.
-type Signal int
-
-func (s Signal) Signal() {}
-
-func (s Signal) String() string {
-	if 0 <= s && int(s) < len(signals) {
-		str := signals[s]
-		if str != "" {
-			return str
-		}
-	}
-	return "signal " + itoa(int(s))
 }
 
 func Read(fd int, p []byte) (n int, err error) {

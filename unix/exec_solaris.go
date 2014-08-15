@@ -5,6 +5,7 @@
 package unix
 
 import (
+	"syscall"
 	"unsafe"
 )
 
@@ -21,20 +22,20 @@ type SysProcAttr struct {
 func runtime_BeforeFork()
 func runtime_AfterFork()
 
-func chdir(path uintptr) (err Errno)
-func chroot1(path uintptr) (err Errno)
-func close(fd uintptr) (err Errno)
-func execve(path uintptr, argv uintptr, envp uintptr) (err Errno)
+func chdir(path uintptr) (err syscall.Errno)
+func chroot1(path uintptr) (err syscall.Errno)
+func close(fd uintptr) (err syscall.Errno)
+func execve(path uintptr, argv uintptr, envp uintptr) (err syscall.Errno)
 func exit(code uintptr)
-func fcntl1(fd uintptr, cmd uintptr, arg uintptr) (val uintptr, err Errno)
-func forkx(flags uintptr) (pid uintptr, err Errno)
-func ioctl(fd uintptr, req uintptr, arg uintptr) (err Errno)
-func setgid(gid uintptr) (err Errno)
-func setgroups1(ngid uintptr, gid uintptr) (err Errno)
-func setsid() (pid uintptr, err Errno)
-func setuid(uid uintptr) (err Errno)
-func setpgid(pid uintptr, pgid uintptr) (err Errno)
-func write1(fd uintptr, buf uintptr, nbyte uintptr) (n uintptr, err Errno)
+func fcntl1(fd uintptr, cmd uintptr, arg uintptr) (val uintptr, err syscall.Errno)
+func forkx(flags uintptr) (pid uintptr, err syscall.Errno)
+func ioctl(fd uintptr, req uintptr, arg uintptr) (err syscall.Errno)
+func setgid(gid uintptr) (err syscall.Errno)
+func setgroups1(ngid uintptr, gid uintptr) (err syscall.Errno)
+func setsid() (pid uintptr, err syscall.Errno)
+func setuid(uid uintptr) (err syscall.Errno)
+func setpgid(pid uintptr, pgid uintptr) (err syscall.Errno)
+func write1(fd uintptr, buf uintptr, nbyte uintptr) (n uintptr, err syscall.Errno)
 
 // Fork, dup fd onto 0..len(fd), and exec(argv0, argvv, envv) in child.
 // If a dup or exec fails, write the errno error to pipe.
@@ -48,12 +49,12 @@ func write1(fd uintptr, buf uintptr, nbyte uintptr) (n uintptr, err Errno)
 // because we need to avoid lazy-loading the functions (might malloc,
 // split the stack, or acquire mutexes). We can't call RawSyscall
 // because it's not safe even for BSD-subsystem calls.
-func forkAndExecInChild(argv0 *byte, argv, envv []*byte, chroot, dir *byte, attr *ProcAttr, sys *SysProcAttr, pipe int) (pid int, err Errno) {
+func forkAndExecInChild(argv0 *byte, argv, envv []*byte, chroot, dir *byte, attr *ProcAttr, sys *SysProcAttr, pipe int) (pid int, err syscall.Errno) {
 	// Declare all variables at top in case any
 	// declarations require heap allocation (e.g., err1).
 	var (
 		r1     uintptr
-		err1   Errno
+		err1   syscall.Errno
 		nextfd int
 		i      int
 	)

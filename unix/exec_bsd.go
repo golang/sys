@@ -8,6 +8,7 @@ package unix
 
 import (
 	"runtime"
+	"syscall"
 	"unsafe"
 )
 
@@ -34,12 +35,12 @@ func runtime_AfterFork()
 // For the same reason compiler does not race instrument it.
 // The calls to RawSyscall are okay because they are assembly
 // functions that do not grow the stack.
-func forkAndExecInChild(argv0 *byte, argv, envv []*byte, chroot, dir *byte, attr *ProcAttr, sys *SysProcAttr, pipe int) (pid int, err Errno) {
+func forkAndExecInChild(argv0 *byte, argv, envv []*byte, chroot, dir *byte, attr *ProcAttr, sys *SysProcAttr, pipe int) (pid int, err syscall.Errno) {
 	// Declare all variables at top in case any
 	// declarations require heap allocation (e.g., err1).
 	var (
 		r1, r2 uintptr
-		err1   Errno
+		err1   syscall.Errno
 		nextfd int
 		i      int
 	)

@@ -4,6 +4,8 @@
 
 package unix
 
+import "syscall"
+
 //sys	Chown(path string, uid int, gid int) (err error)
 //sys	Fchown(fd int, uid int, gid int) (err error)
 //sys	Fstat(fd int, stat *Stat_t) (err error)
@@ -58,7 +60,7 @@ package unix
 func Getpagesize() int { return 4096 }
 
 //go:noescape
-func gettimeofday(tv *Timeval) (err Errno)
+func gettimeofday(tv *Timeval) (err syscall.Errno)
 
 func Gettimeofday(tv *Timeval) (err error) {
 	errno := gettimeofday(tv)

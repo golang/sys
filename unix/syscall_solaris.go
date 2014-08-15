@@ -12,7 +12,10 @@
 
 package unix
 
-import "unsafe"
+import (
+	"syscall"
+	"unsafe"
+)
 
 type SockaddrDatalink struct {
 	Family uint16
@@ -70,7 +73,7 @@ func Pipe(p []int) (err error) {
 	}
 	r0, w0, e1 := pipe()
 	if e1 != 0 {
-		err = Errno(e1)
+		err = syscall.Errno(e1)
 	}
 	p[0], p[1] = int(r0), int(w0)
 	return
@@ -224,8 +227,8 @@ func (w WaitStatus) ExitStatus() int {
 
 func (w WaitStatus) Signaled() bool { return w&mask != stopped && w&mask != 0 }
 
-func (w WaitStatus) Signal() Signal {
-	sig := Signal(w & mask)
+func (w WaitStatus) Signal() syscall.Signal {
+	sig := syscall.Signal(w & mask)
 	if sig == stopped || sig == 0 {
 		return -1
 	}
@@ -234,15 +237,15 @@ func (w WaitStatus) Signal() Signal {
 
 func (w WaitStatus) CoreDump() bool { return w.Signaled() && w&core != 0 }
 
-func (w WaitStatus) Stopped() bool { return w&mask == stopped && Signal(w>>shift) != SIGSTOP }
+func (w WaitStatus) Stopped() bool { return w&mask == stopped && syscall.Signal(w>>shift) != SIGSTOP }
 
-func (w WaitStatus) Continued() bool { return w&mask == stopped && Signal(w>>shift) == SIGSTOP }
+func (w WaitStatus) Continued() bool { return w&mask == stopped && syscall.Signal(w>>shift) == SIGSTOP }
 
-func (w WaitStatus) StopSignal() Signal {
+func (w WaitStatus) StopSignal() syscall.Signal {
 	if !w.Stopped() {
 		return -1
 	}
-	return Signal(w>>shift) & 0xFF
+	return syscall.Signal(w>>shift) & 0xFF
 }
 
 func (w WaitStatus) TrapCause() int { return -1 }
@@ -252,7 +255,7 @@ func wait4(pid uintptr, wstatus *WaitStatus, options uintptr, rusage *Rusage) (w
 func Wait4(pid int, wstatus *WaitStatus, options int, rusage *Rusage) (wpid int, err error) {
 	r0, e1 := wait4(uintptr(pid), wstatus, uintptr(options), rusage)
 	if e1 != 0 {
-		err = Errno(e1)
+		err = syscall.Errno(e1)
 	}
 	return int(r0), err
 }
@@ -262,7 +265,7 @@ func gethostname() (name string, err uintptr)
 func Gethostname() (name string, err error) {
 	name, e1 := gethostname()
 	if e1 != 0 {
-		err = Errno(e1)
+		err = syscall.Errno(e1)
 	}
 	return name, err
 }
@@ -452,7 +455,7 @@ func SendmsgN(fd int, p, oob []byte, to Sockaddr, flags int) (n int, err error) 
 //sysnb	Getrlimit(which int, lim *Rlimit) (err error)
 //sysnb	Gettimeofday(tv *Timeval) (err error)
 //sysnb	Getuid() (uid int)
-//sys	Kill(pid int, signum Signal) (err error)
+//sys	Kill(pid int, signum syscall.Signal) (err error)
 //sys	Lchown(path string, uid int, gid int) (err error)
 //sys	Link(path string, link string) (err error)
 //sys	Listen(s int, backlog int) (err error) = libsocket.listen
