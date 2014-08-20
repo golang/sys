@@ -140,6 +140,7 @@ var (
 	procgetprotobyname                     = modws2_32.NewProc("getprotobyname")
 	procDnsQuery_W                         = moddnsapi.NewProc("DnsQuery_W")
 	procDnsRecordListFree                  = moddnsapi.NewProc("DnsRecordListFree")
+	procDnsNameCompare_W                   = moddnsapi.NewProc("DnsNameCompare_W")
 	procGetAddrInfoW                       = modws2_32.NewProc("GetAddrInfoW")
 	procFreeAddrInfoW                      = modws2_32.NewProc("FreeAddrInfoW")
 	procGetIfEntry                         = modiphlpapi.NewProc("GetIfEntry")
@@ -1632,6 +1633,12 @@ func DnsQuery(name string, qtype uint16, options uint32, extra *byte, qrs **DNSR
 
 func DnsRecordListFree(rl *DNSRecord, freetype uint32) {
 	syscall.Syscall(procDnsRecordListFree.Addr(), 2, uintptr(unsafe.Pointer(rl)), uintptr(freetype), 0)
+	return
+}
+
+func DnsNameCompare(name1 *uint16, name2 *uint16) (same bool) {
+	r0, _, _ := syscall.Syscall(procDnsNameCompare_W.Addr(), 2, uintptr(unsafe.Pointer(name1)), uintptr(unsafe.Pointer(name2)), 0)
+	same = r0 != 0
 	return
 }
 
