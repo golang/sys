@@ -255,3 +255,19 @@ func Sendfile(outfd int, infd int, offset *int64, count int) (written int, err e
 }
 
 var ioSync int64
+
+func CloseOnExec(fd int) { fcntl(fd, F_SETFD, FD_CLOEXEC) }
+
+func SetNonblock(fd int, nonblocking bool) (err error) {
+	flag, err := fcntl(fd, F_GETFL, 0)
+	if err != nil {
+		return err
+	}
+	if nonblocking {
+		flag |= O_NONBLOCK
+	} else {
+		flag &= ^O_NONBLOCK
+	}
+	_, err = fcntl(fd, F_SETFL, flag)
+	return err
+}
