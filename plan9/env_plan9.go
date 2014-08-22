@@ -87,6 +87,38 @@ func copyenv() {
 	}
 }
 
+// readdirnames returns the names of files inside the directory represented by dirfd.
+func readdirnames(dirfd int) (names []string, err error) {
+	names = make([]string, 0, 100)
+	var buf [STATMAX]byte
+
+	for {
+		n, e := Read(dirfd, buf[:])
+		if e != nil {
+			return nil, e
+		}
+		if n == 0 {
+			break
+		}
+		for i := 0; i < n; {
+			m, _ := gbit16(buf[i:])
+			m += 2
+
+			if m < STATFIXLEN {
+				return nil, ErrBadStat
+			}
+
+			s, _, ok := gstring(buf[i+41:])
+			if !ok {
+				return nil, ErrBadStat
+			}
+			names = append(names, s)
+			i += int(m)
+		}
+	}
+	return
+}
+
 func Getenv(key string) (value string, found bool) {
 	if len(key) == 0 {
 		return "", false
