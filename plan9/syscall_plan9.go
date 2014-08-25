@@ -139,7 +139,7 @@ func Fd2path(fd int) (path string, err error) {
 //sys	pipe(p *[2]_C_int) (err error)
 func Pipe(p []int) (err error) {
 	if len(p) != 2 {
-		return NewError("bad arg in system call")
+		return syscall.ErrorString("bad arg in system call")
 	}
 	var pp [2]_C_int
 	err = pipe(&pp)
@@ -156,7 +156,7 @@ func Seek(fd int, offset int64, whence int) (newoffset int64, err error) {
 	newoffset, e := seek(0, fd, offset, whence)
 
 	if newoffset == -1 {
-		err = NewError(e)
+		err = syscall.ErrorString(e)
 	}
 	return
 }
@@ -212,7 +212,7 @@ func Await(w *Waitmsg) (err error) {
 	nf++
 
 	if nf != len(f) {
-		return NewError("invalid wait message")
+		return syscall.ErrorString("invalid wait message")
 	}
 	w.Pid = int(atoi(f[0]))
 	w.Time[0] = uint32(atoi(f[1]))

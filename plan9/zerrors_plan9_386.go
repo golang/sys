@@ -4,6 +4,8 @@
 
 package plan9
 
+import "syscall"
+
 // Constants
 const (
 	// Invented values to support what package os expects.
@@ -26,23 +28,23 @@ const (
 
 // Errors
 var (
-	EINVAL       = NewError("bad arg in system call")
-	ENOTDIR      = NewError("not a directory")
-	EISDIR       = NewError("file is a directory")
-	ENOENT       = NewError("file does not exist")
-	EEXIST       = NewError("file already exists")
-	EMFILE       = NewError("no free file descriptors")
-	EIO          = NewError("i/o error")
-	ENAMETOOLONG = NewError("file name too long")
-	EINTR        = NewError("interrupted")
-	EPERM        = NewError("permission denied")
-	EBUSY        = NewError("no free devices")
-	ETIMEDOUT    = NewError("connection timed out")
-	EPLAN9       = NewError("not supported by plan 9")
+	EINVAL       = syscall.ErrorString("bad arg in system call")
+	ENOTDIR      = syscall.ErrorString("not a directory")
+	EISDIR       = syscall.ErrorString("file is a directory")
+	ENOENT       = syscall.ErrorString("file does not exist")
+	EEXIST       = syscall.ErrorString("file already exists")
+	EMFILE       = syscall.ErrorString("no free file descriptors")
+	EIO          = syscall.ErrorString("i/o error")
+	ENAMETOOLONG = syscall.ErrorString("file name too long")
+	EINTR        = syscall.ErrorString("interrupted")
+	EPERM        = syscall.ErrorString("permission denied")
+	EBUSY        = syscall.ErrorString("no free devices")
+	ETIMEDOUT    = syscall.ErrorString("connection timed out")
+	EPLAN9       = syscall.ErrorString("not supported by plan 9")
 
 	// The following errors do not correspond to any
 	// Plan 9 system messages. Invented to support
 	// what package os and others expect.
-	EACCES       = NewError("access permission denied")
-	EAFNOSUPPORT = NewError("address family not supported by protocol")
+	EACCES       = syscall.ErrorString("access permission denied")
+	EAFNOSUPPORT = syscall.ErrorString("address family not supported by protocol")
 )
