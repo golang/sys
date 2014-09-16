@@ -72,9 +72,6 @@ while(<>) {
 	my $nonblock = /^\/\/sysnb /;
 	next if !/^\/\/sys / && !$nonblock;
 
-	my $syscalldot = "";
-	$syscalldot = "syscall." if $package ne "syscall";
-
 	# Line must be of the form
 	#	func Open(path string, mode int, perm int) (fd int, err error)
 	# Split into name, in params, out params.
@@ -96,7 +93,7 @@ while(<>) {
 	my $modvname = "mod$modname";
 	if($modnames !~ /$modname/) {
 		$modnames .= ".$modname";
-		$mods .= "\t$modvname = ${syscalldot}newLazySO(\"$modname.so\")\n";
+		$mods .= "\t$modvname = newLazySO(\"$modname.so\")\n";
 	}
 
 	# System call name.
@@ -136,8 +133,8 @@ while(<>) {
 
 	# Prepare arguments to Syscall.
 	my @args = ();
+	my @uses = ();
 	my $n = 0;
-	my @pin= ();
 	foreach my $p (@in) {
 		my ($name, $type) = parseparam($p);
 		if($type =~ /^\*/) {
@@ -147,12 +144,14 @@ while(<>) {
 			$text .= "\t_p$n, $errvar = $strconvfunc($name)\n";
 			$text .= "\tif $errvar != nil {\n\t\treturn\n\t}\n";
 			push @args, "uintptr(unsafe.Pointer(_p$n))";
+			push @uses, "use(unsafe.Pointer(_p$n))";
 			$n++;
 		} elsif($type eq "string") {
 			print STDERR "$ARGV:$.: $func uses string arguments, but has no error return\n";
 			$text .= "\tvar _p$n $strconvtype\n";
 			$text .= "\t_p$n, _ = $strconvfunc($name)\n";
 			push @args, "uintptr(unsafe.Pointer(_p$n))";
+			push @uses, "use(unsafe.Pointer(_p$n))";
 			$n++;
 		} elsif($type =~ /^\[\](.*)/) {
 			# Convert slice into pointer, length.
@@ -176,14 +175,13 @@ while(<>) {
 		} else {
 			push @args, "uintptr($name)";
 		}
-		push @pin, sprintf "\"%s=\", %s, ", $name, $name;
 	}
 	my $nargs = @args;
 
 	# Determine which form to use; pad args with zeros.
-	my $asm = "${syscalldot}sysvicall6";
+	my $asm = "sysvicall6";
 	if ($nonblock) {
-		$asm = "${syscalldot}rawSysvicall6";
+		$asm = "rawSysvicall6";
 	}
 	if(@args <= 6) {
 		while(@args < 6) {
@@ -239,6 +237,9 @@ while(<>) {
 		$text .= "\t$call\n";
 	} else {
 		$text .= "\t$ret[0], $ret[1], $ret[2] := $call\n";
+	}
+	foreach my $use (@uses) {
+		$text .= "\t$use\n";
 	}
 	$text .= $body;
 
