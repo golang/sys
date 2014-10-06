@@ -304,7 +304,12 @@ print <<EOF;
 
 package unix
 
-import "unsafe"
+import (
+	"syscall"
+	"unsafe"
+)
+
+var _ syscall.Errno
 
 $text
 EOF
