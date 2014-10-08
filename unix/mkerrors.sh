@@ -74,6 +74,7 @@ includes_FreeBSD='
 #include <termios.h>
 #include <netinet/ip.h>
 #include <netinet/ip_mroute.h>
+#include <sys/extattr.h>
 
 #if __FreeBSD__ >= 10
 #define IFT_CARP	0xf8	// IFT_CARP is deprecated in FreeBSD 10
@@ -243,6 +244,9 @@ ccflags="$@"
 		$2 ~ /^(SIGEV_|SIGSTKSZ|SIGRT(MIN|MAX))/ {next}
 		$2 ~ /^(SCM_SRCRT)$/ {next}
 		$2 ~ /^(MAP_FAILED)$/ {next}
+
+		$2 ~ /^EXTATTR_NAMESPACE_NAMES/ ||
+		$2 ~ /^EXTATTR_NAMESPACE_[A-Z]+_STRING/ {next}
 
 		$2 !~ /^ETH_/ &&
 		$2 !~ /^EPROC_/ &&
