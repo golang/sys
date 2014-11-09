@@ -18,7 +18,7 @@ import (
 	"testing"
 	"time"
 
-	"code.google.com/p/go.sys/unix"
+	"golang.org/x/sys/unix"
 )
 
 // Tests that below functions, structures and constants are consistent

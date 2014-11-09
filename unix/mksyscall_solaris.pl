@@ -265,7 +265,7 @@ package $package
 import "unsafe"
 EOF
 
-print "import \"code.google.com/p/go.sys/unix\"\n" if $package ne "unix";
+print "import \"golang.org/x/sys/unix\"\n" if $package ne "unix";
 
 print <<EOF;
 

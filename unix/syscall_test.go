@@ -9,7 +9,7 @@ package unix_test
 import (
 	"testing"
 
-	"code.google.com/p/go.sys/unix"
+	"golang.org/x/sys/unix"
 )
 
 func testSetGetenv(t *testing.T, key, value string) {
