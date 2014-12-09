@@ -19,7 +19,7 @@
 // These calls return err == nil to indicate success; otherwise
 // err represents an operating system error describing the failure and
 // holds a value of type syscall.ErrorString.
-package plan9
+package plan9 // import "golang.org/x/sys/plan9"
 
 import "unsafe"
 
