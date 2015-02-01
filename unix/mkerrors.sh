@@ -16,7 +16,7 @@ if test -z "$GOARCH" -o -z "$GOOS"; then
 	exit 1
 fi
 
-CC=${CC:-gcc}
+CC=${CC:-cc}
 
 if [[ "$GOOS" -eq "solaris" ]]; then
 	# Assumes GNU versions of utilities in PATH.
