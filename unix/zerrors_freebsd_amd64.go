@@ -439,6 +439,9 @@ const (
 	EV_RECEIPT                        = 0x40
 	EV_SYSFLAGS                       = 0xf000
 	EXTA                              = 0x4b00
+	EXTATTR_NAMESPACE_EMPTY           = 0x0
+	EXTATTR_NAMESPACE_SYSTEM          = 0x2
+	EXTATTR_NAMESPACE_USER            = 0x1
 	EXTB                              = 0x9600
 	EXTPROC                           = 0x800
 	FD_CLOEXEC                        = 0x1
@@ -764,6 +767,7 @@ const (
 	IPPROTO_GMTP                      = 0x64
 	IPPROTO_GRE                       = 0x2f
 	IPPROTO_HELLO                     = 0x3f
+	IPPROTO_HIP                       = 0x8b
 	IPPROTO_HMP                       = 0x14
 	IPPROTO_HOPOPTS                   = 0x0
 	IPPROTO_ICMP                      = 0x1
@@ -817,6 +821,8 @@ const (
 	IPPROTO_RAW                       = 0xff
 	IPPROTO_RCCMON                    = 0xa
 	IPPROTO_RDP                       = 0x1b
+	IPPROTO_RESERVED_253              = 0xfd
+	IPPROTO_RESERVED_254              = 0xfe
 	IPPROTO_ROUTING                   = 0x2b
 	IPPROTO_RSVP                      = 0x2e
 	IPPROTO_RVD                       = 0x42
@@ -827,6 +833,7 @@ const (
 	IPPROTO_SDRP                      = 0x2a
 	IPPROTO_SEND                      = 0x103
 	IPPROTO_SEP                       = 0x21
+	IPPROTO_SHIM6                     = 0x8c
 	IPPROTO_SKIP                      = 0x39
 	IPPROTO_SPACER                    = 0x7fff
 	IPPROTO_SRPC                      = 0x5a
@@ -842,6 +849,7 @@ const (
 	IPPROTO_TRUNK2                    = 0x18
 	IPPROTO_TTP                       = 0x54
 	IPPROTO_UDP                       = 0x11
+	IPPROTO_UDPLITE                   = 0x88
 	IPPROTO_VINES                     = 0x53
 	IPPROTO_VISA                      = 0x46
 	IPPROTO_VMTP                      = 0x51
@@ -1012,6 +1020,7 @@ const (
 	MAP_ANON                          = 0x1000
 	MAP_ANONYMOUS                     = 0x1000
 	MAP_COPY                          = 0x2
+	MAP_EXCL                          = 0x4000
 	MAP_FILE                          = 0x0
 	MAP_FIXED                         = 0x10
 	MAP_HASSEMAPHORE                  = 0x200
@@ -1067,13 +1076,17 @@ const (
 	NOTE_FORK                         = 0x40000000
 	NOTE_LINK                         = 0x10
 	NOTE_LOWAT                        = 0x1
+	NOTE_MSECONDS                     = 0x2
+	NOTE_NSECONDS                     = 0x8
 	NOTE_PCTRLMASK                    = 0xf0000000
 	NOTE_PDATAMASK                    = 0xfffff
 	NOTE_RENAME                       = 0x20
 	NOTE_REVOKE                       = 0x40
+	NOTE_SECONDS                      = 0x1
 	NOTE_TRACK                        = 0x1
 	NOTE_TRACKERR                     = 0x2
 	NOTE_TRIGGER                      = 0x1000000
+	NOTE_USECONDS                     = 0x4
 	NOTE_WRITE                        = 0x2
 	OCRNL                             = 0x10
 	ONLCR                             = 0x2
@@ -1153,7 +1166,6 @@ const (
 	RTF_MODIFIED                      = 0x20
 	RTF_MULTICAST                     = 0x800000
 	RTF_PINNED                        = 0x100000
-	RTF_PRCLONING                     = 0x10000
 	RTF_PROTO1                        = 0x8000
 	RTF_PROTO2                        = 0x4000
 	RTF_PROTO3                        = 0x40000
@@ -1177,8 +1189,6 @@ const (
 	RTM_MISS                          = 0x7
 	RTM_NEWADDR                       = 0xc
 	RTM_NEWMADDR                      = 0xf
-	RTM_OLDADD                        = 0x9
-	RTM_OLDDEL                        = 0xa
 	RTM_REDIRECT                      = 0x6
 	RTM_RESOLVE                       = 0xb
 	RTM_RTTUNIT                       = 0xf4240
@@ -1192,6 +1202,7 @@ const (
 	RTV_SPIPE                         = 0x10
 	RTV_SSTHRESH                      = 0x20
 	RTV_WEIGHT                        = 0x100
+	RT_ALL_FIBS                       = -0x1
 	RT_CACHING_CONTEXT                = 0x1
 	RT_DEFAULT_FIB                    = 0x0
 	RT_NORTREF                        = 0x2
@@ -1206,13 +1217,11 @@ const (
 	SHUT_RDWR                         = 0x2
 	SHUT_WR                           = 0x1
 	SIOCADDMULTI                      = 0x80206931
-	SIOCADDRT                         = 0x8040720a
 	SIOCAIFADDR                       = 0x8040691a
 	SIOCAIFGROUP                      = 0x80286987
 	SIOCALIFADDR                      = 0x8118691b
 	SIOCATMARK                        = 0x40047307
 	SIOCDELMULTI                      = 0x80206932
-	SIOCDELRT                         = 0x8040720b
 	SIOCDIFADDR                       = 0x80206919
 	SIOCDIFGROUP                      = 0x80286989
 	SIOCDIFPHYADDR                    = 0x80206949
