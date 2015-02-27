@@ -104,6 +104,7 @@ func NewCallbackCDecl(fn interface{}) uintptr
 //sys	DeleteFile(path *uint16) (err error) = DeleteFileW
 //sys	MoveFile(from *uint16, to *uint16) (err error) = MoveFileW
 //sys	GetComputerName(buf *uint16, n *uint32) (err error) = GetComputerNameW
+//sys	GetComputerNameEx(nametype uint32, buf *uint16, n *uint32) (err error) = GetComputerNameExW
 //sys	SetEndOfFile(handle Handle) (err error)
 //sys	GetSystemTimeAsFileTime(time *Filetime)
 //sys	GetTimeZoneInformation(tzi *Timezoneinformation) (rc uint32, err error) [failretval==0xffffffff]

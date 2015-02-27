@@ -1108,3 +1108,15 @@ const (
 	IO_REPARSE_TAG_SYMLINK           = 0xA000000C
 	SYMBOLIC_LINK_FLAG_DIRECTORY     = 0x1
 )
+
+const (
+	ComputerNameNetBIOS                   = 0
+	ComputerNameDnsHostname               = 1
+	ComputerNameDnsDomain                 = 2
+	ComputerNameDnsFullyQualified         = 3
+	ComputerNamePhysicalNetBIOS           = 4
+	ComputerNamePhysicalDnsHostname       = 5
+	ComputerNamePhysicalDnsDomain         = 6
+	ComputerNamePhysicalDnsFullyQualified = 7
+	ComputerNameMax                       = 8
+)
