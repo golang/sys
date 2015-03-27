@@ -414,7 +414,7 @@ func Faccessat(dirfd int, path string, mode uint32, flags int) (err error) {
 func Fadvise(fd int, offset int64, length int64, advice int) (err error) {
 	_, _, e1 := Syscall6(SYS_FADVISE64, uintptr(fd), uintptr(offset), uintptr(offset>>32), uintptr(length), uintptr(length>>32), uintptr(advice))
 	if e1 != 0 {
-		err = e1
+		err = errnoErr(e1)
 	}
 	return
 }
@@ -1422,7 +1422,7 @@ func Chown(path string, uid int, gid int) (err error) {
 func Fadvise(fd int, offset int64, length int64, advice int) (err error) {
 	_, _, e1 := Syscall6(SYS_FADVISE64_64, uintptr(fd), uintptr(offset), uintptr(offset>>32), uintptr(length), uintptr(length>>32), uintptr(advice))
 	if e1 != 0 {
-		err = e1
+		err = errnoErr(e1)
 	}
 	return
 }

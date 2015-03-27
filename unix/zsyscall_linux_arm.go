@@ -414,7 +414,7 @@ func Faccessat(dirfd int, path string, mode uint32, flags int) (err error) {
 func Fadvise(fd int, offset int64, length int64, advice int) (err error) {
 	_, _, e1 := Syscall9(SYS_FADVISE64, uintptr(fd), 0, uintptr(offset), uintptr(offset>>32), uintptr(length), uintptr(length>>32), uintptr(advice), 0, 0)
 	if e1 != 0 {
-		err = e1
+		err = errnoErr(e1)
 	}
 	return
 }

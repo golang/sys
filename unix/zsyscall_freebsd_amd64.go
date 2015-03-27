@@ -655,7 +655,7 @@ func ExtattrListLink(link string, attrnamespace int, data uintptr, nbytes int) (
 func Fadvise(fd int, offset int64, length int64, advice int) (err error) {
 	_, _, e1 := Syscall6(SYS_POSIX_FADVISE, uintptr(fd), uintptr(offset), uintptr(length), uintptr(advice), 0, 0)
 	if e1 != 0 {
-		err = e1
+		err = errnoErr(e1)
 	}
 	return
 }
