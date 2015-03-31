@@ -86,8 +86,15 @@ func Seek(fd int, offset int64, whence int) (newoffset int64, err error) {
 //sys   Pread(fd int, p []byte, offset int64) (n int, err error) = SYS_PREAD64
 //sys   Pwrite(fd int, p []byte, offset int64) (n int, err error) = SYS_PWRITE64
 //sys	Truncate(path string, length int64) (err error) = SYS_TRUNCATE64
-//sys	Fadvise(fd int, advice int64, offset int64, length int) = SYS_FADVISE64
 //sys	Ftruncate(fd int, length int64) (err error) = SYS_FTRUNCATE64
+
+func Fadvise(fd int, offset int64, length int64, advice int) (err error) {
+	_, _, e1 := Syscall6(SYS_ARM_FADVISE64_64, uintptr(fd), uintptr(advice), uintptr(offset), uintptr(offset>>32), uintptr(length), uintptr(length>>32))
+	if e1 != 0 {
+		err = errnoErr(e1)
+	}
+	return
+}
 
 //sys	mmap2(addr uintptr, length uintptr, prot int, flags int, fd int, pageOffset uintptr) (xaddr uintptr, err error)
 

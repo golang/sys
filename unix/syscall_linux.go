@@ -799,7 +799,6 @@ func Mount(source string, target string, fstype string, flags uintptr, data stri
 //sys	EpollWait(epfd int, events []EpollEvent, msec int) (n int, err error)
 //sys	Exit(code int) = SYS_EXIT_GROUP
 //sys	Faccessat(dirfd int, path string, mode uint32, flags int) (err error)
-//sys	Fadvise(fd int, offset int64, length int64, advice int) (err error) = SYS_FADVISE64
 //sys	Fallocate(fd int, mode uint32, off int64, len int64) (err error)
 //sys	Fchdir(fd int) (err error)
 //sys	Fchmod(fd int, mode uint32) (err error)
