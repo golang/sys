@@ -6,8 +6,6 @@
 
 package windows
 
-import "syscall"
-
 // EscapeArg rewrites command line argument s as prescribed
 // in http://msdn.microsoft.com/en-us/library/ms880421.
 // This function returns "" (2 double quotes) if s is empty.
@@ -85,21 +83,15 @@ func FullPath(name string) (path string, err error) {
 	if err != nil {
 		return "", err
 	}
-	buf := make([]uint16, 100)
-	n, err := GetFullPathName(p, uint32(len(buf)), &buf[0], nil)
-	if err != nil {
-		return "", err
-	}
-	if n > uint32(len(buf)) {
-		// Windows is asking for bigger buffer.
-		buf = make([]uint16, n)
+	n := uint32(100)
+	for {
+		buf := make([]uint16, n)
 		n, err = GetFullPathName(p, uint32(len(buf)), &buf[0], nil)
 		if err != nil {
 			return "", err
 		}
-		if n > uint32(len(buf)) {
-			return "", syscall.EINVAL
+		if n <= uint32(len(buf)) {
+			return UTF16ToString(buf[:n]), nil
 		}
 	}
-	return UTF16ToString(buf[:n]), nil
 }
