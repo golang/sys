@@ -114,17 +114,6 @@ func Write(fd int, p []byte) (n int, err error) {
 
 var ioSync int64
 
-func Getwd() (wd string, err error) {
-	fd, e := Open(".", O_RDONLY)
-
-	if e != nil {
-		return "", e
-	}
-	defer Close(fd)
-
-	return Fd2path(fd)
-}
-
 //sys	fd2path(fd int, buf []byte) (err error)
 func Fd2path(fd int) (path string, err error) {
 	var buf [512]byte
@@ -227,6 +216,7 @@ func Await(w *Waitmsg) (err error) {
 }
 
 func Unmount(name, old string) (err error) {
+	fixwd()
 	oldp, err := BytePtrFromString(old)
 	if err != nil {
 		return err
@@ -308,17 +298,52 @@ func Getgroups() (gids []int, err error) {
 	return make([]int, 0), nil
 }
 
+//sys	open(path string, mode int) (fd int, err error)
+func Open(path string, mode int) (fd int, err error) {
+	fixwd()
+	return open(path, mode)
+}
+
+//sys	create(path string, mode int, perm uint32) (fd int, err error)
+func Create(path string, mode int, perm uint32) (fd int, err error) {
+	fixwd()
+	return create(path, mode, perm)
+}
+
+//sys	remove(path string) (err error)
+func Remove(path string) error {
+	fixwd()
+	return remove(path)
+}
+
+//sys	stat(path string, edir []byte) (n int, err error)
+func Stat(path string, edir []byte) (n int, err error) {
+	fixwd()
+	return stat(path, edir)
+}
+
+//sys	bind(name string, old string, flag int) (err error)
+func Bind(name string, old string, flag int) (err error) {
+	fixwd()
+	return bind(name, old, flag)
+}
+
+//sys	mount(fd int, afd int, old string, flag int, aname string) (err error)
+func Mount(fd int, afd int, old string, flag int, aname string) (err error) {
+	fixwd()
+	return mount(fd, afd, old, flag, aname)
+}
+
+//sys	wstat(path string, edir []byte) (err error)
+func Wstat(path string, edir []byte) (err error) {
+	fixwd()
+	return wstat(path, edir)
+}
+
+//sys	chdir(path string) (err error)
 //sys	Dup(oldfd int, newfd int) (fd int, err error)
-//sys	Open(path string, mode int) (fd int, err error)
-//sys	Create(path string, mode int, perm uint32) (fd int, err error)
-//sys	Remove(path string) (err error)
 //sys	Pread(fd int, p []byte, offset int64) (n int, err error)
 //sys	Pwrite(fd int, p []byte, offset int64) (n int, err error)
 //sys	Close(fd int) (err error)
-//sys	Chdir(path string) (err error)
-//sys	Bind(name string, old string, flag int) (err error)
-//sys	Mount(fd int, afd int, old string, flag int, aname string) (err error)
-//sys	Stat(path string, edir []byte) (n int, err error)
 //sys	Fstat(fd int, edir []byte) (n int, err error)
-//sys	Wstat(path string, edir []byte) (err error)
 //sys	Fwstat(fd int, edir []byte) (err error)
