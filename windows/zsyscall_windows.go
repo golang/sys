@@ -8,8 +8,8 @@ import "syscall"
 var _ unsafe.Pointer
 
 var (
-	modkernel32 = syscall.NewLazyDLL("kernel32.dll")
 	modadvapi32 = syscall.NewLazyDLL("advapi32.dll")
+	modkernel32 = syscall.NewLazyDLL("kernel32.dll")
 	modshell32  = syscall.NewLazyDLL("shell32.dll")
 	modmswsock  = syscall.NewLazyDLL("mswsock.dll")
 	modcrypt32  = syscall.NewLazyDLL("crypt32.dll")
@@ -20,6 +20,23 @@ var (
 	modnetapi32 = syscall.NewLazyDLL("netapi32.dll")
 	moduserenv  = syscall.NewLazyDLL("userenv.dll")
 
+	procRegisterEventSourceW               = modadvapi32.NewProc("RegisterEventSourceW")
+	procDeregisterEventSource              = modadvapi32.NewProc("DeregisterEventSource")
+	procReportEventW                       = modadvapi32.NewProc("ReportEventW")
+	procOpenSCManagerW                     = modadvapi32.NewProc("OpenSCManagerW")
+	procCloseServiceHandle                 = modadvapi32.NewProc("CloseServiceHandle")
+	procCreateServiceW                     = modadvapi32.NewProc("CreateServiceW")
+	procOpenServiceW                       = modadvapi32.NewProc("OpenServiceW")
+	procDeleteService                      = modadvapi32.NewProc("DeleteService")
+	procStartServiceW                      = modadvapi32.NewProc("StartServiceW")
+	procQueryServiceStatus                 = modadvapi32.NewProc("QueryServiceStatus")
+	procControlService                     = modadvapi32.NewProc("ControlService")
+	procStartServiceCtrlDispatcherW        = modadvapi32.NewProc("StartServiceCtrlDispatcherW")
+	procSetServiceStatus                   = modadvapi32.NewProc("SetServiceStatus")
+	procChangeServiceConfigW               = modadvapi32.NewProc("ChangeServiceConfigW")
+	procQueryServiceConfigW                = modadvapi32.NewProc("QueryServiceConfigW")
+	procChangeServiceConfig2W              = modadvapi32.NewProc("ChangeServiceConfig2W")
+	procQueryServiceConfig2W               = modadvapi32.NewProc("QueryServiceConfig2W")
 	procGetLastError                       = modkernel32.NewProc("GetLastError")
 	procLoadLibraryW                       = modkernel32.NewProc("LoadLibraryW")
 	procFreeLibrary                        = modkernel32.NewProc("FreeLibrary")
@@ -117,6 +134,9 @@ var (
 	procDeviceIoControl                    = modkernel32.NewProc("DeviceIoControl")
 	procCreateSymbolicLinkW                = modkernel32.NewProc("CreateSymbolicLinkW")
 	procCreateHardLinkW                    = modkernel32.NewProc("CreateHardLinkW")
+	procGetCurrentThreadId                 = modkernel32.NewProc("GetCurrentThreadId")
+	procCreateEventW                       = modkernel32.NewProc("CreateEventW")
+	procSetEvent                           = modkernel32.NewProc("SetEvent")
 	procWSAStartup                         = modws2_32.NewProc("WSAStartup")
 	procWSACleanup                         = modws2_32.NewProc("WSACleanup")
 	procWSAIoctl                           = modws2_32.NewProc("WSAIoctl")
@@ -160,10 +180,221 @@ var (
 	procConvertStringSidToSidW             = modadvapi32.NewProc("ConvertStringSidToSidW")
 	procGetLengthSid                       = modadvapi32.NewProc("GetLengthSid")
 	procCopySid                            = modadvapi32.NewProc("CopySid")
+	procAllocateAndInitializeSid           = modadvapi32.NewProc("AllocateAndInitializeSid")
+	procFreeSid                            = modadvapi32.NewProc("FreeSid")
+	procEqualSid                           = modadvapi32.NewProc("EqualSid")
 	procOpenProcessToken                   = modadvapi32.NewProc("OpenProcessToken")
 	procGetTokenInformation                = modadvapi32.NewProc("GetTokenInformation")
 	procGetUserProfileDirectoryW           = moduserenv.NewProc("GetUserProfileDirectoryW")
 )
+
+func RegisterEventSource(uncServerName *uint16, sourceName *uint16) (handle Handle, err error) {
+	r0, _, e1 := syscall.Syscall(procRegisterEventSourceW.Addr(), 2, uintptr(unsafe.Pointer(uncServerName)), uintptr(unsafe.Pointer(sourceName)), 0)
+	handle = Handle(r0)
+	if handle == 0 {
+		if e1 != 0 {
+			err = error(e1)
+		} else {
+			err = syscall.EINVAL
+		}
+	}
+	return
+}
+
+func DeregisterEventSource(handle Handle) (err error) {
+	r1, _, e1 := syscall.Syscall(procDeregisterEventSource.Addr(), 1, uintptr(handle), 0, 0)
+	if r1 == 0 {
+		if e1 != 0 {
+			err = error(e1)
+		} else {
+			err = syscall.EINVAL
+		}
+	}
+	return
+}
+
+func ReportEvent(log Handle, etype uint16, category uint16, eventId uint32, usrSId uintptr, numStrings uint16, dataSize uint32, strings **uint16, rawData *byte) (err error) {
+	r1, _, e1 := syscall.Syscall9(procReportEventW.Addr(), 9, uintptr(log), uintptr(etype), uintptr(category), uintptr(eventId), uintptr(usrSId), uintptr(numStrings), uintptr(dataSize), uintptr(unsafe.Pointer(strings)), uintptr(unsafe.Pointer(rawData)))
+	if r1 == 0 {
+		if e1 != 0 {
+			err = error(e1)
+		} else {
+			err = syscall.EINVAL
+		}
+	}
+	return
+}
+
+func OpenSCManager(machineName *uint16, databaseName *uint16, access uint32) (handle Handle, err error) {
+	r0, _, e1 := syscall.Syscall(procOpenSCManagerW.Addr(), 3, uintptr(unsafe.Pointer(machineName)), uintptr(unsafe.Pointer(databaseName)), uintptr(access))
+	handle = Handle(r0)
+	if handle == 0 {
+		if e1 != 0 {
+			err = error(e1)
+		} else {
+			err = syscall.EINVAL
+		}
+	}
+	return
+}
+
+func CloseServiceHandle(handle Handle) (err error) {
+	r1, _, e1 := syscall.Syscall(procCloseServiceHandle.Addr(), 1, uintptr(handle), 0, 0)
+	if r1 == 0 {
+		if e1 != 0 {
+			err = error(e1)
+		} else {
+			err = syscall.EINVAL
+		}
+	}
+	return
+}
+
+func CreateService(mgr Handle, serviceName *uint16, displayName *uint16, access uint32, srvType uint32, startType uint32, errCtl uint32, pathName *uint16, loadOrderGroup *uint16, tagId *uint32, dependencies *uint16, serviceStartName *uint16, password *uint16) (handle Handle, err error) {
+	r0, _, e1 := syscall.Syscall15(procCreateServiceW.Addr(), 13, uintptr(mgr), uintptr(unsafe.Pointer(serviceName)), uintptr(unsafe.Pointer(displayName)), uintptr(access), uintptr(srvType), uintptr(startType), uintptr(errCtl), uintptr(unsafe.Pointer(pathName)), uintptr(unsafe.Pointer(loadOrderGroup)), uintptr(unsafe.Pointer(tagId)), uintptr(unsafe.Pointer(dependencies)), uintptr(unsafe.Pointer(serviceStartName)), uintptr(unsafe.Pointer(password)), 0, 0)
+	handle = Handle(r0)
+	if handle == 0 {
+		if e1 != 0 {
+			err = error(e1)
+		} else {
+			err = syscall.EINVAL
+		}
+	}
+	return
+}
+
+func OpenService(mgr Handle, serviceName *uint16, access uint32) (handle Handle, err error) {
+	r0, _, e1 := syscall.Syscall(procOpenServiceW.Addr(), 3, uintptr(mgr), uintptr(unsafe.Pointer(serviceName)), uintptr(access))
+	handle = Handle(r0)
+	if handle == 0 {
+		if e1 != 0 {
+			err = error(e1)
+		} else {
+			err = syscall.EINVAL
+		}
+	}
+	return
+}
+
+func DeleteService(service Handle) (err error) {
+	r1, _, e1 := syscall.Syscall(procDeleteService.Addr(), 1, uintptr(service), 0, 0)
+	if r1 == 0 {
+		if e1 != 0 {
+			err = error(e1)
+		} else {
+			err = syscall.EINVAL
+		}
+	}
+	return
+}
+
+func StartService(service Handle, numArgs uint32, argVectors **uint16) (err error) {
+	r1, _, e1 := syscall.Syscall(procStartServiceW.Addr(), 3, uintptr(service), uintptr(numArgs), uintptr(unsafe.Pointer(argVectors)))
+	if r1 == 0 {
+		if e1 != 0 {
+			err = error(e1)
+		} else {
+			err = syscall.EINVAL
+		}
+	}
+	return
+}
+
+func QueryServiceStatus(service Handle, status *SERVICE_STATUS) (err error) {
+	r1, _, e1 := syscall.Syscall(procQueryServiceStatus.Addr(), 2, uintptr(service), uintptr(unsafe.Pointer(status)), 0)
+	if r1 == 0 {
+		if e1 != 0 {
+			err = error(e1)
+		} else {
+			err = syscall.EINVAL
+		}
+	}
+	return
+}
+
+func ControlService(service Handle, control uint32, status *SERVICE_STATUS) (err error) {
+	r1, _, e1 := syscall.Syscall(procControlService.Addr(), 3, uintptr(service), uintptr(control), uintptr(unsafe.Pointer(status)))
+	if r1 == 0 {
+		if e1 != 0 {
+			err = error(e1)
+		} else {
+			err = syscall.EINVAL
+		}
+	}
+	return
+}
+
+func StartServiceCtrlDispatcher(serviceTable *SERVICE_TABLE_ENTRY) (err error) {
+	r1, _, e1 := syscall.Syscall(procStartServiceCtrlDispatcherW.Addr(), 1, uintptr(unsafe.Pointer(serviceTable)), 0, 0)
+	if r1 == 0 {
+		if e1 != 0 {
+			err = error(e1)
+		} else {
+			err = syscall.EINVAL
+		}
+	}
+	return
+}
+
+func SetServiceStatus(service Handle, serviceStatus *SERVICE_STATUS) (err error) {
+	r1, _, e1 := syscall.Syscall(procSetServiceStatus.Addr(), 2, uintptr(service), uintptr(unsafe.Pointer(serviceStatus)), 0)
+	if r1 == 0 {
+		if e1 != 0 {
+			err = error(e1)
+		} else {
+			err = syscall.EINVAL
+		}
+	}
+	return
+}
+
+func ChangeServiceConfig(service Handle, serviceType uint32, startType uint32, errorControl uint32, binaryPathName *uint16, loadOrderGroup *uint16, tagId *uint32, dependencies *uint16, serviceStartName *uint16, password *uint16, displayName *uint16) (err error) {
+	r1, _, e1 := syscall.Syscall12(procChangeServiceConfigW.Addr(), 11, uintptr(service), uintptr(serviceType), uintptr(startType), uintptr(errorControl), uintptr(unsafe.Pointer(binaryPathName)), uintptr(unsafe.Pointer(loadOrderGroup)), uintptr(unsafe.Pointer(tagId)), uintptr(unsafe.Pointer(dependencies)), uintptr(unsafe.Pointer(serviceStartName)), uintptr(unsafe.Pointer(password)), uintptr(unsafe.Pointer(displayName)), 0)
+	if r1 == 0 {
+		if e1 != 0 {
+			err = error(e1)
+		} else {
+			err = syscall.EINVAL
+		}
+	}
+	return
+}
+
+func QueryServiceConfig(service Handle, serviceConfig *QUERY_SERVICE_CONFIG, bufSize uint32, bytesNeeded *uint32) (err error) {
+	r1, _, e1 := syscall.Syscall6(procQueryServiceConfigW.Addr(), 4, uintptr(service), uintptr(unsafe.Pointer(serviceConfig)), uintptr(bufSize), uintptr(unsafe.Pointer(bytesNeeded)), 0, 0)
+	if r1 == 0 {
+		if e1 != 0 {
+			err = error(e1)
+		} else {
+			err = syscall.EINVAL
+		}
+	}
+	return
+}
+
+func ChangeServiceConfig2(service Handle, infoLevel uint32, info *byte) (err error) {
+	r1, _, e1 := syscall.Syscall(procChangeServiceConfig2W.Addr(), 3, uintptr(service), uintptr(infoLevel), uintptr(unsafe.Pointer(info)))
+	if r1 == 0 {
+		if e1 != 0 {
+			err = error(e1)
+		} else {
+			err = syscall.EINVAL
+		}
+	}
+	return
+}
+
+func QueryServiceConfig2(service Handle, infoLevel uint32, buff *byte, buffSize uint32, bytesNeeded *uint32) (err error) {
+	r1, _, e1 := syscall.Syscall6(procQueryServiceConfig2W.Addr(), 5, uintptr(service), uintptr(infoLevel), uintptr(unsafe.Pointer(buff)), uintptr(buffSize), uintptr(unsafe.Pointer(bytesNeeded)), 0)
+	if r1 == 0 {
+		if e1 != 0 {
+			err = error(e1)
+		} else {
+			err = syscall.EINVAL
+		}
+	}
+	return
+}
 
 func GetLastError() (lasterr error) {
 	r0, _, _ := syscall.Syscall(procGetLastError.Addr(), 0, 0, 0, 0)
@@ -1357,6 +1588,37 @@ func CreateHardLink(filename *uint16, existingfilename *uint16, reserved uintptr
 	return
 }
 
+func GetCurrentThreadId() (id uint32) {
+	r0, _, _ := syscall.Syscall(procGetCurrentThreadId.Addr(), 0, 0, 0, 0)
+	id = uint32(r0)
+	return
+}
+
+func CreateEvent(eventAttrs *syscall.SecurityAttributes, manualReset uint32, initialState uint32, name *uint16) (handle Handle, err error) {
+	r0, _, e1 := syscall.Syscall6(procCreateEventW.Addr(), 4, uintptr(unsafe.Pointer(eventAttrs)), uintptr(manualReset), uintptr(initialState), uintptr(unsafe.Pointer(name)), 0, 0)
+	handle = Handle(r0)
+	if handle == 0 {
+		if e1 != 0 {
+			err = error(e1)
+		} else {
+			err = syscall.EINVAL
+		}
+	}
+	return
+}
+
+func SetEvent(event Handle) (err error) {
+	r1, _, e1 := syscall.Syscall(procSetEvent.Addr(), 1, uintptr(event), 0, 0)
+	if r1 == 0 {
+		if e1 != 0 {
+			err = error(e1)
+		} else {
+			err = syscall.EINVAL
+		}
+	}
+	return
+}
+
 func WSAStartup(verreq uint32, data *WSAData) (sockerr error) {
 	r0, _, _ := syscall.Syscall(procWSAStartup.Addr(), 2, uintptr(verreq), uintptr(unsafe.Pointer(data)), 0)
 	if r0 != 0 {
@@ -1845,6 +2107,36 @@ func CopySid(destSidLen uint32, destSid *SID, srcSid *SID) (err error) {
 			err = syscall.EINVAL
 		}
 	}
+	return
+}
+
+func AllocateAndInitializeSid(identAuth *SidIdentifierAuthority, subAuth byte, subAuth0 uint32, subAuth1 uint32, subAuth2 uint32, subAuth3 uint32, subAuth4 uint32, subAuth5 uint32, subAuth6 uint32, subAuth7 uint32, sid **SID) (err error) {
+	r1, _, e1 := syscall.Syscall12(procAllocateAndInitializeSid.Addr(), 11, uintptr(unsafe.Pointer(identAuth)), uintptr(subAuth), uintptr(subAuth0), uintptr(subAuth1), uintptr(subAuth2), uintptr(subAuth3), uintptr(subAuth4), uintptr(subAuth5), uintptr(subAuth6), uintptr(subAuth7), uintptr(unsafe.Pointer(sid)), 0)
+	if r1 == 0 {
+		if e1 != 0 {
+			err = error(e1)
+		} else {
+			err = syscall.EINVAL
+		}
+	}
+	return
+}
+
+func FreeSid(sid *SID) (err error) {
+	r1, _, e1 := syscall.Syscall(procFreeSid.Addr(), 1, uintptr(unsafe.Pointer(sid)), 0, 0)
+	if r1 != 0 {
+		if e1 != 0 {
+			err = error(e1)
+		} else {
+			err = syscall.EINVAL
+		}
+	}
+	return
+}
+
+func EqualSid(sid1 *SID, sid2 *SID) (isEqual bool) {
+	r0, _, _ := syscall.Syscall(procEqualSid.Addr(), 2, uintptr(unsafe.Pointer(sid1)), uintptr(unsafe.Pointer(sid2)), 0)
+	isEqual = r0 != 0
 	return
 }
 

@@ -14,7 +14,7 @@ import (
 	"unsafe"
 )
 
-//go:generate go run $GOROOT/src/syscall/mksyscall_windows.go -output zsyscall_windows.go syscall_windows.go security_windows.go
+//go:generate go run $GOROOT/src/syscall/mksyscall_windows.go -output zsyscall_windows.go eventlog.go service.go syscall_windows.go security_windows.go
 
 type Handle uintptr
 
@@ -180,6 +180,9 @@ func NewCallbackCDecl(fn interface{}) uintptr
 // This function returns 1 byte BOOLEAN rather than the 4 byte BOOL.
 //sys	CreateSymbolicLink(symlinkfilename *uint16, targetfilename *uint16, flags uint32) (err error) [failretval&0xff==0] = CreateSymbolicLinkW
 //sys	CreateHardLink(filename *uint16, existingfilename *uint16, reserved uintptr) (err error) [failretval&0xff==0] = CreateHardLinkW
+//sys	GetCurrentThreadId() (id uint32)
+//sys	CreateEvent(eventAttrs *syscall.SecurityAttributes, manualReset uint32, initialState uint32, name *uint16) (handle Handle, err error) = kernel32.CreateEventW
+//sys	SetEvent(event Handle) (err error) = kernel32.SetEvent
 
 // syscall interface implementation for other packages
 

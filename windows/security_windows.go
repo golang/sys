@@ -91,12 +91,56 @@ const (
 	SidTypeLabel
 )
 
+type SidIdentifierAuthority struct {
+	Value [6]byte
+}
+
+var (
+	SECURITY_NULL_SID_AUTHORITY        = SidIdentifierAuthority{[6]byte{0, 0, 0, 0, 0, 0}}
+	SECURITY_WORLD_SID_AUTHORITY       = SidIdentifierAuthority{[6]byte{0, 0, 0, 0, 0, 1}}
+	SECURITY_LOCAL_SID_AUTHORITY       = SidIdentifierAuthority{[6]byte{0, 0, 0, 0, 0, 2}}
+	SECURITY_CREATOR_SID_AUTHORITY     = SidIdentifierAuthority{[6]byte{0, 0, 0, 0, 0, 3}}
+	SECURITY_NON_UNIQUE_AUTHORITY      = SidIdentifierAuthority{[6]byte{0, 0, 0, 0, 0, 4}}
+	SECURITY_NT_AUTHORITY              = SidIdentifierAuthority{[6]byte{0, 0, 0, 0, 0, 5}}
+	SECURITY_MANDATORY_LABEL_AUTHORITY = SidIdentifierAuthority{[6]byte{0, 0, 0, 0, 0, 16}}
+)
+
+const (
+	SECURITY_NULL_RID                   = 0
+	SECURITY_WORLD_RID                  = 0
+	SECURITY_LOCAL_RID                  = 0
+	SECURITY_CREATOR_OWNER_RID          = 0
+	SECURITY_CREATOR_GROUP_RID          = 1
+	SECURITY_DIALUP_RID                 = 1
+	SECURITY_NETWORK_RID                = 2
+	SECURITY_BATCH_RID                  = 3
+	SECURITY_INTERACTIVE_RID            = 4
+	SECURITY_LOGON_IDS_RID              = 5
+	SECURITY_SERVICE_RID                = 6
+	SECURITY_LOCAL_SYSTEM_RID           = 18
+	SECURITY_BUILTIN_DOMAIN_RID         = 32
+	SECURITY_PRINCIPAL_SELF_RID         = 10
+	SECURITY_CREATOR_OWNER_SERVER_RID   = 0x2
+	SECURITY_CREATOR_GROUP_SERVER_RID   = 0x3
+	SECURITY_LOGON_IDS_RID_COUNT        = 0x3
+	SECURITY_ANONYMOUS_LOGON_RID        = 0x7
+	SECURITY_PROXY_RID                  = 0x8
+	SECURITY_ENTERPRISE_CONTROLLERS_RID = 0x9
+	SECURITY_SERVER_LOGON_RID           = SECURITY_ENTERPRISE_CONTROLLERS_RID
+	SECURITY_AUTHENTICATED_USER_RID     = 0xb
+	SECURITY_RESTRICTED_CODE_RID        = 0xc
+	SECURITY_NT_NON_UNIQUE_RID          = 0x15
+)
+
 //sys	LookupAccountSid(systemName *uint16, sid *SID, name *uint16, nameLen *uint32, refdDomainName *uint16, refdDomainNameLen *uint32, use *uint32) (err error) = advapi32.LookupAccountSidW
 //sys	LookupAccountName(systemName *uint16, accountName *uint16, sid *SID, sidLen *uint32, refdDomainName *uint16, refdDomainNameLen *uint32, use *uint32) (err error) = advapi32.LookupAccountNameW
 //sys	ConvertSidToStringSid(sid *SID, stringSid **uint16) (err error) = advapi32.ConvertSidToStringSidW
 //sys	ConvertStringSidToSid(stringSid *uint16, sid **SID) (err error) = advapi32.ConvertStringSidToSidW
 //sys	GetLengthSid(sid *SID) (len uint32) = advapi32.GetLengthSid
 //sys	CopySid(destSidLen uint32, destSid *SID, srcSid *SID) (err error) = advapi32.CopySid
+//sys	AllocateAndInitializeSid(identAuth *SidIdentifierAuthority, subAuth byte, subAuth0 uint32, subAuth1 uint32, subAuth2 uint32, subAuth3 uint32, subAuth4 uint32, subAuth5 uint32, subAuth6 uint32, subAuth7 uint32, sid **SID) (err error) = advapi32.AllocateAndInitializeSid
+//sys	FreeSid(sid *SID) (err error) [failretval!=0] = advapi32.FreeSid
+//sys	EqualSid(sid1 *SID, sid2 *SID) (isEqual bool) = advapi32.EqualSid
 
 // The security identifier (SID) structure is a variable-length
 // structure used to uniquely identify users or groups.
@@ -286,6 +330,11 @@ type Tokenprimarygroup struct {
 	PrimaryGroup *SID
 }
 
+type Tokengroups struct {
+	GroupCount uint32
+	Groups     [1]SIDAndAttributes
+}
+
 //sys	OpenProcessToken(h Handle, access uint32, token *Token) (err error) = advapi32.OpenProcessToken
 //sys	GetTokenInformation(t Token, infoClass uint32, info *byte, infoLen uint32, returnedLen *uint32) (err error) = advapi32.GetTokenInformation
 //sys	GetUserProfileDirectory(t Token, dir *uint16, dirLen *uint32) (err error) = userenv.GetUserProfileDirectoryW
@@ -344,6 +393,15 @@ func (t Token) GetTokenUser() (*Tokenuser, error) {
 		return nil, e
 	}
 	return (*Tokenuser)(i), nil
+}
+
+// GetTokenGroups retrieves group accounts associated with access token t.
+func (t Token) GetTokenGroups() (*Tokengroups, error) {
+	i, e := t.getInfo(TokenGroups, 50)
+	if e != nil {
+		return nil, e
+	}
+	return (*Tokengroups)(i), nil
 }
 
 // GetTokenPrimaryGroup retrieves access token t primary group information.
