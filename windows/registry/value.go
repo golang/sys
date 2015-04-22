@@ -119,15 +119,13 @@ func ExpandString(value string) (string, error) {
 	if value == "" {
 		return "", nil
 	}
-	for i := 0; i < len(value); i++ {
-		if value[i] == 0 {
-			return "", errors.New("string cannot have 0 inside")
-		}
+	p, err := syscall.UTF16PtrFromString(value)
+	if err != nil {
+		return "", err
 	}
-	p := utf16.Encode([]rune(value))
 	r := make([]uint16, 100)
 	for {
-		n, err := expandEnvironmentStrings(&p[0], &r[0], uint32(len(r)))
+		n, err := expandEnvironmentStrings(p, &r[0], uint32(len(r)))
 		if err != nil {
 			return "", err
 		}
