@@ -385,7 +385,9 @@ type Ustat_t C.struct_ustat
 type EpollEvent C.struct_my_epoll_event
 
 const (
-	_AT_FDCWD = C.AT_FDCWD
+	AT_FDCWD            = C.AT_FDCWD
+	AT_REMOVEDIR        = C.AT_REMOVEDIR
+	AT_SYMLINK_NOFOLLOW = C.AT_SYMLINK_NOFOLLOW
 )
 
 // Terminal handling

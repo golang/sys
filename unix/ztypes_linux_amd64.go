@@ -590,7 +590,9 @@ type EpollEvent struct {
 }
 
 const (
-	_AT_FDCWD = -0x64
+	AT_FDCWD            = -0x64
+	AT_SYMLINK_NOFOLLOW = 0x100
+	AT_REMOVEDIR        = 0x200
 )
 
 type Termios struct {

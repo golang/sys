@@ -67,13 +67,13 @@ func Utimes(path string, tv []Timeval) (err error) {
 	return utimes(path, (*[2]Timeval)(unsafe.Pointer(&tv[0])))
 }
 
-//sys	utimensat(dirfd int, path string, times *[2]Timespec) (err error)
+//sys	utimensat(dirfd int, path string, times *[2]Timespec, flags int) (err error)
 
 func UtimesNano(path string, ts []Timespec) (err error) {
 	if len(ts) != 2 {
 		return EINVAL
 	}
-	err = utimensat(_AT_FDCWD, path, (*[2]Timespec)(unsafe.Pointer(&ts[0])))
+	err = utimensat(AT_FDCWD, path, (*[2]Timespec)(unsafe.Pointer(&ts[0])), 0)
 	if err != ENOSYS {
 		return err
 	}
@@ -85,6 +85,13 @@ func UtimesNano(path string, ts []Timespec) (err error) {
 		tv[i].Usec = ts[i].Nsec / 1000
 	}
 	return utimes(path, (*[2]Timeval)(unsafe.Pointer(&tv[0])))
+}
+
+func UtimesNanoAt(dirfd int, path string, ts []Timespec, flags int) (err error) {
+	if len(ts) != 2 {
+		return EINVAL
+	}
+	return utimensat(dirfd, path, (*[2]Timespec)(unsafe.Pointer(&ts[0])), flags)
 }
 
 //sys	futimesat(dirfd int, path *byte, times *[2]Timeval) (err error)
