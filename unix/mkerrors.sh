@@ -218,6 +218,7 @@ includes='
 #include <sys/signal.h>
 #include <signal.h>
 #include <sys/resource.h>
+#include <time.h>
 '
 ccflags="$@"
 
@@ -296,6 +297,7 @@ ccflags="$@"
 		$2 ~ /^CLONE_[A-Z_]+/ ||
 		$2 !~ /^(BPF_TIMEVAL)$/ &&
 		$2 ~ /^(BPF|DLT)_/ ||
+		$2 ~ /^CLOCK_/ ||
 		$2 !~ "WMESGLEN" &&
 		$2 ~ /^W[A-Z0-9]+$/ {printf("\t%s = C.%s\n", $2, $2)}
 		$2 ~ /^__WCOREFLAG$/ {next}

@@ -795,6 +795,7 @@ func Mount(source string, target string, fstype string, flags uintptr, data stri
 //sys	Chdir(path string) (err error)
 //sys	Chmod(path string, mode uint32) (err error)
 //sys	Chroot(path string) (err error)
+//sys	ClockGettime(clockid int32, time *Timespec) (err error)
 //sys	Close(fd int) (err error)
 //sys	Creat(path string, mode uint32) (fd int, err error)
 //sys	Dup(oldfd int) (fd int, err error)
@@ -926,7 +927,6 @@ func Munmap(b []byte) (err error) {
 // Capget
 // Capset
 // ClockGetres
-// ClockGettime
 // ClockNanosleep
 // ClockSettime
 // Clone
