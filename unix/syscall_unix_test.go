@@ -118,6 +118,9 @@ func TestPassFD(t *testing.T) {
 
 	cmd := exec.Command(os.Args[0], "-test.run=^TestPassFD$", "--", tempDir)
 	cmd.Env = []string{"GO_WANT_HELPER_PROCESS=1"}
+	if lp := os.Getenv("LD_LIBRARY_PATH"); lp != "" {
+		cmd.Env = append(cmd.Env, "LD_LIBRARY_PATH="+lp)
+	}
 	cmd.ExtraFiles = []*os.File{writeFile}
 
 	out, err := cmd.CombinedOutput()
