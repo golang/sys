@@ -26,6 +26,30 @@ func NsecToTimeval(nsec int64) (tv Timeval) {
 	return
 }
 
+func Pipe(p []int) (err error) {
+	if len(p) != 2 {
+		return EINVAL
+	}
+	var pp [2]_C_int
+	err = pipe2(&pp, 0)
+	p[0] = int(pp[0])
+	p[1] = int(pp[1])
+	return
+}
+
+//sysnb pipe2(p *[2]_C_int, flags int) (err error)
+
+func Pipe2(p []int, flags int) (err error) {
+	if len(p) != 2 {
+		return EINVAL
+	}
+	var pp [2]_C_int
+	err = pipe2(&pp, flags)
+	p[0] = int(pp[0])
+	p[1] = int(pp[1])
+	return
+}
+
 // Underlying system call writes to newoffset via pointer.
 // Implemented in assembly to avoid allocation.
 func seek(fd int, offset int64, whence int) (newoffset int64, err syscall.Errno)
@@ -57,7 +81,7 @@ func Seek(fd int, offset int64, whence int) (newoffset int64, err error) {
 
 // 64-bit file system and 32-bit uid calls
 // (16-bit uid calls are not always supported in newer kernels)
-//sys	Chown(path string, uid int, gid int) (err error) = SYS_CHOWN32
+//sys	Dup2(oldfd int, newfd int) (err error)
 //sys	Fchown(fd int, uid int, gid int) (err error) = SYS_FCHOWN32
 //sys	Fstat(fd int, stat *Stat_t) (err error) = SYS_FSTAT64
 //sysnb	Getegid() (egid int) = SYS_GETEGID32

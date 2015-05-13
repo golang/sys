@@ -6,7 +6,7 @@ package unix
 
 import "syscall"
 
-//sys	Chown(path string, uid int, gid int) (err error)
+//sys	Dup2(oldfd int, newfd int) (err error)
 //sys	Fadvise(fd int, offset int64, length int64, advice int) (err error) = SYS_FADVISE64
 //sys	Fchown(fd int, uid int, gid int) (err error)
 //sys	Fstat(fd int, stat *Stat_t) (err error)
@@ -97,6 +97,32 @@ func NsecToTimeval(nsec int64) (tv Timeval) {
 	nsec += 999 // round up to microsecond
 	tv.Sec = nsec / 1e9
 	tv.Usec = nsec % 1e9 / 1e3
+	return
+}
+
+//sysnb	pipe(p *[2]_C_int) (err error)
+
+func Pipe(p []int) (err error) {
+	if len(p) != 2 {
+		return EINVAL
+	}
+	var pp [2]_C_int
+	err = pipe(&pp)
+	p[0] = int(pp[0])
+	p[1] = int(pp[1])
+	return
+}
+
+//sysnb pipe2(p *[2]_C_int, flags int) (err error)
+
+func Pipe2(p []int, flags int) (err error) {
+	if len(p) != 2 {
+		return EINVAL
+	}
+	var pp [2]_C_int
+	err = pipe2(&pp, flags)
+	p[0] = int(pp[0])
+	p[1] = int(pp[1])
 	return
 }
 
