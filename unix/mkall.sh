@@ -107,6 +107,7 @@ case "$#" in
 	exit 2
 esac
 
+GOOSARCH_in=syscall_$GOOSARCH.go
 case "$GOOSARCH" in
 _* | *_ | _)
 	echo 'undefined $GOOS_$GOARCH:' "$GOOSARCH" 1>&2
@@ -173,7 +174,32 @@ linux_amd64)
 linux_arm)
 	mkerrors="$mkerrors"
 	mksyscall="./mksyscall.pl -l32 -arm"
-	mksysnum="curl -s 'http://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/plain/arch/arm/include/uapi/asm/unistd.h' | ./mksysnum_linux.pl"
+	mksysnum="curl -s 'http://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/plain/arch/arm/include/uapi/asm/unistd.h' | ./mksysnum_linux.pl -"
+	mktypes="GOARCH=$GOARCH go tool cgo -godefs"
+	;;
+linux_arm64)
+	unistd_h=$(ls -1 /usr/include/asm/unistd.h /usr/include/asm-generic/unistd.h 2>/dev/null | head -1)
+	if [ "$unistd_h" = "" ]; then
+		echo >&2 cannot find unistd_64.h
+		exit 1
+	fi
+	mksysnum="./mksysnum_linux.pl $unistd_h"
+	# Let the type of C char be singed for making the bare syscall
+	# API consistent across over platforms.
+	mktypes="GOARCH=$GOARCH go tool cgo -godefs -- -fsigned-char"
+	;;
+linux_ppc64)
+	GOOSARCH_in=syscall_linux_ppc64x.go
+	unistd_h=/usr/include/asm/unistd.h
+	mkerrors="$mkerrors -m64"
+	mksysnum="./mksysnum_linux.pl $unistd_h"
+	mktypes="GOARCH=$GOARCH go tool cgo -godefs"
+	;;
+linux_ppc64le)
+	GOOSARCH_in=syscall_linux_ppc64x.go
+	unistd_h=/usr/include/powerpc64le-linux-gnu/asm/unistd.h
+	mkerrors="$mkerrors -m64"
+	mksysnum="./mksysnum_linux.pl $unistd_h"
 	mktypes="GOARCH=$GOARCH go tool cgo -godefs"
 	;;
 netbsd_386)
@@ -226,7 +252,7 @@ esac
 			syscall_goos="syscall_bsd.go $syscall_goos"
 			;;
 		esac
-		if [ -n "$mksyscall" ]; then echo "$mksyscall $syscall_goos syscall_$GOOSARCH.go |gofmt >zsyscall_$GOOSARCH.go"; fi
+		if [ -n "$mksyscall" ]; then echo "$mksyscall $syscall_goos $GOOSARCH_in |gofmt >zsyscall_$GOOSARCH.go"; fi
 		;;
 	esac
 	if [ -n "$mksysctl" ]; then echo "$mksysctl |gofmt >$zsysctl"; fi
