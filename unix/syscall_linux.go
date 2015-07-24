@@ -93,6 +93,9 @@ func Unlinkat(dirfd int, path string) error {
 //sys	utimes(path string, times *[2]Timeval) (err error)
 
 func Utimes(path string, tv []Timeval) (err error) {
+	if tv == nil {
+		return utimes(path, nil)
+	}
 	if len(tv) != 2 {
 		return EINVAL
 	}
