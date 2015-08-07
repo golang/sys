@@ -17,6 +17,12 @@ import (
 	"unsafe"
 )
 
+// Implemented in runtime/syscall_solaris.go.
+type syscallFunc uintptr
+
+func rawSysvicall6(trap, nargs, a1, a2, a3, a4, a5, a6 uintptr) (r1, r2 uintptr, err syscall.Errno)
+func sysvicall6(trap, nargs, a1, a2, a3, a4, a5, a6 uintptr) (r1, r2 uintptr, err syscall.Errno)
+
 type SockaddrDatalink struct {
 	Family uint16
 	Index  uint16
@@ -289,7 +295,7 @@ func UtimesNano(path string, ts []Timespec) error {
 
 // FcntlFlock performs a fcntl syscall for the F_GETLK, F_SETLK or F_SETLKW command.
 func FcntlFlock(fd uintptr, cmd int, lk *Flock_t) error {
-	_, _, e1 := sysvicall6(procfcntl.Addr(), 3, uintptr(fd), uintptr(cmd), uintptr(unsafe.Pointer(lk)), 0, 0, 0)
+	_, _, e1 := sysvicall6(uintptr(unsafe.Pointer(&procfcntl)), 3, uintptr(fd), uintptr(cmd), uintptr(unsafe.Pointer(lk)), 0, 0, 0)
 	if e1 != 0 {
 		return e1
 	}
@@ -511,7 +517,7 @@ func SendmsgN(fd int, p, oob []byte, to Sockaddr, flags int) (n int, err error) 
 //sys	recvmsg(s int, msg *Msghdr, flags int) (n int, err error) = libsocket.recvmsg
 
 func readlen(fd int, buf *byte, nbuf int) (n int, err error) {
-	r0, _, e1 := sysvicall6(procread.Addr(), 3, uintptr(fd), uintptr(unsafe.Pointer(buf)), uintptr(nbuf), 0, 0, 0)
+	r0, _, e1 := sysvicall6(uintptr(unsafe.Pointer(&procread)), 3, uintptr(fd), uintptr(unsafe.Pointer(buf)), uintptr(nbuf), 0, 0, 0)
 	n = int(r0)
 	if e1 != 0 {
 		err = e1
@@ -520,7 +526,7 @@ func readlen(fd int, buf *byte, nbuf int) (n int, err error) {
 }
 
 func writelen(fd int, buf *byte, nbuf int) (n int, err error) {
-	r0, _, e1 := sysvicall6(procwrite.Addr(), 3, uintptr(fd), uintptr(unsafe.Pointer(buf)), uintptr(nbuf), 0, 0, 0)
+	r0, _, e1 := sysvicall6(uintptr(unsafe.Pointer(&procwrite)), 3, uintptr(fd), uintptr(unsafe.Pointer(buf)), uintptr(nbuf), 0, 0, 0)
 	n = int(r0)
 	if e1 != 0 {
 		err = e1
