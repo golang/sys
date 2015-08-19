@@ -44,6 +44,7 @@ import (
 //go:cgo_import_dynamic libc_link link "libc.so"
 //go:cgo_import_dynamic libsocket_listen listen "libsocket.so"
 //go:cgo_import_dynamic libc_lstat lstat "libc.so"
+//go:cgo_import_dynamic libc_madvise madvise "libc.so"
 //go:cgo_import_dynamic libc_mkdir mkdir "libc.so"
 //go:cgo_import_dynamic libc_mknod mknod "libc.so"
 //go:cgo_import_dynamic libc_nanosleep nanosleep "libc.so"
@@ -125,6 +126,7 @@ import (
 //go:linkname procLink libc_link
 //go:linkname proclisten libsocket_listen
 //go:linkname procLstat libc_lstat
+//go:linkname procMadvise libc_madvise
 //go:linkname procMkdir libc_mkdir
 //go:linkname procMknod libc_mknod
 //go:linkname procNanosleep libc_nanosleep
@@ -207,6 +209,7 @@ var (
 	procLink,
 	proclisten,
 	procLstat,
+	procMadvise,
 	procMkdir,
 	procMknod,
 	procNanosleep,
@@ -572,6 +575,18 @@ func Lstat(path string, stat *Stat_t) (err error) {
 	}
 	_, _, e1 := sysvicall6(uintptr(unsafe.Pointer(&procLstat)), 2, uintptr(unsafe.Pointer(_p0)), uintptr(unsafe.Pointer(stat)), 0, 0, 0, 0)
 	use(unsafe.Pointer(_p0))
+	if e1 != 0 {
+		err = e1
+	}
+	return
+}
+
+func Madvise(b []byte, advice int) (err error) {
+	var _p0 *byte
+	if len(b) > 0 {
+		_p0 = &b[0]
+	}
+	_, _, e1 := sysvicall6(uintptr(unsafe.Pointer(&procMadvise)), 3, uintptr(unsafe.Pointer(_p0)), uintptr(len(b)), uintptr(advice), 0, 0, 0)
 	if e1 != 0 {
 		err = e1
 	}

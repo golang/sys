@@ -469,6 +469,7 @@ func SendmsgN(fd int, p, oob []byte, to Sockaddr, flags int) (n int, err error) 
 //sys	Link(path string, link string) (err error)
 //sys	Listen(s int, backlog int) (err error) = libsocket.listen
 //sys	Lstat(path string, stat *Stat_t) (err error)
+//sys	Madvise(b []byte, advice int) (err error)
 //sys	Mkdir(path string, mode uint32) (err error)
 //sys	Mknod(path string, mode uint32, dev int) (err error)
 //sys	Nanosleep(time *Timespec, leftover *Timespec) (err error)
@@ -532,4 +533,18 @@ func writelen(fd int, buf *byte, nbuf int) (n int, err error) {
 		err = e1
 	}
 	return
+}
+
+var mapper = &mmapper{
+	active: make(map[*byte][]byte),
+	mmap:   mmap,
+	munmap: munmap,
+}
+
+func Mmap(fd int, offset int64, length int, prot int, flags int) (data []byte, err error) {
+	return mapper.Mmap(fd, offset, length, prot, flags)
+}
+
+func Munmap(b []byte) (err error) {
+	return mapper.Munmap(b)
 }
