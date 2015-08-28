@@ -121,7 +121,7 @@ darwin_386)
 	;;
 darwin_amd64)
 	mkerrors="$mkerrors -m64"
-	mksysnum="./mksysnum_darwin.pl /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk/usr/include/sys/syscall.h"
+	mksysnum="./mksysnum_darwin.pl /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.10.sdk/usr/include/sys/syscall.h"
 	mktypes="GOARCH=$GOARCH go tool cgo -godefs"
 	;;
 darwin_arm)
@@ -267,5 +267,8 @@ esac
 	esac
 	if [ -n "$mksysctl" ]; then echo "$mksysctl |gofmt >$zsysctl"; fi
 	if [ -n "$mksysnum" ]; then echo "$mksysnum |gofmt >zsysnum_$GOOSARCH.go"; fi
-	if [ -n "$mktypes" ]; then echo "$mktypes types_$GOOS.go | gofmt >ztypes_$GOOSARCH.go"; fi
+	if [ -n "$mktypes" ]; then
+		echo "echo // +build $GOARCH,$GOOS > ztypes_$GOOSARCH.go";
+		echo "$mktypes types_$GOOS.go | gofmt >>ztypes_$GOOSARCH.go";
+	fi
 ) | $run
