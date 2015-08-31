@@ -131,7 +131,7 @@ darwin_arm)
 	;;
 darwin_arm64)
 	mkerrors="$mkerrors -m64"
-	mksysnum="./mksysnum_darwin.pl /usr/include/sys/syscall.h"
+	mksysnum="./mksysnum_darwin.pl /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk/usr/include/sys/syscall.h"
 	mktypes="GOARCH=$GOARCH go tool cgo -godefs"
 	;;
 dragonfly_386)
