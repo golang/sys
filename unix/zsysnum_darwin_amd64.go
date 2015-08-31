@@ -141,7 +141,7 @@ const (
 	SYS_LSEEK                          = 199
 	SYS_TRUNCATE                       = 200
 	SYS_FTRUNCATE                      = 201
-	SYS___SYSCTL                       = 202
+	SYS_SYSCTL                         = 202
 	SYS_MLOCK                          = 203
 	SYS_MUNLOCK                        = 204
 	SYS_UNDELETE                       = 205
