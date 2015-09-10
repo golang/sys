@@ -357,6 +357,8 @@ type BpfHdr struct {
 	Pad_cgo_0 [2]byte
 }
 
+const _SC_PAGESIZE = 0xb
+
 type Termios struct {
 	Iflag     uint32
 	Oflag     uint32

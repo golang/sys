@@ -91,6 +91,7 @@ import (
 //go:cgo_import_dynamic libsocket_setsockopt setsockopt "libsocket.so"
 //go:cgo_import_dynamic libsocket_recvfrom recvfrom "libsocket.so"
 //go:cgo_import_dynamic libsocket_recvmsg recvmsg "libsocket.so"
+//go:cgo_import_dynamic libc_sysconf sysconf "libc.so"
 
 //go:linkname procgetgroups libc_getgroups
 //go:linkname procsetgroups libc_setgroups
@@ -173,6 +174,7 @@ import (
 //go:linkname procsetsockopt libsocket_setsockopt
 //go:linkname procrecvfrom libsocket_recvfrom
 //go:linkname procrecvmsg libsocket_recvmsg
+//go:linkname procsysconf libc_sysconf
 
 var (
 	procgetgroups,
@@ -255,7 +257,8 @@ var (
 	procgetsockname,
 	procsetsockopt,
 	procrecvfrom,
-	procrecvmsg syscallFunc
+	procrecvmsg,
+	procsysconf syscallFunc
 )
 
 func getgroups(ngid int, gid *_Gid_t) (n int, err error) {
@@ -1078,6 +1081,15 @@ func recvfrom(fd int, p []byte, flags int, from *RawSockaddrAny, fromlen *_Sockl
 func recvmsg(s int, msg *Msghdr, flags int) (n int, err error) {
 	r0, _, e1 := sysvicall6(uintptr(unsafe.Pointer(&procrecvmsg)), 3, uintptr(s), uintptr(unsafe.Pointer(msg)), uintptr(flags), 0, 0, 0)
 	n = int(r0)
+	if e1 != 0 {
+		err = e1
+	}
+	return
+}
+
+func sysconf(name int) (n int64, err error) {
+	r0, _, e1 := sysvicall6(uintptr(unsafe.Pointer(&procsysconf)), 1, uintptr(name), 0, 0, 0, 0, 0)
+	n = int64(r0)
 	if e1 != 0 {
 		err = e1
 	}
