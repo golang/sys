@@ -309,6 +309,9 @@ ccflags="$@"
 		$2 ~ /^(NETLINK|NLM|NLMSG|NLA|IFA|IFAN|RT|RTCF|RTN|RTPROT|RTNH|ARPHRD|ETH_P)_/ ||
 		$2 ~ /^SIOC/ ||
 		$2 ~ /^TIOC/ ||
+		$2 ~ /^TCGET/ ||
+		$2 ~ /^TCSET/ ||
+		$2 ~ /^TC(FLSH|SBRK|XONC)$/ ||
 		$2 !~ "RTF_BITS" &&
 		$2 ~ /^(IFF|IFT|NET_RT|RTM|RTF|RTV|RTA|RTAX)_/ ||
 		$2 ~ /^BIOC/ ||

@@ -516,6 +516,52 @@ func Acct(path string) (err error) {
 }
 
 /*
+ * Expose the ioctl function
+ */
+
+//sys	ioctl(fd int, req int, arg uintptr) (err error)
+
+func IoctlSetInt(fd int, req int, value int) (err error) {
+	return ioctl(fd, req, uintptr(value))
+}
+
+func IoctlSetWinsize(fd int, req int, value *Winsize) (err error) {
+	return ioctl(fd, req, uintptr(unsafe.Pointer(value)))
+}
+
+func IoctlSetTermios(fd int, req int, value *Termios) (err error) {
+	return ioctl(fd, req, uintptr(unsafe.Pointer(value)))
+}
+
+func IoctlSetTermio(fd int, req int, value *Termio) (err error) {
+	return ioctl(fd, req, uintptr(unsafe.Pointer(value)))
+}
+
+func IoctlGetInt(fd int, req int) (int, error) {
+	var value int
+	err := ioctl(fd, req, uintptr(unsafe.Pointer(&value)))
+	return value, err
+}
+
+func IoctlGetWinsize(fd int, req int) (*Winsize, error) {
+	var value Winsize
+	err := ioctl(fd, req, uintptr(unsafe.Pointer(&value)))
+	return &value, err
+}
+
+func IoctlGetTermios(fd int, req int) (*Termios, error) {
+	var value Termios
+	err := ioctl(fd, req, uintptr(unsafe.Pointer(&value)))
+	return &value, err
+}
+
+func IoctlGetTermio(fd int, req int) (*Termio, error) {
+	var value Termio
+	err := ioctl(fd, req, uintptr(unsafe.Pointer(&value)))
+	return &value, err
+}
+
+/*
  * Exposed directly
  */
 //sys	Access(path string, mode uint32) (err error)

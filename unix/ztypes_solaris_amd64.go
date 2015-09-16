@@ -259,7 +259,7 @@ type Ustat_t struct {
 }
 
 const (
-	AT_FDCWD            = -0x2e6aad
+	AT_FDCWD            = 0xffd19553
 	AT_SYMLINK_NOFOLLOW = 0x1000
 	AT_SYMLINK_FOLLOW   = 0x2000
 	AT_REMOVEDIR        = 0x1
@@ -402,4 +402,21 @@ type Termios struct {
 	Lflag     uint32
 	Cc        [19]uint8
 	Pad_cgo_0 [1]byte
+}
+
+type Termio struct {
+	Iflag     uint16
+	Oflag     uint16
+	Cflag     uint16
+	Lflag     uint16
+	Line      int8
+	Cc        [8]uint8
+	Pad_cgo_0 [1]byte
+}
+
+type Winsize struct {
+	Row    uint16
+	Col    uint16
+	Xpixel uint16
+	Ypixel uint16
 }

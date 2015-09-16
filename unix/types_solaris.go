@@ -25,6 +25,7 @@ package unix
 #include <limits.h>
 #include <signal.h>
 #include <termios.h>
+#include <termio.h>
 #include <stdio.h>
 #include <unistd.h>
 #include <sys/mman.h>
@@ -253,3 +254,7 @@ const _SC_PAGESIZE = C._SC_PAGESIZE
 // Terminal handling
 
 type Termios C.struct_termios
+
+type Termio C.struct_termio
+
+type Winsize C.struct_winsize

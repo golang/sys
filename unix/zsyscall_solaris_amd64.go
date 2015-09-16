@@ -22,6 +22,7 @@ import (
 //go:cgo_import_dynamic libc_recvmsg recvmsg "libsocket.so"
 //go:cgo_import_dynamic libc_sendmsg sendmsg "libsocket.so"
 //go:cgo_import_dynamic libc_acct acct "libc.so"
+//go:cgo_import_dynamic libc_ioctl ioctl "libc.so"
 //go:cgo_import_dynamic libc_access access "libc.so"
 //go:cgo_import_dynamic libc_adjtime adjtime "libc.so"
 //go:cgo_import_dynamic libc_chdir chdir "libc.so"
@@ -136,6 +137,7 @@ import (
 //go:linkname procrecvmsg libc_recvmsg
 //go:linkname procsendmsg libc_sendmsg
 //go:linkname procacct libc_acct
+//go:linkname procioctl libc_ioctl
 //go:linkname procAccess libc_access
 //go:linkname procAdjtime libc_adjtime
 //go:linkname procChdir libc_chdir
@@ -251,6 +253,7 @@ var (
 	procrecvmsg,
 	procsendmsg,
 	procacct,
+	procioctl,
 	procAccess,
 	procAdjtime,
 	procChdir,
@@ -466,6 +469,14 @@ func sendmsg(s int, msg *Msghdr, flags int) (n int, err error) {
 
 func acct(path *byte) (err error) {
 	_, _, e1 := sysvicall6(uintptr(unsafe.Pointer(&procacct)), 1, uintptr(unsafe.Pointer(path)), 0, 0, 0, 0, 0)
+	if e1 != 0 {
+		err = e1
+	}
+	return
+}
+
+func ioctl(fd int, req int, arg uintptr) (err error) {
+	_, _, e1 := sysvicall6(uintptr(unsafe.Pointer(&procioctl)), 3, uintptr(fd), uintptr(req), uintptr(arg), 0, 0, 0)
 	if e1 != 0 {
 		err = e1
 	}
