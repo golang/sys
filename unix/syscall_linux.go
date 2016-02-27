@@ -921,7 +921,6 @@ func Setgid(uid int) (err error) {
 //sys	Unmount(target string, flags int) (err error) = SYS_UMOUNT2
 //sys	Unshare(flags int) (err error)
 //sys	Ustat(dev int, ubuf *Ustat_t) (err error)
-//sys	Utime(path string, buf *Utimbuf) (err error)
 //sys	write(fd int, p []byte) (n int, err error)
 //sys	exitThread(code int) (err error) = SYS_EXIT
 //sys	readlen(fd int, p *byte, np int) (n int, err error) = SYS_READ
