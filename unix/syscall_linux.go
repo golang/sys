@@ -895,6 +895,7 @@ func Getpgrp() (pid int) {
 //sysnb	Setpgid(pid int, pgid int) (err error)
 //sysnb	Setsid() (pid int, err error)
 //sysnb	Settimeofday(tv *Timeval) (err error)
+//sys	Setns(fd int, nstype int) (err error)
 
 // issue 1435.
 // On linux Setuid and Setgid only affects the current thread, not the process.
