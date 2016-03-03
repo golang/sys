@@ -69,10 +69,10 @@ func Ppoll(fds []PollFd, timeout *Timespec, sigmask *Sigset_t) (n int, err error
 	return ppoll(&fds[0], len(fds), timeout, sigmask)
 }
 
-//sys	readlinkat(dirfd int, path string, buf []byte) (n int, err error)
+//sys	Readlinkat(dirfd int, path string, buf []byte) (n int, err error)
 
 func Readlink(path string, buf []byte) (n int, err error) {
-	return readlinkat(AT_FDCWD, path, buf)
+	return Readlinkat(AT_FDCWD, path, buf)
 }
 
 func Rename(oldpath string, newpath string) (err error) {
@@ -83,21 +83,17 @@ func Rmdir(path string) error {
 	return unlinkat(AT_FDCWD, path, AT_REMOVEDIR)
 }
 
-//sys	symlinkat(oldpath string, newdirfd int, newpath string) (err error)
+//sys	Symlinkat(oldpath string, newdirfd int, newpath string) (err error)
 
 func Symlink(oldpath string, newpath string) (err error) {
-	return symlinkat(oldpath, AT_FDCWD, newpath)
+	return Symlinkat(oldpath, AT_FDCWD, newpath)
 }
 
 func Unlink(path string) error {
-	return unlinkat(AT_FDCWD, path, 0)
+	return Unlinkat(AT_FDCWD, path, 0)
 }
 
-//sys	unlinkat(dirfd int, path string, flags int) (err error)
-
-func Unlinkat(dirfd int, path string, flags int) error {
-	return unlinkat(dirfd, path, flags)
-}
+//sys	Unlinkat(dirfd int, path string, flags int) (err error)
 
 //sys	utimes(path string, times *[2]Timeval) (err error)
 
