@@ -152,6 +152,10 @@ func InotifyInit() (fd int, err error) {
 	return InotifyInit1(0)
 }
 
+func Dup2(oldfd int, newfd int) (err error) {
+	return Dup3(oldfd, newfd, 0)
+}
+
 // TODO(dfc): constants that should be in zsysnum_linux_arm64.go, remove
 // these when the deprecated syscalls that the syscall package relies on
 // are removed.
