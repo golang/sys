@@ -36,10 +36,10 @@ func Creat(path string, mode uint32) (fd int, err error) {
 	return Open(path, O_CREAT|O_WRONLY|O_TRUNC, mode)
 }
 
-//sys	linkat(olddirfd int, oldpath string, newdirfd int, newpath string, flags int) (err error)
+//sys	Linkat(olddirfd int, oldpath string, newdirfd int, newpath string, flags int) (err error)
 
 func Link(oldpath string, newpath string) (err error) {
-	return linkat(AT_FDCWD, oldpath, AT_FDCWD, newpath, 0)
+	return Linkat(AT_FDCWD, oldpath, AT_FDCWD, newpath, 0)
 }
 
 func Mkdir(path string, mode uint32) (err error) {
