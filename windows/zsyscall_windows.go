@@ -10,17 +10,17 @@ import (
 var _ unsafe.Pointer
 
 var (
-	modadvapi32 = &LazyDLL{Name: "advapi32.dll", System: true}
-	modkernel32 = &LazyDLL{Name: "kernel32.dll", System: true}
-	modshell32  = &LazyDLL{Name: "shell32.dll", System: true}
-	modmswsock  = &LazyDLL{Name: "mswsock.dll", System: true}
-	modcrypt32  = &LazyDLL{Name: "crypt32.dll", System: true}
-	modws2_32   = &LazyDLL{Name: "ws2_32.dll", System: true}
-	moddnsapi   = &LazyDLL{Name: "dnsapi.dll", System: true}
-	modiphlpapi = &LazyDLL{Name: "iphlpapi.dll", System: true}
-	modsecur32  = &LazyDLL{Name: "secur32.dll", System: true}
-	modnetapi32 = &LazyDLL{Name: "netapi32.dll", System: true}
-	moduserenv  = &LazyDLL{Name: "userenv.dll", System: true}
+	modadvapi32 = NewLazySystemDLL("advapi32.dll")
+	modkernel32 = NewLazySystemDLL("kernel32.dll")
+	modshell32  = NewLazySystemDLL("shell32.dll")
+	modmswsock  = NewLazySystemDLL("mswsock.dll")
+	modcrypt32  = NewLazySystemDLL("crypt32.dll")
+	modws2_32   = NewLazySystemDLL("ws2_32.dll")
+	moddnsapi   = NewLazySystemDLL("dnsapi.dll")
+	modiphlpapi = NewLazySystemDLL("iphlpapi.dll")
+	modsecur32  = NewLazySystemDLL("secur32.dll")
+	modnetapi32 = NewLazySystemDLL("netapi32.dll")
+	moduserenv  = NewLazySystemDLL("userenv.dll")
 
 	procRegisterEventSourceW               = modadvapi32.NewProc("RegisterEventSourceW")
 	procDeregisterEventSource              = modadvapi32.NewProc("DeregisterEventSource")

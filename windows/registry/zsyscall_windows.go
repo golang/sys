@@ -11,8 +11,8 @@ import (
 var _ unsafe.Pointer
 
 var (
-	modadvapi32 = &windows.LazyDLL{Name: "advapi32.dll", System: true}
-	modkernel32 = &windows.LazyDLL{Name: "kernel32.dll", System: true}
+	modadvapi32 = windows.NewLazySystemDLL("advapi32.dll")
+	modkernel32 = windows.NewLazySystemDLL("kernel32.dll")
 
 	procRegCreateKeyExW           = modadvapi32.NewProc("RegCreateKeyExW")
 	procRegDeleteKeyW             = modadvapi32.NewProc("RegDeleteKeyW")
