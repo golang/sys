@@ -394,6 +394,19 @@ func (sa *SockaddrNetlink) sockaddr() (unsafe.Pointer, _Socklen, error) {
 	return unsafe.Pointer(&sa.raw), SizeofSockaddrNetlink, nil
 }
 
+type SockaddrHCI struct {
+	Dev     uint16
+	Channel uint16
+	raw     RawSockaddrHCI
+}
+
+func (sa *SockaddrHCI) sockaddr() (unsafe.Pointer, _Socklen, error) {
+	sa.raw.Family = AF_BLUETOOTH
+	sa.raw.Dev = sa.Dev
+	sa.raw.Channel = sa.Channel
+	return unsafe.Pointer(&sa.raw), SizeofSockaddrHCI, nil
+}
+
 func anyToSockaddr(rsa *RawSockaddrAny) (Sockaddr, error) {
 	switch rsa.Addr.Family {
 	case AF_NETLINK:

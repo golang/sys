@@ -196,6 +196,8 @@ type RawSockaddrLinklayer C.struct_sockaddr_ll
 
 type RawSockaddrNetlink C.struct_sockaddr_nl
 
+type RawSockaddrHCI C.struct_sockaddr_hci
+
 type RawSockaddr C.struct_sockaddr
 
 type RawSockaddrAny C.struct_sockaddr_any
@@ -235,6 +237,7 @@ const (
 	SizeofSockaddrUnix      = C.sizeof_struct_sockaddr_un
 	SizeofSockaddrLinklayer = C.sizeof_struct_sockaddr_ll
 	SizeofSockaddrNetlink   = C.sizeof_struct_sockaddr_nl
+	SizeofSockaddrHCI       = C.sizeof_struct_sockaddr_hci
 	SizeofLinger            = C.sizeof_struct_linger
 	SizeofIPMreq            = C.sizeof_struct_ip_mreq
 	SizeofIPMreqn           = C.sizeof_struct_ip_mreqn
