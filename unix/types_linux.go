@@ -55,6 +55,8 @@ package unix
 #include <unistd.h>
 #include <ustat.h>
 #include <utime.h>
+#include <bluetooth/bluetooth.h>
+#include <bluetooth/hci.h>
 
 #ifdef TCSETS2
 // On systems that have "struct termios2" use this as type Termios.
