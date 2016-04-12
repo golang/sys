@@ -14,6 +14,7 @@ package unix
 // Lookup linux_dirent{,64} in kernel source code for details.
 const _SYS_getdents = SYS_GETDENTS
 
+//sys	EpollWait(epfd int, events []EpollEvent, msec int) (n int, err error)
 //sys	Fchown(fd int, uid int, gid int) (err error)
 //sys	Fstatfs(fd int, buf *Statfs_t) (err error)
 //sys	Ftruncate(fd int, length int64) (err error)
