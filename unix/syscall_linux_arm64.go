@@ -155,6 +155,14 @@ func Dup2(oldfd int, newfd int) (err error) {
 	return Dup3(oldfd, newfd, 0)
 }
 
+func Pause() (err error) {
+	_, _, e1 := Syscall6(SYS_PPOLL, 0, 0, 0, 0, 0, 0)
+	if e1 != 0 {
+		err = errnoErr(e1)
+	}
+	return
+}
+
 // TODO(dfc): constants that should be in zsysnum_linux_arm64.go, remove
 // these when the deprecated syscalls that the syscall package relies on
 // are removed.
