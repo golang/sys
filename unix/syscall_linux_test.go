@@ -15,6 +15,45 @@ import (
 	"golang.org/x/sys/unix"
 )
 
+func TestPoll(t *testing.T) {
+	err := unix.Mkfifo("fifo", 0666)
+	if err != nil {
+		t.Errorf("Poll: failed to create FIFO: %v", err)
+		return
+	}
+	defer os.Remove("fifo")
+
+	f, err := os.OpenFile("fifo", os.O_RDWR, 0666)
+	if err != nil {
+		t.Errorf("Poll: failed to open FIFO: %v", err)
+		return
+	}
+	defer f.Close()
+
+	const timeout = 100
+
+	ok := make(chan bool, 1)
+	go func() {
+		select {
+		case <-time.After(10 * timeout * time.Millisecond):
+			t.Errorf("Poll: failed to timeout after %d milliseconds", 10*timeout)
+		case <-ok:
+		}
+	}()
+
+	fds := []unix.PollFd{{Fd: int32(f.Fd()), Events: unix.POLLIN}}
+	n, err := unix.Poll(fds, timeout)
+	ok <- true
+	if err != nil {
+		t.Errorf("Poll: unexpected error: %v", err)
+		return
+	}
+	if n != 0 {
+		t.Errorf("Poll: wrong number of events: got %v, expected %v", n, 0)
+		return
+	}
+}
+
 func TestTime(t *testing.T) {
 	var ut unix.Time_t
 	ut2, err := unix.Time(&ut)

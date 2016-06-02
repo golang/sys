@@ -24,6 +24,7 @@ package unix
 #include <netinet/in.h>
 #include <netinet/tcp.h>
 #include <netpacket/packet.h>
+#include <poll.h>
 #include <signal.h>
 #include <stdio.h>
 #include <sys/epoll.h>
@@ -428,6 +429,18 @@ const (
 	AT_REMOVEDIR        = C.AT_REMOVEDIR
 	AT_SYMLINK_FOLLOW   = C.AT_SYMLINK_FOLLOW
 	AT_SYMLINK_NOFOLLOW = C.AT_SYMLINK_NOFOLLOW
+)
+
+type PollFd C.struct_pollfd
+
+const (
+	POLLIN    = C.POLLIN
+	POLLPRI   = C.POLLPRI
+	POLLOUT   = C.POLLOUT
+	POLLRDHUP = C.POLLRDHUP
+	POLLERR   = C.POLLERR
+	POLLHUP   = C.POLLHUP
+	POLLNVAL  = C.POLLNVAL
 )
 
 // Terminal handling
