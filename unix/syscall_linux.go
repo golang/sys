@@ -60,13 +60,13 @@ func Openat(dirfd int, path string, flags int, mode uint32) (fd int, err error) 
 	return openat(dirfd, path, flags|O_LARGEFILE, mode)
 }
 
-//sys	poll(fds *PollFd, nfd int, timeout int) (n int, err error)
+//sys	ppoll(fds *PollFd, nfds int, timeout *Timespec, sigmask *Sigset_t) (n int, err error)
 
-func Poll(fds []PollFd, timeout int) (n int, err error) {
+func Ppoll(fds []PollFd, timeout *Timespec, sigmask *Sigset_t) (n int, err error) {
 	if len(fds) == 0 {
-		return poll(nil, 0, timeout)
+		return ppoll(nil, 0, timeout, sigmask)
 	}
-	return poll(&fds[0], len(fds), timeout)
+	return ppoll(&fds[0], len(fds), timeout, sigmask)
 }
 
 //sys	readlinkat(dirfd int, path string, buf []byte) (n int, err error)
@@ -1052,7 +1052,6 @@ func Munmap(b []byte) (err error) {
 // Newfstatat
 // Nfsservctl
 // Personality
-// Ppoll
 // Pselect6
 // Ptrace
 // Putpmsg

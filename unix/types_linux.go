@@ -443,6 +443,8 @@ const (
 	POLLNVAL  = C.POLLNVAL
 )
 
+type Sigset_t C.sigset_t
+
 // Terminal handling
 
 type Termios C.termios_t

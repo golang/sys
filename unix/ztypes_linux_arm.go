@@ -591,6 +591,10 @@ const (
 	POLLNVAL  = 0x20
 )
 
+type Sigset_t struct {
+	X__val [16]uint64
+}
+
 type Termios struct {
 	Iflag  uint32
 	Oflag  uint32
