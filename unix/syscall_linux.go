@@ -143,8 +143,7 @@ func UtimesNano(path string, ts []Timespec) error {
 	// in 2.6.22, Released, 8 July 2007) then fall back to utimes
 	var tv [2]Timeval
 	for i := 0; i < 2; i++ {
-		tv[i].Sec = ts[i].Sec
-		tv[i].Usec = ts[i].Nsec / 1000
+		tv[i] = NsecToTimeval(TimespecToNsec(ts[i]))
 	}
 	return utimes(path, (*[2]Timeval)(unsafe.Pointer(&tv[0])))
 }
