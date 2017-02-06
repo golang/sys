@@ -119,6 +119,7 @@ includes_Linux='
 #include <linux/if_tun.h>
 #include <linux/if_packet.h>
 #include <linux/if_addr.h>
+#include <linux/falloc.h>
 #include <linux/filter.h>
 #include <linux/netlink.h>
 #include <linux/reboot.h>
@@ -312,6 +313,7 @@ ccflags="$@"
 		$2 ~ /^IN_/ ||
 		$2 ~ /^LOCK_(SH|EX|NB|UN)$/ ||
 		$2 ~ /^(AF|SOCK|SO|SOL|IPPROTO|IP|IPV6|ICMP6|TCP|EVFILT|NOTE|EV|SHUT|PROT|MAP|PACKET|MSG|SCM|MCL|DT|MADV|PR)_/ ||
+		$2 ~ /^FALLOC_/ ||
 		$2 == "ICMPV6_FILTER" ||
 		$2 == "SOMAXCONN" ||
 		$2 == "NAME_MAX" ||
