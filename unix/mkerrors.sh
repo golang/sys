@@ -114,6 +114,7 @@ includes_Linux='
 #include <sys/time.h>
 #include <sys/socket.h>
 #include <linux/if.h>
+#include <linux/if_alg.h>
 #include <linux/if_arp.h>
 #include <linux/if_ether.h>
 #include <linux/if_tun.h>
@@ -343,6 +344,7 @@ ccflags="$@"
 		$2 ~ /^(BPF|DLT)_/ ||
 		$2 ~ /^CLOCK_/ ||
 		$2 ~ /^CAN_/ ||
+		$2 ~ /^ALG_/ ||
 		$2 !~ "WMESGLEN" &&
 		$2 ~ /^W[A-Z0-9]+$/ {printf("\t%s = C.%s\n", $2, $2)}
 		$2 ~ /^__WCOREFLAG$/ {next}

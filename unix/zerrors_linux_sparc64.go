@@ -57,6 +57,13 @@ const (
 	AF_VSOCK                         = 0x28
 	AF_WANPIPE                       = 0x19
 	AF_X25                           = 0x9
+	ALG_OP_DECRYPT                   = 0x0
+	ALG_OP_ENCRYPT                   = 0x1
+	ALG_SET_AEAD_ASSOCLEN            = 0x4
+	ALG_SET_AEAD_AUTHSIZE            = 0x5
+	ALG_SET_IV                       = 0x2
+	ALG_SET_KEY                      = 0x1
+	ALG_SET_OP                       = 0x3
 	ARPHRD_6LOWPAN                   = 0x339
 	ARPHRD_ADAPT                     = 0x108
 	ARPHRD_APPLETLK                  = 0x8
