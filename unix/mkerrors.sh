@@ -345,6 +345,7 @@ ccflags="$@"
 		$2 ~ /^CLOCK_/ ||
 		$2 ~ /^CAN_/ ||
 		$2 ~ /^ALG_/ ||
+		$2 ~ /^SPLICE_/ ||
 		$2 !~ "WMESGLEN" &&
 		$2 ~ /^W[A-Z0-9]+$/ {printf("\t%s = C.%s\n", $2, $2)}
 		$2 ~ /^__WCOREFLAG$/ {next}
@@ -460,7 +461,7 @@ main(void)
 		printf("\t%d: \"%s\",\n", e, buf);
 	}
 	printf("}\n\n");
-	
+
 	printf("\n\n// Signal table\n");
 	printf("var signals = [...]string {\n");
 	qsort(signals, nelem(signals), sizeof signals[0], intcmp);
