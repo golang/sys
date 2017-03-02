@@ -353,7 +353,8 @@ ccflags="$@"
 		$2 ~ /^GRND_/ ||
 		$2 ~ /^SPLICE_/ ||
 		$2 !~ "WMESGLEN" &&
-		$2 ~ /^W[A-Z0-9]+$/ {printf("\t%s = C.%s\n", $2, $2)}
+		$2 ~ /^W[A-Z0-9]+$/ ||
+		$2 ~ /^BLK/ {printf("\t%s = C.%s\n", $2, $2)}
 		$2 ~ /^__WCOREFLAG$/ {next}
 		$2 ~ /^__W[A-Z0-9]+$/ {printf("\t%s = C.%s\n", substr($2,3), $2)}
 
