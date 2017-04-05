@@ -78,6 +78,7 @@ var (
 	procSetFilePointer                     = modkernel32.NewProc("SetFilePointer")
 	procCloseHandle                        = modkernel32.NewProc("CloseHandle")
 	procGetStdHandle                       = modkernel32.NewProc("GetStdHandle")
+	procSetStdHandle                       = modkernel32.NewProc("SetStdHandle")
 	procFindFirstFileW                     = modkernel32.NewProc("FindFirstFileW")
 	procFindNextFileW                      = modkernel32.NewProc("FindNextFileW")
 	procFindClose                          = modkernel32.NewProc("FindClose")
@@ -624,6 +625,18 @@ func GetStdHandle(stdhandle uint32) (handle Handle, err error) {
 	r0, _, e1 := syscall.Syscall(procGetStdHandle.Addr(), 1, uintptr(stdhandle), 0, 0)
 	handle = Handle(r0)
 	if handle == InvalidHandle {
+		if e1 != 0 {
+			err = errnoErr(e1)
+		} else {
+			err = syscall.EINVAL
+		}
+	}
+	return
+}
+
+func SetStdHandle(stdhandle uint32, handle Handle) (err error) {
+	r1, _, e1 := syscall.Syscall(procSetStdHandle.Addr(), 2, uintptr(stdhandle), uintptr(handle), 0)
+	if r1 == 0 {
 		if e1 != 0 {
 			err = errnoErr(e1)
 		} else {
