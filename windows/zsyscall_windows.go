@@ -620,7 +620,7 @@ func CloseHandle(handle Handle) (err error) {
 	return
 }
 
-func GetStdHandle(stdhandle int) (handle Handle, err error) {
+func GetStdHandle(stdhandle uint32) (handle Handle, err error) {
 	r0, _, e1 := syscall.Syscall(procGetStdHandle.Addr(), 1, uintptr(stdhandle), 0, 0)
 	handle = Handle(r0)
 	if handle == InvalidHandle {
