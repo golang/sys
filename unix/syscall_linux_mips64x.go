@@ -183,9 +183,9 @@ func fillStat_t(s *Stat_t, st *stat_t) {
 	s.Blocks = st.Blocks
 }
 
-func (r *PtraceRegs) PC() uint64 { return r.Regs[64] }
+func (r *PtraceRegs) PC() uint64 { return r.Epc }
 
-func (r *PtraceRegs) SetPC(pc uint64) { r.Regs[64] = pc }
+func (r *PtraceRegs) SetPC(pc uint64) { r.Epc = pc }
 
 func (iov *Iovec) SetLen(length int) {
 	iov.Len = uint64(length)
