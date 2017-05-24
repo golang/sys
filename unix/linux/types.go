@@ -59,6 +59,7 @@ package unix
 #include <linux/if_alg.h>
 #include <linux/fs.h>
 #include <linux/vm_sockets.h>
+#include <linux/random.h>
 
 // On mips64, the glibc stat and kernel stat do not agree
 #if (defined(__mips__) && _MIPS_SIM == _MIPS_SIM_ABI64)
@@ -529,6 +530,8 @@ const (
 )
 
 type Sigset_t C.sigset_t
+
+const RNDGETENTCNT = C.RNDGETENTCNT
 
 // sysconf information
 
