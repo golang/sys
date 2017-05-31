@@ -1182,7 +1182,6 @@ const (
 	RTF_MODIFIED                      = 0x20
 	RTF_MULTICAST                     = 0x800000
 	RTF_PINNED                        = 0x100000
-	RTF_PRCLONING                     = 0x10000
 	RTF_PROTO1                        = 0x8000
 	RTF_PROTO2                        = 0x4000
 	RTF_PROTO3                        = 0x40000
@@ -1206,8 +1205,6 @@ const (
 	RTM_MISS                          = 0x7
 	RTM_NEWADDR                       = 0xc
 	RTM_NEWMADDR                      = 0xf
-	RTM_OLDADD                        = 0x9
-	RTM_OLDDEL                        = 0xa
 	RTM_REDIRECT                      = 0x6
 	RTM_RESOLVE                       = 0xb
 	RTM_RTTUNIT                       = 0xf4240
@@ -1236,13 +1233,11 @@ const (
 	SHUT_RDWR                         = 0x2
 	SHUT_WR                           = 0x1
 	SIOCADDMULTI                      = 0x80206931
-	SIOCADDRT                         = 0x8040720a
 	SIOCAIFADDR                       = 0x8040691a
 	SIOCAIFGROUP                      = 0x80286987
 	SIOCALIFADDR                      = 0x8118691b
 	SIOCATMARK                        = 0x40047307
 	SIOCDELMULTI                      = 0x80206932
-	SIOCDELRT                         = 0x8040720b
 	SIOCDIFADDR                       = 0x80206919
 	SIOCDIFGROUP                      = 0x80286989
 	SIOCDIFPHYADDR                    = 0x80206949
