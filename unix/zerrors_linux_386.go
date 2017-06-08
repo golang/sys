@@ -325,6 +325,9 @@ const (
 	ECHOKE                               = 0x800
 	ECHONL                               = 0x40
 	ECHOPRT                              = 0x400
+	EFD_CLOEXEC                          = 0x80000
+	EFD_NONBLOCK                         = 0x800
+	EFD_SEMAPHORE                        = 0x1
 	ENCODING_DEFAULT                     = 0x0
 	ENCODING_FM_MARK                     = 0x3
 	ENCODING_FM_SPACE                    = 0x4
