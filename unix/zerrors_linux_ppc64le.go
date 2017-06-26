@@ -1850,6 +1850,8 @@ const (
 	WORDSIZE                             = 0x40
 	WSTOPPED                             = 0x2
 	WUNTRACED                            = 0x2
+	XATTR_CREATE                         = 0x1
+	XATTR_REPLACE                        = 0x2
 	XCASE                                = 0x4000
 	XTABS                                = 0xc00
 )
