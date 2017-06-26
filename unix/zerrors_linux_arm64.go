@@ -1383,6 +1383,9 @@ const (
 	SCM_TIMESTAMPING_OPT_STATS           = 0x36
 	SCM_TIMESTAMPNS                      = 0x23
 	SCM_WIFI_STATUS                      = 0x29
+	SECCOMP_MODE_DISABLED                = 0x0
+	SECCOMP_MODE_FILTER                  = 0x2
+	SECCOMP_MODE_STRICT                  = 0x1
 	SHUT_RD                              = 0x0
 	SHUT_RDWR                            = 0x2
 	SHUT_WR                              = 0x1
