@@ -21,7 +21,7 @@ import (
 )
 
 func TestSysctlUint64(t *testing.T) {
-	_, err := unix.SysctlUint64("security.mac.labeled")
+	_, err := unix.SysctlUint64("vm.swap_total")
 	if err != nil {
 		t.Fatal(err)
 	}
