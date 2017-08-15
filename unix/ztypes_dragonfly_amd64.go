@@ -443,6 +443,6 @@ type Termios struct {
 }
 
 const (
-	AT_FDCWD            = -0x64
+	AT_FDCWD            = 0xfffafdcd
 	AT_SYMLINK_NOFOLLOW = 0x1
 )
