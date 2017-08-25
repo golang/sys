@@ -739,3 +739,21 @@ type Taskstats struct {
 	Freepages_count           uint64
 	Freepages_delay_total     uint64
 }
+
+const (
+	TASKSTATS_CMD_UNSPEC                  = 0x0
+	TASKSTATS_CMD_GET                     = 0x1
+	TASKSTATS_CMD_NEW                     = 0x2
+	TASKSTATS_TYPE_UNSPEC                 = 0x0
+	TASKSTATS_TYPE_PID                    = 0x1
+	TASKSTATS_TYPE_TGID                   = 0x2
+	TASKSTATS_TYPE_STATS                  = 0x3
+	TASKSTATS_TYPE_AGGR_PID               = 0x4
+	TASKSTATS_TYPE_AGGR_TGID              = 0x5
+	TASKSTATS_TYPE_NULL                   = 0x6
+	TASKSTATS_CMD_ATTR_UNSPEC             = 0x0
+	TASKSTATS_CMD_ATTR_PID                = 0x1
+	TASKSTATS_CMD_ATTR_TGID               = 0x2
+	TASKSTATS_CMD_ATTR_REGISTER_CPUMASK   = 0x3
+	TASKSTATS_CMD_ATTR_DEREGISTER_CPUMASK = 0x4
+)
