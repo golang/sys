@@ -62,6 +62,7 @@ package unix
 #include <linux/fs.h>
 #include <linux/vm_sockets.h>
 #include <linux/random.h>
+#include <linux/taskstats.h>
 
 // On mips64, the glibc stat and kernel stat do not agree
 #if (defined(__mips__) && _MIPS_SIM == _MIPS_SIM_ABI64)
@@ -550,3 +551,7 @@ const _SC_PAGESIZE = C._SC_PAGESIZE
 type Termios C.termios_t
 
 type Winsize C.struct_winsize
+
+// Taskstats
+
+type Taskstats C.struct_taskstats
