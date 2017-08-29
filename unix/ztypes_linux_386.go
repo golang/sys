@@ -760,3 +760,36 @@ const (
 	TASKSTATS_CMD_ATTR_REGISTER_CPUMASK   = 0x3
 	TASKSTATS_CMD_ATTR_DEREGISTER_CPUMASK = 0x4
 )
+
+type Genlmsghdr struct {
+	Cmd      uint8
+	Version  uint8
+	Reserved uint16
+}
+
+const (
+	CTRL_CMD_UNSPEC            = 0x0
+	CTRL_CMD_NEWFAMILY         = 0x1
+	CTRL_CMD_DELFAMILY         = 0x2
+	CTRL_CMD_GETFAMILY         = 0x3
+	CTRL_CMD_NEWOPS            = 0x4
+	CTRL_CMD_DELOPS            = 0x5
+	CTRL_CMD_GETOPS            = 0x6
+	CTRL_CMD_NEWMCAST_GRP      = 0x7
+	CTRL_CMD_DELMCAST_GRP      = 0x8
+	CTRL_CMD_GETMCAST_GRP      = 0x9
+	CTRL_ATTR_UNSPEC           = 0x0
+	CTRL_ATTR_FAMILY_ID        = 0x1
+	CTRL_ATTR_FAMILY_NAME      = 0x2
+	CTRL_ATTR_VERSION          = 0x3
+	CTRL_ATTR_HDRSIZE          = 0x4
+	CTRL_ATTR_MAXATTR          = 0x5
+	CTRL_ATTR_OPS              = 0x6
+	CTRL_ATTR_MCAST_GROUPS     = 0x7
+	CTRL_ATTR_OP_UNSPEC        = 0x0
+	CTRL_ATTR_OP_ID            = 0x1
+	CTRL_ATTR_OP_FLAGS         = 0x2
+	CTRL_ATTR_MCAST_GRP_UNSPEC = 0x0
+	CTRL_ATTR_MCAST_GRP_NAME   = 0x1
+	CTRL_ATTR_MCAST_GRP_ID     = 0x2
+)
