@@ -535,10 +535,6 @@ const RNDGETENTCNT = C.RNDGETENTCNT
 
 const PERF_IOC_FLAG_GROUP = C.PERF_IOC_FLAG_GROUP
 
-// sysconf information
-
-const _SC_PAGESIZE = C._SC_PAGESIZE
-
 // Terminal handling
 
 type Termios C.termios_t
