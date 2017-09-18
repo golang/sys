@@ -514,6 +514,24 @@ func Acct(path string) (err error) {
 	return acct(pathp)
 }
 
+//sys	__makedev(version int, major uint, minor uint) (val uint64)
+
+func Mkdev(major, minor uint32) uint64 {
+	return __makedev(NEWDEV, uint(major), uint(minor))
+}
+
+//sys	__major(version int, dev uint64) (val uint)
+
+func Major(dev uint64) uint32 {
+	return uint32(__major(NEWDEV, dev))
+}
+
+//sys	__minor(version int, dev uint64) (val uint)
+
+func Minor(dev uint64) uint32 {
+	return uint32(__minor(NEWDEV, dev))
+}
+
 /*
  * Expose the ioctl function
  */
