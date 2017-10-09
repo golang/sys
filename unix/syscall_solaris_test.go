@@ -10,7 +10,7 @@ import (
 	"os/exec"
 	"testing"
 
-	"golang.org/x/sys/unix"
+	"github.com/golang/sys/unix"
 )
 
 func TestStatvfs(t *testing.T) {
