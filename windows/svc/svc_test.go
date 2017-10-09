@@ -14,8 +14,8 @@ import (
 	"testing"
 	"time"
 
-	"golang.org/x/sys/windows/svc"
-	"golang.org/x/sys/windows/svc/mgr"
+	"github.com/golang/sys/windows/svc"
+	"github.com/golang/sys/windows/svc/mgr"
 )
 
 func getState(t *testing.T, s *mgr.Service) svc.State {
@@ -66,7 +66,7 @@ func TestExample(t *testing.T) {
 	defer os.RemoveAll(dir)
 
 	exepath := filepath.Join(dir, "a.exe")
-	o, err := exec.Command("go", "build", "-o", exepath, "golang.org/x/sys/windows/svc/example").CombinedOutput()
+	o, err := exec.Command("go", "build", "-o", exepath, "github.com/golang/sys/windows/svc/example").CombinedOutput()
 	if err != nil {
 		t.Fatalf("failed to build service program: %v\n%v", err, string(o))
 	}

@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"testing"
 
-	"golang.org/x/sys/unix"
+	"github.com/qd-um/golang-sys/unix"
 )
 
 func TestDevices(t *testing.T) {

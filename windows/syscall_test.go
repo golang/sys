@@ -9,7 +9,7 @@ package windows_test
 import (
 	"testing"
 
-	"golang.org/x/sys/windows"
+	"github.com/golang/sys/windows"
 )
 
 func testSetGetenv(t *testing.T, key, value string) {
