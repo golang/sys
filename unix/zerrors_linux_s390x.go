@@ -1904,6 +1904,8 @@ const (
 	TUNSETVNETHDRSZ                      = 0x400454d8
 	TUNSETVNETLE                         = 0x400454dc
 	UMOUNT_NOFOLLOW                      = 0x8
+	UTIME_NOW                            = 0x3fffffff
+	UTIME_OMIT                           = 0x3ffffffe
 	VDISCARD                             = 0xd
 	VEOF                                 = 0x4
 	VEOL                                 = 0xb

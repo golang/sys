@@ -420,6 +420,7 @@ ccflags="$@"
 		$2 ~ /^(VM|VMADDR)_/ ||
 		$2 ~ /^(TASKSTATS|TS)_/ ||
 		$2 ~ /^GENL_/ ||
+		$2 ~ /^UTIME_/ ||
 		$2 ~ /^XATTR_(CREATE|REPLACE)/ ||
 		$2 !~ "WMESGLEN" &&
 		$2 ~ /^W[A-Z0-9]+$/ ||
