@@ -73,8 +73,6 @@ func Lstat(path string, stat *Stat_t) (err error) {
 
 //sysnb	Gettimeofday(tv *Timeval) (err error)
 
-func TimespecToNsec(ts Timespec) int64 { return int64(ts.Sec)*1e9 + int64(ts.Nsec) }
-
 func NsecToTimespec(nsec int64) (ts Timespec) {
 	ts.Sec = nsec / 1e9
 	ts.Nsec = nsec % 1e9

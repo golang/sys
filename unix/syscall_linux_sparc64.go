@@ -82,8 +82,6 @@ func Time(t *Time_t) (tt Time_t, err error) {
 
 //sys	Utime(path string, buf *Utimbuf) (err error)
 
-func TimespecToNsec(ts Timespec) int64 { return int64(ts.Sec)*1e9 + int64(ts.Nsec) }
-
 func NsecToTimespec(nsec int64) (ts Timespec) {
 	ts.Sec = nsec / 1e9
 	ts.Nsec = nsec % 1e9

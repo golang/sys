@@ -65,5 +65,3 @@ func (ts *Timespec) Nano() int64 {
 func (tv *Timeval) Nano() int64 {
 	return int64(tv.Sec)*1e9 + int64(tv.Usec)*1000
 }
-
-func TimevalToNsec(tv Timeval) int64 { return int64(tv.Sec)*1e9 + int64(tv.Usec)*1e3 }

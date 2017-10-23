@@ -99,8 +99,6 @@ func Seek(fd int, offset int64, whence int) (off int64, err error) {
 	return
 }
 
-func TimespecToNsec(ts Timespec) int64 { return int64(ts.Sec)*1e9 + int64(ts.Nsec) }
-
 func NsecToTimespec(nsec int64) (ts Timespec) {
 	ts.Sec = int32(nsec / 1e9)
 	ts.Nsec = int32(nsec % 1e9)
