@@ -116,7 +116,7 @@ func (p *Proc) Addr() uintptr {
 
 //go:uintptrescapes
 
-// Call executes procedure p with arguments a. It will panic, if more then 15 arguments
+// Call executes procedure p with arguments a. It will panic, if more than 15 arguments
 // are supplied.
 //
 // The returned error is always non-nil, constructed from the result of GetLastError.
@@ -297,7 +297,7 @@ func (p *LazyProc) Addr() uintptr {
 
 //go:uintptrescapes
 
-// Call executes procedure p with arguments a. It will panic, if more then 15 arguments
+// Call executes procedure p with arguments a. It will panic, if more than 15 arguments
 // are supplied. It will also panic if the procedure cannot be found.
 //
 // The returned error is always non-nil, constructed from the result of GetLastError.
