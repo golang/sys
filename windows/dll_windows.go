@@ -289,6 +289,7 @@ func (p *LazyProc) mustFind() {
 
 // Addr returns the address of the procedure represented by p.
 // The return value can be passed to Syscall to run the procedure.
+// It will panic if the procedure cannot be found.
 func (p *LazyProc) Addr() uintptr {
 	p.mustFind()
 	return p.proc.Addr()
@@ -297,7 +298,7 @@ func (p *LazyProc) Addr() uintptr {
 //go:uintptrescapes
 
 // Call executes procedure p with arguments a. It will panic, if more then 15 arguments
-// are supplied.
+// are supplied. It will also panic if the procedure cannot be found.
 //
 // The returned error is always non-nil, constructed from the result of GetLastError.
 // Callers must inspect the primary return value to decide whether an error occurred
