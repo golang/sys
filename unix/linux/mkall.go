@@ -178,6 +178,7 @@ func main() {
 	for _, p := range ptracePairs {
 		if err := generatePtracePair(p.a1, p.a2); err != nil {
 			fmt.Printf("%v\n***** FAILURE: %s/%s *****\n\n", err, p.a1, p.a2)
+			ok = false
 		}
 	}
 	if ok {
