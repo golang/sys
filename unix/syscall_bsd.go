@@ -607,6 +607,15 @@ func Futimes(fd int, tv []Timeval) error {
 
 //sys	fcntl(fd int, cmd int, arg int) (val int, err error)
 
+//sys   poll(fds *PollFd, nfds int, timeout int) (n int, err error)
+
+func Poll(fds []PollFd, timeout int) (n int, err error) {
+	if len(fds) == 0 {
+		return poll(nil, 0, timeout)
+	}
+	return poll(&fds[0], len(fds), timeout)
+}
+
 // TODO: wrap
 //	Acct(name nil-string) (err error)
 //	Gethostuuid(uuid *byte, timeout *Timespec) (err error)
