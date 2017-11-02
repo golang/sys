@@ -470,6 +470,11 @@ const (
 	FF1                               = 0x4000
 	FFDLY                             = 0x4000
 	FLUSHO                            = 0x800000
+	FSOPT_ATTR_CMN_EXTENDED           = 0x20
+	FSOPT_NOFOLLOW                    = 0x1
+	FSOPT_NOINMEMUPDATE               = 0x2
+	FSOPT_PACK_INVAL_ATTRS            = 0x8
+	FSOPT_REPORT_FULLSIZE             = 0x4
 	F_ADDFILESIGS                     = 0x3d
 	F_ADDFILESIGS_FOR_DYLD_SIM        = 0x53
 	F_ADDFILESIGS_RETURN              = 0x61

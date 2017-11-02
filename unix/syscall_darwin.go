@@ -187,7 +187,7 @@ func Getfsstat(buf []Statfs_t, flags int) (n int, err error) {
 	return
 }
 
-func setattrlistTimes(path string, times []Timespec) error {
+func setattrlistTimes(path string, times []Timespec, flags int) error {
 	_p0, err := BytePtrFromString(path)
 	if err != nil {
 		return err
@@ -199,8 +199,10 @@ func setattrlistTimes(path string, times []Timespec) error {
 
 	// order is mtime, atime: the opposite of Chtimes
 	attributes := [2]Timespec{times[1], times[0]}
-
-	const options = 0
+	options := 0
+	if flags&AT_SYMLINK_NOFOLLOW != 0 {
+		options |= FSOPT_NOFOLLOW
+	}
 	_, _, e1 := Syscall6(
 		SYS_SETATTRLIST,
 		uintptr(unsafe.Pointer(_p0)),
