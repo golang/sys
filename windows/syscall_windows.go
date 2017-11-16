@@ -16,7 +16,46 @@ import (
 
 type Handle uintptr
 
-const InvalidHandle = ^Handle(0)
+const (
+	InvalidHandle = ^Handle(0)
+
+	// Flags for DefineDosDevice.
+	DDD_EXACT_MATCH_ON_REMOVE = 0x00000004
+	DDD_NO_BROADCAST_SYSTEM =   0x00000008
+	DDD_RAW_TARGET_PATH =       0x00000001
+	DDD_REMOVE_DEFINITION =     0x00000002
+
+	// Return values for GetDriveType.
+	DRIVE_UNKNOWN = 0
+	DRIVE_NO_ROOT_DIR = 1
+	DRIVE_REMOVABLE = 2
+	DRIVE_FIXED = 3
+	DRIVE_REMOTE = 4
+	DRIVE_CDROM = 5
+	DRIVE_RAMDISK = 6
+
+	// File system flags from GetVolumeInformation and GetVolumeInformationByHandle.
+	FILE_CASE_SENSITIVE_SEARCH = 0x00000001
+	FILE_CASE_PRESERVED_NAMES = 0x00000002
+	FILE_FILE_COMPRESSION = 0x00000010
+	FILE_DAX_VOLUME = 0x20000000
+	FILE_NAMED_STREAMS = 0x00040000
+	FILE_PERSISTENT_ACLS = 0x00000008
+	FILE_READ_ONLY_VOLUME = 0x00080000
+	FILE_SEQUENTIAL_WRITE_ONCE = 0x00100000
+	FILE_SUPPORTS_ENCRYPTION = 0x00020000
+	FILE_SUPPORTS_EXTENDED_ATTRIBUTES = 0x00800000
+	FILE_SUPPORTS_HARD_LINKS = 0x00400000
+	FILE_SUPPORTS_OBJECT_IDS = 0x00010000
+	FILE_SUPPORTS_OPEN_BY_FILE_ID = 0x01000000
+	FILE_SUPPORTS_REPARSE_POINTS = 0x00000080
+	FILE_SUPPORTS_SPARSE_FILES = 0x00000040
+	FILE_SUPPORTS_TRANSACTIONS = 0x00200000
+	FILE_SUPPORTS_USN_JOURNAL = 0x02000000
+	FILE_UNICODE_ON_DISK = 0x00000004
+	FILE_VOLUME_IS_COMPRESSED = 0x00008000
+	FILE_VOLUME_QUOTAS = 0x00000020
+)
 
 // StringToUTF16 is deprecated. Use UTF16FromString instead.
 // If s contains a NUL byte this function panics instead of
@@ -137,33 +176,33 @@ func NewCallbackCDecl(fn interface{}) uintptr {
 //sys	CryptAcquireContext(provhandle *Handle, container *uint16, provider *uint16, provtype uint32, flags uint32) (err error) = advapi32.CryptAcquireContextW
 //sys	CryptReleaseContext(provhandle Handle, flags uint32) (err error) = advapi32.CryptReleaseContext
 //sys	CryptGenRandom(provhandle Handle, buflen uint32, buf *byte) (err error) = advapi32.CryptGenRandom
-//sys	GetEnvironmentStrings() (envs *uint16, err error) [failretval==nil] = kernel32.GetEnvironmentStringsW
-//sys	FreeEnvironmentStrings(envs *uint16) (err error) = kernel32.FreeEnvironmentStringsW
-//sys	GetEnvironmentVariable(name *uint16, buffer *uint16, size uint32) (n uint32, err error) = kernel32.GetEnvironmentVariableW
-//sys	SetEnvironmentVariable(name *uint16, value *uint16) (err error) = kernel32.SetEnvironmentVariableW
+//sys	GetEnvironmentStrings() (envs *uint16, err error) [failretval==nil] = GetEnvironmentStringsW
+//sys	FreeEnvironmentStrings(envs *uint16) (err error) = FreeEnvironmentStringsW
+//sys	GetEnvironmentVariable(name *uint16, buffer *uint16, size uint32) (n uint32, err error) = GetEnvironmentVariableW
+//sys	SetEnvironmentVariable(name *uint16, value *uint16) (err error) = SetEnvironmentVariableW
 //sys	SetFileTime(handle Handle, ctime *Filetime, atime *Filetime, wtime *Filetime) (err error)
-//sys	GetFileAttributes(name *uint16) (attrs uint32, err error) [failretval==INVALID_FILE_ATTRIBUTES] = kernel32.GetFileAttributesW
-//sys	SetFileAttributes(name *uint16, attrs uint32) (err error) = kernel32.SetFileAttributesW
-//sys	GetFileAttributesEx(name *uint16, level uint32, info *byte) (err error) = kernel32.GetFileAttributesExW
-//sys	GetCommandLine() (cmd *uint16) = kernel32.GetCommandLineW
+//sys	GetFileAttributes(name *uint16) (attrs uint32, err error) [failretval==INVALID_FILE_ATTRIBUTES] = GetFileAttributesW
+//sys	SetFileAttributes(name *uint16, attrs uint32) (err error) = SetFileAttributesW
+//sys	GetFileAttributesEx(name *uint16, level uint32, info *byte) (err error) = GetFileAttributesExW
+//sys	GetCommandLine() (cmd *uint16) = GetCommandLineW
 //sys	CommandLineToArgv(cmd *uint16, argc *int32) (argv *[8192]*[8192]uint16, err error) [failretval==nil] = shell32.CommandLineToArgvW
 //sys	LocalFree(hmem Handle) (handle Handle, err error) [failretval!=0]
 //sys	SetHandleInformation(handle Handle, mask uint32, flags uint32) (err error)
 //sys	FlushFileBuffers(handle Handle) (err error)
-//sys	GetFullPathName(path *uint16, buflen uint32, buf *uint16, fname **uint16) (n uint32, err error) = kernel32.GetFullPathNameW
-//sys	GetLongPathName(path *uint16, buf *uint16, buflen uint32) (n uint32, err error) = kernel32.GetLongPathNameW
-//sys	GetShortPathName(longpath *uint16, shortpath *uint16, buflen uint32) (n uint32, err error) = kernel32.GetShortPathNameW
-//sys	CreateFileMapping(fhandle Handle, sa *SecurityAttributes, prot uint32, maxSizeHigh uint32, maxSizeLow uint32, name *uint16) (handle Handle, err error) = kernel32.CreateFileMappingW
+//sys	GetFullPathName(path *uint16, buflen uint32, buf *uint16, fname **uint16) (n uint32, err error) = GetFullPathNameW
+//sys	GetLongPathName(path *uint16, buf *uint16, buflen uint32) (n uint32, err error) = GetLongPathNameW
+//sys	GetShortPathName(longpath *uint16, shortpath *uint16, buflen uint32) (n uint32, err error) = GetShortPathNameW
+//sys	CreateFileMapping(fhandle Handle, sa *SecurityAttributes, prot uint32, maxSizeHigh uint32, maxSizeLow uint32, name *uint16) (handle Handle, err error) = CreateFileMappingW
 //sys	MapViewOfFile(handle Handle, access uint32, offsetHigh uint32, offsetLow uint32, length uintptr) (addr uintptr, err error)
 //sys	UnmapViewOfFile(addr uintptr) (err error)
 //sys	FlushViewOfFile(addr uintptr, length uintptr) (err error)
 //sys	VirtualLock(addr uintptr, length uintptr) (err error)
 //sys	VirtualUnlock(addr uintptr, length uintptr) (err error)
-//sys	VirtualAlloc(address uintptr, size uintptr, alloctype uint32, protect uint32) (value uintptr, err error) = kernel32.VirtualAlloc
-//sys	VirtualFree(address uintptr, size uintptr, freetype uint32) (err error) = kernel32.VirtualFree
-//sys	VirtualProtect(address uintptr, size uintptr, newprotect uint32, oldprotect *uint32) (err error) = kernel32.VirtualProtect
+//sys	VirtualAlloc(address uintptr, size uintptr, alloctype uint32, protect uint32) (value uintptr, err error)
+//sys	VirtualFree(address uintptr, size uintptr, freetype uint32) (err error)
+//sys	VirtualProtect(address uintptr, size uintptr, newprotect uint32, oldprotect *uint32) (err error)
 //sys	TransmitFile(s Handle, handle Handle, bytesToWrite uint32, bytsPerSend uint32, overlapped *Overlapped, transmitFileBuf *TransmitFileBuffers, flags uint32) (err error) = mswsock.TransmitFile
-//sys	ReadDirectoryChanges(handle Handle, buf *byte, buflen uint32, watchSubTree bool, mask uint32, retlen *uint32, overlapped *Overlapped, completionRoutine uintptr) (err error) = kernel32.ReadDirectoryChangesW
+//sys	ReadDirectoryChanges(handle Handle, buf *byte, buflen uint32, watchSubTree bool, mask uint32, retlen *uint32, overlapped *Overlapped, completionRoutine uintptr) (err error) = ReadDirectoryChangesW
 //sys	CertOpenSystemStore(hprov Handle, name *uint16) (store Handle, err error) = crypt32.CertOpenSystemStoreW
 //sys   CertOpenStore(storeProvider uintptr, msgAndCertEncodingType uint32, cryptProv uintptr, flags uint32, para uintptr) (handle Handle, err error) [failretval==InvalidHandle] = crypt32.CertOpenStore
 //sys	CertEnumCertificatesInStore(store Handle, prevContext *CertContext) (context *CertContext, err error) [failretval==nil] = crypt32.CertEnumCertificatesInStore
@@ -179,26 +218,48 @@ func NewCallbackCDecl(fn interface{}) uintptr {
 //sys	RegQueryInfoKey(key Handle, class *uint16, classLen *uint32, reserved *uint32, subkeysLen *uint32, maxSubkeyLen *uint32, maxClassLen *uint32, valuesLen *uint32, maxValueNameLen *uint32, maxValueLen *uint32, saLen *uint32, lastWriteTime *Filetime) (regerrno error) = advapi32.RegQueryInfoKeyW
 //sys	RegEnumKeyEx(key Handle, index uint32, name *uint16, nameLen *uint32, reserved *uint32, class *uint16, classLen *uint32, lastWriteTime *Filetime) (regerrno error) = advapi32.RegEnumKeyExW
 //sys	RegQueryValueEx(key Handle, name *uint16, reserved *uint32, valtype *uint32, buf *byte, buflen *uint32) (regerrno error) = advapi32.RegQueryValueExW
-//sys	getCurrentProcessId() (pid uint32) = kernel32.GetCurrentProcessId
-//sys	GetConsoleMode(console Handle, mode *uint32) (err error) = kernel32.GetConsoleMode
-//sys	SetConsoleMode(console Handle, mode uint32) (err error) = kernel32.SetConsoleMode
-//sys	GetConsoleScreenBufferInfo(console Handle, info *ConsoleScreenBufferInfo) (err error) = kernel32.GetConsoleScreenBufferInfo
-//sys	WriteConsole(console Handle, buf *uint16, towrite uint32, written *uint32, reserved *byte) (err error) = kernel32.WriteConsoleW
-//sys	ReadConsole(console Handle, buf *uint16, toread uint32, read *uint32, inputControl *byte) (err error) = kernel32.ReadConsoleW
-//sys	CreateToolhelp32Snapshot(flags uint32, processId uint32) (handle Handle, err error) [failretval==InvalidHandle] = kernel32.CreateToolhelp32Snapshot
-//sys	Process32First(snapshot Handle, procEntry *ProcessEntry32) (err error) = kernel32.Process32FirstW
-//sys	Process32Next(snapshot Handle, procEntry *ProcessEntry32) (err error) = kernel32.Process32NextW
+//sys	getCurrentProcessId() (pid uint32) = GetCurrentProcessId
+//sys	GetConsoleMode(console Handle, mode *uint32) (err error)
+//sys	SetConsoleMode(console Handle, mode uint32) (err error)
+//sys	GetConsoleScreenBufferInfo(console Handle, info *ConsoleScreenBufferInfo) (err error)
+//sys	WriteConsole(console Handle, buf *uint16, towrite uint32, written *uint32, reserved *byte) (err error) = WriteConsoleW
+//sys	ReadConsole(console Handle, buf *uint16, toread uint32, read *uint32, inputControl *byte) (err error) = ReadConsoleW
+//sys	CreateToolhelp32Snapshot(flags uint32, processId uint32) (handle Handle, err error) [failretval==InvalidHandle]
+//sys	Process32First(snapshot Handle, procEntry *ProcessEntry32) (err error) = Process32FirstW
+//sys	Process32Next(snapshot Handle, procEntry *ProcessEntry32) (err error) = Process32NextW
 //sys	DeviceIoControl(handle Handle, ioControlCode uint32, inBuffer *byte, inBufferSize uint32, outBuffer *byte, outBufferSize uint32, bytesReturned *uint32, overlapped *Overlapped) (err error)
 // This function returns 1 byte BOOLEAN rather than the 4 byte BOOL.
 //sys	CreateSymbolicLink(symlinkfilename *uint16, targetfilename *uint16, flags uint32) (err error) [failretval&0xff==0] = CreateSymbolicLinkW
 //sys	CreateHardLink(filename *uint16, existingfilename *uint16, reserved uintptr) (err error) [failretval&0xff==0] = CreateHardLinkW
 //sys	GetCurrentThreadId() (id uint32)
-//sys	CreateEvent(eventAttrs *SecurityAttributes, manualReset uint32, initialState uint32, name *uint16) (handle Handle, err error) = kernel32.CreateEventW
-//sys	CreateEventEx(eventAttrs *SecurityAttributes, name *uint16, flags uint32, desiredAccess uint32) (handle Handle, err error) = kernel32.CreateEventExW
-//sys	OpenEvent(desiredAccess uint32, inheritHandle bool, name *uint16) (handle Handle, err error) = kernel32.OpenEventW
-//sys	SetEvent(event Handle) (err error) = kernel32.SetEvent
-//sys	ResetEvent(event Handle) (err error) = kernel32.ResetEvent
-//sys	PulseEvent(event Handle) (err error) = kernel32.PulseEvent
+//sys	CreateEvent(eventAttrs *SecurityAttributes, manualReset uint32, initialState uint32, name *uint16) (handle Handle, err error) = CreateEventW
+//sys	CreateEventEx(eventAttrs *SecurityAttributes, name *uint16, flags uint32, desiredAccess uint32) (handle Handle, err error) = CreateEventExW
+//sys	OpenEvent(desiredAccess uint32, inheritHandle bool, name *uint16) (handle Handle, err error) = OpenEventW
+//sys	SetEvent(event Handle) (err error)
+//sys	ResetEvent(event Handle) (err error)
+//sys	PulseEvent(event Handle) (err error)
+
+// Volume Management Functions
+//sys	DefineDosDevice(flags uint32, deviceName *uint16, targetPath *uint16) (err error) = DefineDosDeviceW
+//sys	DeleteVolumeMountPoint(volumeMountPoint *uint16) (err error) = DeleteVolumeMountPointW
+//sys	FindFirstVolume(volumeName *uint16, bufferLength uint32) (handle Handle, err error) [failretval==0] = FindFirstVolumeW
+//sys	FindFirstVolumeMountPoint(rootPathName *uint16, volumeMountPoint *uint16, bufferLength uint32) (handle Handle, err error) [failretval==0] = FindFirstVolumeMountPointW
+//sys	FindNextVolume(findVolume Handle, volumeName *uint16, bufferLength uint32) (err error) = FindNextVolumeW
+//sys	FindNextVolumeMountPoint(findVolumeMountPoint Handle, volumeMountPoint *uint16, bufferLength uint32) (err error) = FindNextVolumeMountPointW
+//sys	FindVolumeClose(findVolume Handle) (err error)
+//sys	FindVolumeMountPointClose(findVolumeMountPoint Handle) (err error)
+//sys	GetDriveType(rootPathName *uint16) (driveType uint32)
+//sys	GetLogicalDrives() (drivesBitMask uint32, err error) [failretval==0]
+//sys	GetLogicalDriveStrings(bufferLength uint32, buffer *uint16) (n uint32, err error) [failretval==0] = GetLogicalDriveStringsW
+//sys	GetVolumeInformation(rootPathName *uint16, volumeNameBuffer *uint16, volumeNameSize uint32, volumeNameSerialNumber *uint32, maximumComponentLength *uint32, fileSystemFlags *uint32, fileSystemNameBuffer *uint16, fileSystemNameSize uint32) (err error) = GetVolumeInformationW
+//sys	GetVolumeInformationByHandle(file Handle, volumeNameBuffer *uint16, volumeNameSize uint32, volumeNameSerialNumber *uint32, maximumComponentLength *uint32, fileSystemFlags *uint32, fileSystemNameBuffer *uint16, fileSystemNameSize uint32) (err error) = GetVolumeInformationByHandleW
+//sys	GetVolumeNameForVolumeMountPoint(volumeMountPoint *uint16, volumeName *uint16, bufferlength uint32) (err error) = GetVolumeNameForVolumeMountPointW
+//sys	GetVolumePathName(fileName *uint16, volumePathName *uint16, bufferLength uint32) (err error) = GetVolumePathNameW
+//sys	GetVolumePathNamesForVolumeName(volumeName *uint16, volumePathNames *uint16, bufferLength uint32, returnLength *uint32) (err error) = GetVolumePathNamesForVolumeNameW
+//sys	QueryDosDevice(deviceName *uint16, targetPath *uint16, max uint32) (n uint32, err error) [failretval==0] = QueryDosDeviceW
+//sys	SetVolumeLabel(rootPathName *uint16, volumeName *uint16) (err error) = SetVolumeLabelW
+//sys	SetVolumeMountPoint(volumeMountPoint *uint16, volumeName *uint16) (err error) = SetVolumeMountPointW
+
 
 // syscall interface implementation for other packages
 
@@ -561,11 +622,11 @@ const socket_error = uintptr(^uint32(0))
 //sys	FreeAddrInfoW(addrinfo *AddrinfoW) = ws2_32.FreeAddrInfoW
 //sys	GetIfEntry(pIfRow *MibIfRow) (errcode error) = iphlpapi.GetIfEntry
 //sys	GetAdaptersInfo(ai *IpAdapterInfo, ol *uint32) (errcode error) = iphlpapi.GetAdaptersInfo
-//sys	SetFileCompletionNotificationModes(handle Handle, flags uint8) (err error) = kernel32.SetFileCompletionNotificationModes
+//sys	SetFileCompletionNotificationModes(handle Handle, flags uint8) (err error)
 //sys	WSAEnumProtocols(protocols *int32, protocolBuffer *WSAProtocolInfo, bufferLength *uint32) (n int32, err error) [failretval==-1] = ws2_32.WSAEnumProtocolsW
 //sys	GetAdaptersAddresses(family uint32, flags uint32, reserved uintptr, adapterAddresses *IpAdapterAddresses, sizePointer *uint32) (errcode error) = iphlpapi.GetAdaptersAddresses
-//sys	GetACP() (acp uint32) = kernel32.GetACP
-//sys	MultiByteToWideChar(codePage uint32, dwFlags uint32, str *byte, nstr int32, wchar *uint16, nwchar int32) (nwrite int32, err error) = kernel32.MultiByteToWideChar
+//sys	GetACP() (acp uint32)
+//sys	MultiByteToWideChar(codePage uint32, dwFlags uint32, str *byte, nstr int32, wchar *uint16, nwchar int32) (nwrite int32, err error)
 
 // For testing: clients can set this flag to force
 // creation of IPv6 sockets to return EAFNOSUPPORT.
