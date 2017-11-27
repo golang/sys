@@ -191,8 +191,7 @@ func TestUname(t *testing.T) {
 		t.Fatalf("Uname: %v", err)
 	}
 
-	// conversion from []byte to string, golang.org/issue/20753
-	t.Logf("OS: %s/%s %s", string(utsname.Sysname[:]), string(utsname.Machine[:]), string(utsname.Release[:]))
+	t.Logf("OS: %s/%s %s", utsname.Sysname[:], utsname.Machine[:], utsname.Release[:])
 }
 
 func TestFstatat(t *testing.T) {
