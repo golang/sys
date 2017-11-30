@@ -23,8 +23,6 @@ func TestDevices(t *testing.T) {
 		// NetBSD 8.0
 		{"/dev/null", 2, 2},
 		{"/dev/zero", 2, 12},
-		{"/dev/ptyp0", 6, 0},
-		{"/dev/ptyp1", 6, 1},
 		{"/dev/random", 46, 0},
 		{"/dev/urandom", 46, 1},
 	}
