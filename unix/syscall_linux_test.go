@@ -20,9 +20,12 @@ func TestFchmodat(t *testing.T) {
 	defer chtmpdir(t)()
 
 	touch(t, "file1")
-	os.Symlink("file1", "symlink1")
+	err := os.Symlink("file1", "symlink1")
+	if err != nil {
+		t.Fatal(err)
+	}
 
-	err := unix.Fchmodat(unix.AT_FDCWD, "symlink1", 0444, 0)
+	err = unix.Fchmodat(unix.AT_FDCWD, "symlink1", 0444, 0)
 	if err != nil {
 		t.Fatalf("Fchmodat: unexpected error: %v", err)
 	}
@@ -239,7 +242,10 @@ func TestFstatat(t *testing.T) {
 		t.Errorf("Fstatat: returned stat does not match Stat")
 	}
 
-	os.Symlink("file1", "symlink1")
+	err = os.Symlink("file1", "symlink1")
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	err = unix.Lstat("symlink1", &st1)
 	if err != nil {
