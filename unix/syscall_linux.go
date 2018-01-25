@@ -420,6 +420,7 @@ func (sa *SockaddrUnix) sockaddr() (unsafe.Pointer, _Socklen, error) {
 	return unsafe.Pointer(&sa.raw), sl, nil
 }
 
+// SockaddrLinklayer implements the Sockaddr interface for AF_PACKET type sockets.
 type SockaddrLinklayer struct {
 	Protocol uint16
 	Ifindex  int
@@ -446,6 +447,7 @@ func (sa *SockaddrLinklayer) sockaddr() (unsafe.Pointer, _Socklen, error) {
 	return unsafe.Pointer(&sa.raw), SizeofSockaddrLinklayer, nil
 }
 
+// SockaddrNetlink implements the Sockaddr interface for AF_NETLINK type sockets.
 type SockaddrNetlink struct {
 	Family uint16
 	Pad    uint16
@@ -462,6 +464,8 @@ func (sa *SockaddrNetlink) sockaddr() (unsafe.Pointer, _Socklen, error) {
 	return unsafe.Pointer(&sa.raw), SizeofSockaddrNetlink, nil
 }
 
+// SockaddrHCI implements the Sockaddr interface for AF_BLUETOOTH type sockets
+// using the HCI protocol.
 type SockaddrHCI struct {
 	Dev     uint16
 	Channel uint16
@@ -475,6 +479,8 @@ func (sa *SockaddrHCI) sockaddr() (unsafe.Pointer, _Socklen, error) {
 	return unsafe.Pointer(&sa.raw), SizeofSockaddrHCI, nil
 }
 
+// SockaddrL2 implements the Sockaddr interface for AF_BLUETOOTH type sockets
+// using the L2CAP protocol.
 type SockaddrL2 struct {
 	PSM      uint16
 	CID      uint16
