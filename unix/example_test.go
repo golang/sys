@@ -2,15 +2,18 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package unix
+// +build darwin dragonfly freebsd linux netbsd openbsd solaris
+
+package unix_test
 
 import (
 	"log"
 	"os"
-	"syscall"
+
+	"golang.org/x/sys/unix"
 )
 
 func ExampleExec() {
-	err := syscall.Exec("/bin/ls", []string{"ls", "-al"}, os.Environ())
+	err := unix.Exec("/bin/ls", []string{"ls", "-al"}, os.Environ())
 	log.Fatal(err)
 }
