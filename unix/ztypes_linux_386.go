@@ -96,24 +96,24 @@ type Rlimit struct {
 type _Gid_t uint32
 
 type Stat_t struct {
-	Dev       uint64
-	X__pad1   uint16
-	_         [2]byte
-	X__st_ino uint32
-	Mode      uint32
-	Nlink     uint32
-	Uid       uint32
-	Gid       uint32
-	Rdev      uint64
-	X__pad2   uint16
-	_         [2]byte
-	Size      int64
-	Blksize   int32
-	Blocks    int64
-	Atim      Timespec
-	Mtim      Timespec
-	Ctim      Timespec
-	Ino       uint64
+	Dev     uint64
+	_       uint16
+	_       [2]byte
+	_       uint32
+	Mode    uint32
+	Nlink   uint32
+	Uid     uint32
+	Gid     uint32
+	Rdev    uint64
+	_       uint16
+	_       [2]byte
+	Size    int64
+	Blksize int32
+	Blocks  int64
+	Atim    Timespec
+	Mtim    Timespec
+	Ctim    Timespec
+	Ino     uint64
 }
 
 type Statfs_t struct {
@@ -132,9 +132,9 @@ type Statfs_t struct {
 }
 
 type StatxTimestamp struct {
-	Sec         int64
-	Nsec        uint32
-	X__reserved int32
+	Sec  int64
+	Nsec uint32
+	_    int32
 }
 
 type Statx_t struct {
@@ -171,7 +171,7 @@ type Dirent struct {
 }
 
 type Fsid struct {
-	X__val [2]int32
+	_ [2]int32
 }
 
 type Flock_t struct {
@@ -583,12 +583,12 @@ type RtAttr struct {
 }
 
 type IfInfomsg struct {
-	Family     uint8
-	X__ifi_pad uint8
-	Type       uint16
-	Index      int32
-	Flags      uint32
-	Change     uint32
+	Family uint8
+	_      uint8
+	Type   uint16
+	Index  int32
+	Flags  uint32
+	Change uint32
 }
 
 type IfAddrmsg struct {
@@ -683,7 +683,7 @@ type Sysinfo_t struct {
 	Totalhigh uint32
 	Freehigh  uint32
 	Unit      uint32
-	X_f       [8]int8
+	_         [8]int8
 }
 
 type Utsname struct {
@@ -739,7 +739,7 @@ const (
 )
 
 type Sigset_t struct {
-	X__val [32]uint32
+	_ [32]uint32
 }
 
 const RNDGETENTCNT = 0x80045200

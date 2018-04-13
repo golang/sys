@@ -105,7 +105,7 @@ type Stat_t struct {
 	Mode    uint32
 	Uid     uint32
 	Gid     uint32
-	X__pad0 int32
+	_       int32
 	Rdev    uint64
 	Size    int64
 	Blksize int64
@@ -132,9 +132,9 @@ type Statfs_t struct {
 }
 
 type StatxTimestamp struct {
-	Sec         int64
-	Nsec        uint32
-	X__reserved int32
+	Sec  int64
+	Nsec uint32
+	_    int32
 }
 
 type Statx_t struct {
@@ -171,7 +171,7 @@ type Dirent struct {
 }
 
 type Fsid struct {
-	X__val [2]int32
+	_ [2]int32
 }
 
 type Flock_t struct {
@@ -587,12 +587,12 @@ type RtAttr struct {
 }
 
 type IfInfomsg struct {
-	Family     uint8
-	X__ifi_pad uint8
-	Type       uint16
-	Index      int32
-	Flags      uint32
-	Change     uint32
+	Family uint8
+	_      uint8
+	Type   uint16
+	Index  int32
+	Flags  uint32
+	Change uint32
 }
 
 type IfAddrmsg struct {
@@ -698,7 +698,7 @@ type Sysinfo_t struct {
 	Totalhigh uint64
 	Freehigh  uint64
 	Unit      uint32
-	X_f       [0]int8
+	_         [0]int8
 	_         [4]byte
 }
 
@@ -757,7 +757,7 @@ const (
 )
 
 type Sigset_t struct {
-	X__val [16]uint64
+	_ [16]uint64
 }
 
 const RNDGETENTCNT = 0x80045200
