@@ -77,7 +77,7 @@ package unix
 
 // Use the stat defined by the kernel with a few modifications. These are:
 //	* The time fields (like st_atime and st_atimensec) use the timespec
-//	  struct (like st_atim) for consitancy with the glibc fields.
+//	  struct (like st_atim) for consistency with the glibc fields.
 //	* The padding fields get different names to not break compatibility.
 //	* st_blocks is signed, again for compatibility.
 struct stat {
@@ -97,8 +97,8 @@ struct stat {
 
 	off_t			st_size;
 
-	// These are declared as speperate fields in the kernel. Here we use
-	// the timespec struct for consistancy with the other stat structs.
+	// These are declared as separate fields in the kernel. Here we use
+	// the timespec struct for consistency with the other stat structs.
 	struct timespec		st_atim;
 	struct timespec		st_mtim;
 	struct timespec		st_ctim;
