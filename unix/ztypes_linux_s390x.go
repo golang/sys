@@ -1157,3 +1157,18 @@ const (
 	CBitFieldMaskBit62 = 0x2
 	CBitFieldMaskBit63 = 0x1
 )
+
+type SockaddrStorage struct {
+	Family uint16
+	_      [118]int8
+	_      uint64
+}
+
+type TCPMD5Sig struct {
+	Addr      SockaddrStorage
+	Flags     uint8
+	Prefixlen uint8
+	Keylen    uint16
+	_         uint32
+	Key       [80]uint8
+}
