@@ -171,6 +171,7 @@ struct ltchars {
 #include <linux/filter.h>
 #include <linux/fs.h>
 #include <linux/keyctl.h>
+#include <linux/magic.h>
 #include <linux/netlink.h>
 #include <linux/perf_event.h>
 #include <linux/random.h>
@@ -426,6 +427,7 @@ ccflags="$@"
 		$2 ~ /^PERF_EVENT_IOC_/ ||
 		$2 ~ /^SECCOMP_MODE_/ ||
 		$2 ~ /^SPLICE_/ ||
+		$2 ~ /^[A-Z0-9_]+_MAGIC2?$/ ||
 		$2 ~ /^(VM|VMADDR)_/ ||
 		$2 ~ /^IOCTL_VM_SOCKETS_/ ||
 		$2 ~ /^(TASKSTATS|TS)_/ ||

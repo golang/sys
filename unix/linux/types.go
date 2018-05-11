@@ -38,6 +38,7 @@ package unix
 #include <sys/select.h>
 #include <sys/signal.h>
 #include <sys/statfs.h>
+#include <sys/statvfs.h>
 #include <sys/sysinfo.h>
 #include <sys/time.h>
 #include <sys/times.h>
@@ -336,8 +337,6 @@ type _Gid_t C.gid_t
 // Files
 
 type Stat_t C.struct_stat
-
-type Statfs_t C.struct_statfs
 
 type StatxTimestamp C.struct_statx_timestamp
 
@@ -972,3 +971,19 @@ type HDDriveCmdHdr C.struct_hd_drive_cmd_hdr
 type HDGeometry C.struct_hd_geometry
 
 type HDDriveID C.struct_hd_driveid
+
+// Statfs
+
+type Statfs_t C.struct_statfs
+
+const (
+	ST_MANDLOCK    = C.ST_MANDLOCK
+	ST_NOATIME     = C.ST_NOATIME
+	ST_NODEV       = C.ST_NODEV
+	ST_NODIRATIME  = C.ST_NODIRATIME
+	ST_NOEXEC      = C.ST_NOEXEC
+	ST_NOSUID      = C.ST_NOSUID
+	ST_RDONLY      = C.ST_RDONLY
+	ST_RELATIME    = C.ST_RELATIME
+	ST_SYNCHRONOUS = C.ST_SYNCHRONOUS
+)
