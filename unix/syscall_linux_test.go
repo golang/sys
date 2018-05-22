@@ -371,3 +371,17 @@ func TestStatx(t *testing.T) {
 		t.Errorf("Statx: returned stat mtime does not match Lstat")
 	}
 }
+
+// stringsFromByteSlice converts a sequence of attributes to a []string.
+// On Linux, each entry is a NULL-terminated string.
+func stringsFromByteSlice(buf []byte) []string {
+	var result []string
+	off := 0
+	for i, b := range buf {
+		if b == 0 {
+			result = append(result, string(buf[off:i]))
+			off = i + 1
+		}
+	}
+	return result
+}
