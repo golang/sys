@@ -285,7 +285,7 @@ func TestSchedSetaffinity(t *testing.T) {
 func TestStatx(t *testing.T) {
 	var stx unix.Statx_t
 	err := unix.Statx(unix.AT_FDCWD, ".", 0, 0, &stx)
-	if err == unix.ENOSYS {
+	if err == unix.ENOSYS || err == unix.EPERM {
 		t.Skip("statx syscall is not available, skipping test")
 	} else if err != nil {
 		t.Fatalf("Statx: %v", err)
