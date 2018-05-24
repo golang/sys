@@ -560,6 +560,19 @@ func TestFchmodat(t *testing.T) {
 	}
 }
 
+func TestMkdev(t *testing.T) {
+	major := uint32(42)
+	minor := uint32(7)
+	dev := unix.Mkdev(major, minor)
+
+	if unix.Major(dev) != major {
+		t.Errorf("Major(%#x) == %d, want %d", dev, unix.Major(dev), major)
+	}
+	if unix.Minor(dev) != minor {
+		t.Errorf("Minor(%#x) == %d, want %d", dev, unix.Minor(dev), minor)
+	}
+}
+
 // mktmpfifo creates a temporary FIFO and provides a cleanup function.
 func mktmpfifo(t *testing.T) (*os.File, func()) {
 	err := unix.Mkfifo("fifo", 0666)
