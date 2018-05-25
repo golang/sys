@@ -1055,7 +1055,7 @@ const (
 )
 
 // netfilter nfnetlink
-type Nfgenmsg = C.struct_nfgenmsg
+type Nfgenmsg C.struct_nfgenmsg
 
 const (
 	NFNL_BATCH_UNSPEC = C.NFNL_BATCH_UNSPEC

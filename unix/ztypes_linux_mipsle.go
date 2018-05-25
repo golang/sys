@@ -1376,7 +1376,7 @@ const (
 	NFPROTO_NUMPROTO = 0xd
 )
 
-type Nfgenmsg = struct {
+type Nfgenmsg struct {
 	Nfgen_family uint8
 	Version      uint8
 	Res_id       uint16
