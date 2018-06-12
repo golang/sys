@@ -449,6 +449,7 @@ const (
 	ETH_P_PPP_DISC                       = 0x8863
 	ETH_P_PPP_MP                         = 0x8
 	ETH_P_PPP_SES                        = 0x8864
+	ETH_P_PREAUTH                        = 0x88c7
 	ETH_P_PRP                            = 0x88fb
 	ETH_P_PUP                            = 0x200
 	ETH_P_PUPAT                          = 0x201
@@ -1232,6 +1233,7 @@ const (
 	PERF_EVENT_IOC_DISABLE               = 0x2401
 	PERF_EVENT_IOC_ENABLE                = 0x2400
 	PERF_EVENT_IOC_ID                    = 0x80082407
+	PERF_EVENT_IOC_MODIFY_ATTRIBUTES     = 0x4008240b
 	PERF_EVENT_IOC_PAUSE_OUTPUT          = 0x40042409
 	PERF_EVENT_IOC_PERIOD                = 0x40082404
 	PERF_EVENT_IOC_QUERY_BPF             = 0xc008240a
@@ -1287,6 +1289,7 @@ const (
 	PR_GET_PDEATHSIG                     = 0x2
 	PR_GET_SECCOMP                       = 0x15
 	PR_GET_SECUREBITS                    = 0x1b
+	PR_GET_SPECULATION_CTRL              = 0x34
 	PR_GET_THP_DISABLE                   = 0x2a
 	PR_GET_TID_ADDRESS                   = 0x28
 	PR_GET_TIMERSLACK                    = 0x1e
@@ -1332,11 +1335,18 @@ const (
 	PR_SET_PTRACER_ANY                   = 0xffffffffffffffff
 	PR_SET_SECCOMP                       = 0x16
 	PR_SET_SECUREBITS                    = 0x1c
+	PR_SET_SPECULATION_CTRL              = 0x35
 	PR_SET_THP_DISABLE                   = 0x29
 	PR_SET_TIMERSLACK                    = 0x1d
 	PR_SET_TIMING                        = 0xe
 	PR_SET_TSC                           = 0x1a
 	PR_SET_UNALIGN                       = 0x6
+	PR_SPEC_DISABLE                      = 0x4
+	PR_SPEC_ENABLE                       = 0x2
+	PR_SPEC_FORCE_DISABLE                = 0x8
+	PR_SPEC_NOT_AFFECTED                 = 0x0
+	PR_SPEC_PRCTL                        = 0x1
+	PR_SPEC_STORE_BYPASS                 = 0x0
 	PR_SVE_GET_VL                        = 0x33
 	PR_SVE_SET_VL                        = 0x32
 	PR_SVE_SET_VL_ONEXEC                 = 0x40000
