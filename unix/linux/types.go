@@ -142,6 +142,10 @@ struct stat {
 # define AT_STATX_DONT_SYNC	0x4000	// - Don't sync attributes with the server
 #endif
 
+#ifndef AT_EACCESS
+# define AT_EACCESS		0x200	// Test access permitted for effective IDs, not real IDs.
+#endif
+
 #ifdef TCSETS2
 // On systems that have "struct termios2" use this as type Termios.
 typedef struct termios2 termios_t;
@@ -650,6 +654,8 @@ const (
 
 	AT_SYMLINK_FOLLOW   = C.AT_SYMLINK_FOLLOW
 	AT_SYMLINK_NOFOLLOW = C.AT_SYMLINK_NOFOLLOW
+
+	AT_EACCESS = C.AT_EACCESS
 )
 
 type PollFd C.struct_pollfd

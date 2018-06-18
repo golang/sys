@@ -384,3 +384,33 @@ func stringsFromByteSlice(buf []byte) []string {
 	}
 	return result
 }
+
+func TestFaccessat(t *testing.T) {
+	defer chtmpdir(t)()
+	touch(t, "file1")
+
+	err := unix.Faccessat(unix.AT_FDCWD, "file1", unix.O_RDONLY, 0)
+	if err != nil {
+		t.Errorf("Faccessat: unexpected error: %v", err)
+	}
+
+	err = unix.Faccessat(unix.AT_FDCWD, "file1", unix.O_RDONLY, 2)
+	if err != unix.EINVAL {
+		t.Errorf("Faccessat: unexpected error: %v, want EINVAL", err)
+	}
+
+	err = unix.Faccessat(unix.AT_FDCWD, "file1", unix.O_RDONLY, unix.AT_EACCESS)
+	if err != unix.EOPNOTSUPP {
+		t.Errorf("Faccessat: unexpected error: %v, want EOPNOTSUPP", err)
+	}
+
+	err = os.Symlink("file1", "symlink1")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = unix.Faccessat(unix.AT_FDCWD, "symlink1", unix.O_RDONLY, unix.AT_SYMLINK_NOFOLLOW)
+	if err != unix.EOPNOTSUPP {
+		t.Errorf("Faccessat: unexpected error: %v, want EOPNOTSUPP", err)
+	}
+}
