@@ -140,9 +140,8 @@ func TestUtimesNanoAt(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Lstat: %v", err)
 	}
-	if st.Atim != ts[0] {
-		t.Errorf("UtimesNanoAt: wrong atime: %v", st.Atim)
-	}
+
+	// Only check Mtim, Atim might not be supported by the underlying filesystem
 	if st.Mtim != ts[1] {
 		t.Errorf("UtimesNanoAt: wrong mtime: %v", st.Mtim)
 	}
