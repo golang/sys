@@ -142,8 +142,14 @@ func TestUtimesNanoAt(t *testing.T) {
 	}
 
 	// Only check Mtim, Atim might not be supported by the underlying filesystem
-	if st.Mtim != ts[1] {
-		t.Errorf("UtimesNanoAt: wrong mtime: %v", st.Mtim)
+	expected := ts[1]
+	if st.Mtim.Nsec == 0 {
+		// Some filesystems only support 1-second time stamp resolution
+		// and will always set Nsec to 0.
+		expected.Nsec = 0
+	}
+	if st.Mtim != expected {
+		t.Errorf("UtimesNanoAt: wrong mtime: expected %v, got %v", expected, st.Mtim)
 	}
 }
 
