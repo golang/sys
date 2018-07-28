@@ -261,6 +261,7 @@ includes_OpenBSD='
 #include <sys/sysctl.h>
 #include <sys/termios.h>
 #include <sys/ttycom.h>
+#include <sys/unistd.h>
 #include <sys/wait.h>
 #include <net/bpf.h>
 #include <net/if.h>
