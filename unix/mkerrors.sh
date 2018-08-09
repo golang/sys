@@ -258,6 +258,7 @@ includes_OpenBSD='
 #include <sys/mman.h>
 #include <sys/socket.h>
 #include <sys/sockio.h>
+#include <sys/stat.h>
 #include <sys/sysctl.h>
 #include <sys/termios.h>
 #include <sys/ttycom.h>
