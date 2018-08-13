@@ -191,7 +191,6 @@ struct ltchars {
 #include <linux/vm_sockets.h>
 #include <linux/taskstats.h>
 #include <linux/genetlink.h>
-#include <linux/stat.h>
 #include <linux/watchdog.h>
 #include <linux/hdreg.h>
 #include <linux/rtc.h>
