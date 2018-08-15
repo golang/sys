@@ -65,6 +65,7 @@ includes_DragonFly='
 #include <sys/event.h>
 #include <sys/socket.h>
 #include <sys/sockio.h>
+#include <sys/stat.h>
 #include <sys/sysctl.h>
 #include <sys/mman.h>
 #include <sys/wait.h>
