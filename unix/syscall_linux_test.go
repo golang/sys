@@ -7,6 +7,7 @@
 package unix_test
 
 import (
+	"io/ioutil"
 	"os"
 	"runtime"
 	"runtime/debug"
@@ -439,5 +440,28 @@ func TestFaccessat(t *testing.T) {
 		if unix.Getuid() != 0 {
 			t.Errorf("Faccessat: unexpected error: %v, want EACCES", err)
 		}
+	}
+}
+
+func TestSyncFileRange(t *testing.T) {
+	file, err := ioutil.TempFile("", "TestSyncFileRange")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer os.Remove(file.Name())
+	defer file.Close()
+
+	err = unix.SyncFileRange(int(file.Fd()), 0, 0, 0)
+	if err == unix.ENOSYS || err == unix.EPERM {
+		t.Skip("sync_file_range syscall is not available, skipping test")
+	} else if err != nil {
+		t.Fatalf("SyncFileRange: %v", err)
+	}
+
+	// invalid flags
+	flags := 0xf00
+	err = unix.SyncFileRange(int(file.Fd()), 0, 0, flags)
+	if err != unix.EINVAL {
+		t.Fatalf("SyncFileRange: unexpected error: %v, want EINVAL", err)
 	}
 }
