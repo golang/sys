@@ -1,4 +1,4 @@
-FROM ubuntu:18.04
+FROM ubuntu:18.10
 
 # Dependencies to get the git sources and go binaries
 RUN apt-get update && apt-get install -y  --no-install-recommends \
@@ -33,7 +33,7 @@ RUN apt-get update && apt-get install -y  --no-install-recommends \
         bison gawk make python \
         gcc gcc-multilib \
         gettext texinfo \
-        qemu \
+        qemu-user \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 # Cross compilers (install recommended packages to get cross libc-dev)
@@ -42,6 +42,7 @@ RUN apt-get update && apt-get install -y \
         gcc-mips-linux-gnu          gcc-mips64-linux-gnuabi64 \
         gcc-mips64el-linux-gnuabi64 gcc-mipsel-linux-gnu      \
         gcc-powerpc64-linux-gnu     gcc-powerpc64le-linux-gnu \
+	gcc-riscv64-linux-gnu                                 \
         gcc-s390x-linux-gnu         gcc-sparc64-linux-gnu     \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
