@@ -178,7 +178,7 @@ func TestRlimitAs(t *testing.T) {
 	// should fail. See 'man 2 getrlimit'.
 	_, err = unix.Mmap(-1, 0, 2*unix.Getpagesize(), unix.PROT_NONE, unix.MAP_ANON|unix.MAP_PRIVATE)
 	if err == nil {
-		t.Fatal("Mmap: unexpectedly suceeded after setting RLIMIT_AS")
+		t.Fatal("Mmap: unexpectedly succeeded after setting RLIMIT_AS")
 	}
 
 	err = unix.Setrlimit(unix.RLIMIT_AS, &rlim)
