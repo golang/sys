@@ -280,6 +280,14 @@ type RawSockaddrVM struct {
 	Zero      [4]uint8
 }
 
+type RawSockaddrXDP struct {
+	Family         uint16
+	Flags          uint16
+	Ifindex        uint32
+	Queue_id       uint32
+	Shared_umem_fd uint32
+}
+
 type RawSockaddr struct {
 	Family uint16
 	Data   [14]int8
@@ -416,6 +424,7 @@ const (
 	SizeofSockaddrCAN       = 0x10
 	SizeofSockaddrALG       = 0x58
 	SizeofSockaddrVM        = 0x10
+	SizeofSockaddrXDP       = 0x10
 	SizeofLinger            = 0x8
 	SizeofIovec             = 0x10
 	SizeofIPMreq            = 0x8
@@ -1918,3 +1927,35 @@ const (
 	NETNSA_PID  = 0x2
 	NETNSA_FD   = 0x3
 )
+
+type XDPRingOffset struct {
+	Producer uint64
+	Consumer uint64
+	Desc     uint64
+}
+
+type XDPMmapOffsets struct {
+	Rx XDPRingOffset
+	Tx XDPRingOffset
+	Fr XDPRingOffset
+	Cr XDPRingOffset
+}
+
+type XDPUmemReg struct {
+	Addr     uint64
+	Len      uint64
+	Size     uint32
+	Headroom uint32
+}
+
+type XDPStatistics struct {
+	Rx_dropped       uint64
+	Rx_invalid_descs uint64
+	Tx_invalid_descs uint64
+}
+
+type XDPDesc struct {
+	Addr    uint64
+	Len     uint32
+	Options uint32
+}
