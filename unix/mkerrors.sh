@@ -87,6 +87,7 @@ includes_DragonFly='
 #include <sys/stat.h>
 #include <sys/sysctl.h>
 #include <sys/mman.h>
+#include <sys/mount.h>
 #include <sys/wait.h>
 #include <sys/ioctl.h>
 #include <net/bpf.h>
