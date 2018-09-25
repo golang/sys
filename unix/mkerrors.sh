@@ -292,6 +292,7 @@ includes_OpenBSD='
 #include <sys/param.h>
 #include <sys/event.h>
 #include <sys/mman.h>
+#include <sys/mount.h>
 #include <sys/socket.h>
 #include <sys/sockio.h>
 #include <sys/stat.h>
@@ -440,6 +441,7 @@ ccflags="$@"
 		$2 ~ /^KERN_(HOSTNAME|OS(RELEASE|TYPE)|VERSION)$/ ||
 		$2 ~ /^HW_MACHINE$/ ||
 		$2 ~ /^SYSCTL_VERS/ ||
+		$2 !~ "MNT_BITS" &&
 		$2 ~ /^(MS|MNT|UMOUNT)_/ ||
 		$2 ~ /^TUN(SET|GET|ATTACH|DETACH)/ ||
 		$2 ~ /^(O|F|E?FD|NAME|S|PTRACE|PT)_/ ||
