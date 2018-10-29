@@ -272,6 +272,7 @@ func Uname(uname *Utsname) error {
 //sys	Pwrite(fd int, p []byte, offset int64) (n int, err error)
 //sys	read(fd int, p []byte) (n int, err error)
 //sys	Readlink(path string, buf []byte) (n int, err error)
+//sys	Readlinkat(dirfd int, path string, buf []byte) (n int, err error)
 //sys	Rename(from string, to string) (err error)
 //sys	Revoke(path string) (err error)
 //sys	Rmdir(path string) (err error)
@@ -361,7 +362,6 @@ func Uname(uname *Utsname) error {
 // profil
 // pwritev
 // quotactl
-// readlinkat
 // readv
 // reboot
 // renameat
