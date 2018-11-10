@@ -453,8 +453,8 @@ func TestGetwd(t *testing.T) {
 		t.Fatalf("Open .: %s", err)
 	}
 	defer fd.Close()
-	// Don't worry if a few of these directories contain symlinks or don't exist
-	// on some common unix desktop environments. That will be checked.
+	// Directory list for test. Do not worry if any are symlinks or do not
+	// exist on some common unix desktop environments. That will be checked.
 	dirs := []string{"/", "/usr/bin", "/etc", "/var", "/opt"}
 	switch runtime.GOOS {
 	case "android":
@@ -475,7 +475,7 @@ func TestGetwd(t *testing.T) {
 	}
 	oldwd := os.Getenv("PWD")
 	for _, d := range dirs {
-		// Check whether d exists, is a dir and whether it contains a symlink
+		// Check whether d exists, is a dir and that d's path does not contain a symlink
 		fi, err := os.Stat(d)
 		if err != nil || !fi.IsDir() {
 			t.Logf("Test dir %s stat error (%v) or not a directory, skipping", d, err)
@@ -483,7 +483,7 @@ func TestGetwd(t *testing.T) {
 		}
 		check, err := filepath.EvalSymlinks(d)
 		if err != nil || check != d {
-			t.Logf("Test dir %s (%s), is symlink or other error (%v), skipping", d, check, err)
+			t.Logf("Test dir %s (%s) is symlink or other error (%v), skipping", d, check, err)
 			continue
 		}
 		err = os.Chdir(d)
