@@ -853,6 +853,22 @@ func anyToSockaddr(fd int, rsa *RawSockaddrAny) (Sockaddr, error) {
 			SharedUmemFD: pp.Shared_umem_fd,
 		}
 		return sa, nil
+	case AF_PPPOX:
+		pp := (*RawSockaddrPPPoX)(unsafe.Pointer(rsa))
+		if binary.BigEndian.Uint32(pp[2:6]) != 0 {
+			return nil, errors.New("PPPOX address type is not PPPoE")
+		}
+		sa := &SockaddrPPPoE{
+			SID:    binary.BigEndian.Uint16(pp[6:8]),
+			Remote: net.HardwareAddr(pp[8:14]),
+		}
+		for i := 14; i < 14+IFNAMSIZ; i++ {
+			if pp[i] == 0 {
+				sa.Dev = string(pp[14:i])
+				break
+			}
+		}
+		return sa, nil
 	}
 	return nil, EAFNOSUPPORT
 }
