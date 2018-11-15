@@ -12,6 +12,10 @@
 package unix
 
 import (
+	"encoding/binary"
+	"errors"
+	"fmt"
+	"net"
 	"syscall"
 	"unsafe"
 )
@@ -708,6 +712,35 @@ func (sa *SockaddrXDP) sockaddr() (unsafe.Pointer, _Socklen, error) {
 	sa.raw.Shared_umem_fd = sa.SharedUmemFD
 
 	return unsafe.Pointer(&sa.raw), SizeofSockaddrXDP, nil
+}
+
+type SockaddrPPPoE struct {
+	SID    uint16
+	Remote net.HardwareAddr
+	Dev    string
+	raw    RawSockaddrPPPoX
+}
+
+func (sa *SockaddrPPPoE) sockaddr() (unsafe.Pointer, _Socklen, error) {
+	if len(sa.Remote) != 6 {
+		return nil, 0, errors.New("wrong size MAC address")
+	}
+	if len(sa.Dev) > IFNAMSIZ-1 {
+		return nil, 0, fmt.Errorf("Dev name %q too long, max %d chars", sa.Dev, IFNAMSIZ-1)
+	}
+
+	*(*uint16)(unsafe.Pointer(&sa.raw[0])) = AF_PPPOX
+	// PX_PROTO_OE = 0, so just zero the field out by hand.
+	for i := 2; i < 6; i++ {
+		sa.raw[i] = 0
+	}
+	binary.BigEndian.PutUint16(sa.raw[6:8], sa.SID)
+	copy(sa.raw[8:14], sa.Remote)
+	for i := 14; i < 14+IFNAMSIZ; i++ {
+		sa.raw[i] = 0
+	}
+	copy(sa.raw[14:], sa.Dev)
+	return unsafe.Pointer(&sa.raw), SizeofSockaddrPPPoX, nil
 }
 
 func anyToSockaddr(fd int, rsa *RawSockaddrAny) (Sockaddr, error) {
