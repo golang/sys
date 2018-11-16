@@ -14,7 +14,6 @@ package unix
 import (
 	"encoding/binary"
 	"errors"
-	"fmt"
 	"net"
 	"syscall"
 	"unsafe"
@@ -714,6 +713,15 @@ func (sa *SockaddrXDP) sockaddr() (unsafe.Pointer, _Socklen, error) {
 	return unsafe.Pointer(&sa.raw), SizeofSockaddrXDP, nil
 }
 
+// This constant mirrors the #define of PX_PROTO_OE in
+// linux/if_pppox.h. We're defining this by hand here instead of
+// autogenerating through mkerrors.sh because including
+// linux/if_pppox.h causes some declaration conflicts with other
+// includes (linux/if_pppox.h includes linux/in.h, which conflicts
+// with netinet/in.h). Given that we only need a single zero constant
+// out of that file, it's cleaner to just define it by hand here.
+const px_proto_oe = 0
+
 type SockaddrPPPoE struct {
 	SID    uint16
 	Remote net.HardwareAddr
@@ -723,17 +731,24 @@ type SockaddrPPPoE struct {
 
 func (sa *SockaddrPPPoE) sockaddr() (unsafe.Pointer, _Socklen, error) {
 	if len(sa.Remote) != 6 {
-		return nil, 0, errors.New("wrong size MAC address")
+		return nil, 0, EINVAL
 	}
 	if len(sa.Dev) > IFNAMSIZ-1 {
-		return nil, 0, fmt.Errorf("Dev name %q too long, max %d chars", sa.Dev, IFNAMSIZ-1)
+		return nil, 0, EINVAL
 	}
 
 	*(*uint16)(unsafe.Pointer(&sa.raw[0])) = AF_PPPOX
-	// PX_PROTO_OE = 0, so just zero the field out by hand.
-	for i := 2; i < 6; i++ {
-		sa.raw[i] = 0
-	}
+	// This next field is in host-endian byte order. We can't use the
+	// same unsafe pointer cast as above, because this value is not
+	// 32-bit aligned and some architectures don't allow unaligned
+	// access.
+	//
+	// However, the value of px_proto_oe is 0, so we can use
+	// encoding/binary helpers to write the bytes without worrying
+	// about the ordering.
+	binary.BigEndian.PutUint32(sa.raw[2:6], px_proto_oe)
+	// This field is deliberately big-endian, unlike the previous
+	// one. The kernel expects SID to be in network byte order.
 	binary.BigEndian.PutUint16(sa.raw[6:8], sa.SID)
 	copy(sa.raw[8:14], sa.Remote)
 	for i := 14; i < 14+IFNAMSIZ; i++ {
@@ -855,7 +870,7 @@ func anyToSockaddr(fd int, rsa *RawSockaddrAny) (Sockaddr, error) {
 		return sa, nil
 	case AF_PPPOX:
 		pp := (*RawSockaddrPPPoX)(unsafe.Pointer(rsa))
-		if binary.BigEndian.Uint32(pp[2:6]) != 0 {
+		if binary.BigEndian.Uint32(pp[2:6]) != px_proto_oe {
 			return nil, errors.New("PPPOX address type is not PPPoE")
 		}
 		sa := &SockaddrPPPoE{
