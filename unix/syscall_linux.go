@@ -13,7 +13,6 @@ package unix
 
 import (
 	"encoding/binary"
-	"errors"
 	"net"
 	"syscall"
 	"unsafe"
@@ -871,7 +870,7 @@ func anyToSockaddr(fd int, rsa *RawSockaddrAny) (Sockaddr, error) {
 	case AF_PPPOX:
 		pp := (*RawSockaddrPPPoX)(unsafe.Pointer(rsa))
 		if binary.BigEndian.Uint32(pp[2:6]) != px_proto_oe {
-			return nil, errors.New("PPPOX address type is not PPPoE")
+			return nil, EINVAL
 		}
 		sa := &SockaddrPPPoE{
 			SID:    binary.BigEndian.Uint16(pp[6:8]),
