@@ -222,6 +222,10 @@ func (t *target) commandFormatOutput(formatter string, outputFile string,
 		args = append([]string{"run", "mksyscall.go"}, args...)
 		mainCmd = makeCommand("go", args...)
 		t.setTargetBuildArch(mainCmd)
+	} else if name == "mksysnum" {
+		args = append([]string{"run", "linux/mksysnum.go"}, args...)
+		mainCmd = makeCommand("go", args...)
+		t.setTargetBuildArch(mainCmd)
 	}
 
 	fmtCmd := makeCommand(formatter)
@@ -467,7 +471,7 @@ func (t *target) makeZSysnumFile() error {
 	unistdFile := filepath.Join(IncludeDir, "asm/unistd.h")
 
 	args := append(t.cFlags(), unistdFile)
-	return t.commandFormatOutput("gofmt", zsysnumFile, "linux/mksysnum.pl", args...)
+	return t.commandFormatOutput("gofmt", zsysnumFile, "mksysnum", args...)
 }
 
 // makes the zsyscall_linux_$GOARCH.go file
