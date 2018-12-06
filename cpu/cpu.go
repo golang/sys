@@ -68,3 +68,20 @@ var ARM64 struct {
 	HasASIMDFHM bool // Advanced SIMD multiplication FP16 to FP32
 	_           CacheLinePad
 }
+
+// PPC64 contains the supported CPU features of the current ppc64/ppc64le platforms.
+// If the current platform is not ppc64/ppc64le then all feature flags are false.
+//
+// For ppc64/ppc64le, it is safe to check only for ISA level starting on ISA v3.00,
+// since there are no optional categories. There are some exceptions that also
+// require kernel support to work (DARN, SCV), so there are feature bits for
+// those as well. The minimum processor requirement is POWER8 (ISA 2.07).
+// The struct is padded to avoid false sharing.
+var PPC64 struct {
+	_        CacheLinePad
+	HasDARN  bool // Hardware random number generator (requires kernel enablement)
+	HasSCV   bool // Syscall vectored (requires kernel enablement)
+	IsPOWER8 bool // ISA v2.07 (POWER8)
+	IsPOWER9 bool // ISA v3.00 (POWER9)
+	_        CacheLinePad
+}

@@ -9,6 +9,7 @@ package cpu
 import (
 	"encoding/binary"
 	"io/ioutil"
+	"runtime"
 )
 
 const (
@@ -41,8 +42,13 @@ func init() {
 			tag = uint(binary.LittleEndian.Uint32(buf[i:]))
 			val = uint(binary.LittleEndian.Uint32(buf[i+pb:]))
 		case 64:
-			tag = uint(binary.LittleEndian.Uint64(buf[i:]))
-			val = uint(binary.LittleEndian.Uint64(buf[i+pb:]))
+			if runtime.GOARCH == "ppc64" {
+				tag = uint(binary.BigEndian.Uint64(buf[i:]))
+				val = uint(binary.BigEndian.Uint64(buf[i+pb:]))
+			} else {
+				tag = uint(binary.LittleEndian.Uint64(buf[i:]))
+				val = uint(binary.LittleEndian.Uint64(buf[i+pb:]))
+			}
 		}
 		switch tag {
 		case _AT_HWCAP:
