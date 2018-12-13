@@ -116,6 +116,12 @@ func main() {
 		endianness = "little-endian"
 	}
 
+	libc := false
+	if goos == "darwin" && strings.Contains(buildTags(), ",go1.12") {
+		libc = true
+	}
+	trampolines := map[string]bool{}
+
 	text := ""
 	for _, path := range flag.Args() {
 		file, err := os.Open(path)
@@ -272,6 +278,20 @@ func main() {
 				sysname = strings.ToUpper(sysname)
 			}
 
+			var libcFn string
+			if libc {
+				asm = "syscall_" + strings.ToLower(asm[:1]) + asm[1:] // internal syscall call
+				sysname = strings.TrimPrefix(sysname, "SYS_")         // remove SYS_
+				sysname = strings.ToLower(sysname)                    // lowercase
+				if sysname == "getdirentries64" {
+					// Special case - libSystem name and
+					// raw syscall name don't match.
+					sysname = "__getdirentries64"
+				}
+				libcFn = sysname
+				sysname = "funcPC(libc_" + sysname + "_trampoline)"
+			}
+
 			// Actual call.
 			arglist := strings.Join(args, ", ")
 			call := fmt.Sprintf("%s(%s, %s)", asm, sysname, arglist)
@@ -339,6 +359,16 @@ func main() {
 			text += "\treturn\n"
 			text += "}\n\n"
 
+			if libc && !trampolines[libcFn] {
+				// some system calls share a trampoline, like read and readlen.
+				trampolines[libcFn] = true
+				// Declare assembly trampoline.
+				text += fmt.Sprintf("func libc_%s_trampoline()\n", libcFn)
+				// Assembly trampoline calls the libc_* function, which this magic
+				// redirects to use the function from libSystem.
+				text += fmt.Sprintf("//go:linkname libc_%s libc_%s\n", libcFn, libcFn)
+				text += fmt.Sprintf("//go:cgo_import_dynamic libc_%s %s \"/usr/lib/libSystem.B.dylib\"\n", libcFn, libcFn)
+			}
 		}
 		if err := s.Err(); err != nil {
 			fmt.Fprintf(os.Stderr, err.Error())
