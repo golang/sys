@@ -134,8 +134,6 @@ TEXT ·libc_fsync_trampoline(SB),NOSPLIT,$0-0
 	JMP	libc_fsync(SB)
 TEXT ·libc_ftruncate_trampoline(SB),NOSPLIT,$0-0
 	JMP	libc_ftruncate(SB)
-TEXT ·libc___getdirentries64_trampoline(SB),NOSPLIT,$0-0
-	JMP	libc___getdirentries64(SB)
 TEXT ·libc_getdtablesize_trampoline(SB),NOSPLIT,$0-0
 	JMP	libc_getdtablesize(SB)
 TEXT ·libc_getegid_trampoline(SB),NOSPLIT,$0-0
@@ -268,6 +266,8 @@ TEXT ·libc_fstatat64_trampoline(SB),NOSPLIT,$0-0
 	JMP	libc_fstatat64(SB)
 TEXT ·libc_fstatfs64_trampoline(SB),NOSPLIT,$0-0
 	JMP	libc_fstatfs64(SB)
+TEXT ·libc___getdirentries64_trampoline(SB),NOSPLIT,$0-0
+	JMP	libc___getdirentries64(SB)
 TEXT ·libc_lstat64_trampoline(SB),NOSPLIT,$0-0
 	JMP	libc_lstat64(SB)
 TEXT ·libc_stat64_trampoline(SB),NOSPLIT,$0-0

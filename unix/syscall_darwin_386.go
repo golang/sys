@@ -70,6 +70,7 @@ const SYS___SYSCTL = SYS_SYSCTL
 //sys	Fstat(fd int, stat *Stat_t) (err error) = SYS_FSTAT64
 //sys	Fstatat(fd int, path string, stat *Stat_t, flags int) (err error) = SYS_FSTATAT64
 //sys	Fstatfs(fd int, stat *Statfs_t) (err error) = SYS_FSTATFS64
+//sys	Getdirentries(fd int, buf []byte, basep *uintptr) (n int, err error) = SYS_GETDIRENTRIES64
 //sys	Lstat(path string, stat *Stat_t) (err error) = SYS_LSTAT64
 //sys	Stat(path string, stat *Stat_t) (err error) = SYS_STAT64
 //sys	Statfs(path string, stat *Statfs_t) (err error) = SYS_STATFS64
