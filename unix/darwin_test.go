@@ -206,4 +206,5 @@ var darwinTests = [...]darwinTest{
 	{"mmap", libc_mmap_trampoline},
 	{"munmap", libc_munmap_trampoline},
 	{"gettimeofday", libc_gettimeofday_trampoline},
+	{"getfsstat64", libc_getfsstat64_trampoline},
 }

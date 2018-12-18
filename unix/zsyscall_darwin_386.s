@@ -268,6 +268,8 @@ TEXT ·libc_fstatfs64_trampoline(SB),NOSPLIT,$0-0
 	JMP	libc_fstatfs64(SB)
 TEXT ·libc___getdirentries64_trampoline(SB),NOSPLIT,$0-0
 	JMP	libc___getdirentries64(SB)
+TEXT ·libc_getfsstat64_trampoline(SB),NOSPLIT,$0-0
+	JMP	libc_getfsstat64(SB)
 TEXT ·libc_lstat64_trampoline(SB),NOSPLIT,$0-0
 	JMP	libc_lstat64(SB)
 TEXT ·libc_stat64_trampoline(SB),NOSPLIT,$0-0
