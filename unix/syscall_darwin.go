@@ -108,17 +108,8 @@ func getAttrList(path string, attrList attrList, attrBuf []byte, options uint) (
 		return nil, err
 	}
 
-	_, _, e1 := Syscall6(
-		SYS_GETATTRLIST,
-		uintptr(unsafe.Pointer(_p0)),
-		uintptr(unsafe.Pointer(&attrList)),
-		uintptr(unsafe.Pointer(&attrBuf[0])),
-		uintptr(len(attrBuf)),
-		uintptr(options),
-		0,
-	)
-	if e1 != 0 {
-		return nil, e1
+	if err := getattrlist(_p0, unsafe.Pointer(&attrList), unsafe.Pointer(&attrBuf[0]), uintptr(len(attrBuf)), int(options)); err != nil {
+		return nil, err
 	}
 	size := *(*uint32)(unsafe.Pointer(&attrBuf[0]))
 
@@ -150,6 +141,8 @@ func getAttrList(path string, attrList attrList, attrBuf []byte, options uint) (
 	}
 	return
 }
+
+//sys getattrlist(path *byte, list unsafe.Pointer, buf unsafe.Pointer, size uintptr, options int) (err error)
 
 //sysnb pipe() (r int, w int, err error)
 
