@@ -6,7 +6,6 @@ package unix
 
 import (
 	"syscall"
-	"unsafe"
 )
 
 func setTimespec(sec, nsec int64) Timespec {
@@ -44,19 +43,6 @@ func (msghdr *Msghdr) SetControllen(length int) {
 
 func (cmsg *Cmsghdr) SetLen(length int) {
 	cmsg.Len = uint32(length)
-}
-
-func sendfile(outfd int, infd int, offset *int64, count int) (written int, err error) {
-	var length = uint64(count)
-
-	_, _, e1 := Syscall9(SYS_SENDFILE, uintptr(infd), uintptr(outfd), uintptr(*offset), uintptr(*offset>>32), uintptr(unsafe.Pointer(&length)), 0, 0, 0, 0)
-
-	written = int(length)
-
-	if e1 != 0 {
-		err = e1
-	}
-	return
 }
 
 func Syscall9(num, a1, a2, a3, a4, a5, a6, a7, a8, a9 uintptr) (r1, r2 uintptr, err syscall.Errno) // sic
