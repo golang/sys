@@ -84,6 +84,8 @@ TEXT ·libc_listxattr_trampoline(SB),NOSPLIT,$0-0
 	JMP	libc_listxattr(SB)
 TEXT ·libc_flistxattr_trampoline(SB),NOSPLIT,$0-0
 	JMP	libc_flistxattr(SB)
+TEXT ·libc_setattrlist_trampoline(SB),NOSPLIT,$0-0
+	JMP	libc_setattrlist(SB)
 TEXT ·libc_kill_trampoline(SB),NOSPLIT,$0-0
 	JMP	libc_kill(SB)
 TEXT ·libc_ioctl_trampoline(SB),NOSPLIT,$0-0

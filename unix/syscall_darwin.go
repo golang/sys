@@ -293,20 +293,15 @@ func setattrlistTimes(path string, times []Timespec, flags int) error {
 	if flags&AT_SYMLINK_NOFOLLOW != 0 {
 		options |= FSOPT_NOFOLLOW
 	}
-	_, _, e1 := Syscall6(
-		SYS_SETATTRLIST,
-		uintptr(unsafe.Pointer(_p0)),
-		uintptr(unsafe.Pointer(&attrList)),
-		uintptr(unsafe.Pointer(&attributes)),
-		uintptr(unsafe.Sizeof(attributes)),
-		uintptr(options),
-		0,
-	)
-	if e1 != 0 {
-		return e1
-	}
-	return nil
+	return setattrlist(
+		_p0,
+		unsafe.Pointer(&attrList),
+		unsafe.Pointer(&attributes),
+		unsafe.Sizeof(attributes),
+		options)
 }
+
+//sys setattrlist(path *byte, list unsafe.Pointer, buf unsafe.Pointer, size uintptr, options int) (err error)
 
 func utimensat(dirfd int, path string, times *[2]Timespec, flags int) error {
 	// Darwin doesn't support SYS_UTIMENSAT
