@@ -368,6 +368,7 @@ func main() {
 				// redirects to use the function from libSystem.
 				text += fmt.Sprintf("//go:linkname libc_%s libc_%s\n", libcFn, libcFn)
 				text += fmt.Sprintf("//go:cgo_import_dynamic libc_%s %s \"/usr/lib/libSystem.B.dylib\"\n", libcFn, libcFn)
+				text += "\n"
 			}
 		}
 		if err := s.Err(); err != nil {
