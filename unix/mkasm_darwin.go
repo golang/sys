@@ -27,9 +27,9 @@ func main() {
 	if err != nil {
 		log.Fatalf("can't open syscall_darwin_%s.go: %s", arch, err)
 	}
-	in3, err := ioutil.ReadFile(fmt.Sprintf("zsyscall_darwin_%s.1_12.go", arch))
+	in3, err := ioutil.ReadFile(fmt.Sprintf("zsyscall_darwin_%s.go", arch))
 	if err != nil {
-		log.Fatalf("can't open zsyscall_darwin_%s.1_12.go: %s", arch, err)
+		log.Fatalf("can't open zsyscall_darwin_%s.go: %s", arch, err)
 	}
 	in := string(in1) + string(in2) + string(in3)
 

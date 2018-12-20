@@ -69,7 +69,7 @@ func init() {
 	}
 }
 
-// All the _trampoline functions in zsyscall_darwin_$ARCH.1_12.s
+// All the _trampoline functions in zsyscall_darwin_$ARCH.s
 var darwinTests = [...]darwinTest{
 	{"getgroups", libc_getgroups_trampoline},
 	{"setgroups", libc_setgroups_trampoline},
