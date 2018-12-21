@@ -8,7 +8,6 @@ package unix
 
 import (
 	"syscall"
-	"unsafe"
 )
 
 func setTimespec(sec, nsec int64) Timespec {
