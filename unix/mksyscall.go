@@ -93,10 +93,10 @@ func main() {
 		goarch = os.Getenv("GOARCH")
 	}
 
-	// Check that we are using the new build system if we should
-	if goos == "linux" && goarch != "sparc64" {
+	// Check that we are using the Docker-based build system if we should
+	if goos == "linux" {
 		if os.Getenv("GOLANG_SYS_BUILD") != "docker" {
-			fmt.Fprintf(os.Stderr, "In the new build system, mksyscall should not be called directly.\n")
+			fmt.Fprintf(os.Stderr, "In the Docker-based build system, mksyscall should not be called directly.\n")
 			fmt.Fprintf(os.Stderr, "See README.md\n")
 			os.Exit(1)
 		}

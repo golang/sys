@@ -46,8 +46,8 @@ case "$#" in
 	exit 2
 esac
 
-if [[ "$GOOS" = "linux" ]] && [[ "$GOARCH" != "sparc64" ]]; then
-	# Use then new build system
+if [[ "$GOOS" = "linux" ]]; then
+	# Use the Docker-based build system
 	# Files generated through docker (use $cmd so you can Ctl-C the build or run)
 	$cmd docker build --tag generate:$GOOS $GOOS
 	$cmd docker run --interactive --tty --volume $(dirname "$(readlink -f "$0")"):/build generate:$GOOS
@@ -120,13 +120,6 @@ freebsd_arm)
 	# Let the type of C char be signed for making the bare syscall
 	# API consistent across platforms.
 	mktypes="GOARCH=$GOARCH go tool cgo -godefs -- -fsigned-char"
-	;;
-linux_sparc64)
-	GOOSARCH_in=syscall_linux_sparc64.go
-	unistd_h=/usr/include/sparc64-linux-gnu/asm/unistd.h
-	mkerrors="$mkerrors -m64"
-	mksysnum="./mksysnum_linux.pl $unistd_h"
-	mktypes="GOARCH=$GOARCH go tool cgo -godefs"
 	;;
 netbsd_386)
 	mkerrors="$mkerrors -m32"
