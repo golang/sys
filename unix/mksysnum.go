@@ -1,13 +1,13 @@
 // Copyright 2018 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
-//
+
+// +build ignore
+
 // Generate system call table for DragonFly, NetBSD,
 // FreeBSD, OpenBSD or Darwin from master list
 // (for example, /usr/src/sys/kern/syscalls.master or
 // sys/syscall.h).
-
-// +build ignore
 package main
 
 import (
