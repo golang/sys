@@ -57,7 +57,6 @@ func open(path string, mode int) (fd int, err error) {
 		return
 	}
 	r0, _, e1 := Syscall(SYS_OPEN, uintptr(unsafe.Pointer(_p0)), uintptr(mode), 0)
-	use(unsafe.Pointer(_p0))
 	fd = int(r0)
 	if int32(r0) == -1 {
 		err = e1
@@ -74,7 +73,6 @@ func create(path string, mode int, perm uint32) (fd int, err error) {
 		return
 	}
 	r0, _, e1 := Syscall(SYS_CREATE, uintptr(unsafe.Pointer(_p0)), uintptr(mode), uintptr(perm))
-	use(unsafe.Pointer(_p0))
 	fd = int(r0)
 	if int32(r0) == -1 {
 		err = e1
@@ -91,7 +89,6 @@ func remove(path string) (err error) {
 		return
 	}
 	r0, _, e1 := Syscall(SYS_REMOVE, uintptr(unsafe.Pointer(_p0)), 0, 0)
-	use(unsafe.Pointer(_p0))
 	if int32(r0) == -1 {
 		err = e1
 	}
@@ -113,7 +110,6 @@ func stat(path string, edir []byte) (n int, err error) {
 		_p1 = unsafe.Pointer(&_zero)
 	}
 	r0, _, e1 := Syscall(SYS_STAT, uintptr(unsafe.Pointer(_p0)), uintptr(_p1), uintptr(len(edir)))
-	use(unsafe.Pointer(_p0))
 	n = int(r0)
 	if int32(r0) == -1 {
 		err = e1
@@ -135,8 +131,6 @@ func bind(name string, old string, flag int) (err error) {
 		return
 	}
 	r0, _, e1 := Syscall(SYS_BIND, uintptr(unsafe.Pointer(_p0)), uintptr(unsafe.Pointer(_p1)), uintptr(flag))
-	use(unsafe.Pointer(_p0))
-	use(unsafe.Pointer(_p1))
 	if int32(r0) == -1 {
 		err = e1
 	}
@@ -157,8 +151,6 @@ func mount(fd int, afd int, old string, flag int, aname string) (err error) {
 		return
 	}
 	r0, _, e1 := Syscall6(SYS_MOUNT, uintptr(fd), uintptr(afd), uintptr(unsafe.Pointer(_p0)), uintptr(flag), uintptr(unsafe.Pointer(_p1)), 0)
-	use(unsafe.Pointer(_p0))
-	use(unsafe.Pointer(_p1))
 	if int32(r0) == -1 {
 		err = e1
 	}
@@ -180,7 +172,6 @@ func wstat(path string, edir []byte) (err error) {
 		_p1 = unsafe.Pointer(&_zero)
 	}
 	r0, _, e1 := Syscall(SYS_WSTAT, uintptr(unsafe.Pointer(_p0)), uintptr(_p1), uintptr(len(edir)))
-	use(unsafe.Pointer(_p0))
 	if int32(r0) == -1 {
 		err = e1
 	}
@@ -196,7 +187,6 @@ func chdir(path string) (err error) {
 		return
 	}
 	r0, _, e1 := Syscall(SYS_CHDIR, uintptr(unsafe.Pointer(_p0)), 0, 0)
-	use(unsafe.Pointer(_p0))
 	if int32(r0) == -1 {
 		err = e1
 	}

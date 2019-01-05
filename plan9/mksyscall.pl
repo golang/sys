@@ -132,7 +132,6 @@ while(<>) {
 
 	# Prepare arguments to Syscall.
 	my @args = ();
-	my @uses = ();
 	my $n = 0;
 	foreach my $p (@in) {
 		my ($name, $type) = parseparam($p);
@@ -143,14 +142,12 @@ while(<>) {
 			$text .= "\t_p$n, $errvar = BytePtrFromString($name)\n";
 			$text .= "\tif $errvar != nil {\n\t\treturn\n\t}\n";
 			push @args, "uintptr(unsafe.Pointer(_p$n))";
-			push @uses, "use(unsafe.Pointer(_p$n))";
 			$n++;
 		} elsif($type eq "string") {
 			print STDERR "$ARGV:$.: $func uses string arguments, but has no error return\n";
 			$text .= "\tvar _p$n *byte\n";
 			$text .= "\t_p$n, _ = BytePtrFromString($name)\n";
 			push @args, "uintptr(unsafe.Pointer(_p$n))";
-			push @uses, "use(unsafe.Pointer(_p$n))";
 			$n++;
 		} elsif($type =~ /^\[\](.*)/) {
 			# Convert slice into pointer, length.
@@ -280,9 +277,6 @@ while(<>) {
 		$text .= "\t$call\n";
 	} else {
 		$text .= "\t$ret[0], $ret[1], $ret[2] := $call\n";
-	}
-	foreach my $use (@uses) {
-		$text .= "\t$use\n";
 	}
 	$text .= $body;
 	
