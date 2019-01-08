@@ -62,7 +62,7 @@ _* | *_ | _)
 	;;
 aix_ppc)
 	mkerrors="$mkerrors -maix32"
-	mksyscall="./mksyscall_aix_ppc.pl -aix"
+	mksyscall="go run mksyscall_aix_ppc.go -aix"
 	mktypes="GOARCH=$GOARCH go tool cgo -godefs"
 	;;
 aix_ppc64)
