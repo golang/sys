@@ -2151,6 +2151,7 @@ const (
 	TCSETSF                              = 0x802c7416
 	TCSETSW                              = 0x802c7415
 	TCXONC                               = 0x2000741e
+	TIMER_ABSTIME                        = 0x1
 	TIOCCBRK                             = 0x5428
 	TIOCCONS                             = 0x541d
 	TIOCEXCL                             = 0x540c
