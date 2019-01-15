@@ -36,6 +36,7 @@ package unix
 #include <sys/resource.h>
 #include <sys/select.h>
 #include <sys/signal.h>
+#include <sys/signalfd.h>
 #include <sys/statfs.h>
 #include <sys/statvfs.h>
 #include <sys/sysinfo.h>
@@ -747,6 +748,8 @@ const (
 )
 
 type Sigset_t C.sigset_t
+
+type SignalfdSiginfo C.struct_signalfd_siginfo
 
 const RNDGETENTCNT = C.RNDGETENTCNT
 
