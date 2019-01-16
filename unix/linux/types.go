@@ -230,8 +230,8 @@ struct sockaddr_rc {
 // copied from /usr/include/linux/un.h
 struct my_sockaddr_un {
 	sa_family_t sun_family;
-#if defined(__ARM_EABI__) || defined(__powerpc64__)
-	// on ARM char is by default unsigned
+#if defined(__ARM_EABI__) || defined(__powerpc64__) || defined(__riscv)
+	// on some platforms char is unsigned by default
 	signed char sun_path[108];
 #else
 	char sun_path[108];

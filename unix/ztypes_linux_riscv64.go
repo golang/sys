@@ -212,7 +212,7 @@ type RawSockaddrInet6 struct {
 
 type RawSockaddrUnix struct {
 	Family uint16
-	Path   [108]uint8
+	Path   [108]int8
 }
 
 type RawSockaddrLinklayer struct {
