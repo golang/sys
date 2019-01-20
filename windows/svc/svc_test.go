@@ -127,8 +127,7 @@ func TestExample(t *testing.T) {
 	}
 	want := strings.Join(append([]string{name}, args...), "-")
 	// Test context passing (see servicemain in sys_386.s and sys_amd64.s).
-	// TODO(brainman): Uncomment next line once issue #25660 is fixed.
-	//want += "-123456"
+	want += "-123456"
 	if !strings.Contains(string(out), want) {
 		t.Errorf("%q string does not contain %q", string(out), want)
 	}

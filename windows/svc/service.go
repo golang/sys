@@ -315,8 +315,8 @@ func Run(name string, handler Handler) error {
 		return err
 	}
 
-	ctlHandler := func(ctl uint32, evtype uint32, evdata uintptr, context uintptr) uintptr {
-		e := ctlEvent{cmd: Cmd(ctl), eventType: evtype, eventData: evdata, context: context}
+	ctlHandler := func(ctl, evtype, evdata, context uintptr) uintptr {
+		e := ctlEvent{cmd: Cmd(ctl), eventType: uint32(evtype), eventData: evdata, context: context}
 		// We assume that this callback function is running on
 		// the same thread as Run. Nowhere in MS documentation
 		// I could find statement to guarantee that. So putting
