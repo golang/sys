@@ -1976,6 +1976,10 @@ const (
 	NCSI_CHANNEL_ATTR_VLAN_ID       = 0xa
 )
 
+type ScmTimestamping struct {
+	Ts [3]Timespec
+}
+
 const (
 	SOF_TIMESTAMPING_TX_HARDWARE  = 0x1
 	SOF_TIMESTAMPING_TX_SOFTWARE  = 0x2
@@ -1995,4 +1999,18 @@ const (
 
 	SOF_TIMESTAMPING_LAST = 0x4000
 	SOF_TIMESTAMPING_MASK = 0x7fff
+
+	SCM_TSTAMP_SND   = 0x0
+	SCM_TSTAMP_SCHED = 0x1
+	SCM_TSTAMP_ACK   = 0x2
 )
+
+type SockExtendedErr struct {
+	Errno  uint32
+	Origin uint8
+	Type   uint8
+	Code   uint8
+	Pad    uint8
+	Info   uint32
+	Data   uint32
+}
