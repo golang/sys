@@ -642,7 +642,7 @@ func TestRenameat(t *testing.T) {
 
 	_, err = os.Stat(from)
 	if err == nil {
-		t.Errorf("Renameat: stat of renamed file %q unexpectedly suceeeded", from)
+		t.Errorf("Renameat: stat of renamed file %q unexpectedly succeeded", from)
 	}
 }
 
