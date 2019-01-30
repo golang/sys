@@ -32,6 +32,21 @@ func TestIoctlGetInt(t *testing.T) {
 	t.Logf("%d bits of entropy available", v)
 }
 
+func TestIoctlGetRTCTime(t *testing.T) {
+	f, err := os.Open("/dev/rtc0")
+	if err != nil {
+		t.Skipf("skipping test, %v", err)
+	}
+	defer f.Close()
+
+	v, err := unix.IoctlGetRTCTime(int(f.Fd()))
+	if err != nil {
+		t.Fatalf("failed to perform ioctl: %v", err)
+	}
+
+	t.Logf("RTC time: %04d-%02d-%02d %02d:%02d:%02d", v.Year+1900, v.Mon+1, v.Mday, v.Hour, v.Min, v.Sec)
+}
+
 func TestPpoll(t *testing.T) {
 	if runtime.GOOS == "android" {
 		t.Skip("mkfifo syscall is not available on android, skipping test")
