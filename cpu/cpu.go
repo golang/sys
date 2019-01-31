@@ -29,6 +29,8 @@ var X86 struct {
 	HasOSXSAVE   bool // OS supports XSAVE/XRESTOR for saving/restoring XMM registers.
 	HasPCLMULQDQ bool // PCLMULQDQ instruction - most often used for AES-GCM
 	HasPOPCNT    bool // Hamming weight instruction POPCNT.
+	HasRDRAND    bool // RDRAND instruction (on-chip random number generator)
+	HasRDSEED    bool // RDSEED instruction (on-chip random number generator)
 	HasSSE2      bool // Streaming SIMD extension 2 (always available on amd64)
 	HasSSE3      bool // Streaming SIMD extension 3
 	HasSSSE3     bool // Supplemental streaming SIMD extension 3
