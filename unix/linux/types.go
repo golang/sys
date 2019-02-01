@@ -752,8 +752,6 @@ type Sigset_t C.sigset_t
 
 type SignalfdSiginfo C.struct_signalfd_siginfo
 
-const RNDGETENTCNT = C.RNDGETENTCNT
-
 const PERF_IOC_FLAG_GROUP = C.PERF_IOC_FLAG_GROUP
 
 // Terminal handling
