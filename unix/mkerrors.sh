@@ -259,16 +259,6 @@ struct ltchars {
 #define FS_KEY_DESC_PREFIX              "fscrypt:"
 #define FS_KEY_DESC_PREFIX_SIZE         8
 #define FS_MAX_KEY_SIZE                 64
-
-// XDP socket constants do not appear to be picked up otherwise.
-// Copied from samples/bpf/xdpsock_user.c.
-#ifndef SOL_XDP
-#define SOL_XDP 283
-#endif
-
-#ifndef AF_XDP
-#define AF_XDP 44
-#endif
 '
 
 includes_NetBSD='
