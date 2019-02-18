@@ -22,8 +22,8 @@ const (
 // For those platforms don't have a 'cpuid' equivalent we use HWCAP/HWCAP2
 // These are initialized in cpu_$GOARCH.go
 // and should not be changed after they are initialized.
-var HWCap uint
-var HWCap2 uint
+var hwCap uint
+var hwCap2 uint
 
 func init() {
 	buf, err := ioutil.ReadFile(procAuxv)
@@ -46,9 +46,9 @@ func init() {
 		}
 		switch tag {
 		case _AT_HWCAP:
-			HWCap = val
+			hwCap = val
 		case _AT_HWCAP2:
-			HWCap2 = val
+			hwCap2 = val
 		}
 	}
 	doinit()
