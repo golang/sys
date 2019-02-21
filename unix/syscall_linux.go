@@ -1000,6 +1000,14 @@ func SetsockoptSockFprog(fd, level, opt int, fprog *SockFprog) error {
 	return setsockopt(fd, level, opt, unsafe.Pointer(fprog), unsafe.Sizeof(*fprog))
 }
 
+func SetsockoptCanRawFilter(fd, level, opt int, filter []CanFilter) error {
+	var p unsafe.Pointer
+	if len(filter) > 0 {
+		p = unsafe.Pointer(&filter[0])
+	}
+	return setsockopt(fd, level, opt, p, uintptr(len(filter)*SizeofCanFilter))
+}
+
 // Keyctl Commands (http://man7.org/linux/man-pages/man2/keyctl.2.html)
 
 // KeyctlInt calls keyctl commands in which each argument is an int.

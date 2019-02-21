@@ -493,6 +493,8 @@ type Ucred C.struct_ucred
 
 type TCPInfo C.struct_tcp_info
 
+type CanFilter C.struct_can_filter
+
 const (
 	SizeofSockaddrInet4     = C.sizeof_struct_sockaddr_in
 	SizeofSockaddrInet6     = C.sizeof_struct_sockaddr_in6
@@ -522,6 +524,7 @@ const (
 	SizeofICMPv6Filter      = C.sizeof_struct_icmp6_filter
 	SizeofUcred             = C.sizeof_struct_ucred
 	SizeofTCPInfo           = C.sizeof_struct_tcp_info
+	SizeofCanFilter         = C.sizeof_struct_can_filter
 )
 
 // Netlink routing and interface messages
