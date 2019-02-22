@@ -662,6 +662,7 @@ const (
 	SizeofIfAddrmsg      = C.sizeof_struct_ifaddrmsg
 	SizeofRtMsg          = C.sizeof_struct_rtmsg
 	SizeofRtNexthop      = C.sizeof_struct_rtnexthop
+	SizeofNdUseroptmsg   = C.sizeof_struct_nduseroptmsg
 )
 
 type NlMsghdr C.struct_nlmsghdr
@@ -681,6 +682,8 @@ type IfAddrmsg C.struct_ifaddrmsg
 type RtMsg C.struct_rtmsg
 
 type RtNexthop C.struct_rtnexthop
+
+type NdUseroptmsg C.struct_nduseroptmsg
 
 // Linux socket filter
 
