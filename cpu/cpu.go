@@ -6,6 +6,13 @@
 // various CPU architectures.
 package cpu
 
+// Initialized reports whether the CPU features were initialized.
+//
+// For some GOOS/GOARCH combinations initialization of the CPU features depends
+// on reading an operating specific file, e.g. /proc/self/auxv on linux/arm
+// Initialized will report false if reading the file fails.
+var Initialized bool
+
 // CacheLinePad is used to pad structs to avoid false sharing.
 type CacheLinePad struct{ _ [cacheLineSize]byte }
 

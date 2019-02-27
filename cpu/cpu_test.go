@@ -13,6 +13,9 @@ import (
 
 func TestAMD64minimalFeatures(t *testing.T) {
 	if runtime.GOARCH == "amd64" {
+		if !cpu.Initialized {
+			t.Fatal("Initialized expected true, got false")
+		}
 		if !cpu.X86.HasSSE2 {
 			t.Fatal("HasSSE2 expected true, got false")
 		}
