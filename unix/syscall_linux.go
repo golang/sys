@@ -39,6 +39,20 @@ func Creat(path string, mode uint32) (fd int, err error) {
 	return Open(path, O_CREAT|O_WRONLY|O_TRUNC, mode)
 }
 
+//sys	FanotifyInit(flags uint, event_f_flags uint) (fd int, err error)
+//sys	fanotifyMark(fd int, flags uint, mask uint64, dirFd int, pathname *byte) (err error)
+
+func FanotifyMark(fd int, flags uint, mask uint64, dirFd int, pathname string) (err error) {
+	if pathname == "" {
+		return fanotifyMark(fd, flags, mask, dirFd, nil)
+	}
+	p, err := BytePtrFromString(pathname)
+	if err != nil {
+		return err
+	}
+	return fanotifyMark(fd, flags, mask, dirFd, p)
+}
+
 //sys	fchmodat(dirfd int, path string, mode uint32) (err error)
 
 func Fchmodat(dirfd int, path string, mode uint32, flags int) (err error) {

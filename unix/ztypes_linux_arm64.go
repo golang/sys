@@ -2035,3 +2035,18 @@ type SockExtendedErr struct {
 	Info   uint32
 	Data   uint32
 }
+
+type FanotifyEventMetadata struct {
+	Event_len    uint32
+	Vers         uint8
+	Reserved     uint8
+	Metadata_len uint16
+	Mask         uint64
+	Fd           int32
+	Pid          int32
+}
+
+type FanotifyResponse struct {
+	Fd       int32
+	Response uint32
+}
