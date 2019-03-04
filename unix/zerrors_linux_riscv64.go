@@ -174,6 +174,7 @@ const (
 	B9600                                = 0xd
 	BALLOON_KVM_MAGIC                    = 0x13661366
 	BDEVFS_MAGIC                         = 0x62646576
+	BINDERFS_SUPER_MAGIC                 = 0x6c6f6f70
 	BINFMTFS_MAGIC                       = 0x42494e4d
 	BLKBSZGET                            = 0x80081270
 	BLKBSZSET                            = 0x40081271
@@ -523,6 +524,8 @@ const (
 	FAN_NONBLOCK                         = 0x2
 	FAN_ONDIR                            = 0x40000000
 	FAN_OPEN                             = 0x20
+	FAN_OPEN_EXEC                        = 0x1000
+	FAN_OPEN_EXEC_PERM                   = 0x40000
 	FAN_OPEN_PERM                        = 0x10000
 	FAN_Q_OVERFLOW                       = 0x4000
 	FAN_REPORT_TID                       = 0x100
@@ -534,6 +537,7 @@ const (
 	FF1                                  = 0x8000
 	FFDLY                                = 0x8000
 	FLUSHO                               = 0x1000
+	FS_ENCRYPTION_MODE_ADIANTUM          = 0x9
 	FS_ENCRYPTION_MODE_AES_128_CBC       = 0x5
 	FS_ENCRYPTION_MODE_AES_128_CTS       = 0x6
 	FS_ENCRYPTION_MODE_AES_256_CBC       = 0x3
@@ -555,7 +559,7 @@ const (
 	FS_POLICY_FLAGS_PAD_4                = 0x0
 	FS_POLICY_FLAGS_PAD_8                = 0x1
 	FS_POLICY_FLAGS_PAD_MASK             = 0x3
-	FS_POLICY_FLAGS_VALID                = 0x3
+	FS_POLICY_FLAGS_VALID                = 0x7
 	FUTEXFS_SUPER_MAGIC                  = 0xbad1dea
 	F_ADD_SEALS                          = 0x409
 	F_DUPFD                              = 0x0
@@ -1174,7 +1178,7 @@ const (
 	NETLINK_UNUSED                       = 0x1
 	NETLINK_USERSOCK                     = 0x2
 	NETLINK_XFRM                         = 0x6
-	NETNSA_MAX                           = 0x3
+	NETNSA_MAX                           = 0x5
 	NETNSA_NSID_NOT_ASSIGNED             = -0x1
 	NFNETLINK_V0                         = 0x0
 	NFNLGRP_ACCT_QUOTA                   = 0x8
@@ -1438,6 +1442,12 @@ const (
 	PR_MCE_KILL_SET                      = 0x1
 	PR_MPX_DISABLE_MANAGEMENT            = 0x2c
 	PR_MPX_ENABLE_MANAGEMENT             = 0x2b
+	PR_PAC_APDAKEY                       = 0x4
+	PR_PAC_APDBKEY                       = 0x8
+	PR_PAC_APGAKEY                       = 0x10
+	PR_PAC_APIAKEY                       = 0x1
+	PR_PAC_APIBKEY                       = 0x2
+	PR_PAC_RESET_KEYS                    = 0x36
 	PR_SET_CHILD_SUBREAPER               = 0x24
 	PR_SET_DUMPABLE                      = 0x4
 	PR_SET_ENDIAN                        = 0x14
@@ -2262,6 +2272,7 @@ const (
 	TUNGETVNETBE                         = 0x800454df
 	TUNGETVNETHDRSZ                      = 0x800454d7
 	TUNGETVNETLE                         = 0x800454dd
+	TUNSETCARRIER                        = 0x400454e2
 	TUNSETDEBUG                          = 0x400454c9
 	TUNSETFILTEREBPF                     = 0x800454e1
 	TUNSETGROUP                          = 0x400454ce
