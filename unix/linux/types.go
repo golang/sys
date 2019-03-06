@@ -1115,6 +1115,9 @@ const (
 	SizeofTpacketHdr  = C.sizeof_struct_tpacket_hdr
 	SizeofTpacket2Hdr = C.sizeof_struct_tpacket2_hdr
 	SizeofTpacket3Hdr = C.sizeof_struct_tpacket3_hdr
+
+	SizeofTpacketStats   = C.sizeof_struct_tpacket_stats
+	SizeofTpacketStatsV3 = C.sizeof_struct_tpacket_stats_v3
 )
 
 // netfilter
