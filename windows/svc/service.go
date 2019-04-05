@@ -328,7 +328,7 @@ func Run(name string, handler Handler) error {
 		}
 		s.c <- e
 		// Always return NO_ERROR (0) for now.
-		return 0
+		return windows.NO_ERROR
 	}
 
 	var svcmain uintptr
