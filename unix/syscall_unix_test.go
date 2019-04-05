@@ -403,6 +403,14 @@ func TestSeekFailure(t *testing.T) {
 	}
 }
 
+func TestSetsockoptString(t *testing.T) {
+	// should not panic on empty string, see issue #31277
+	err := unix.SetsockoptString(-1, 0, 0, "")
+	if err == nil {
+		t.Fatalf("SetsockoptString: did not fail")
+	}
+}
+
 func TestDup(t *testing.T) {
 	file, err := ioutil.TempFile("", "TestDup")
 	if err != nil {
