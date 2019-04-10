@@ -532,6 +532,34 @@ const (
 // Netlink routing and interface messages
 
 const (
+	NDA_UNSPEC           = C.NDA_UNSPEC
+	NDA_DST              = C.NDA_DST
+	NDA_LLADDR           = C.NDA_LLADDR
+	NDA_CACHEINFO        = C.NDA_CACHEINFO
+	NDA_PROBES           = C.NDA_PROBES
+	NDA_VLAN             = C.NDA_VLAN
+	NDA_PORT             = C.NDA_PORT
+	NDA_VNI              = C.NDA_VNI
+	NDA_IFINDEX          = C.NDA_IFINDEX
+	NDA_MASTER           = C.NDA_MASTER
+	NDA_LINK_NETNSID     = C.NDA_LINK_NETNSID
+	NDA_SRC_VNI          = C.NDA_SRC_VNI
+	NTF_USE              = C.NTF_USE
+	NTF_SELF             = C.NTF_SELF
+	NTF_MASTER           = C.NTF_MASTER
+	NTF_PROXY            = C.NTF_PROXY
+	NTF_EXT_LEARNED      = C.NTF_EXT_LEARNED
+	NTF_OFFLOADED        = C.NTF_OFFLOADED
+	NTF_ROUTER           = C.NTF_ROUTER
+	NUD_INCOMPLETE       = C.NUD_INCOMPLETE
+	NUD_REACHABLE        = C.NUD_REACHABLE
+	NUD_STALE            = C.NUD_STALE
+	NUD_DELAY            = C.NUD_DELAY
+	NUD_PROBE            = C.NUD_PROBE
+	NUD_FAILED           = C.NUD_FAILED
+	NUD_NOARP            = C.NUD_NOARP
+	NUD_PERMANENT        = C.NUD_PERMANENT
+	NUD_NONE             = C.NUD_NONE
 	IFA_UNSPEC           = C.IFA_UNSPEC
 	IFA_ADDRESS          = C.IFA_ADDRESS
 	IFA_LOCAL            = C.IFA_LOCAL
@@ -668,6 +696,7 @@ const (
 	SizeofRtMsg          = C.sizeof_struct_rtmsg
 	SizeofRtNexthop      = C.sizeof_struct_rtnexthop
 	SizeofNdUseroptmsg   = C.sizeof_struct_nduseroptmsg
+	SizeofNdMsg          = C.sizeof_struct_ndmsg
 )
 
 type NlMsghdr C.struct_nlmsghdr
@@ -689,6 +718,8 @@ type RtMsg C.struct_rtmsg
 type RtNexthop C.struct_rtnexthop
 
 type NdUseroptmsg C.struct_nduseroptmsg
+
+type NdMsg C.struct_ndmsg
 
 // Linux socket filter
 
