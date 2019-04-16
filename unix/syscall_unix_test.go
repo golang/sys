@@ -169,6 +169,11 @@ func TestPassFD(t *testing.T) {
 		t.Skip("cannot exec subprocess on iOS, skipping test")
 	}
 
+	if os.Getenv("GO_WANT_HELPER_PROCESS") == "1" {
+		passFDChild()
+		return
+	}
+
 	if runtime.GOOS == "aix" {
 		// Unix network isn't properly working on AIX
 		// 7.2 with Technical Level < 2
@@ -188,11 +193,6 @@ func TestPassFD(t *testing.T) {
 		if aixVer < "7200" || (aixVer == "7200" && tl < 2) {
 			t.Skip("skipped on AIX versions previous to 7.2 TL 2")
 		}
-	}
-
-	if os.Getenv("GO_WANT_HELPER_PROCESS") == "1" {
-		passFDChild()
-		return
 	}
 
 	tempDir, err := ioutil.TempDir("", "TestPassFD")
