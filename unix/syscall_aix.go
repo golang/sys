@@ -470,8 +470,7 @@ func IoctlGetTermios(fd int, req uint) (*Termios, error) {
 //sys	Pause() (err error)
 //sys	Pread(fd int, p []byte, offset int64) (n int, err error) = pread64
 //sys	Pwrite(fd int, p []byte, offset int64) (n int, err error) = pwrite64
-//TODO Select
-// //sys	Select(nfd int, r *FdSet, w *FdSet, e *FdSet, timeout *Timeval) (n int, err error)
+//sys	Select(nfd int, r *FdSet, w *FdSet, e *FdSet, timeout *Timeval) (n int, err error)
 //sys	Pselect(nfd int, r *FdSet, w *FdSet, e *FdSet, timeout *Timespec, sigmask *Sigset_t) (n int, err error)
 //sysnb	Setregid(rgid int, egid int) (err error)
 //sysnb	Setreuid(ruid int, euid int) (err error)
