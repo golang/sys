@@ -539,8 +539,21 @@ func TestClockNanosleep(t *testing.T) {
 }
 
 func TestOpenByHandleAt(t *testing.T) {
+	skipIfNotSupported := func(t *testing.T, name string, err error) {
+		if err == unix.EPERM {
+			t.Skipf("skipping %s test without CAP_DAC_READ_SEARCH", name)
+		}
+		if err == unix.ENOSYS {
+			t.Skipf("%s system call not available", name)
+		}
+		if err == unix.EOPNOTSUPP {
+			t.Skipf("%s not supported on this filesystem", name)
+		}
+	}
+
 	h, mountID, err := unix.NameToHandleAt(unix.AT_FDCWD, "syscall_linux_test.go", 0)
 	if err != nil {
+		skipIfNotSupported(t, "name_to_handle_at", err)
 		t.Fatalf("NameToHandleAt: %v", err)
 	}
 	t.Logf("mountID: %v, handle: size=%d, type=%d, bytes=%q", mountID,
@@ -557,15 +570,7 @@ func TestOpenByHandleAt(t *testing.T) {
 				h = unix.NewFileHandle(h.Type(), h.Bytes())
 			}
 			fd, err := unix.OpenByHandleAt(int(mount.Fd()), h, unix.O_RDONLY)
-			if err == unix.EPERM {
-				t.Skipf("skipping OpenByHandleAt without CAP_DAC_READ_SEARCH")
-			}
-			if err == unix.ENOSYS {
-				t.Skipf("name_to_handle_at system call not available")
-			}
-			if err == unix.EOPNOTSUPP {
-				t.Skipf("name_to_handle_at not supported on this filesystem")
-			}
+			skipIfNotSupported(t, "open_by_handle_at", err)
 			if err != nil {
 				t.Fatalf("OpenByHandleAt: %v", err)
 			}
