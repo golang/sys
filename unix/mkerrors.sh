@@ -43,9 +43,9 @@ includes_AIX='
 #include <sys/protosw.h>
 #include <sys/stropts.h>
 #include <sys/mman.h>
-#include <sys/poll.h>
 #include <sys/termio.h>
 #include <termios.h>
+#include <poll.h>
 #include <fcntl.h>
 
 #define AF_LOCAL AF_UNIX
