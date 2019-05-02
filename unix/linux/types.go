@@ -1160,6 +1160,10 @@ type TpacketHdrVariant1 C.struct_tpacket_hdr_variant1
 
 type TpacketBlockDesc C.struct_tpacket_block_desc
 
+type TpacketBDTS C.struct_tpacket_bd_ts
+
+type TpacketHdrV1 C.struct_tpacket_hdr_v1
+
 type TpacketReq C.struct_tpacket_req
 
 type TpacketReq3 C.struct_tpacket_req3
