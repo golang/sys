@@ -37,6 +37,7 @@ func errnoErr(e syscall.Errno) error {
 var (
 	modadvapi32 = NewLazySystemDLL("advapi32.dll")
 	modkernel32 = NewLazySystemDLL("kernel32.dll")
+	moduserenv  = NewLazySystemDLL("userenv.dll")
 	modshell32  = NewLazySystemDLL("shell32.dll")
 	modmswsock  = NewLazySystemDLL("mswsock.dll")
 	modcrypt32  = NewLazySystemDLL("crypt32.dll")
@@ -45,7 +46,6 @@ var (
 	modiphlpapi = NewLazySystemDLL("iphlpapi.dll")
 	modsecur32  = NewLazySystemDLL("secur32.dll")
 	modnetapi32 = NewLazySystemDLL("netapi32.dll")
-	moduserenv  = NewLazySystemDLL("userenv.dll")
 	modwtsapi32 = NewLazySystemDLL("wtsapi32.dll")
 
 	procRegisterEventSourceW               = modadvapi32.NewProc("RegisterEventSourceW")
@@ -128,6 +128,8 @@ var (
 	procFreeEnvironmentStringsW            = modkernel32.NewProc("FreeEnvironmentStringsW")
 	procGetEnvironmentVariableW            = modkernel32.NewProc("GetEnvironmentVariableW")
 	procSetEnvironmentVariableW            = modkernel32.NewProc("SetEnvironmentVariableW")
+	procCreateEnvironmentBlock             = moduserenv.NewProc("CreateEnvironmentBlock")
+	procDestroyEnvironmentBlock            = moduserenv.NewProc("DestroyEnvironmentBlock")
 	procSetFileTime                        = modkernel32.NewProc("SetFileTime")
 	procGetFileAttributesW                 = modkernel32.NewProc("GetFileAttributesW")
 	procSetFileAttributesW                 = modkernel32.NewProc("SetFileAttributesW")
@@ -1290,6 +1292,36 @@ func GetEnvironmentVariable(name *uint16, buffer *uint16, size uint32) (n uint32
 
 func SetEnvironmentVariable(name *uint16, value *uint16) (err error) {
 	r1, _, e1 := syscall.Syscall(procSetEnvironmentVariableW.Addr(), 2, uintptr(unsafe.Pointer(name)), uintptr(unsafe.Pointer(value)), 0)
+	if r1 == 0 {
+		if e1 != 0 {
+			err = errnoErr(e1)
+		} else {
+			err = syscall.EINVAL
+		}
+	}
+	return
+}
+
+func CreateEnvironmentBlock(block **uint16, token Token, inheritExisting bool) (err error) {
+	var _p0 uint32
+	if inheritExisting {
+		_p0 = 1
+	} else {
+		_p0 = 0
+	}
+	r1, _, e1 := syscall.Syscall(procCreateEnvironmentBlock.Addr(), 3, uintptr(unsafe.Pointer(block)), uintptr(token), uintptr(_p0))
+	if r1 == 0 {
+		if e1 != 0 {
+			err = errnoErr(e1)
+		} else {
+			err = syscall.EINVAL
+		}
+	}
+	return
+}
+
+func DestroyEnvironmentBlock(block *uint16) (err error) {
+	r1, _, e1 := syscall.Syscall(procDestroyEnvironmentBlock.Addr(), 1, uintptr(unsafe.Pointer(block)), 0, 0)
 	if r1 == 0 {
 		if e1 != 0 {
 			err = errnoErr(e1)
