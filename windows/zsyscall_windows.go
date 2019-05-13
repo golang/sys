@@ -66,6 +66,7 @@ var (
 	procQueryServiceConfig2W               = modadvapi32.NewProc("QueryServiceConfig2W")
 	procEnumServicesStatusExW              = modadvapi32.NewProc("EnumServicesStatusExW")
 	procQueryServiceStatusEx               = modadvapi32.NewProc("QueryServiceStatusEx")
+	procNotifyServiceStatusChangeW         = modadvapi32.NewProc("NotifyServiceStatusChangeW")
 	procGetLastError                       = modkernel32.NewProc("GetLastError")
 	procLoadLibraryW                       = modkernel32.NewProc("LoadLibraryW")
 	procLoadLibraryExW                     = modkernel32.NewProc("LoadLibraryExW")
@@ -183,6 +184,7 @@ var (
 	procSetEvent                           = modkernel32.NewProc("SetEvent")
 	procResetEvent                         = modkernel32.NewProc("ResetEvent")
 	procPulseEvent                         = modkernel32.NewProc("PulseEvent")
+	procSleepEx                            = modkernel32.NewProc("SleepEx")
 	procDefineDosDeviceW                   = modkernel32.NewProc("DefineDosDeviceW")
 	procDeleteVolumeMountPointW            = modkernel32.NewProc("DeleteVolumeMountPointW")
 	procFindFirstVolumeW                   = modkernel32.NewProc("FindFirstVolumeW")
@@ -497,6 +499,14 @@ func QueryServiceStatusEx(service Handle, infoLevel uint32, buff *byte, buffSize
 		} else {
 			err = syscall.EINVAL
 		}
+	}
+	return
+}
+
+func NotifyServiceStatusChange(service Handle, notifyMask uint32, notifier *SERVICE_NOTIFY) (ret error) {
+	r0, _, _ := syscall.Syscall(procNotifyServiceStatusChangeW.Addr(), 3, uintptr(service), uintptr(notifyMask), uintptr(unsafe.Pointer(notifier)))
+	if r0 != 0 {
+		ret = syscall.Errno(r0)
 	}
 	return
 }
@@ -1951,6 +1961,18 @@ func PulseEvent(event Handle) (err error) {
 			err = syscall.EINVAL
 		}
 	}
+	return
+}
+
+func SleepEx(milliseconds uint32, alertable bool) (ret uint32) {
+	var _p0 uint32
+	if alertable {
+		_p0 = 1
+	} else {
+		_p0 = 0
+	}
+	r0, _, _ := syscall.Syscall(procSleepEx.Addr(), 2, uintptr(milliseconds), uintptr(_p0), 0)
+	ret = uint32(r0)
 	return
 }
 
