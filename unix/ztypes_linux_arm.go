@@ -116,6 +116,10 @@ type Stat_t struct {
 	Ino     uint64
 }
 
+func (s *Stat_t) AmcTime() (atim, mtim, ctim Timespec) {
+	return s.Atim, s.Mtim, s.Ctim
+}
+
 type StatxTimestamp struct {
 	Sec  int64
 	Nsec uint32

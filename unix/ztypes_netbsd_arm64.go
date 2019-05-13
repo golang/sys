@@ -80,6 +80,10 @@ type Stat_t struct {
 	Pad_cgo_2     [4]byte
 }
 
+func (s *Stat_t) AmcTime() (atim, mtim, ctim Timespec) {
+	return s.Atimespec, s.Mtimespec, s.Ctimespec
+}
+
 type Statfs_t [0]byte
 
 type Flock_t struct {

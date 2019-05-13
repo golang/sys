@@ -93,6 +93,10 @@ type Stat_t struct {
 	Fstype  [16]int8
 }
 
+func (s *Stat_t) AmcTime() (atim, mtim, ctim Timespec) {
+	return s.Atim, s.Mtim, s.Ctim
+}
+
 type Flock_t struct {
 	Type   int16
 	Whence int16

@@ -83,6 +83,10 @@ type Stat_t struct {
 	Spare    [10]uint64
 }
 
+func (s *Stat_t) AmcTime() (atim, mtim, ctim Timespec) {
+	return s.Atim, s.Mtim, s.Ctim
+}
+
 type stat_freebsd11_t struct {
 	Dev      uint32
 	Ino      uint32

@@ -117,6 +117,18 @@ type Stat_t struct {
 	Size     int64
 }
 
+func (s *Stat_t) AmcTime() (atim, mtim, ctim Timespec) {
+	atim.Sec = s.Atim.Sec
+	atim.Nsec = s.Atim.Nsec
+
+	mtim.Sec = s.Mtim.Sec
+	mtim.Nsec = s.Mtim.Nsec
+
+	ctim.Sec = s.Ctim.Sec
+	ctim.Nsec = s.Ctim.Nsec
+	return
+}
+
 type StatxTimestamp struct{}
 
 type Statx_t struct{}

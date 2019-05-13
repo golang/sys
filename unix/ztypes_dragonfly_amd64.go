@@ -78,6 +78,10 @@ type Stat_t struct {
 	Qspare2  int64
 }
 
+func (s *Stat_t) AmcTime() (atim, mtim, ctim Timespec) {
+	return s.Atim, s.Mtim, s.Ctim
+}
+
 type Statfs_t struct {
 	Spare2      int64
 	Bsize       int64

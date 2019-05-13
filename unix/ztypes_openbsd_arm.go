@@ -78,6 +78,10 @@ type Stat_t struct {
 	_       Timespec
 }
 
+func (s *Stat_t) AmcTime() (atim, mtim, ctim Timespec) {
+	return s.Atim, s.Mtim, s.Ctim
+}
+
 type Statfs_t struct {
 	F_flags       uint32
 	F_bsize       uint32
