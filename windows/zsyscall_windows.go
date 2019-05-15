@@ -267,6 +267,7 @@ var (
 	procSetThreadToken                     = modadvapi32.NewProc("SetThreadToken")
 	procLookupPrivilegeValueW              = modadvapi32.NewProc("LookupPrivilegeValueW")
 	procAdjustTokenPrivileges              = modadvapi32.NewProc("AdjustTokenPrivileges")
+	procAdjustTokenGroups                  = modadvapi32.NewProc("AdjustTokenGroups")
 	procGetTokenInformation                = modadvapi32.NewProc("GetTokenInformation")
 	procSetTokenInformation                = modadvapi32.NewProc("SetTokenInformation")
 	procDuplicateTokenEx                   = modadvapi32.NewProc("DuplicateTokenEx")
@@ -2909,6 +2910,24 @@ func AdjustTokenPrivileges(token Token, disableAllPrivileges bool, newstate *Tok
 		_p0 = 0
 	}
 	r1, _, e1 := syscall.Syscall6(procAdjustTokenPrivileges.Addr(), 6, uintptr(token), uintptr(_p0), uintptr(unsafe.Pointer(newstate)), uintptr(buflen), uintptr(unsafe.Pointer(prevstate)), uintptr(unsafe.Pointer(returnlen)))
+	if r1 == 0 {
+		if e1 != 0 {
+			err = errnoErr(e1)
+		} else {
+			err = syscall.EINVAL
+		}
+	}
+	return
+}
+
+func AdjustTokenGroups(token Token, resetToDefault bool, newstate *Tokengroups, buflen uint32, prevstate *Tokengroups, returnlen *uint32) (err error) {
+	var _p0 uint32
+	if resetToDefault {
+		_p0 = 1
+	} else {
+		_p0 = 0
+	}
+	r1, _, e1 := syscall.Syscall6(procAdjustTokenGroups.Addr(), 6, uintptr(token), uintptr(_p0), uintptr(unsafe.Pointer(newstate)), uintptr(buflen), uintptr(unsafe.Pointer(prevstate)), uintptr(unsafe.Pointer(returnlen)))
 	if r1 == 0 {
 		if e1 != 0 {
 			err = errnoErr(e1)
