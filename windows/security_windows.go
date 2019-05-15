@@ -693,6 +693,28 @@ func (t Token) GetUserProfileDirectory() (string, error) {
 	}
 }
 
+// Returns whether the current token is elevated from a UAC perspective.
+func (token Token) IsElevated() bool {
+	var isElevated uint32
+	var outLen uint32
+	err := GetTokenInformation(token, TokenElevation, (*byte)(unsafe.Pointer(&isElevated)), uint32(unsafe.Sizeof(isElevated)), &outLen)
+	if err != nil {
+		return false
+	}
+	return outLen == uint32(unsafe.Sizeof(isElevated)) && isElevated != 0
+}
+
+// Returns the linked token, which may be an elevated UAC token.
+func (token Token) GetLinkedToken() (Token, error) {
+	var linkedToken Token
+	var outLen uint32
+	err := GetTokenInformation(token, TokenLinkedToken, (*byte)(unsafe.Pointer(&linkedToken)), uint32(unsafe.Sizeof(linkedToken)), &outLen)
+	if err != nil {
+		return Token(0), err
+	}
+	return linkedToken, nil
+}
+
 // GetSystemDirectory retrieves path to current location of the system
 // directory, which is typically, though not always, C:\Windows\System32.
 func GetSystemDirectory() (string, error) {
