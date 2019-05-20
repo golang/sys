@@ -62,7 +62,7 @@ func TestUname(t *testing.T) {
 // Test that this compiles. (Issue #31735)
 func TestStatFieldNames(t *testing.T) {
 	var st unix.Stat_t
-	var ts interface{} // either *unix.Timespec or *unix.StTimespec on GOOS==aix
+	var ts *unix.Timespec
 	ts = &st.Atim
 	ts = &st.Mtim
 	ts = &st.Ctim
