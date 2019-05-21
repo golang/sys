@@ -259,8 +259,13 @@ var (
 	procCopySid                            = modadvapi32.NewProc("CopySid")
 	procAllocateAndInitializeSid           = modadvapi32.NewProc("AllocateAndInitializeSid")
 	procCreateWellKnownSid                 = modadvapi32.NewProc("CreateWellKnownSid")
+	procIsWellKnownSid                     = modadvapi32.NewProc("IsWellKnownSid")
 	procFreeSid                            = modadvapi32.NewProc("FreeSid")
 	procEqualSid                           = modadvapi32.NewProc("EqualSid")
+	procGetSidIdentifierAuthority          = modadvapi32.NewProc("GetSidIdentifierAuthority")
+	procGetSidSubAuthorityCount            = modadvapi32.NewProc("GetSidSubAuthorityCount")
+	procGetSidSubAuthority                 = modadvapi32.NewProc("GetSidSubAuthority")
+	procIsValidSid                         = modadvapi32.NewProc("IsValidSid")
 	procCheckTokenMembership               = modadvapi32.NewProc("CheckTokenMembership")
 	procOpenProcessToken                   = modadvapi32.NewProc("OpenProcessToken")
 	procOpenThreadToken                    = modadvapi32.NewProc("OpenThreadToken")
@@ -2827,6 +2832,12 @@ func createWellKnownSid(sidType WELL_KNOWN_SID_TYPE, domainSid *SID, sid *SID, s
 	return
 }
 
+func isWellKnownSid(sid *SID, sidType WELL_KNOWN_SID_TYPE) (isWellKnown bool) {
+	r0, _, _ := syscall.Syscall(procIsWellKnownSid.Addr(), 2, uintptr(unsafe.Pointer(sid)), uintptr(sidType), 0)
+	isWellKnown = r0 != 0
+	return
+}
+
 func FreeSid(sid *SID) (err error) {
 	r1, _, e1 := syscall.Syscall(procFreeSid.Addr(), 1, uintptr(unsafe.Pointer(sid)), 0, 0)
 	if r1 != 0 {
@@ -2842,6 +2853,30 @@ func FreeSid(sid *SID) (err error) {
 func EqualSid(sid1 *SID, sid2 *SID) (isEqual bool) {
 	r0, _, _ := syscall.Syscall(procEqualSid.Addr(), 2, uintptr(unsafe.Pointer(sid1)), uintptr(unsafe.Pointer(sid2)), 0)
 	isEqual = r0 != 0
+	return
+}
+
+func getSidIdentifierAuthority(sid *SID) (authority *SidIdentifierAuthority) {
+	r0, _, _ := syscall.Syscall(procGetSidIdentifierAuthority.Addr(), 1, uintptr(unsafe.Pointer(sid)), 0, 0)
+	authority = (*SidIdentifierAuthority)(unsafe.Pointer(r0))
+	return
+}
+
+func getSidSubAuthorityCount(sid *SID) (count *uint8) {
+	r0, _, _ := syscall.Syscall(procGetSidSubAuthorityCount.Addr(), 1, uintptr(unsafe.Pointer(sid)), 0, 0)
+	count = (*uint8)(unsafe.Pointer(r0))
+	return
+}
+
+func getSidSubAuthority(sid *SID, index uint32) (subAuthority *uint32) {
+	r0, _, _ := syscall.Syscall(procGetSidSubAuthority.Addr(), 2, uintptr(unsafe.Pointer(sid)), uintptr(index), 0)
+	subAuthority = (*uint32)(unsafe.Pointer(r0))
+	return
+}
+
+func isValidSid(sid *SID) (isValid bool) {
+	r0, _, _ := syscall.Syscall(procIsValidSid.Addr(), 1, uintptr(unsafe.Pointer(sid)), 0, 0)
+	isValid = r0 != 0
 	return
 }
 
