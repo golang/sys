@@ -191,6 +191,7 @@ var (
 	procCreateJobObjectW                   = modkernel32.NewProc("CreateJobObjectW")
 	procAssignProcessToJobObject           = modkernel32.NewProc("AssignProcessToJobObject")
 	procTerminateJobObject                 = modkernel32.NewProc("TerminateJobObject")
+	procSetErrorMode                       = modkernel32.NewProc("SetErrorMode")
 	procDefineDosDeviceW                   = modkernel32.NewProc("DefineDosDeviceW")
 	procDeleteVolumeMountPointW            = modkernel32.NewProc("DeleteVolumeMountPointW")
 	procFindFirstVolumeW                   = modkernel32.NewProc("FindFirstVolumeW")
@@ -2048,6 +2049,12 @@ func TerminateJobObject(job Handle, exitCode uint32) (err error) {
 			err = syscall.EINVAL
 		}
 	}
+	return
+}
+
+func SetErrorMode(mode uint32) (ret uint32) {
+	r0, _, _ := syscall.Syscall(procSetErrorMode.Addr(), 1, uintptr(mode), 0, 0)
+	ret = uint32(r0)
 	return
 }
 
