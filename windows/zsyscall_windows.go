@@ -37,8 +37,8 @@ func errnoErr(e syscall.Errno) error {
 var (
 	modadvapi32 = NewLazySystemDLL("advapi32.dll")
 	modkernel32 = NewLazySystemDLL("kernel32.dll")
-	moduserenv  = NewLazySystemDLL("userenv.dll")
 	modshell32  = NewLazySystemDLL("shell32.dll")
+	moduserenv  = NewLazySystemDLL("userenv.dll")
 	modmswsock  = NewLazySystemDLL("mswsock.dll")
 	modcrypt32  = NewLazySystemDLL("crypt32.dll")
 	modws2_32   = NewLazySystemDLL("ws2_32.dll")
@@ -110,6 +110,7 @@ var (
 	procCancelIoEx                         = modkernel32.NewProc("CancelIoEx")
 	procCreateProcessW                     = modkernel32.NewProc("CreateProcessW")
 	procOpenProcess                        = modkernel32.NewProc("OpenProcess")
+	procShellExecuteW                      = modshell32.NewProc("ShellExecuteW")
 	procTerminateProcess                   = modkernel32.NewProc("TerminateProcess")
 	procGetExitCodeProcess                 = modkernel32.NewProc("GetExitCodeProcess")
 	procGetStartupInfoW                    = modkernel32.NewProc("GetStartupInfoW")
@@ -1066,6 +1067,18 @@ func OpenProcess(da uint32, inheritHandle bool, pid uint32) (handle Handle, err 
 	r0, _, e1 := syscall.Syscall(procOpenProcess.Addr(), 3, uintptr(da), uintptr(_p0), uintptr(pid))
 	handle = Handle(r0)
 	if handle == 0 {
+		if e1 != 0 {
+			err = errnoErr(e1)
+		} else {
+			err = syscall.EINVAL
+		}
+	}
+	return
+}
+
+func ShellExecute(hwnd Handle, verb *uint16, file *uint16, args *uint16, cwd *uint16, showCmd int32) (err error) {
+	r1, _, e1 := syscall.Syscall6(procShellExecuteW.Addr(), 6, uintptr(hwnd), uintptr(unsafe.Pointer(verb)), uintptr(unsafe.Pointer(file)), uintptr(unsafe.Pointer(args)), uintptr(unsafe.Pointer(cwd)), uintptr(showCmd))
+	if r1 == 0 {
 		if e1 != 0 {
 			err = errnoErr(e1)
 		} else {
