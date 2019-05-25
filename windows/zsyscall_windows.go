@@ -41,6 +41,7 @@ var (
 	moduserenv  = NewLazySystemDLL("userenv.dll")
 	modmswsock  = NewLazySystemDLL("mswsock.dll")
 	modcrypt32  = NewLazySystemDLL("crypt32.dll")
+	moduser32   = NewLazySystemDLL("user32.dll")
 	modws2_32   = NewLazySystemDLL("ws2_32.dll")
 	moddnsapi   = NewLazySystemDLL("dnsapi.dll")
 	modiphlpapi = NewLazySystemDLL("iphlpapi.dll")
@@ -213,6 +214,7 @@ var (
 	procQueryDosDeviceW                    = modkernel32.NewProc("QueryDosDeviceW")
 	procSetVolumeLabelW                    = modkernel32.NewProc("SetVolumeLabelW")
 	procSetVolumeMountPointW               = modkernel32.NewProc("SetVolumeMountPointW")
+	procMessageBoxW                        = moduser32.NewProc("MessageBoxW")
 	procWSAStartup                         = modws2_32.NewProc("WSAStartup")
 	procWSACleanup                         = modws2_32.NewProc("WSACleanup")
 	procWSAIoctl                           = modws2_32.NewProc("WSAIoctl")
@@ -2307,6 +2309,19 @@ func SetVolumeLabel(rootPathName *uint16, volumeName *uint16) (err error) {
 func SetVolumeMountPoint(volumeMountPoint *uint16, volumeName *uint16) (err error) {
 	r1, _, e1 := syscall.Syscall(procSetVolumeMountPointW.Addr(), 2, uintptr(unsafe.Pointer(volumeMountPoint)), uintptr(unsafe.Pointer(volumeName)), 0)
 	if r1 == 0 {
+		if e1 != 0 {
+			err = errnoErr(e1)
+		} else {
+			err = syscall.EINVAL
+		}
+	}
+	return
+}
+
+func MessageBox(hwnd Handle, text *uint16, caption *uint16, boxtype uint32) (ret int32, err error) {
+	r0, _, e1 := syscall.Syscall6(procMessageBoxW.Addr(), 4, uintptr(hwnd), uintptr(unsafe.Pointer(text)), uintptr(unsafe.Pointer(caption)), uintptr(boxtype), 0, 0)
+	ret = int32(r0)
+	if ret == 0 {
 		if e1 != 0 {
 			err = errnoErr(e1)
 		} else {
