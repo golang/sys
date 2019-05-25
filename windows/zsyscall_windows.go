@@ -76,6 +76,7 @@ var (
 	procGetVersion                         = modkernel32.NewProc("GetVersion")
 	procFormatMessageW                     = modkernel32.NewProc("FormatMessageW")
 	procExitProcess                        = modkernel32.NewProc("ExitProcess")
+	procIsWow64Process                     = modkernel32.NewProc("IsWow64Process")
 	procCreateFileW                        = modkernel32.NewProc("CreateFileW")
 	procReadFile                           = modkernel32.NewProc("ReadFile")
 	procWriteFile                          = modkernel32.NewProc("WriteFile")
@@ -643,6 +644,18 @@ func FormatMessage(flags uint32, msgsrc uintptr, msgid uint32, langid uint32, bu
 
 func ExitProcess(exitcode uint32) {
 	syscall.Syscall(procExitProcess.Addr(), 1, uintptr(exitcode), 0, 0)
+	return
+}
+
+func IsWow64Process(handle Handle, isWow64 *bool) (err error) {
+	r1, _, e1 := syscall.Syscall(procIsWow64Process.Addr(), 2, uintptr(handle), uintptr(unsafe.Pointer(isWow64)), 0)
+	if r1 == 0 {
+		if e1 != 0 {
+			err = errnoErr(e1)
+		} else {
+			err = syscall.EINVAL
+		}
+	}
 	return
 }
 
