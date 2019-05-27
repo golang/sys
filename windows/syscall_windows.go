@@ -257,6 +257,7 @@ func NewCallbackCDecl(fn interface{}) uintptr {
 //sys	AssignProcessToJobObject(job Handle, process Handle) (err error) = kernel32.AssignProcessToJobObject
 //sys	TerminateJobObject(job Handle, exitCode uint32) (err error) = kernel32.TerminateJobObject
 //sys	SetErrorMode(mode uint32) (ret uint32) = kernel32.SetErrorMode
+//sys	ResumeThread(thread Handle) (ret uint32, err error) [failretval==0xffffffff] = kernel32.ResumeThread
 
 // Volume Management Functions
 //sys	DefineDosDevice(flags uint32, deviceName *uint16, targetPath *uint16) (err error) = DefineDosDeviceW
