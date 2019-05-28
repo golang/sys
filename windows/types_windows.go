@@ -1508,3 +1508,85 @@ type ConsoleScreenBufferInfo struct {
 }
 
 const UNIX_PATH_MAX = 108 // defined in afunix.h
+
+const (
+	// flags for JOBOBJECT_BASIC_LIMIT_INFORMATION.LimitFlags
+	JOB_OBJECT_LIMIT_ACTIVE_PROCESS             = 0x00000008
+	JOB_OBJECT_LIMIT_AFFINITY                   = 0x00000010
+	JOB_OBJECT_LIMIT_BREAKAWAY_OK               = 0x00000800
+	JOB_OBJECT_LIMIT_DIE_ON_UNHANDLED_EXCEPTION = 0x00000400
+	JOB_OBJECT_LIMIT_JOB_MEMORY                 = 0x00000200
+	JOB_OBJECT_LIMIT_JOB_TIME                   = 0x00000004
+	JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE          = 0x00002000
+	JOB_OBJECT_LIMIT_PRESERVE_JOB_TIME          = 0x00000040
+	JOB_OBJECT_LIMIT_PRIORITY_CLASS             = 0x00000020
+	JOB_OBJECT_LIMIT_PROCESS_MEMORY             = 0x00000100
+	JOB_OBJECT_LIMIT_PROCESS_TIME               = 0x00000002
+	JOB_OBJECT_LIMIT_SCHEDULING_CLASS           = 0x00000080
+	JOB_OBJECT_LIMIT_SILENT_BREAKAWAY_OK        = 0x00001000
+	JOB_OBJECT_LIMIT_SUBSET_AFFINITY            = 0x00004000
+	JOB_OBJECT_LIMIT_WORKINGSET                 = 0x00000001
+)
+
+type JOBOBJECT_BASIC_LIMIT_INFORMATION struct {
+	PerProcessUserTimeLimit int64
+	PerJobUserTimeLimit     int64
+	LimitFlags              uint32
+	MinimumWorkingSetSize   uintptr
+	MaximumWorkingSetSize   uintptr
+	ActiveProcessLimit      uint32
+	Affinity                uintptr
+	PriorityClass           uint32
+	SchedulingClass         uint32
+}
+
+type IO_COUNTERS struct {
+	ReadOperationCount  uint64
+	WriteOperationCount uint64
+	OtherOperationCount uint64
+	ReadTransferCount   uint64
+	WriteTransferCount  uint64
+	OtherTransferCount  uint64
+}
+
+type JOBOBJECT_EXTENDED_LIMIT_INFORMATION struct {
+	BasicLimitInformation JOBOBJECT_BASIC_LIMIT_INFORMATION
+	IoInfo                IO_COUNTERS
+	ProcessMemoryLimit    uintptr
+	JobMemoryLimit        uintptr
+	PeakProcessMemoryUsed uintptr
+	PeakJobMemoryUsed     uintptr
+}
+
+const (
+	// UIRestrictionsClass
+	JOB_OBJECT_UILIMIT_DESKTOP          = 0x00000040
+	JOB_OBJECT_UILIMIT_DISPLAYSETTINGS  = 0x00000010
+	JOB_OBJECT_UILIMIT_EXITWINDOWS      = 0x00000080
+	JOB_OBJECT_UILIMIT_GLOBALATOMS      = 0x00000020
+	JOB_OBJECT_UILIMIT_HANDLES          = 0x00000001
+	JOB_OBJECT_UILIMIT_READCLIPBOARD    = 0x00000002
+	JOB_OBJECT_UILIMIT_SYSTEMPARAMETERS = 0x00000008
+	JOB_OBJECT_UILIMIT_WRITECLIPBOARD   = 0x00000004
+)
+
+type JOBOBJECT_BASIC_UI_RESTRICTIONS struct {
+	UIRestrictionsClass uint32
+}
+
+const (
+	// JobObjectInformationClass
+	JobObjectAssociateCompletionPortInformation = 7
+	JobObjectBasicLimitInformation              = 2
+	JobObjectBasicUIRestrictions                = 4
+	JobObjectCpuRateControlInformation          = 15
+	JobObjectEndOfJobTimeInformation            = 6
+	JobObjectExtendedLimitInformation           = 9
+	JobObjectGroupInformation                   = 11
+	JobObjectGroupInformationEx                 = 14
+	JobObjectLimitViolationInformation2         = 35
+	JobObjectNetRateControlInformation          = 32
+	JobObjectNotificationLimitInformation       = 12
+	JobObjectNotificationLimitInformation2      = 34
+	JobObjectSecurityLimitInformation           = 5
+)
