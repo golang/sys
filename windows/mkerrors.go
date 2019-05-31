@@ -6,4 +6,4 @@
 
 package windows
 
-//go:generate ./generate.bash
+//go:generate ./mkerrors.bash zerrors_windows.go
