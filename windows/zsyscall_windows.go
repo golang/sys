@@ -133,6 +133,7 @@ var (
 	procSetEnvironmentVariableW            = modkernel32.NewProc("SetEnvironmentVariableW")
 	procCreateEnvironmentBlock             = moduserenv.NewProc("CreateEnvironmentBlock")
 	procDestroyEnvironmentBlock            = moduserenv.NewProc("DestroyEnvironmentBlock")
+	procGetTickCount64                     = modkernel32.NewProc("GetTickCount64")
 	procSetFileTime                        = modkernel32.NewProc("SetFileTime")
 	procGetFileAttributesW                 = modkernel32.NewProc("GetFileAttributesW")
 	procSetFileAttributesW                 = modkernel32.NewProc("SetFileAttributesW")
@@ -1370,6 +1371,12 @@ func DestroyEnvironmentBlock(block *uint16) (err error) {
 			err = syscall.EINVAL
 		}
 	}
+	return
+}
+
+func getTickCount64() (ms uint64) {
+	r0, _, _ := syscall.Syscall(procGetTickCount64.Addr(), 0, 0, 0, 0)
+	ms = uint64(r0)
 	return
 }
 
