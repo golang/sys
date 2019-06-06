@@ -60,6 +60,7 @@ var (
 	procDeleteService                      = modadvapi32.NewProc("DeleteService")
 	procStartServiceW                      = modadvapi32.NewProc("StartServiceW")
 	procQueryServiceStatus                 = modadvapi32.NewProc("QueryServiceStatus")
+	procQueryServiceLockStatusW            = modadvapi32.NewProc("QueryServiceLockStatusW")
 	procControlService                     = modadvapi32.NewProc("ControlService")
 	procStartServiceCtrlDispatcherW        = modadvapi32.NewProc("StartServiceCtrlDispatcherW")
 	procSetServiceStatus                   = modadvapi32.NewProc("SetServiceStatus")
@@ -415,6 +416,18 @@ func StartService(service Handle, numArgs uint32, argVectors **uint16) (err erro
 
 func QueryServiceStatus(service Handle, status *SERVICE_STATUS) (err error) {
 	r1, _, e1 := syscall.Syscall(procQueryServiceStatus.Addr(), 2, uintptr(service), uintptr(unsafe.Pointer(status)), 0)
+	if r1 == 0 {
+		if e1 != 0 {
+			err = errnoErr(e1)
+		} else {
+			err = syscall.EINVAL
+		}
+	}
+	return
+}
+
+func QueryServiceLockStatus(mgr Handle, lockStatus *QUERY_SERVICE_LOCK_STATUS, bufSize uint32, bytesNeeded *uint32) (err error) {
+	r1, _, e1 := syscall.Syscall6(procQueryServiceLockStatusW.Addr(), 4, uintptr(mgr), uintptr(unsafe.Pointer(lockStatus)), uintptr(bufSize), uintptr(unsafe.Pointer(bytesNeeded)), 0, 0)
 	if r1 == 0 {
 		if e1 != 0 {
 			err = errnoErr(e1)
