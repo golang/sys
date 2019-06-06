@@ -286,6 +286,9 @@ func NewCallbackCDecl(fn interface{}) uintptr {
 //sys	SetVolumeLabel(rootPathName *uint16, volumeName *uint16) (err error) = SetVolumeLabelW
 //sys	SetVolumeMountPoint(volumeMountPoint *uint16, volumeName *uint16) (err error) = SetVolumeMountPointW
 //sys	MessageBox(hwnd Handle, text *uint16, caption *uint16, boxtype uint32) (ret int32, err error) [failretval==0] = user32.MessageBoxW
+//sys	clsidFromString(lpsz *uint16, pclsid *GUID) (err error) [failretval!=0] = ole32.CLSIDFromString
+//sys	stringFromGUID2(rguid *GUID, lpsz *uint16, cchMax int) (chars int) = ole32.StringFromGUID2
+//sys	coCreateGuid(pguid *GUID) (ret error) = ole32.CoCreateGuid
 
 // syscall interface implementation for other packages
 
@@ -1240,4 +1243,40 @@ func Readlink(path string, buf []byte) (n int, err error) {
 	n = copy(buf, []byte(s))
 
 	return n, nil
+}
+
+// GUIDFromString parses a string in the form of
+// "{XXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX}" into a GUID.
+func GUIDFromString(str string) (GUID, error) {
+	guid := GUID{}
+	str16, err := syscall.UTF16PtrFromString(str)
+	if err != nil {
+		return guid, err
+	}
+	err = clsidFromString(str16, &guid)
+	if err != nil {
+		return guid, err
+	}
+	return guid, nil
+}
+
+// GenerateGUID creates a new random GUID.
+func GenerateGUID() (GUID, error) {
+	guid := GUID{}
+	err := coCreateGuid(&guid)
+	if err != nil {
+		return guid, err
+	}
+	return guid, nil
+}
+
+// String returns the canonical string form of the GUID,
+// in the form of "{XXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX}".
+func (guid GUID) String() string {
+	var str [100]uint16
+	chars := stringFromGUID2(&guid, &str[0], len(str))
+	if chars <= 1 {
+		return ""
+	}
+	return string(utf16.Decode(str[:chars-1]))
 }

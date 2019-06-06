@@ -5,6 +5,7 @@
 package windows_test
 
 import (
+	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -167,5 +168,27 @@ func TestPseudoTokens(t *testing.T) {
 	}
 	if !windows.EqualSid(realProcessUser.User.Sid, pseudoThreadUser.User.Sid) {
 		t.Fatal("The real process token does not have the same as the pseudo thread token after impersonating self")
+	}
+}
+
+func TestGUID(t *testing.T) {
+	guid, err := windows.GenerateGUID()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if guid.Data1 == 0 && guid.Data2 == 0 && guid.Data3 == 0 && guid.Data4 == [8]byte{} {
+		t.Fatal("Got an all zero GUID, which is overwhelmingly unlikely")
+	}
+	want := fmt.Sprintf("{%08X-%04X-%04X-%04X-%012X}", guid.Data1, guid.Data2, guid.Data3, guid.Data4[:2], guid.Data4[2:])
+	got := guid.String()
+	if got != want {
+		t.Fatalf("String = %q; want %q", got, want)
+	}
+	guid2, err := windows.GUIDFromString(got)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if guid2 != guid {
+		t.Fatalf("Did not parse string back to original GUID = %q; want %q", guid2, guid)
 	}
 }

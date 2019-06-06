@@ -42,6 +42,7 @@ var (
 	modmswsock  = NewLazySystemDLL("mswsock.dll")
 	modcrypt32  = NewLazySystemDLL("crypt32.dll")
 	moduser32   = NewLazySystemDLL("user32.dll")
+	modole32    = NewLazySystemDLL("ole32.dll")
 	modws2_32   = NewLazySystemDLL("ws2_32.dll")
 	moddnsapi   = NewLazySystemDLL("dnsapi.dll")
 	modiphlpapi = NewLazySystemDLL("iphlpapi.dll")
@@ -221,6 +222,9 @@ var (
 	procSetVolumeLabelW                    = modkernel32.NewProc("SetVolumeLabelW")
 	procSetVolumeMountPointW               = modkernel32.NewProc("SetVolumeMountPointW")
 	procMessageBoxW                        = moduser32.NewProc("MessageBoxW")
+	procCLSIDFromString                    = modole32.NewProc("CLSIDFromString")
+	procStringFromGUID2                    = modole32.NewProc("StringFromGUID2")
+	procCoCreateGuid                       = modole32.NewProc("CoCreateGuid")
 	procWSAStartup                         = modws2_32.NewProc("WSAStartup")
 	procWSACleanup                         = modws2_32.NewProc("WSACleanup")
 	procWSAIoctl                           = modws2_32.NewProc("WSAIoctl")
@@ -2402,6 +2406,32 @@ func MessageBox(hwnd Handle, text *uint16, caption *uint16, boxtype uint32) (ret
 		} else {
 			err = syscall.EINVAL
 		}
+	}
+	return
+}
+
+func clsidFromString(lpsz *uint16, pclsid *GUID) (err error) {
+	r1, _, e1 := syscall.Syscall(procCLSIDFromString.Addr(), 2, uintptr(unsafe.Pointer(lpsz)), uintptr(unsafe.Pointer(pclsid)), 0)
+	if r1 != 0 {
+		if e1 != 0 {
+			err = errnoErr(e1)
+		} else {
+			err = syscall.EINVAL
+		}
+	}
+	return
+}
+
+func stringFromGUID2(rguid *GUID, lpsz *uint16, cchMax int) (chars int) {
+	r0, _, _ := syscall.Syscall(procStringFromGUID2.Addr(), 3, uintptr(unsafe.Pointer(rguid)), uintptr(unsafe.Pointer(lpsz)), uintptr(cchMax))
+	chars = int(r0)
+	return
+}
+
+func coCreateGuid(pguid *GUID) (ret error) {
+	r0, _, _ := syscall.Syscall(procCoCreateGuid.Addr(), 1, uintptr(unsafe.Pointer(pguid)), 0, 0)
+	if r0 != 0 {
+		ret = syscall.Errno(r0)
 	}
 	return
 }
