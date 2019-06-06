@@ -102,9 +102,19 @@ func (m *Mgr) CreateService(name, exepath string, c Config, args ...string) (*Se
 	if err != nil {
 		return nil, err
 	}
+	if c.SidType != windows.SERVICE_SID_TYPE_NONE {
+		err = updateSidType(h, c.SidType)
+		if err != nil {
+			windows.DeleteService(h)
+			windows.CloseHandle(h)
+			return nil, err
+		}
+	}
 	if c.Description != "" {
 		err = updateDescription(h, c.Description)
 		if err != nil {
+			windows.DeleteService(h)
+			windows.CloseHandle(h)
 			return nil, err
 		}
 	}
