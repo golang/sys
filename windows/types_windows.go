@@ -659,6 +659,16 @@ type ProcessEntry32 struct {
 	ExeFile         [MAX_PATH]uint16
 }
 
+type ThreadEntry32 struct {
+	Size           uint32
+	Usage          uint32
+	ThreadID       uint32
+	OwnerProcessID uint32
+	BasePri        int32
+	DeltaPri       int32
+	Flags          uint32
+}
+
 type Systemtime struct {
 	Year         uint16
 	Month        uint16

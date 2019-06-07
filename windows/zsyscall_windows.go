@@ -182,6 +182,8 @@ var (
 	procCreateToolhelp32Snapshot           = modkernel32.NewProc("CreateToolhelp32Snapshot")
 	procProcess32FirstW                    = modkernel32.NewProc("Process32FirstW")
 	procProcess32NextW                     = modkernel32.NewProc("Process32NextW")
+	procThread32First                      = modkernel32.NewProc("Thread32First")
+	procThread32Next                       = modkernel32.NewProc("Thread32Next")
 	procDeviceIoControl                    = modkernel32.NewProc("DeviceIoControl")
 	procCreateSymbolicLinkW                = modkernel32.NewProc("CreateSymbolicLinkW")
 	procCreateHardLinkW                    = modkernel32.NewProc("CreateHardLinkW")
@@ -1919,6 +1921,30 @@ func Process32First(snapshot Handle, procEntry *ProcessEntry32) (err error) {
 
 func Process32Next(snapshot Handle, procEntry *ProcessEntry32) (err error) {
 	r1, _, e1 := syscall.Syscall(procProcess32NextW.Addr(), 2, uintptr(snapshot), uintptr(unsafe.Pointer(procEntry)), 0)
+	if r1 == 0 {
+		if e1 != 0 {
+			err = errnoErr(e1)
+		} else {
+			err = syscall.EINVAL
+		}
+	}
+	return
+}
+
+func Thread32First(snapshot Handle, threadEntry *ThreadEntry32) (err error) {
+	r1, _, e1 := syscall.Syscall(procThread32First.Addr(), 2, uintptr(snapshot), uintptr(unsafe.Pointer(threadEntry)), 0)
+	if r1 == 0 {
+		if e1 != 0 {
+			err = errnoErr(e1)
+		} else {
+			err = syscall.EINVAL
+		}
+	}
+	return
+}
+
+func Thread32Next(snapshot Handle, threadEntry *ThreadEntry32) (err error) {
+	r1, _, e1 := syscall.Syscall(procThread32Next.Addr(), 2, uintptr(snapshot), uintptr(unsafe.Pointer(threadEntry)), 0)
 	if r1 == 0 {
 		if e1 != 0 {
 			err = errnoErr(e1)

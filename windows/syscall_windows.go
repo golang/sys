@@ -243,6 +243,8 @@ func NewCallbackCDecl(fn interface{}) uintptr {
 //sys	CreateToolhelp32Snapshot(flags uint32, processId uint32) (handle Handle, err error) [failretval==InvalidHandle] = kernel32.CreateToolhelp32Snapshot
 //sys	Process32First(snapshot Handle, procEntry *ProcessEntry32) (err error) = kernel32.Process32FirstW
 //sys	Process32Next(snapshot Handle, procEntry *ProcessEntry32) (err error) = kernel32.Process32NextW
+//sys	Thread32First(snapshot Handle, threadEntry *ThreadEntry32) (err error)
+//sys	Thread32Next(snapshot Handle, threadEntry *ThreadEntry32) (err error)
 //sys	DeviceIoControl(handle Handle, ioControlCode uint32, inBuffer *byte, inBufferSize uint32, outBuffer *byte, outBufferSize uint32, bytesReturned *uint32, overlapped *Overlapped) (err error)
 // This function returns 1 byte BOOLEAN rather than the 4 byte BOOL.
 //sys	CreateSymbolicLink(symlinkfilename *uint16, targetfilename *uint16, flags uint32) (err error) [failretval&0xff==0] = CreateSymbolicLinkW
