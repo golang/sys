@@ -191,4 +191,8 @@ func TestGUID(t *testing.T) {
 	if guid2 != guid {
 		t.Fatalf("Did not parse string back to original GUID = %q; want %q", guid2, guid)
 	}
+	_, err = windows.GUIDFromString("not-a-real-guid")
+	if err != syscall.Errno(windows.CO_E_CLASSSTRING) {
+		t.Fatalf("Bad GUID string error = %v; want CO_E_CLASSSTRING", err)
+	}
 }

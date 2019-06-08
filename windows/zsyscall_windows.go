@@ -2436,21 +2436,17 @@ func MessageBox(hwnd Handle, text *uint16, caption *uint16, boxtype uint32) (ret
 	return
 }
 
-func clsidFromString(lpsz *uint16, pclsid *GUID) (err error) {
-	r1, _, e1 := syscall.Syscall(procCLSIDFromString.Addr(), 2, uintptr(unsafe.Pointer(lpsz)), uintptr(unsafe.Pointer(pclsid)), 0)
-	if r1 != 0 {
-		if e1 != 0 {
-			err = errnoErr(e1)
-		} else {
-			err = syscall.EINVAL
-		}
+func clsidFromString(lpsz *uint16, pclsid *GUID) (ret error) {
+	r0, _, _ := syscall.Syscall(procCLSIDFromString.Addr(), 2, uintptr(unsafe.Pointer(lpsz)), uintptr(unsafe.Pointer(pclsid)), 0)
+	if r0 != 0 {
+		ret = syscall.Errno(r0)
 	}
 	return
 }
 
-func stringFromGUID2(rguid *GUID, lpsz *uint16, cchMax int) (chars int) {
+func stringFromGUID2(rguid *GUID, lpsz *uint16, cchMax int32) (chars int32) {
 	r0, _, _ := syscall.Syscall(procStringFromGUID2.Addr(), 3, uintptr(unsafe.Pointer(rguid)), uintptr(unsafe.Pointer(lpsz)), uintptr(cchMax))
-	chars = int(r0)
+	chars = int32(r0)
 	return
 }
 

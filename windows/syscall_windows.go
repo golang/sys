@@ -288,8 +288,8 @@ func NewCallbackCDecl(fn interface{}) uintptr {
 //sys	SetVolumeLabel(rootPathName *uint16, volumeName *uint16) (err error) = SetVolumeLabelW
 //sys	SetVolumeMountPoint(volumeMountPoint *uint16, volumeName *uint16) (err error) = SetVolumeMountPointW
 //sys	MessageBox(hwnd Handle, text *uint16, caption *uint16, boxtype uint32) (ret int32, err error) [failretval==0] = user32.MessageBoxW
-//sys	clsidFromString(lpsz *uint16, pclsid *GUID) (err error) [failretval!=0] = ole32.CLSIDFromString
-//sys	stringFromGUID2(rguid *GUID, lpsz *uint16, cchMax int) (chars int) = ole32.StringFromGUID2
+//sys	clsidFromString(lpsz *uint16, pclsid *GUID) (ret error) = ole32.CLSIDFromString
+//sys	stringFromGUID2(rguid *GUID, lpsz *uint16, cchMax int32) (chars int32) = ole32.StringFromGUID2
 //sys	coCreateGuid(pguid *GUID) (ret error) = ole32.CoCreateGuid
 
 // syscall interface implementation for other packages
@@ -1276,7 +1276,7 @@ func GenerateGUID() (GUID, error) {
 // in the form of "{XXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX}".
 func (guid GUID) String() string {
 	var str [100]uint16
-	chars := stringFromGUID2(&guid, &str[0], len(str))
+	chars := stringFromGUID2(&guid, &str[0], int32(len(str)))
 	if chars <= 1 {
 		return ""
 	}
