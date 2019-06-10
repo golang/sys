@@ -1841,7 +1841,7 @@ func RegQueryValueEx(key Handle, name *uint16, reserved *uint32, valtype *uint32
 	return
 }
 
-func getCurrentProcessId() (pid uint32) {
+func GetCurrentProcessId() (pid uint32) {
 	r0, _, _ := syscall.Syscall(procGetCurrentProcessId.Addr(), 0, 0, 0, 0)
 	pid = uint32(r0)
 	return

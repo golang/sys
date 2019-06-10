@@ -234,7 +234,7 @@ func NewCallbackCDecl(fn interface{}) uintptr {
 //sys	RegQueryInfoKey(key Handle, class *uint16, classLen *uint32, reserved *uint32, subkeysLen *uint32, maxSubkeyLen *uint32, maxClassLen *uint32, valuesLen *uint32, maxValueNameLen *uint32, maxValueLen *uint32, saLen *uint32, lastWriteTime *Filetime) (regerrno error) = advapi32.RegQueryInfoKeyW
 //sys	RegEnumKeyEx(key Handle, index uint32, name *uint16, nameLen *uint32, reserved *uint32, class *uint16, classLen *uint32, lastWriteTime *Filetime) (regerrno error) = advapi32.RegEnumKeyExW
 //sys	RegQueryValueEx(key Handle, name *uint16, reserved *uint32, valtype *uint32, buf *byte, buflen *uint32) (regerrno error) = advapi32.RegQueryValueExW
-//sys	getCurrentProcessId() (pid uint32) = kernel32.GetCurrentProcessId
+//sys	GetCurrentProcessId() (pid uint32) = kernel32.GetCurrentProcessId
 //sys	GetConsoleMode(console Handle, mode *uint32) (err error) = kernel32.GetConsoleMode
 //sys	SetConsoleMode(console Handle, mode uint32) (err error) = kernel32.SetConsoleMode
 //sys	GetConsoleScreenBufferInfo(console Handle, info *ConsoleScreenBufferInfo) (err error) = kernel32.GetConsoleScreenBufferInfo
@@ -1118,7 +1118,7 @@ func SetsockoptIPv6Mreq(fd Handle, level, opt int, mreq *IPv6Mreq) (err error) {
 	return syscall.EWINDOWS
 }
 
-func Getpid() (pid int) { return int(getCurrentProcessId()) }
+func Getpid() (pid int) { return int(GetCurrentProcessId()) }
 
 func FindFirstFile(name *uint16, data *Win32finddata) (handle Handle, err error) {
 	// NOTE(rsc): The Win32finddata struct is wrong for the system call:
