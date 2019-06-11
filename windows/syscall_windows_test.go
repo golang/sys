@@ -196,3 +196,23 @@ func TestGUID(t *testing.T) {
 		t.Fatalf("Bad GUID string error = %v; want CO_E_CLASSSTRING", err)
 	}
 }
+
+func TestKnownFolderPath(t *testing.T) {
+	token, err := windows.OpenCurrentProcessToken()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer token.Close()
+	profileDir, err := token.GetUserProfileDirectory()
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := filepath.Join(profileDir, "Desktop")
+	got, err := windows.KnownFolderPath(windows.FOLDERID_Desktop, windows.KF_FLAG_DEFAULT)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if want != got {
+		t.Fatalf("Path = %q; want %q", got, want)
+	}
+}

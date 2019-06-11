@@ -114,6 +114,7 @@ var (
 	procCreateProcessW                     = modkernel32.NewProc("CreateProcessW")
 	procOpenProcess                        = modkernel32.NewProc("OpenProcess")
 	procShellExecuteW                      = modshell32.NewProc("ShellExecuteW")
+	procSHGetKnownFolderPath               = modshell32.NewProc("SHGetKnownFolderPath")
 	procTerminateProcess                   = modkernel32.NewProc("TerminateProcess")
 	procGetExitCodeProcess                 = modkernel32.NewProc("GetExitCodeProcess")
 	procGetStartupInfoW                    = modkernel32.NewProc("GetStartupInfoW")
@@ -230,6 +231,7 @@ var (
 	procCLSIDFromString                    = modole32.NewProc("CLSIDFromString")
 	procStringFromGUID2                    = modole32.NewProc("StringFromGUID2")
 	procCoCreateGuid                       = modole32.NewProc("CoCreateGuid")
+	procCoTaskMemFree                      = modole32.NewProc("CoTaskMemFree")
 	procWSAStartup                         = modws2_32.NewProc("WSAStartup")
 	procWSACleanup                         = modws2_32.NewProc("WSACleanup")
 	procWSAIoctl                           = modws2_32.NewProc("WSAIoctl")
@@ -1113,6 +1115,14 @@ func ShellExecute(hwnd Handle, verb *uint16, file *uint16, args *uint16, cwd *ui
 		} else {
 			err = syscall.EINVAL
 		}
+	}
+	return
+}
+
+func shGetKnownFolderPath(id *KNOWNFOLDERID, flags uint32, token Token, path **uint16) (ret error) {
+	r0, _, _ := syscall.Syscall6(procSHGetKnownFolderPath.Addr(), 4, uintptr(unsafe.Pointer(id)), uintptr(flags), uintptr(token), uintptr(unsafe.Pointer(path)), 0, 0)
+	if r0 != 0 {
+		ret = syscall.Errno(r0)
 	}
 	return
 }
@@ -2502,6 +2512,11 @@ func coCreateGuid(pguid *GUID) (ret error) {
 	if r0 != 0 {
 		ret = syscall.Errno(r0)
 	}
+	return
+}
+
+func coTaskMemFree(address unsafe.Pointer) {
+	syscall.Syscall(procCoTaskMemFree.Addr(), 1, uintptr(address), 0, 0)
 	return
 }
 

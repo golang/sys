@@ -174,6 +174,7 @@ func NewCallbackCDecl(fn interface{}) uintptr {
 //sys	CreateProcess(appName *uint16, commandLine *uint16, procSecurity *SecurityAttributes, threadSecurity *SecurityAttributes, inheritHandles bool, creationFlags uint32, env *uint16, currentDir *uint16, startupInfo *StartupInfo, outProcInfo *ProcessInformation) (err error) = CreateProcessW
 //sys	OpenProcess(da uint32, inheritHandle bool, pid uint32) (handle Handle, err error)
 //sys	ShellExecute(hwnd Handle, verb *uint16, file *uint16, args *uint16, cwd *uint16, showCmd int32) (err error) = shell32.ShellExecuteW
+//sys	shGetKnownFolderPath(id *KNOWNFOLDERID, flags uint32, token Token, path **uint16) (ret error) = shell32.SHGetKnownFolderPath
 //sys	TerminateProcess(handle Handle, exitcode uint32) (err error)
 //sys	GetExitCodeProcess(handle Handle, exitcode *uint32) (err error)
 //sys	GetStartupInfo(startupInfo *StartupInfo) (err error) = GetStartupInfoW
@@ -293,6 +294,7 @@ func NewCallbackCDecl(fn interface{}) uintptr {
 //sys	clsidFromString(lpsz *uint16, pclsid *GUID) (ret error) = ole32.CLSIDFromString
 //sys	stringFromGUID2(rguid *GUID, lpsz *uint16, cchMax int32) (chars int32) = ole32.StringFromGUID2
 //sys	coCreateGuid(pguid *GUID) (ret error) = ole32.CoCreateGuid
+//sys	coTaskMemFree(address unsafe.Pointer) = ole32.CoTaskMemFree
 
 // syscall interface implementation for other packages
 
@@ -1283,4 +1285,22 @@ func (guid GUID) String() string {
 		return ""
 	}
 	return string(utf16.Decode(str[:chars-1]))
+}
+
+// KnownFolderPath returns a well-known folder path for the current user, specified by one of
+// the FOLDERID_ constants, and chosen and optionally created based on a KF_ flag.
+func KnownFolderPath(folderID *KNOWNFOLDERID, flags uint32) (string, error) {
+	return Token(0).KnownFolderPath(folderID, flags)
+}
+
+// KnownFolderPath returns a well-known folder path for the user token, specified by one of
+// the FOLDERID_ constants, and chosen and optionally created based on a KF_ flag.
+func (t Token) KnownFolderPath(folderID *KNOWNFOLDERID, flags uint32) (string, error) {
+	var p *uint16
+	err := shGetKnownFolderPath(folderID, flags, t, &p)
+	if err != nil {
+		return "", err
+	}
+	defer coTaskMemFree(unsafe.Pointer(p))
+	return UTF16ToString((*[(1 << 30) - 1]uint16)(unsafe.Pointer(p))[:]), nil
 }
