@@ -206,6 +206,7 @@ var (
 	procSetInformationJobObject            = modkernel32.NewProc("SetInformationJobObject")
 	procGenerateConsoleCtrlEvent           = modkernel32.NewProc("GenerateConsoleCtrlEvent")
 	procGetProcessId                       = modkernel32.NewProc("GetProcessId")
+	procOpenThread                         = modkernel32.NewProc("OpenThread")
 	procDefineDosDeviceW                   = modkernel32.NewProc("DefineDosDeviceW")
 	procDeleteVolumeMountPointW            = modkernel32.NewProc("DeleteVolumeMountPointW")
 	procFindFirstVolumeW                   = modkernel32.NewProc("FindFirstVolumeW")
@@ -2214,6 +2215,25 @@ func GetProcessId(process Handle) (id uint32, err error) {
 	r0, _, e1 := syscall.Syscall(procGetProcessId.Addr(), 1, uintptr(process), 0, 0)
 	id = uint32(r0)
 	if id == 0 {
+		if e1 != 0 {
+			err = errnoErr(e1)
+		} else {
+			err = syscall.EINVAL
+		}
+	}
+	return
+}
+
+func OpenThread(da uint32, inheritHandle bool, tid uint32) (handle Handle, err error) {
+	var _p0 uint32
+	if inheritHandle {
+		_p0 = 1
+	} else {
+		_p0 = 0
+	}
+	r0, _, e1 := syscall.Syscall(procOpenThread.Addr(), 3, uintptr(da), uintptr(_p0), uintptr(tid))
+	handle = Handle(r0)
+	if handle == 0 {
 		if e1 != 0 {
 			err = errnoErr(e1)
 		} else {
