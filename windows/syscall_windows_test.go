@@ -216,3 +216,10 @@ func TestKnownFolderPath(t *testing.T) {
 		t.Fatalf("Path = %q; want %q", got, want)
 	}
 }
+
+func TestRtlGetVersion(t *testing.T) {
+	version := windows.RtlGetVersion()
+	if version.MajorVersion < 6 {
+		t.Fatalf("MajorVersion = %d; want >= 6", version.MajorVersion)
+	}
+}
