@@ -6,6 +6,8 @@
 
 package unix
 
+import "unsafe"
+
 // ReadDirent reads directory entries from fd and writes them into buf.
 func ReadDirent(fd int, buf []byte) (n int, err error) {
 	// Final argument is (basep *uintptr) and the syscall doesn't take nil.
