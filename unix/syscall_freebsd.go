@@ -362,7 +362,7 @@ func Getdents(fd int, buf []byte) (n int, err error) {
 
 func Getdirentries(fd int, buf []byte, basep *uintptr) (n int, err error) {
 	if supportsABI(_ino64First) {
-		if unsafe.Sizeof(*basep) == 8 {
+		if basep == nil || unsafe.Sizeof(*basep) == 8 {
 			return getdirentries_freebsd12(fd, buf, (*uint64)(unsafe.Pointer(basep)))
 		}
 		// The freebsd12 syscall needs a 64-bit base. On 32-bit machines
