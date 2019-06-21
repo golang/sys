@@ -1449,6 +1449,8 @@ func Sendfile(outfd int, infd int, offset *int64, count int) (written int, err e
 //sys	Acct(path string) (err error)
 //sys	AddKey(keyType string, description string, payload []byte, ringid int) (id int, err error)
 //sys	Adjtimex(buf *Timex) (state int, err error)
+//sys	Capget(hdr *CapUserHeader, data *CapUserData) (err error)
+//sys	Capset(hdr *CapUserHeader, data *CapUserData) (err error)
 //sys	Chdir(path string) (err error)
 //sys	Chroot(path string) (err error)
 //sys	ClockGetres(clockid int32, res *Timespec) (err error)
@@ -1754,8 +1756,6 @@ func OpenByHandleAt(mountFD int, handle FileHandle, flags int) (fd int, err erro
 // Alarm
 // ArchPrctl
 // Brk
-// Capget
-// Capset
 // ClockNanosleep
 // ClockSettime
 // Clone
