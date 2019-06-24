@@ -14,7 +14,6 @@ import (
 	"sort"
 	"strings"
 	"testing"
-	"unsafe"
 
 	"golang.org/x/sys/unix"
 )
@@ -49,7 +48,6 @@ func testGetdirentries(t *testing.T, count int) {
 	}
 
 	// Read files using Getdirentries
-	var names2 []string
 	fd, err := unix.Open(d, unix.O_RDONLY, 0)
 	if err != nil {
 		t.Fatalf("Open: %v", err)
@@ -57,6 +55,7 @@ func testGetdirentries(t *testing.T, count int) {
 	defer unix.Close(fd)
 	var base uintptr
 	var buf [2048]byte
+	names2 := make([]string, 0, count)
 	for {
 		n, err := unix.Getdirentries(fd, buf[:], &base)
 		if err != nil {
@@ -67,17 +66,15 @@ func testGetdirentries(t *testing.T, count int) {
 		}
 		data := buf[:n]
 		for len(data) > 0 {
-			dirent := (*unix.Dirent)(unsafe.Pointer(&data[0]))
-			data = data[dirent.Reclen:]
-			name := make([]byte, dirent.Namlen)
-			for i := 0; i < int(dirent.Namlen); i++ {
-				name[i] = byte(dirent.Name[i])
+			var bc int
+			bc, _, names2 = unix.ParseDirent(data, -1, names2)
+			if bc == 0 && len(data) > 0 {
+				t.Fatal("no progress")
 			}
-			names2 = append(names2, string(name))
+			data = data[bc:]
 		}
 	}
 
-	names = append(names, ".", "..") // Getdirentries returns these also
 	sort.Strings(names)
 	sort.Strings(names2)
 	if strings.Join(names, ":") != strings.Join(names2, ":") {
