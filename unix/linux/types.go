@@ -55,6 +55,7 @@ package unix
 #include <linux/icmpv6.h>
 #include <linux/if_pppox.h>
 #include <linux/keyctl.h>
+#include <linux/loop.h>
 #include <linux/netfilter/nf_tables.h>
 #include <linux/netfilter/nfnetlink.h>
 #include <linux/netfilter.h>
@@ -2004,3 +2005,15 @@ const (
 	LINUX_CAPABILITY_VERSION_2 = C._LINUX_CAPABILITY_VERSION_2
 	LINUX_CAPABILITY_VERSION_3 = C._LINUX_CAPABILITY_VERSION_3
 )
+
+// Loop devices
+
+const (
+	LO_FLAGS_READ_ONLY = C.LO_FLAGS_READ_ONLY
+	LO_FLAGS_AUTOCLEAR = C.LO_FLAGS_AUTOCLEAR
+	LO_FLAGS_PARTSCAN  = C.LO_FLAGS_PARTSCAN
+	LO_FLAGS_DIRECT_IO = C.LO_FLAGS_DIRECT_IO
+)
+
+type LoopInfo C.struct_loop_info
+type LoopInfo64 C.struct_loop_info64
