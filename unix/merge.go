@@ -16,6 +16,7 @@ package main
 
 import (
 	"bufio"
+	"flag"
 	"fmt"
 	"go/ast"
 	"go/parser"
@@ -29,6 +30,10 @@ import (
 )
 
 func main() {
+	var withStats bool
+	flag.BoolVar(&withStats, "stats", false, "prints out statistics before and after")
+	flag.Parse()
+
 	// Load the generated source code (file names start with 'z').
 	filter := func(fi os.FileInfo) bool {
 		name := fi.Name()
@@ -50,6 +55,19 @@ func main() {
 
 	// Process the package.
 	reg := newRegistry(pkg)
+
+	if withStats {
+		var stats Stats
+		reg.ReadStats(&stats)
+		fmt.Println("BEFORE")
+		fmt.Println(stats)
+		defer func() {
+			reg.ReadStats(&stats)
+			fmt.Println("AFTER")
+			fmt.Println(stats)
+		}()
+	}
+
 	reg.build()
 
 	// Print out the new files and updated source code.
@@ -101,7 +119,10 @@ func newRegistry(pkg *ast.Package) registry {
 		reg[name].arch[arch] = &goarch{File: file}
 	}
 
-	return registry(reg)
+	r := registry(reg)
+	r.build_kinds()
+
+	return r
 }
 
 // String lists the merged files and their architectures. Used for debugging.
@@ -123,10 +144,8 @@ func (r registry) String() string {
 	return b.String()
 }
 
-// build populates the kinds of every file and arch.
+// build factorizes the objects.
 func (r registry) build() {
-	r.build_kinds()
-
 	// Build the intersection of all objects for all arch.
 	for _, gf := range r {
 		k := &gf.kinds
@@ -234,6 +253,29 @@ func (r registry) print(pkg *ast.Package, fset *token.FileSet) error {
 		}
 	}
 	return nil
+}
+
+// Stats populates the statistics.
+func (r registry) ReadStats(s *Stats) {
+	s.Clear()
+	for name, gf := range r {
+		var as AggStats
+		as.FileStats.Set(name, &gf.kinds)
+		for arch, ga := range gf.arch {
+			var fs FileStats
+			fs.Set(arch, &ga.kinds)
+			as.Arch = append(as.Arch, fs)
+		}
+		// Sort by file name to ease the readings.
+		sort.Slice(as.Arch, func(i, j int) bool {
+			return as.Arch[i].Name < as.Arch[j].Name
+		})
+		s.Agg = append(s.Agg, as)
+	}
+	// Sort by file name to ease the readings.
+	sort.Slice(s.Agg, func(i, j int) bool {
+		return s.Agg[i].FileStats.Name < s.Agg[j].FileStats.Name
+	})
 }
 
 //-----------------------------------------------------------------------------
@@ -1058,4 +1100,90 @@ func delSpecAt(s []ast.Spec, i int) []ast.Spec {
 	}
 	s[len(s)-1] = nil
 	return s[:len(s)-1]
+}
+
+//-----------------------------------------------------------------------------
+// Statistics.
+
+type (
+	FileStats struct {
+		Name   string // File name
+		Consts int    // Number of constants
+		Types  int    // Number of types
+		Funcs  int    // Number of functions
+	}
+	AggStats struct {
+		FileStats             // Aggregated objects file
+		Arch      []FileStats // Arch dependent files for this aggregate
+	}
+	Stats struct {
+		Agg []AggStats
+	}
+	builder struct {
+		strings.Builder
+	}
+)
+
+func (b *builder) Newline() {
+	b.Builder.WriteByte('\n')
+}
+
+func (b *builder) Printf(f string, args ...interface{}) {
+	s := fmt.Sprintf(f, args...)
+	b.Builder.WriteString(s)
+}
+
+func (s *Stats) Clear() {
+	s.Agg = s.Agg[:0]
+}
+
+func (s Stats) String() string {
+	var buf builder
+	for _, as := range s.Agg {
+		buf.WriteString(as.String())
+		buf.Newline()
+	}
+	return buf.String()
+}
+
+func (s *AggStats) Clear() {
+	s.FileStats.Clear()
+	s.Arch = s.Arch[:0]
+}
+
+func (s AggStats) String() string {
+	var buf builder
+	buf.WriteString(s.FileStats.String())
+	buf.Newline()
+	for _, fs := range s.Arch {
+		buf.WriteString("  ")
+		buf.WriteString(fs.String())
+		buf.Newline()
+	}
+	return buf.String()
+}
+
+func (s *FileStats) Clear() {
+	s.Name = ""
+	s.Consts = 0
+	s.Types = 0
+	s.Funcs = 0
+}
+
+func (s FileStats) String() string {
+	var buf builder
+	buf.Printf("file=%q ", s.Name)
+	buf.Printf("\t\tconsts=%d", s.Consts)
+	buf.Printf("\t\ttypes=%d", s.Types)
+	buf.Printf("\t\tfuncs=%d", s.Funcs)
+	return buf.String()
+}
+
+func (s *FileStats) Set(name string, k *kinds) {
+	s.Name = name
+	if k.consts != nil {
+		s.Consts = len(k.consts.Names)
+	}
+	s.Types = len(k.types)
+	s.Funcs = len(k.funcs)
 }
