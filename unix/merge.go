@@ -15,6 +15,7 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"go/ast"
 	"go/parser"
@@ -65,7 +66,8 @@ type (
 	// kinds holds the objects (const, type, func) that will be factored out.
 	// Assumption: all files have the objects defined in the same order and with the same layout.
 	kinds struct {
-		consts *ast.ValueSpec // Constants
+		consts *ast.ValueSpec  // Constants
+		types  []*ast.TypeSpec // Types
 	}
 	// goarch represents an arch file.
 	goarch struct {
@@ -155,7 +157,7 @@ func (r registry) build_kinds() {
 						k.pushConst(d)
 
 					case token.TYPE:
-						//TODO type support
+						k.pushType(d)
 					}
 
 				case *ast.FuncDecl:
@@ -166,21 +168,48 @@ func (r registry) build_kinds() {
 	}
 }
 
+// bufferedFile provides a buffered os.File.
+func newbufferedFile(name string) (io.WriteCloser, error) {
+	f, err := os.Create(name)
+	if err != nil {
+		return nil, err
+	}
+	buf := bufio.NewWriter(f)
+	return &bufferedFile{f, buf}, nil
+}
+
+type bufferedFile struct {
+	f *os.File
+	*bufio.Writer
+}
+
+func (bf *bufferedFile) Close() error {
+	if err := bf.Writer.Flush(); err != nil {
+		return err
+	}
+	return bf.f.Close()
+}
+
 func (r registry) print(pkg *ast.Package, fset *token.FileSet) error {
-	doInput := func(name string, file *ast.File) error {
-		f, err := os.Create(name)
+	handleClose := func(errp *error, c io.Closer) {
+		if err := c.Close(); err != nil && *errp == nil {
+			*errp = err
+		}
+	}
+	doInput := func(name string, file *ast.File) (err error) {
+		f, err := newbufferedFile(name)
 		if err != nil {
 			return err
 		}
-		defer f.Close()
+		defer handleClose(&err, f)
 		return printer.Fprint(f, fset, file)
 	}
-	do := func(name string, gf *gofile) error {
-		f, err := os.Create(name + ".go")
+	do := func(name string, gf *gofile) (err error) {
+		f, err := newbufferedFile(name + ".go")
 		if err != nil {
 			return err
 		}
-		defer f.Close()
+		defer handleClose(&err, f)
 		// Print header.
 		if _, err := fmt.Fprintf(f, "package %s\n\n", pkg.Name); err != nil {
 			return err
@@ -221,9 +250,22 @@ func (k *kinds) pushConst(decl *ast.GenDecl) {
 	}
 }
 
+// Add the new type to the flatten list of all type definitions.
+func (k *kinds) pushType(decl *ast.GenDecl) {
+	for _, spec := range decl.Specs {
+		s := spec.(*ast.TypeSpec)
+		ns := &ast.TypeSpec{
+			Name: s.Name,
+			Type: s.Type,
+		}
+		k.types = append(k.types, ns)
+	}
+}
+
 // Intersection of all objects from kk into k.
 func (k *kinds) inter(kk *kinds) {
 	k.interConst(kk)
+	k.interType(kk)
 }
 
 // Intersection of constants in k and kk.
@@ -242,9 +284,23 @@ func (k *kinds) interConst(kk *kinds) {
 	interValueSpec(k.consts, kk.consts)
 }
 
+// Intersection of types in k and kk.
+func (k *kinds) interType(kk *kinds) {
+	if len(kk.types) == 0 {
+		return
+	}
+	if len(k.types) == 0 {
+		// Clone the first kinds.
+		k.types = append([]*ast.TypeSpec{}, kk.types...)
+		return
+	}
+	k.types = interTypeSpec(k.types, kk.types)
+}
+
 // Difference of all objects from kk into k.
 func (k *kinds) diff(kk *kinds) {
 	k.diffConst(kk)
+	k.diffType(kk)
 }
 
 // Difference of k.consts and kk.consts.
@@ -256,9 +312,28 @@ kloop:
 	for i := 0; i < len(k.consts.Names); {
 		id := k.consts.Names[i]
 		for ki, kid := range kk.consts.Names {
-			if id.Name == kid.Name && exprEqual(k.consts.Values[i], kk.consts.Values[ki]) {
+			if idEqual(id, kid) && exprEqual(k.consts.Values[i], kk.consts.Values[ki]) {
 				// Constant is in k and kk: factorized, remove from k.
 				delValueSpecAt(k.consts, i)
+				continue kloop
+			}
+		}
+		i++
+	}
+}
+
+// Difference of k.types and kk.types.
+func (k *kinds) diffType(kk *kinds) {
+	if len(k.types) == 0 || len(kk.types) == 0 {
+		return
+	}
+kloop:
+	for i := 0; i < len(k.types); {
+		t := k.types[i]
+		for _, kt := range kk.types {
+			if specEqual(t, kt) {
+				// Type is in k and kk: factorized, remove from k.
+				k.types = delTypeSpecAt(k.types, i)
 				continue kloop
 			}
 		}
@@ -270,7 +345,13 @@ func (k *kinds) print(w io.Writer) error {
 	if err := k.printConst(w); err != nil {
 		return err
 	}
-	//TODO type support
+	// Add a separator at the end of constant definitions to avoid invalid source code.
+	if _, err := w.Write([]byte("\n")); err != nil {
+		return err
+	}
+	if err := k.printType(w); err != nil {
+		return err
+	}
 	//TODO func support
 	return nil
 }
@@ -292,6 +373,22 @@ func (k *kinds) printConst(w io.Writer) error {
 			Names:  []*ast.Ident{id},
 			Values: []ast.Expr{k.consts.Values[i]},
 		}
+	}
+	return printer.Fprint(w, token.NewFileSet(), node)
+}
+
+func (k *kinds) printType(w io.Writer) error {
+	if len(k.types) == 0 {
+		// No Type.
+		return nil
+	}
+	node := &ast.GenDecl{
+		Lparen: 1, // Make sure there is a parenthesis
+		Tok:    token.TYPE,
+		Specs:  make([]ast.Spec, len(k.types)),
+	}
+	for i, ts := range k.types {
+		node.Specs[i] = ts
 	}
 	return printer.Fprint(w, token.NewFileSet(), node)
 }
@@ -320,7 +417,23 @@ func trimFile(f *ast.File, k *kinds) {
 				}
 
 			case token.TYPE:
-				//TODO type support
+			topLoop:
+				for i := 0; i < len(d.Specs); {
+					t := d.Specs[i].(*ast.TypeSpec)
+					for _, kt := range k.types {
+						if specEqual(t, kt) {
+							i++
+							continue topLoop
+						}
+					}
+					// Factorized spec, remove it.
+					d.Specs = delSpecAt(d.Specs, i)
+				}
+				if len(d.Specs) == 0 {
+					// Remove the decl as it has become empty.
+					f.Decls = delDeclAt(f.Decls, i)
+					continue
+				}
 			}
 
 		case *ast.FuncDecl:
@@ -364,6 +477,12 @@ func exprEqual(a, b ast.Expr) bool {
 	case *ast.BasicLit:
 		b, ok := b.(*ast.BasicLit)
 		if !ok {
+			return false
+		}
+		if a == nil && b == nil {
+			return true
+		}
+		if a == nil || b == nil {
 			return false
 		}
 		return a.Kind == b.Kind && a.Value == b.Value
@@ -424,7 +543,7 @@ func exprEqual(a, b ast.Expr) bool {
 		if !ok {
 			return false
 		}
-		return a.Name == b.Name
+		return idEqual(a, b)
 
 	case *ast.IndexExpr:
 		b, ok := b.(*ast.IndexExpr)
@@ -689,6 +808,9 @@ func declEqual(a, b ast.Decl) bool {
 		if a.Body == nil && b.Body == nil {
 			return true
 		}
+		if a.Body == nil || b.Body == nil {
+			return false
+		}
 		return stmtEqual(a.Body, b.Body)
 
 	case *ast.GenDecl:
@@ -696,45 +818,65 @@ func declEqual(a, b ast.Decl) bool {
 		if !ok {
 			return false
 		}
-		if len(a.Specs) != len(b.Specs) {
-			return false
-		}
-		for i, spec := range a.Specs {
-			specb := b.Specs[i]
-			switch a := spec.(type) {
-			case *ast.TypeSpec:
-				b, ok := specb.(*ast.TypeSpec)
-				if !ok {
-					return false
-				}
-				if !exprEqual(a.Type, b.Type) {
-					return false
-				}
-			case *ast.ValueSpec:
-				b, ok := specb.(*ast.ValueSpec)
-				if !ok {
-					return false
-				}
-				if !exprEqual(a.Type, b.Type) {
-					return false
-				}
-				if len(a.Names) != len(b.Names) {
-					return false
-				}
-				for i, id := range a.Names {
-					if !exprEqual(id, b.Names[i]) {
-						return false
-					}
-				}
-				if !exprMultiEqual(a.Values, b.Values) {
-					return false
-				}
-			}
-		}
-		return true
+		return specMultiEqual(a.Specs, b.Specs)
 
 	default:
 		panic(fmt.Sprintf("unsupported declaration %T: %v", a, a))
+	}
+	return false
+}
+
+func idMultiEqual(a, b []*ast.Ident) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for i, as := range a {
+		if !exprEqual(as, b[i]) {
+			return false
+		}
+	}
+	return true
+}
+
+func idEqual(a, b *ast.Ident) bool {
+	return a.Name == b.Name
+}
+
+func specMultiEqual(a, b []ast.Spec) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for i, as := range a {
+		if !specEqual(as, b[i]) {
+			return false
+		}
+	}
+	return true
+}
+
+// specEqual returns whether or not a and b are deeply equal.
+func specEqual(a, b ast.Spec) bool {
+	switch a := a.(type) {
+	case nil:
+		return b == nil
+
+	case *ast.ImportSpec:
+		if b, ok := b.(*ast.ImportSpec); ok {
+			return exprEqual(a.Name, b.Name) && exprEqual(a.Path, b.Path)
+		}
+
+	case *ast.TypeSpec:
+		if b, ok := b.(*ast.TypeSpec); ok {
+			return idEqual(a.Name, b.Name) && exprEqual(a.Type, b.Type)
+		}
+
+	case *ast.ValueSpec:
+		if b, ok := b.(*ast.ValueSpec); ok {
+			return exprEqual(a.Type, b.Type) && idMultiEqual(a.Names, b.Names) && exprMultiEqual(a.Values, b.Values)
+		}
+
+	default:
+		panic(fmt.Sprintf("unsupported spec %T: %v", a, a))
 	}
 	return false
 }
@@ -751,7 +893,7 @@ topLoop:
 	for i := 0; i < len(a.Names); {
 		id := a.Names[i]
 		for ki, kid := range b.Names {
-			if id.Name == kid.Name && exprEqual(a.Values[i], b.Values[ki]) {
+			if idEqual(id, kid) && exprEqual(a.Values[i], b.Values[ki]) {
 				// Same constant!
 				i++
 				continue topLoop
@@ -760,6 +902,27 @@ topLoop:
 		// Constant is in a but not in b: remove from a.
 		delValueSpecAt(a, i)
 	}
+}
+
+// Returns the intersection of a and b.
+func interTypeSpec(a, b []*ast.TypeSpec) []*ast.TypeSpec {
+	if a == nil || b == nil {
+		return a
+	}
+topLoop:
+	for i := 0; i < len(a); {
+		s := a[i]
+		for _, ks := range b {
+			if specEqual(s, ks) {
+				// Same type!
+				i++
+				continue topLoop
+			}
+		}
+		// Type is in a but not in b: remove from a.
+		a = delTypeSpecAt(a, i)
+	}
+	return a
 }
 
 // delValueSpecAt removes the value spec at index i.
@@ -772,6 +935,15 @@ func delValueSpecAt(v *ast.ValueSpec, i int) {
 	v.Values[len(v.Values)-1] = nil
 	v.Names = v.Names[:len(v.Names)-1]
 	v.Values = v.Values[:len(v.Values)-1]
+}
+
+// delTypeSpecAt removes the type spec at index i.
+func delTypeSpecAt(s []*ast.TypeSpec, i int) []*ast.TypeSpec {
+	if i+1 < len(s) {
+		copy(s[i:], s[i+1:])
+	}
+	s[len(s)-1] = nil
+	return s[:len(s)-1]
 }
 
 // delDecl removes the decl at index i and returns the modified slice.
