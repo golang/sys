@@ -68,6 +68,7 @@ type (
 	kinds struct {
 		consts *ast.ValueSpec  // Constants
 		types  []*ast.TypeSpec // Types
+		funcs  []*ast.FuncDecl // Functions
 	}
 	// goarch represents an arch file.
 	goarch struct {
@@ -161,7 +162,7 @@ func (r registry) build_kinds() {
 					}
 
 				case *ast.FuncDecl:
-					//TODO func support
+					k.pushFunc(d)
 				}
 			}
 		}
@@ -262,10 +263,16 @@ func (k *kinds) pushType(decl *ast.GenDecl) {
 	}
 }
 
+// Add the new type to the flatten list of all type definitions.
+func (k *kinds) pushFunc(decl *ast.FuncDecl) {
+	k.funcs = append(k.funcs, decl)
+}
+
 // Intersection of all objects from kk into k.
 func (k *kinds) inter(kk *kinds) {
 	k.interConst(kk)
 	k.interType(kk)
+	k.interFunc(kk)
 }
 
 // Intersection of constants in k and kk.
@@ -297,10 +304,24 @@ func (k *kinds) interType(kk *kinds) {
 	k.types = interTypeSpec(k.types, kk.types)
 }
 
+// Intersection of functions in k and kk.
+func (k *kinds) interFunc(kk *kinds) {
+	if len(kk.funcs) == 0 {
+		return
+	}
+	if len(k.funcs) == 0 {
+		// Clone the first kinds.
+		k.funcs = append([]*ast.FuncDecl{}, kk.funcs...)
+		return
+	}
+	k.funcs = interFuncDecl(k.funcs, kk.funcs)
+}
+
 // Difference of all objects from kk into k.
 func (k *kinds) diff(kk *kinds) {
 	k.diffConst(kk)
 	k.diffType(kk)
+	k.diffFunc(kk)
 }
 
 // Difference of k.consts and kk.consts.
@@ -341,6 +362,25 @@ kloop:
 	}
 }
 
+// Difference of k.funcs and kk.funcs.
+func (k *kinds) diffFunc(kk *kinds) {
+	if len(k.funcs) == 0 || len(kk.funcs) == 0 {
+		return
+	}
+kloop:
+	for i := 0; i < len(k.funcs); {
+		f := k.funcs[i]
+		for _, kf := range kk.funcs {
+			if declEqual(f, kf) {
+				// Function is in k and kk: factorized, remove from k.
+				k.funcs = delFuncDeclAt(k.funcs, i)
+				continue kloop
+			}
+		}
+		i++
+	}
+}
+
 func (k *kinds) print(w io.Writer) error {
 	if err := k.printConst(w); err != nil {
 		return err
@@ -352,7 +392,9 @@ func (k *kinds) print(w io.Writer) error {
 	if err := k.printType(w); err != nil {
 		return err
 	}
-	//TODO func support
+	if err := k.printFunc(w); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -379,7 +421,7 @@ func (k *kinds) printConst(w io.Writer) error {
 
 func (k *kinds) printType(w io.Writer) error {
 	if len(k.types) == 0 {
-		// No Type.
+		// No type.
 		return nil
 	}
 	node := &ast.GenDecl{
@@ -391,6 +433,19 @@ func (k *kinds) printType(w io.Writer) error {
 		node.Specs[i] = ts
 	}
 	return printer.Fprint(w, token.NewFileSet(), node)
+}
+
+func (k *kinds) printFunc(w io.Writer) error {
+	fset := token.NewFileSet()
+	for _, f := range k.funcs {
+		if err := printer.Fprint(w, fset, f); err != nil {
+			return err
+		}
+		if _, err := w.Write([]byte("\n")); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 // trimFile removes objects from f that are not in k.
@@ -700,7 +755,7 @@ func stmtEqual(a, b ast.Stmt) bool {
 		if !ok {
 			return false
 		}
-		return stmtEqual(a, b)
+		return exprEqual(a.X, b.X)
 
 	case *ast.ForStmt:
 		b, ok := b.(*ast.ForStmt)
@@ -906,7 +961,7 @@ topLoop:
 
 // Returns the intersection of a and b.
 func interTypeSpec(a, b []*ast.TypeSpec) []*ast.TypeSpec {
-	if a == nil || b == nil {
+	if len(a) == 0 || len(b) == 0 {
 		return a
 	}
 topLoop:
@@ -925,6 +980,27 @@ topLoop:
 	return a
 }
 
+// Returns the intersection of a and b.
+func interFuncDecl(a, b []*ast.FuncDecl) []*ast.FuncDecl {
+	if len(a) == 0 || len(b) == 0 {
+		return a
+	}
+topLoop:
+	for i := 0; i < len(a); {
+		s := a[i]
+		for _, ks := range b {
+			if declEqual(s, ks) {
+				// Same function!
+				i++
+				continue topLoop
+			}
+		}
+		// Function is in a but not in b: remove from a.
+		a = delFuncDeclAt(a, i)
+	}
+	return a
+}
+
 // delValueSpecAt removes the value spec at index i.
 func delValueSpecAt(v *ast.ValueSpec, i int) {
 	if i+1 < len(v.Names) {
@@ -939,6 +1015,15 @@ func delValueSpecAt(v *ast.ValueSpec, i int) {
 
 // delTypeSpecAt removes the type spec at index i.
 func delTypeSpecAt(s []*ast.TypeSpec, i int) []*ast.TypeSpec {
+	if i+1 < len(s) {
+		copy(s[i:], s[i+1:])
+	}
+	s[len(s)-1] = nil
+	return s[:len(s)-1]
+}
+
+// delFuncDeclAt removes the func decl at index i.
+func delFuncDeclAt(s []*ast.FuncDecl, i int) []*ast.FuncDecl {
 	if i+1 < len(s) {
 		copy(s[i:], s[i+1:])
 	}
