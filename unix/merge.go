@@ -492,7 +492,18 @@ func trimFile(f *ast.File, k *kinds) {
 			}
 
 		case *ast.FuncDecl:
-			//TODO func support
+			var found bool
+			for _, kf := range k.funcs {
+				if declEqual(d, kf) {
+					found = true
+					break
+				}
+			}
+			if !found {
+				// Remove the decl as it has become empty.
+				f.Decls = delDeclAt(f.Decls, i)
+				continue
+			}
 		}
 		i++
 	}
