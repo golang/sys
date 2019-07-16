@@ -20,7 +20,7 @@ const (
 
 // iniCheck returns one of the iCheck value.
 //  - different: a and b are known to be different
-//  - same: a and b are known to be the same
+//  - same: a and b are known to be the same (nil interface or nil pointer)
 //  - unknown: cannot compare a and b, but both are a non nil pointer.
 //
 // If typed, a and b must be pointers.
@@ -153,6 +153,12 @@ func ExprEqual(a, b ast.Expr) bool {
 
 // FieldListEqual returns whether or not a and b are deeply equal.
 func FieldListEqual(a, b *ast.FieldList) bool {
+	if a == nil && b == nil {
+		return true
+	}
+	if a == nil || b == nil {
+		return false
+	}
 	if len(a.List) != len(b.List) {
 		return false
 	}
@@ -288,11 +294,17 @@ func DeclEqual(a, b ast.Decl) bool {
 
 	case *ast.FuncDecl:
 		b := b.(*ast.FuncDecl)
-		switch iniCheck(a, b) {
+		if !IdentEqual(a.Name, b.Name) || !FieldListEqual(a.Recv, b.Recv) {
+			return false
+		}
+		switch iniCheck(a.Type, b.Type) {
 		case different:
 			return false
-		case same:
-			return true
+		case unknown:
+			// a.Type and b.Type are not nil.
+			if !FieldListEqual(a.Type.Params, b.Type.Params) || !FieldListEqual(a.Type.Results, b.Type.Results) {
+				return false
+			}
 		}
 		return StmtEqual(a.Body, b.Body)
 
@@ -300,7 +312,7 @@ func DeclEqual(a, b ast.Decl) bool {
 		b := b.(*ast.GenDecl)
 		return SpecMultiEqual(a.Specs, b.Specs)
 	}
-	panic(fmt.Sprintf("unsupported declaration %T: %v", a, a))
+	panic(fmt.Sprintf("unsupported declaration %T", a))
 }
 
 // IdentMultiEqual returns whether or not a and b are deeply equal.
@@ -356,5 +368,5 @@ func SpecEqual(a, b ast.Spec) bool {
 		b := b.(*ast.ValueSpec)
 		return ExprEqual(a.Type, b.Type) && IdentMultiEqual(a.Names, b.Names) && ExprMultiEqual(a.Values, b.Values)
 	}
-	panic(fmt.Sprintf("unsupported spec %T: %v", a, a))
+	panic(fmt.Sprintf("unsupported spec %T", a))
 }

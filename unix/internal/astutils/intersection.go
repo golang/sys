@@ -7,6 +7,8 @@ package astutils
 import "go/ast"
 
 // InterValueSpec performs the intersection of a and b. a is mutated.
+//
+// a is unchanged if b and a do not have the same type.
 func InterValueSpec(a, b *ast.ValueSpec) {
 	if a == nil || b == nil {
 		return
@@ -28,6 +30,8 @@ loop:
 }
 
 // Returns the intersection of a and b. a is mutated.
+//
+// a is unchanged if b is empty.
 func InterTypeSpec(a, b []*ast.TypeSpec) []*ast.TypeSpec {
 	if len(a) == 0 || len(b) == 0 {
 		return a
@@ -47,6 +51,8 @@ loop:
 }
 
 // Returns the intersection of a and b. a is mutated.
+//
+// a is unchanged if b is empty.
 func InterFuncDecl(a, b []*ast.FuncDecl) []*ast.FuncDecl {
 	if len(a) == 0 || len(b) == 0 {
 		return a
