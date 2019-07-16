@@ -21,16 +21,26 @@ import (
 	"log"
 	"os"
 	"strings"
+	"time"
 
 	"golang.org/x/sys/unix/internal/merge"
 )
 
 func main() {
+	var withTiming bool
+	flag.BoolVar(&withTiming, "timing", false, "prints out time to execute")
 	var withStats bool
 	flag.BoolVar(&withStats, "stats", false, "prints out statistics before and after")
 	var pkgPath string
 	flag.StringVar(&pkgPath, "path", "", "package path")
 	flag.Parse()
+
+	if withTiming {
+		start := time.Now()
+		defer func() {
+			fmt.Println(time.Now().Sub(start))
+		}()
+	}
 
 	// Load the generated source code (file names start with 'z').
 	filter := func(fi os.FileInfo) bool {

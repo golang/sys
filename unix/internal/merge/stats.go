@@ -69,7 +69,7 @@ func (s FileStats) String() string {
 func (s *FileStats) set(name string, k *kinds) {
 	s.Name = name
 	if k.consts != nil {
-		s.Consts = len(k.consts.Names)
+		s.Consts = len(k.consts)
 	}
 	s.Types = len(k.types)
 	s.Funcs = len(k.funcs)

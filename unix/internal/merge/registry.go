@@ -12,8 +12,6 @@ import (
 	"io"
 	"sort"
 	"strings"
-
-	"golang.org/x/sys/unix/internal/astutils"
 )
 
 type (
@@ -197,53 +195,23 @@ func trimFile(f *ast.File, k *kinds) {
 		case *ast.GenDecl:
 			switch d.Tok {
 			case token.CONST:
-				for i := 0; i < len(d.Specs); {
-					v := d.Specs[i].(*ast.ValueSpec)
-					astutils.InterValueSpec(v, k.consts)
-					if len(v.Names) > 0 {
-						i++
-						continue
-					}
-					// Remove the spec as it has become empty.
-					d.Specs = astutils.DelSpecAt(d.Specs, i)
-				}
+				d.Specs = specInter(d.Specs, k.consts)
 				if len(d.Specs) == 0 {
-					// Remove the decl as it has become empty.
-					f.Decls = astutils.DelDeclAt(f.Decls, i)
+					f.Decls = delDeclAt(f.Decls, i)
 					continue
 				}
 
 			case token.TYPE:
-			topLoop:
-				for i := 0; i < len(d.Specs); {
-					t := d.Specs[i].(*ast.TypeSpec)
-					for _, kt := range k.types {
-						if astutils.SpecEqual(t, kt) {
-							i++
-							continue topLoop
-						}
-					}
-					// Factorized spec, remove it.
-					d.Specs = astutils.DelSpecAt(d.Specs, i)
-				}
+				d.Specs = specInter(d.Specs, k.types)
 				if len(d.Specs) == 0 {
-					// Remove the decl as it has become empty.
-					f.Decls = astutils.DelDeclAt(f.Decls, i)
+					f.Decls = delDeclAt(f.Decls, i)
 					continue
 				}
 			}
 
 		case *ast.FuncDecl:
-			var found bool
-			for _, kf := range k.funcs {
-				if astutils.DeclEqual(d, kf) {
-					found = true
-					break
-				}
-			}
-			if !found {
-				// Remove the decl as it has become empty.
-				f.Decls = astutils.DelDeclAt(f.Decls, i)
+			if !declIn(d, k.funcs) {
+				f.Decls = delDeclAt(f.Decls, i)
 				continue
 			}
 		}
