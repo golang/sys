@@ -11,35 +11,35 @@ import (
 	"strings"
 )
 
-// astCache is used to cache the results of printer.Fprint as it is pretty slow.
-var astCache = map[ast.Node]string{}
-
-func nodeFromCache(node ast.Node) string {
-	if s, ok := astCache[node]; ok {
-		return s
-	}
-	s := nodeToString(node)
-	astCache[node] = s
-	return s
-}
-
-func nodeToString(node interface{}) string {
-	var buf strings.Builder
-	// The node comes from successfully parsed code, so it should be safe to ignore the error.
-	_ = printer.Fprint(&buf, token.NewFileSet(), node)
-	return buf.String()
-}
-
-func astEqual(a, b ast.Node) bool {
-	return nodeFromCache(a) == nodeFromCache(b)
-}
-
 //-----------------------------------------------------------------------------
 // ast.Spec
 
+// specCache is used to cache the results of printer.Fprint as it is pretty slow.
+var specCache = map[ast.Spec]string{}
+
+func specFromCache(spec ast.Spec) string {
+	if s, ok := specCache[spec]; ok {
+		return s
+	}
+	s := specToString(spec)
+	specCache[spec] = s
+	return s
+}
+
+func specToString(spec ast.Spec) string {
+	var buf strings.Builder
+	// The node comes from successfully parsed code, so it should be safe to ignore the error.
+	_ = printer.Fprint(&buf, token.NewFileSet(), spec)
+	return buf.String()
+}
+
+func specEqual(a, b ast.Spec) bool {
+	return specFromCache(a) == specFromCache(b)
+}
+
 func specIn(item ast.Spec, s []ast.Spec) bool {
 	for _, v := range s {
-		if astEqual(v, item) {
+		if specEqual(v, item) {
 			return true
 		}
 	}
@@ -82,9 +82,32 @@ func specDiff(a, b []ast.Spec) []ast.Spec {
 //-----------------------------------------------------------------------------
 // ast.Decl
 
+// declCache is used to cache the results of printer.Fprint as it is pretty slow.
+var declCache = map[ast.Decl]string{}
+
+func declFromCache(decl ast.Decl) string {
+	if s, ok := declCache[decl]; ok {
+		return s
+	}
+	s := declToString(decl)
+	declCache[decl] = s
+	return s
+}
+
+func declToString(decl ast.Decl) string {
+	var buf strings.Builder
+	// The node comes from successfully parsed code, so it should be safe to ignore the error.
+	_ = printer.Fprint(&buf, token.NewFileSet(), decl)
+	return buf.String()
+}
+
+func declEqual(a, b ast.Decl) bool {
+	return declFromCache(a) == declFromCache(b)
+}
+
 func declIn(item ast.Decl, s []ast.Decl) bool {
 	for _, v := range s {
-		if astEqual(v, item) {
+		if declEqual(v, item) {
 			return true
 		}
 	}
@@ -95,7 +118,7 @@ func declInter(a, b []ast.Decl) []ast.Decl {
 	var s []ast.Decl
 	for _, v := range a {
 		for _, w := range b {
-			if astEqual(v, w) {
+			if declEqual(v, w) {
 				s = append(s, v)
 			}
 		}

@@ -20,6 +20,7 @@ import (
 	"go/token"
 	"log"
 	"os"
+	"runtime/pprof"
 	"strings"
 	"time"
 
@@ -27,6 +28,8 @@ import (
 )
 
 func main() {
+	var cpuProf string
+	flag.StringVar(&cpuProf, "cpuprofile", "", "write cpu profile to file")
 	var withTiming bool
 	flag.BoolVar(&withTiming, "timing", false, "prints out time to execute")
 	var withStats bool
@@ -34,6 +37,15 @@ func main() {
 	var pkgPath string
 	flag.StringVar(&pkgPath, "path", "", "package path")
 	flag.Parse()
+
+	if cpuProf != "" {
+		f, err := os.Create(cpuProf)
+		if err != nil {
+			log.Fatal(err)
+		}
+		_ = pprof.StartCPUProfile(f)
+		defer pprof.StopCPUProfile()
+	}
 
 	if withTiming {
 		start := time.Now()
