@@ -8,6 +8,9 @@ import (
 	"fmt"
 	"go/ast"
 	"go/parser"
+	"go/token"
+	"log"
+	"strings"
 	"testing"
 )
 
@@ -114,6 +117,19 @@ func TestFieldListEqual(t *testing.T) {
 }
 
 func TestDeclEqual(t *testing.T) {
+	toFunc := func(src string) *ast.FuncDecl {
+		src = "package main\n\n" + src
+		file, err := parser.ParseFile(token.NewFileSet(), "", strings.NewReader(src), parser.AllErrors)
+		if err != nil {
+			log.Fatal(err)
+		}
+		return file.Decls[0].(*ast.FuncDecl)
+	}
+
+	fn1 := toFunc(`func incr(a int) int { return a + 1 }`)
+	fn2 := toFunc(`func incr(a *int) int { *a++; return *a }`)
+	fn3 := toFunc(`func incr(a []int) {  for i := range a { a[i]++ } }`)
+
 	for _, tc := range []struct {
 		label string
 		a, b  ast.Decl
@@ -127,6 +143,11 @@ func TestDeclEqual(t *testing.T) {
 		{"gen 1 nil", g1, nil, false},
 		{"gen 1 1", g1, g1, true},
 		{"gen 1 2", g1, g2, false},
+		{"incr1", fn1, fn1, true},
+		{"incr2", fn2, fn2, true},
+		{"incr3", fn3, fn3, true},
+		{"incr1 incr2", fn1, fn2, false},
+		{"incr1 incr3", fn1, fn3, false},
 	} {
 		t.Run(tc.label, func(t *testing.T) {
 			if got, want := DeclEqual(tc.a, tc.b), tc.ok; got != want {
@@ -145,6 +166,11 @@ func TestExprEqual(t *testing.T) {
 		ok   bool
 	}{
 		{"1 == 1", "1 == 1", true},
+		{"1 == 1", "1 != 1", false},
+		{"+1 == +1", "+1 == +1", true},
+		{"+1 == -1", "+1 == -1", true},
+		{"+1 == -1", "-1 == +1", false},
+		{"+1 == +1", "-1 == -1", false},
 		{"a == a", "a == a", true},
 		{"a == a", "a == b", false},
 		{"len([]int{2}) > 1", "len([]int{2}) > 1", true},

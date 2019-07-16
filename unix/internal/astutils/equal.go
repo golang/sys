@@ -82,7 +82,7 @@ func ExprEqual(a, b ast.Expr) bool {
 
 	case *ast.BinaryExpr:
 		b := b.(*ast.BinaryExpr)
-		return ExprEqual(a.X, b.X) && ExprEqual(a.Y, b.Y)
+		return a.Op == b.Op && ExprEqual(a.X, b.X) && ExprEqual(a.Y, b.Y)
 
 	case *ast.CallExpr:
 		b := b.(*ast.CallExpr)
@@ -94,7 +94,7 @@ func ExprEqual(a, b ast.Expr) bool {
 
 	case *ast.CompositeLit:
 		b := b.(*ast.CompositeLit)
-		return ExprEqual(a.Type, b.Type) && ExprMultiEqual(a.Elts, b.Elts)
+		return a.Incomplete == b.Incomplete && ExprEqual(a.Type, b.Type) && ExprMultiEqual(a.Elts, b.Elts)
 
 	case *ast.Ellipsis:
 		b := b.(*ast.Ellipsis)
@@ -116,7 +116,7 @@ func ExprEqual(a, b ast.Expr) bool {
 
 	case *ast.InterfaceType:
 		b := b.(*ast.InterfaceType)
-		return FieldListEqual(a.Methods, b.Methods)
+		return a.Incomplete == b.Incomplete && FieldListEqual(a.Methods, b.Methods)
 
 	case *ast.KeyValueExpr:
 		b := b.(*ast.KeyValueExpr)
@@ -142,11 +142,11 @@ func ExprEqual(a, b ast.Expr) bool {
 
 	case *ast.StructType:
 		b := b.(*ast.StructType)
-		return FieldListEqual(a.Fields, b.Fields)
+		return a.Incomplete == b.Incomplete && FieldListEqual(a.Fields, b.Fields)
 
 	case *ast.UnaryExpr:
 		b := b.(*ast.UnaryExpr)
-		return ExprEqual(a.X, b.X)
+		return a.Op == b.Op && ExprEqual(a.X, b.X)
 	}
 	panic(fmt.Sprintf("unsupported expr %T", a))
 }
