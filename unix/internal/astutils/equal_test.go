@@ -10,7 +10,6 @@ import (
 	"go/parser"
 	"go/token"
 	"log"
-	"strings"
 	"testing"
 )
 
@@ -118,8 +117,8 @@ func TestFieldListEqual(t *testing.T) {
 
 func TestDeclEqual(t *testing.T) {
 	toFunc := func(src string) *ast.FuncDecl {
-		src = "package main\n\n" + src
-		file, err := parser.ParseFile(token.NewFileSet(), "", strings.NewReader(src), parser.AllErrors)
+		src = "package _\n\n" + src
+		file, err := parser.ParseFile(token.NewFileSet(), "", src, parser.AllErrors)
 		if err != nil {
 			log.Fatal(err)
 		}
