@@ -12,33 +12,44 @@ import (
 )
 
 type (
-	// kinds holds the objects (const, type, func) that will be factored out.
+	// kinds holds the objects (const, type, func) that will be consolidated.
 	// Assumption: all files have the objects defined in the same order and with the same layout.
 	kinds struct {
-		consts []ast.Spec // Constants
-		types  []ast.Spec // Types
-		funcs  []ast.Decl // Functions
+		consts []*ast.ValueSpec // Constants grouped by Type
+		types  []*ast.TypeSpec  // Types
+		funcs  []*ast.FuncDecl  // Functions
 	}
 )
 
 // Add the new const to the flatten list of all const definitions.
 func (k *kinds) pushConst(decl *ast.GenDecl) {
-	k.consts = specUnion(k.consts, decl.Specs)
+loop:
+	for _, spec := range decl.Specs[1:] {
+		val := spec.(*ast.ValueSpec)
+		for _, v := range k.consts {
+			if exprEqual(v.Type, val.Type) {
+				// Existing Type.
+				v.Names = append(v.Names, val.Names...)
+				if n := len(val.Names) - len(val.Values); n > 0 {
+					v.Values = append(v.Values, make([]ast.Expr, n)...)
+				}
+				v.Values = append(v.Values, val.Values...)
+				continue loop
+			}
+		}
+		// New Type.
+		k.consts = append(k.consts, val)
+	}
 }
 
 // Add the new type to the flatten list of all type definitions.
 func (k *kinds) pushType(decl *ast.GenDecl) {
 	for _, spec := range decl.Specs {
-		s := spec.(*ast.TypeSpec)
-		ns := &ast.TypeSpec{
-			Name: s.Name,
-			Type: s.Type,
-		}
-		k.types = append(k.types, ns)
+		k.types = append(k.types, spec.(*ast.TypeSpec))
 	}
 }
 
-// Add the new type to the flatten list of all type definitions.
+// Add the new func to the flatten list of all func definitions.
 func (k *kinds) pushFunc(decl *ast.FuncDecl) {
 	k.funcs = append(k.funcs, decl)
 }
@@ -60,7 +71,25 @@ func (k *kinds) interConst(kk *kinds) {
 		k.consts = append(k.consts, kk.consts...)
 		return
 	}
-	k.consts = specInter(k.consts, kk.consts)
+	// By Type, remove values in k.consts that are not in kk.consts.
+	for i := 0; i < len(k.consts); i++ {
+		val := k.consts[i]
+		for _, v := range kk.consts {
+			if exprEqual(v.Type, val.Type) {
+				valInter(val, v)
+				if len(val.Names) == 0 {
+					s := k.consts
+					if i+1 < len(s) {
+						copy(s[i:], s[i+1:])
+					}
+					s[len(s)-1] = nil
+					k.consts = s[:len(s)-1]
+					i--
+				}
+				break
+			}
+		}
+	}
 }
 
 // Intersection of types in k and kk.
@@ -70,10 +99,10 @@ func (k *kinds) interType(kk *kinds) {
 	}
 	if len(k.types) == 0 {
 		// Clone the first kinds.
-		k.types = append([]ast.Spec{}, kk.types...)
+		k.types = append([]*ast.TypeSpec{}, kk.types...)
 		return
 	}
-	k.types = specInter(k.types, kk.types)
+	k.types = typeInter(k.types, kk.types)
 }
 
 // Intersection of functions in k and kk.
@@ -83,10 +112,10 @@ func (k *kinds) interFunc(kk *kinds) {
 	}
 	if len(k.funcs) == 0 {
 		// Clone the first kinds.
-		k.funcs = append([]ast.Decl{}, kk.funcs...)
+		k.funcs = append([]*ast.FuncDecl{}, kk.funcs...)
 		return
 	}
-	k.funcs = declInter(k.funcs, kk.funcs)
+	k.funcs = funcInter(k.funcs, kk.funcs)
 }
 
 // Difference of all objects from kk into k.
@@ -101,7 +130,15 @@ func (k *kinds) diffConst(kk *kinds) {
 	if len(k.consts) == 0 || len(kk.consts) == 0 {
 		return
 	}
-	k.consts = specDiff(k.consts, kk.consts)
+	// By Type, remove values in k.consts that are in kk.consts.
+	for i, val := range k.consts {
+		for _, v := range kk.consts {
+			if exprEqual(v.Type, val.Type) {
+				valDiff(k.consts[i], v)
+				break
+			}
+		}
+	}
 }
 
 // Difference of k.types and kk.types.
@@ -109,7 +146,7 @@ func (k *kinds) diffType(kk *kinds) {
 	if len(k.types) == 0 || len(kk.types) == 0 {
 		return
 	}
-	k.types = specDiff(k.types, kk.types)
+	k.types = typeDiff(k.types, kk.types)
 }
 
 // Difference of k.funcs and kk.funcs.
@@ -117,7 +154,7 @@ func (k *kinds) diffFunc(kk *kinds) {
 	if len(k.funcs) == 0 || len(kk.funcs) == 0 {
 		return
 	}
-	k.funcs = declDiff(k.funcs, kk.funcs)
+	k.funcs = funcDiff(k.funcs, kk.funcs)
 }
 
 func (k *kinds) print(w io.Writer) error {
@@ -145,7 +182,10 @@ func (k *kinds) printConst(w io.Writer) error {
 	node := &ast.GenDecl{
 		Lparen: 1, // Make sure there is a parenthesis
 		Tok:    token.CONST,
-		Specs:  k.consts,
+		Specs:  make([]ast.Spec, len(k.consts)),
+	}
+	for i, v := range k.consts {
+		node.Specs[i] = v
 	}
 	return printer.Fprint(w, token.NewFileSet(), node)
 }

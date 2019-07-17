@@ -12,113 +12,196 @@ import (
 )
 
 //-----------------------------------------------------------------------------
-// ast.Spec
+// ast.Expr
 
-// specCache is used to cache the results of printer.Fprint as it is pretty slow.
-var specCache = map[ast.Spec]string{}
+// Cache for the results of printer.Fprint.
+var exprCache = map[ast.Expr]string{}
 
-func specFromCache(spec ast.Spec) string {
-	if s, ok := specCache[spec]; ok {
+func exprFromCache(e ast.Expr) string {
+	if s, ok := exprCache[e]; ok {
 		return s
 	}
-	s := specToString(spec)
-	specCache[spec] = s
+	s := exprToString(e)
+	exprCache[e] = s
 	return s
 }
 
-func specToString(spec ast.Spec) string {
+func exprToString(e ast.Expr) string {
+	if e == nil {
+		// Common case.
+		return ""
+	}
+	var buf strings.Builder
+	// The node comes from successfully parsed code, so it should be safe to ignore the error.
+	_ = printer.Fprint(&buf, token.NewFileSet(), e)
+	return buf.String()
+}
+
+func exprEqual(a, b ast.Expr) bool {
+	return exprFromCache(a) == exprFromCache(b)
+}
+
+//-----------------------------------------------------------------------------
+// ast.ValueSpec
+
+func identIn(item *ast.Ident, s []*ast.Ident) bool {
+	for _, v := range s {
+		if v.Name == item.Name {
+			return true
+		}
+	}
+	return false
+}
+
+// Remove values in a that are not in b. a is mutated.
+func valInter(a, b *ast.ValueSpec) {
+	for i := 0; i < len(a.Names); {
+		if identIn(a.Names[i], b.Names) {
+			i++
+			continue
+		}
+		valDelAt(a, i)
+	}
+}
+
+// Remove values in a that are in b. a is mutated.
+func valDiff(a, b *ast.ValueSpec) {
+	for i := 0; i < len(a.Names); {
+		if !identIn(a.Names[i], b.Names) {
+			i++
+			continue
+		}
+		valDelAt(a, i)
+	}
+}
+
+// Remove the item at index i (identifier and any corresponding value if it exists).
+func valDelAt(val *ast.ValueSpec, i int) {
+	val.Names = identDelAt(val.Names, i)
+	if i < len(val.Values) {
+		val.Values = exprDelAt(val.Values, i)
+	}
+}
+
+func identDelAt(s []*ast.Ident, i int) []*ast.Ident {
+	if i+1 < len(s) {
+		copy(s[i:], s[i+1:])
+	}
+	s[len(s)-1] = nil
+	return s[:len(s)-1]
+}
+
+func exprDelAt(s []ast.Expr, i int) []ast.Expr {
+	if i+1 < len(s) {
+		copy(s[i:], s[i+1:])
+	}
+	s[len(s)-1] = nil
+	return s[:len(s)-1]
+}
+
+//-----------------------------------------------------------------------------
+// ast.TypeSpec
+
+// Cache for the results of printer.Fprint.
+var typeCache = map[*ast.TypeSpec]string{}
+
+func typeFromCache(spec *ast.TypeSpec) string {
+	if s, ok := typeCache[spec]; ok {
+		return s
+	}
+	s := typeToString(spec)
+	typeCache[spec] = s
+	return s
+}
+
+func typeToString(spec *ast.TypeSpec) string {
 	var buf strings.Builder
 	// The node comes from successfully parsed code, so it should be safe to ignore the error.
 	_ = printer.Fprint(&buf, token.NewFileSet(), spec)
 	return buf.String()
 }
 
-func specEqual(a, b ast.Spec) bool {
-	return specFromCache(a) == specFromCache(b)
+func typeEqual(a, b *ast.TypeSpec) bool {
+	return typeFromCache(a) == typeFromCache(b)
 }
 
-func specIn(item ast.Spec, s []ast.Spec) bool {
+func typeIn(item *ast.TypeSpec, s []*ast.TypeSpec) bool {
 	for _, v := range s {
-		if specEqual(v, item) {
+		if typeEqual(v, item) {
 			return true
 		}
 	}
 	return false
 }
 
-func specInter(a, b []ast.Spec) []ast.Spec {
-	var s []ast.Spec
+func typeInter(a, b []*ast.TypeSpec) []*ast.TypeSpec {
+	var s []*ast.TypeSpec
 	for _, v := range a {
-		if specIn(v, b) {
+		if typeIn(v, b) {
 			s = append(s, v)
 		}
 	}
 	return s
 }
 
-func specUnion(a, b []ast.Spec) []ast.Spec {
-	if len(a) < len(b) {
-		a, b = b, a
-	}
-	s := append([]ast.Spec{}, b...)
+func typeDiff(a, b []*ast.TypeSpec) []*ast.TypeSpec {
+	var s []*ast.TypeSpec
 	for _, v := range a {
-		if !specIn(v, b) {
+		if !typeIn(v, b) {
 			s = append(s, v)
 		}
 	}
 	return s
 }
 
-func specDiff(a, b []ast.Spec) []ast.Spec {
-	var s []ast.Spec
-	for _, v := range a {
-		if !specIn(v, b) {
-			s = append(s, v)
-		}
+func typeDelAt(s []ast.Spec, i int) []ast.Spec {
+	if i+1 < len(s) {
+		copy(s[i:], s[i+1:])
 	}
-	return s
+	s[len(s)-1] = nil
+	return s[:len(s)-1]
 }
 
 //-----------------------------------------------------------------------------
-// ast.Decl
+// ast.FuncDecl
 
-// declCache is used to cache the results of printer.Fprint as it is pretty slow.
-var declCache = map[ast.Decl]string{}
+// Cache for the results of printer.Fprint.
+var funcCache = map[*ast.FuncDecl]string{}
 
-func declFromCache(decl ast.Decl) string {
-	if s, ok := declCache[decl]; ok {
+func funcFromCache(decl *ast.FuncDecl) string {
+	if s, ok := funcCache[decl]; ok {
 		return s
 	}
-	s := declToString(decl)
-	declCache[decl] = s
+	s := funcToString(decl)
+	funcCache[decl] = s
 	return s
 }
 
-func declToString(decl ast.Decl) string {
+func funcToString(decl *ast.FuncDecl) string {
 	var buf strings.Builder
 	// The node comes from successfully parsed code, so it should be safe to ignore the error.
 	_ = printer.Fprint(&buf, token.NewFileSet(), decl)
 	return buf.String()
 }
 
-func declEqual(a, b ast.Decl) bool {
-	return declFromCache(a) == declFromCache(b)
+func funcEqual(a, b *ast.FuncDecl) bool {
+	return funcFromCache(a) == funcFromCache(b)
 }
 
-func declIn(item ast.Decl, s []ast.Decl) bool {
+func funcIn(item *ast.FuncDecl, s []*ast.FuncDecl) bool {
 	for _, v := range s {
-		if declEqual(v, item) {
+		if funcEqual(v, item) {
 			return true
 		}
 	}
 	return false
 }
 
-func declInter(a, b []ast.Decl) []ast.Decl {
-	var s []ast.Decl
+func funcInter(a, b []*ast.FuncDecl) []*ast.FuncDecl {
+	var s []*ast.FuncDecl
 	for _, v := range a {
 		for _, w := range b {
-			if declEqual(v, w) {
+			if funcEqual(v, w) {
 				s = append(s, v)
 			}
 		}
@@ -126,17 +209,19 @@ func declInter(a, b []ast.Decl) []ast.Decl {
 	return s
 }
 
-func declDiff(a, b []ast.Decl) []ast.Decl {
-	var s []ast.Decl
+func funcDiff(a, b []*ast.FuncDecl) []*ast.FuncDecl {
+	var s []*ast.FuncDecl
 	for _, v := range a {
-		if !declIn(v, b) {
+		if !funcIn(v, b) {
 			s = append(s, v)
 		}
 	}
 	return s
 }
 
-func delDeclAt(s []ast.Decl, i int) []ast.Decl {
+//-----------------------------------------------------------------------------
+
+func declDelAt(s []ast.Decl, i int) []ast.Decl {
 	if i+1 < len(s) {
 		copy(s[i:], s[i+1:])
 	}

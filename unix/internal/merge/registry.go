@@ -75,7 +75,7 @@ func (r Registry) String() string {
 	return b.String()
 }
 
-// Build factorizes the objects.
+// Build consolidates the objects.
 func (r *Registry) Build() {
 	// Build the intersection of all objects for all arch.
 	for _, gf := range r.m {
@@ -84,7 +84,7 @@ func (r *Registry) Build() {
 			k.inter(&ga.kinds)
 		}
 	}
-	// Remove factorized objects for all arch.
+	// Remove consolidated objects for all arch.
 	for _, gf := range r.m {
 		k := &gf.kinds
 		for _, ga := range gf.arch {
@@ -119,13 +119,20 @@ func (r *Registry) buildKinds() {
 	}
 }
 
-// Print outputs the factorized objects into their own file, and updates the correspoonding os_arch files.
+// Print outputs the consolidated objects into their own file, and updates the correspoonding os_arch files.
 func (r *Registry) Print(pkg *ast.Package, fset *token.FileSet) error {
+	header := fmt.Sprintf(`// Generated code. DO NOT EDIT.
+
+package %s
+
+`, pkg.Name)
+
 	handleClose := func(errp *error, c io.Closer) {
 		if err := c.Close(); err != nil && *errp == nil {
 			*errp = err
 		}
 	}
+
 	doInput := func(name string, file *ast.File) (err error) {
 		f, err := newbufferedFile(name)
 		if err != nil {
@@ -141,10 +148,10 @@ func (r *Registry) Print(pkg *ast.Package, fset *token.FileSet) error {
 		}
 		defer handleClose(&err, f)
 		// Print header.
-		if _, err := fmt.Fprintf(f, "package %s\n\n", pkg.Name); err != nil {
+		if _, err := fmt.Fprintf(f, header); err != nil {
 			return err
 		}
-		// Print factorized objects.
+		// Print consolidated objects.
 		if err := gf.kinds.print(f); err != nil {
 			return err
 		}
@@ -195,23 +202,42 @@ func trimFile(f *ast.File, k *kinds) {
 		case *ast.GenDecl:
 			switch d.Tok {
 			case token.CONST:
-				d.Specs = specInter(d.Specs, k.consts)
+				for i := 0; i < len(d.Specs); i++ {
+					val := d.Specs[i].(*ast.ValueSpec)
+					for _, v := range k.consts {
+						if exprEqual(val.Type, v.Type) {
+							valInter(val, v)
+							if len(val.Names) == 0 {
+								d.Specs = typeDelAt(d.Specs, i)
+								i--
+							}
+							break
+						}
+					}
+				}
 				if len(d.Specs) == 0 {
-					f.Decls = delDeclAt(f.Decls, i)
+					f.Decls = declDelAt(f.Decls, i)
 					continue
 				}
 
 			case token.TYPE:
-				d.Specs = specInter(d.Specs, k.types)
+				for i := 0; i < len(d.Specs); {
+					spec := d.Specs[i].(*ast.TypeSpec)
+					if typeIn(spec, k.types) {
+						i++
+						continue
+					}
+					d.Specs = typeDelAt(d.Specs, i)
+				}
 				if len(d.Specs) == 0 {
-					f.Decls = delDeclAt(f.Decls, i)
+					f.Decls = declDelAt(f.Decls, i)
 					continue
 				}
 			}
 
 		case *ast.FuncDecl:
-			if !declIn(d, k.funcs) {
-				f.Decls = delDeclAt(f.Decls, i)
+			if !funcIn(d, k.funcs) {
+				f.Decls = declDelAt(f.Decls, i)
 				continue
 			}
 		}

@@ -2,14 +2,13 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// merge processes the generated Go files to factorize
+// merge processes the generated Go files to consolidate
 // constants, types and functions definitions.
 // For all constants, types, and functions that are defined
 // precisely identically for each GOARCH, move them into
 // a single unified file named after the source file and GOARCH
 // (e.g. zerrors_linux.go).
 //
-//TODO merge is run after ???; see README.md.
 package main
 
 import (
@@ -20,6 +19,7 @@ import (
 	"go/token"
 	"log"
 	"os"
+	"runtime"
 	"runtime/pprof"
 	"strings"
 	"time"
@@ -28,8 +28,9 @@ import (
 )
 
 func main() {
-	var cpuProf string
+	var cpuProf, memProf string
 	flag.StringVar(&cpuProf, "cpuprofile", "", "write cpu profile to file")
+	flag.StringVar(&memProf, "memprofile", "", "write mem profile to file")
 	var withTiming bool
 	flag.BoolVar(&withTiming, "timing", false, "prints out time to execute")
 	var withStats bool
@@ -38,12 +39,28 @@ func main() {
 	flag.StringVar(&pkgPath, "path", "", "package path")
 	flag.Parse()
 
+	if memProf != "" {
+		f, err := os.Create(memProf)
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer f.Close()
+		defer func() {
+			runtime.GC()
+			if err := pprof.WriteHeapProfile(f); err != nil {
+				log.Fatal(err)
+			}
+		}()
+	}
 	if cpuProf != "" {
 		f, err := os.Create(cpuProf)
 		if err != nil {
 			log.Fatal(err)
 		}
-		_ = pprof.StartCPUProfile(f)
+		defer f.Close()
+		if err := pprof.StartCPUProfile(f); err != nil {
+			log.Fatal(err)
+		}
 		defer pprof.StopCPUProfile()
 	}
 
