@@ -13,7 +13,6 @@ import (
 
 type (
 	// kinds holds the objects (const, type, func) that will be consolidated.
-	// Assumption: all files have the objects defined in the same order and with the same layout.
 	kinds struct {
 		consts []*ast.ValueSpec // Constants grouped by Type
 		types  []*ast.TypeSpec  // Types
@@ -22,14 +21,16 @@ type (
 )
 
 // Add the new const to the flatten list of all const definitions.
+// Only the name of the consts is considered as they are unique for a given GOOS/GOARCH.
 func (k *kinds) pushConst(decl *ast.GenDecl) {
 loop:
-	for _, spec := range decl.Specs[1:] {
+	for _, spec := range decl.Specs {
 		val := spec.(*ast.ValueSpec)
 		for _, v := range k.consts {
 			if exprEqual(v.Type, val.Type) {
 				// Existing Type.
 				v.Names = append(v.Names, val.Names...)
+				// In case the values are not defined for all names (not seen yet).
 				if n := len(val.Names) - len(val.Values); n > 0 {
 					v.Values = append(v.Values, make([]ast.Expr, n)...)
 				}
@@ -37,8 +38,12 @@ loop:
 				continue loop
 			}
 		}
-		// New Type.
-		k.consts = append(k.consts, val)
+		// New Type: clone the slices as they will be modified by constDiff().
+		v := &ast.ValueSpec{
+			Names:  append([]*ast.Ident{}, val.Names...),
+			Values: append([]ast.Expr{}, val.Values...),
+		}
+		k.consts = append(k.consts, v)
 	}
 }
 
@@ -61,6 +66,21 @@ func (k *kinds) inter(kk *kinds) {
 	k.interFunc(kk)
 }
 
+// Delete the value at index i if it is empty.
+// It returns the decremented index if the value was deleted.
+func (k *kinds) constDelAt(i int) int {
+	s := k.consts
+	if len(s[i].Names) > 0 {
+		return i
+	}
+	if i+1 < len(s) {
+		copy(s[i:], s[i+1:])
+	}
+	s[len(s)-1] = nil
+	k.consts = s[:len(s)-1]
+	return i - 1
+}
+
 // Intersection of constants in k and kk.
 func (k *kinds) interConst(kk *kinds) {
 	if len(kk.consts) == 0 {
@@ -68,7 +88,13 @@ func (k *kinds) interConst(kk *kinds) {
 	}
 	if len(k.consts) == 0 {
 		// Clone the first kinds.
-		k.consts = append(k.consts, kk.consts...)
+		for _, v := range kk.consts {
+			val := &ast.ValueSpec{
+				Names:  append([]*ast.Ident{}, v.Names...),
+				Values: append([]ast.Expr{}, v.Values...),
+			}
+			k.consts = append(k.consts, val)
+		}
 		return
 	}
 	// By Type, remove values in k.consts that are not in kk.consts.
@@ -77,15 +103,7 @@ func (k *kinds) interConst(kk *kinds) {
 		for _, v := range kk.consts {
 			if exprEqual(v.Type, val.Type) {
 				valInter(val, v)
-				if len(val.Names) == 0 {
-					s := k.consts
-					if i+1 < len(s) {
-						copy(s[i:], s[i+1:])
-					}
-					s[len(s)-1] = nil
-					k.consts = s[:len(s)-1]
-					i--
-				}
+				i = k.constDelAt(i)
 				break
 			}
 		}
@@ -131,10 +149,12 @@ func (k *kinds) diffConst(kk *kinds) {
 		return
 	}
 	// By Type, remove values in k.consts that are in kk.consts.
-	for i, val := range k.consts {
+	for i := 0; i < len(k.consts); i++ {
+		val := k.consts[i]
 		for _, v := range kk.consts {
 			if exprEqual(v.Type, val.Type) {
 				valDiff(k.consts[i], v)
+				i = k.constDelAt(i)
 				break
 			}
 		}
@@ -182,10 +202,17 @@ func (k *kinds) printConst(w io.Writer) error {
 	node := &ast.GenDecl{
 		Lparen: 1, // Make sure there is a parenthesis
 		Tok:    token.CONST,
-		Specs:  make([]ast.Spec, len(k.consts)),
+		Specs:  make([]ast.Spec, 0, len(k.consts)),
 	}
-	for i, v := range k.consts {
-		node.Specs[i] = v
+	// Make sure that constants are on their own line.
+	for _, v := range k.consts {
+		for i := range v.Names {
+			spec := &ast.ValueSpec{
+				Names:  v.Names[i : i+1],
+				Values: v.Values[i : i+1],
+			}
+			node.Specs = append(node.Specs, spec)
+		}
 	}
 	return printer.Fprint(w, token.NewFileSet(), node)
 }

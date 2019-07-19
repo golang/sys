@@ -33,7 +33,7 @@ type (
 	}
 )
 
-// NewRegistry creates a new Registry.
+// NewRegistry creates a new Registry and loads the types to be consolidated.
 func NewRegistry(pkg *ast.Package) *Registry {
 	reg := make(map[string]*gofile)
 
@@ -79,16 +79,14 @@ func (r Registry) String() string {
 func (r *Registry) Build() {
 	// Build the intersection of all objects for all arch.
 	for _, gf := range r.m {
-		k := &gf.kinds
 		for _, ga := range gf.arch {
-			k.inter(&ga.kinds)
+			gf.kinds.inter(&ga.kinds)
 		}
 	}
 	// Remove consolidated objects for all arch.
 	for _, gf := range r.m {
-		k := &gf.kinds
 		for _, ga := range gf.arch {
-			ga.kinds.diff(k)
+			ga.kinds.diff(&gf.kinds)
 			// Update the input file ast.
 			trimFile(ga.File, &ga.kinds)
 		}
@@ -197,7 +195,7 @@ func (r *Registry) ReadStats(s *Stats) {
 
 // trimFile removes objects from f that are not in k.
 func trimFile(f *ast.File, k *kinds) {
-	for i := 0; i < len(f.Decls); {
+	for i := 0; i < len(f.Decls); i++ {
 		switch d := f.Decls[i].(type) {
 		case *ast.GenDecl:
 			switch d.Tok {
@@ -217,7 +215,7 @@ func trimFile(f *ast.File, k *kinds) {
 				}
 				if len(d.Specs) == 0 {
 					f.Decls = declDelAt(f.Decls, i)
-					continue
+					i--
 				}
 
 			case token.TYPE:
@@ -231,16 +229,15 @@ func trimFile(f *ast.File, k *kinds) {
 				}
 				if len(d.Specs) == 0 {
 					f.Decls = declDelAt(f.Decls, i)
-					continue
+					i--
 				}
 			}
 
 		case *ast.FuncDecl:
 			if !funcIn(d, k.funcs) {
 				f.Decls = declDelAt(f.Decls, i)
-				continue
+				i--
 			}
 		}
-		i++
 	}
 }
