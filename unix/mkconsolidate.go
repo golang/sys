@@ -2,14 +2,16 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// merge processes the generated Go files to consolidate
+// +build ignore
+
+// consolidate processes the generated Go files to consolidate
 // constants, types and functions definitions.
 // For all constants, types, and functions that are defined
 // precisely identically for each GOARCH, move them into
 // a single unified file named after the source file and GOARCH
 // (e.g. zerrors_linux.go).
 //
-package main
+package unix
 
 import (
 	"flag"
@@ -24,7 +26,7 @@ import (
 	"strings"
 	"time"
 
-	"golang.org/x/sys/unix/internal/merge"
+	"golang.org/x/sys/unix/internal/consolidate"
 )
 
 func main() {
@@ -91,10 +93,10 @@ func main() {
 	}
 
 	// Process the package.
-	reg := merge.NewRegistry(pkg)
+	reg := consolidate.NewRegistry(pkg)
 
 	if withStats {
-		var stats merge.Stats
+		var stats consolidate.Stats
 		reg.ReadStats(&stats)
 		fmt.Println("BEFORE")
 		fmt.Println(stats)

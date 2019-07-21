@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package merge
+package consolidate
 
 import (
 	"go/ast"
@@ -237,7 +237,7 @@ type visitor func(ast.Node) bool
 
 func (v visitor) Visit(node ast.Node) ast.Visitor {
 	if v(node) {
-		return v
+		return nil
 	}
 	return v
 }

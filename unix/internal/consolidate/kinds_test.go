@@ -1,4 +1,4 @@
-package merge
+package consolidate
 
 import (
 	"go/ast"

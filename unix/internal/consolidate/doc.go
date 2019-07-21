@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Package merge is used to consolidate constants, types and functions
+// Package consolidate is used to consolidate constants, types and functions
 // from the sys generated files grouping them by GOOS and GOARCH.
 // The files named as <name>_<goos>_<goarch>.go are processed and the consolidated
 // objects are stored in a new file named <name>_<goos>.go.
@@ -19,4 +19,4 @@
 //  - remove the consolidated objects from each GOOS/GOARCG file
 //  - update the input files with their stripped down version
 //  - create the new files containing the consolidated objects
-package merge
+package consolidate

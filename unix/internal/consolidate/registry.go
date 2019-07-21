@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package merge
+package consolidate
 
 import (
 	"fmt"
@@ -15,7 +15,7 @@ import (
 )
 
 type (
-	// Registry keeps the files merge is interested in grouped by their name:
+	// Registry keeps the files consolidate is interested in grouped by their name:
 	// - <name>_<goos>_<goarch>.go are the interesting files
 	// - <name>_<goos>.go is the name of the file that will contain the merged objects and points at a *gofile
 	Registry struct {
