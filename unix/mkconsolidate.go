@@ -11,7 +11,7 @@
 // a single unified file named after the source file and GOARCH
 // (e.g. zerrors_linux.go).
 //
-package unix
+package main
 
 import (
 	"flag"

@@ -18,6 +18,7 @@ zsysctl="zsysctl_$GOOSARCH.go"
 mksysnum=
 mktypes=
 mkasm=
+mkconsolidate="go run mkconsolidate.go"
 run="sh"
 cmd=""
 
@@ -51,6 +52,7 @@ if [[ "$GOOS" = "linux" ]]; then
 	# Files generated through docker (use $cmd so you can Ctl-C the build or run)
 	$cmd docker build --tag generate:$GOOS $GOOS
 	$cmd docker run --interactive --tty --volume $(dirname "$(readlink -f "$0")"):/build generate:$GOOS
+    $cmd $mkconsolidate
 	exit
 fi
 
@@ -225,6 +227,5 @@ esac
 	if [ -n "$mktypes" ]; then echo "$mktypes types_$GOOS.go | go run mkpost.go > ztypes_$GOOSARCH.go"; fi
 	if [ -n "$mkasm" ]; then echo "$mkasm $GOARCH"; fi
 
-	# Consolidate all the generated files.
-	echo "go run mkconsolidate.go"
+	$mkconsolidate
 ) | $run
