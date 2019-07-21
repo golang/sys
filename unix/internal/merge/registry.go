@@ -28,8 +28,9 @@ type (
 	}
 	// gofile holds all the arch dependent files for a given interesting file.
 	gofile struct {
-		arch  map[string]*goarch
-		kinds // Factorized objects for all arch
+		arch    map[string]*goarch
+		kinds            // Factorized objects for all arch
+		imports []string // Imported package names
 	}
 )
 
@@ -117,6 +118,29 @@ func (r *Registry) buildKinds() {
 	}
 }
 
+// buildImports records all imports required for files to be newly created.
+func (r *Registry) buildImports() {
+	for _, gf := range r.m {
+		// Aggregate all the imports for a given OS and ARCH.
+		for _, ga := range gf.arch {
+			for _, imp := range ga.File.Imports {
+				name := imp.Path.Value
+				if !stringIn(name, gf.imports) {
+					gf.imports = append(gf.imports, name)
+				}
+			}
+		}
+		// Keep the imports used in the new file.
+		for i := 0; i < len(gf.imports); {
+			if gf.kinds.hasImport(gf.imports[i]) {
+				i++
+				continue
+			}
+			gf.imports = stringDelAt(gf.imports, i)
+		}
+	}
+}
+
 // Print outputs the consolidated objects into their own file, and updates the correspoonding os_arch files.
 func (r *Registry) Print(pkg *ast.Package, fset *token.FileSet) error {
 	header := fmt.Sprintf(`// Generated code. DO NOT EDIT.
@@ -149,6 +173,27 @@ package %s
 		if _, err := fmt.Fprintf(f, header); err != nil {
 			return err
 		}
+		// Print imports, if any.
+		switch {
+		case len(gf.imports) == 1:
+			name := gf.imports[0]
+			if _, err := fmt.Fprintf(f, "import %s\n\n", name); err != nil {
+				return err
+			}
+
+		case len(gf.imports) > 1:
+			if _, err := fmt.Fprintf(f, "import (\n"); err != nil {
+				return err
+			}
+			for _, name := range gf.imports {
+				if _, err := fmt.Fprintf(f, "%s\n", name); err != nil {
+					return err
+				}
+			}
+			if _, err := fmt.Fprintf(f, ")\n\n"); err != nil {
+				return err
+			}
+		}
 		// Print consolidated objects.
 		if err := gf.kinds.print(f); err != nil {
 			return err
@@ -162,6 +207,7 @@ package %s
 		}
 		return nil
 	}
+	r.buildImports()
 	for name, gf := range r.m {
 		if err := do(name, gf); err != nil {
 			return err
@@ -202,6 +248,11 @@ func trimFile(f *ast.File, k *kinds) {
 			case token.CONST:
 				for i := 0; i < len(d.Specs); i++ {
 					val := d.Specs[i].(*ast.ValueSpec)
+					if len(k.consts) == 0 {
+						d.Specs = typeDelAt(d.Specs, i)
+						i--
+						continue
+					}
 					for _, v := range k.consts {
 						if exprEqual(val.Type, v.Type) {
 							valInter(val, v)
@@ -240,4 +291,25 @@ func trimFile(f *ast.File, k *kinds) {
 			}
 		}
 	}
+}
+
+//-----------------------------------------------------------------------------
+
+func stringIn(key string, s []string) bool {
+	for _, k := range s {
+		if k == key {
+			return true
+		}
+	}
+	return false
+}
+
+const nostring = ""
+
+func stringDelAt(s []string, i int) []string {
+	if i+1 < len(s) {
+		copy(s[i:], s[i+1:])
+	}
+	s[len(s)-1] = nostring
+	return s[:len(s)-1]
 }

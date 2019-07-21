@@ -9,6 +9,7 @@ import (
 	"go/printer"
 	"go/token"
 	"io"
+	"strconv"
 )
 
 type (
@@ -67,17 +68,15 @@ func (k *kinds) inter(kk *kinds) {
 }
 
 // Delete the value at index i if it is empty.
-// It returns the decremented index if the value was deleted.
 func (k *kinds) constDelAt(i int) int {
-	s := k.consts
-	if len(s[i].Names) > 0 {
+	if len(k.consts[i].Names) > 0 {
 		return i
 	}
-	if i+1 < len(s) {
-		copy(s[i:], s[i+1:])
+	if i+1 < len(k.consts) {
+		copy(k.consts[i:], k.consts[i+1:])
 	}
-	s[len(s)-1] = nil
-	k.consts = s[:len(s)-1]
+	k.consts[len(k.consts)-1] = nil
+	k.consts = k.consts[:len(k.consts)-1]
 	return i - 1
 }
 
@@ -177,6 +176,48 @@ func (k *kinds) diffFunc(kk *kinds) {
 	k.funcs = funcDiff(k.funcs, kk.funcs)
 }
 
+// hasImport returns whether or not the import is found in any of the kinds' objects.
+func (k *kinds) hasImport(name string) (found bool) {
+	visit := visitor(func(node ast.Node) bool {
+		if found {
+			return true
+		}
+		s, ok := node.(*ast.SelectorExpr)
+		if !ok {
+			return false
+		}
+		id, ok := s.X.(*ast.Ident)
+		if !ok {
+			return false
+		}
+		if id.Obj != nil || id.Name != name {
+			return false
+		}
+		found = true
+		return true
+	})
+	name, _ = strconv.Unquote(name)
+	for _, node := range k.consts {
+		ast.Walk(visit, node)
+		if found {
+			return true
+		}
+	}
+	for _, node := range k.types {
+		ast.Walk(visit, node)
+		if found {
+			return true
+		}
+	}
+	for _, node := range k.funcs {
+		ast.Walk(visit, node)
+		if found {
+			return true
+		}
+	}
+	return false
+}
+
 func (k *kinds) print(w io.Writer) error {
 	if err := k.printConst(w); err != nil {
 		return err
@@ -214,7 +255,7 @@ func (k *kinds) printConst(w io.Writer) error {
 			node.Specs = append(node.Specs, spec)
 		}
 	}
-	return printer.Fprint(w, token.NewFileSet(), node)
+	return printer.Fprint(w, emptyFileSet, node)
 }
 
 func (k *kinds) printType(w io.Writer) error {
@@ -230,13 +271,12 @@ func (k *kinds) printType(w io.Writer) error {
 	for i, ts := range k.types {
 		node.Specs[i] = ts
 	}
-	return printer.Fprint(w, token.NewFileSet(), node)
+	return printer.Fprint(w, emptyFileSet, node)
 }
 
 func (k *kinds) printFunc(w io.Writer) error {
-	fset := token.NewFileSet()
 	for _, f := range k.funcs {
-		if err := printer.Fprint(w, fset, f); err != nil {
+		if err := printer.Fprint(w, emptyFileSet, f); err != nil {
 			return err
 		}
 		if _, err := w.Write([]byte("\n")); err != nil {

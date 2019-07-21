@@ -11,6 +11,8 @@ import (
 	"strings"
 )
 
+var emptyFileSet = token.NewFileSet()
+
 //-----------------------------------------------------------------------------
 // ast.Expr
 
@@ -33,7 +35,7 @@ func exprToString(e ast.Expr) string {
 	}
 	var buf strings.Builder
 	// The node comes from successfully parsed code, so it should be safe to ignore the error.
-	_ = printer.Fprint(&buf, token.NewFileSet(), e)
+	_ = printer.Fprint(&buf, emptyFileSet, e)
 	return buf.String()
 }
 
@@ -117,7 +119,7 @@ func typeFromCache(spec *ast.TypeSpec) string {
 func typeToString(spec *ast.TypeSpec) string {
 	var buf strings.Builder
 	// The node comes from successfully parsed code, so it should be safe to ignore the error.
-	_ = printer.Fprint(&buf, token.NewFileSet(), spec)
+	_ = printer.Fprint(&buf, emptyFileSet, spec)
 	return buf.String()
 }
 
@@ -180,7 +182,7 @@ func funcFromCache(decl *ast.FuncDecl) string {
 func funcToString(decl *ast.FuncDecl) string {
 	var buf strings.Builder
 	// The node comes from successfully parsed code, so it should be safe to ignore the error.
-	_ = printer.Fprint(&buf, token.NewFileSet(), decl)
+	_ = printer.Fprint(&buf, emptyFileSet, decl)
 	return buf.String()
 }
 
@@ -227,4 +229,15 @@ func declDelAt(s []ast.Decl, i int) []ast.Decl {
 	}
 	s[len(s)-1] = nil
 	return s[:len(s)-1]
+}
+
+//-----------------------------------------------------------------------------
+
+type visitor func(ast.Node) bool
+
+func (v visitor) Visit(node ast.Node) ast.Visitor {
+	if v(node) {
+		return v
+	}
+	return v
 }
