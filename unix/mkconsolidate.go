@@ -38,7 +38,7 @@ func main() {
 	var withStats bool
 	flag.BoolVar(&withStats, "stats", false, "prints out statistics before and after")
 	var pkgPath string
-	flag.StringVar(&pkgPath, "path", "", "package path")
+	flag.StringVar(&pkgPath, "path", ".", "package path")
 	flag.Parse()
 
 	if memProf != "" {
