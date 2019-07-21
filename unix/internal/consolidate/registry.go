@@ -216,7 +216,7 @@ package %s
 	return nil
 }
 
-// Stats populates the statistics.
+// ReadStats populates the statistics.
 func (r *Registry) ReadStats(s *Stats) {
 	s.clear()
 	for name, gf := range r.m {

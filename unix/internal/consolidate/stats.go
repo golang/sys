@@ -5,16 +5,19 @@
 package consolidate
 
 type (
+	// FileStats holds statistics for a go source code file.
 	FileStats struct {
 		Name   string // File name
 		Consts int    // Number of constants
 		Types  int    // Number of types
 		Funcs  int    // Number of functions
 	}
+	// AggStats holds statistics for an aggregated file.
 	AggStats struct {
 		FileStats             // Aggregated objects file
 		Arch      []FileStats // Arch dependent files for this aggregate
 	}
+	// Stats holds all the statistics of a consolidated package.
 	Stats struct {
 		Agg []AggStats
 	}
