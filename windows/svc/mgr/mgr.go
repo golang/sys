@@ -149,6 +149,12 @@ func (m *Mgr) CreateService(name, exepath string, c Config, args ...string) (*Se
 			return nil, err
 		}
 	}
+	if c.DelayedAutoStart == ServiceDelayedAutoStartTrue {
+		err = updateStartUp(h, c.DelayedAutoStart)
+		if err != nil {
+			return nil, err
+		}
+	}
 	return &Service{Name: name, Handle: h}, nil
 }
 
