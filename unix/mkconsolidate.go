@@ -11,6 +11,8 @@
 // a single unified file named after the source file and GOARCH
 // (e.g. zerrors_linux.go).
 //
+// The z*_goos_goarch.go files must be generated prior to running this program.
+//
 package main
 
 import (
