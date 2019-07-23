@@ -21,6 +21,7 @@ import (
 	"go/token"
 	"log"
 	"os"
+	"os/exec"
 	"runtime"
 	"runtime/pprof"
 	"strings"
@@ -111,6 +112,12 @@ func main() {
 
 	// Print out the new files and updated source code.
 	if err := reg.Print(pkg, fset); err != nil {
+		log.Fatal(err)
+	}
+
+	// Format the new files.
+	cmd := exec.Command("go", "fmt")
+	if err := cmd.Run(); err != nil {
 		log.Fatal(err)
 	}
 }
