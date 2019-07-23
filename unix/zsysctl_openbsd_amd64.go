@@ -5,11 +5,6 @@
 
 package unix
 
-type mibentry struct {
-	ctlname string
-	ctloid  []_C_int
-}
-
 var sysctlMib = []mibentry{
 	{"ddb.console", []_C_int{9, 6}},
 	{"ddb.log", []_C_int{9, 7}},
