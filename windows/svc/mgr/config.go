@@ -46,7 +46,7 @@ type Config struct {
 	Password         string
 	Description      string
 	SidType          uint32 // one of SERVICE_SID_TYPE, the type of sid to use for the service
-	DelayedAutoStart uint32
+	DelayedAutoStart uint32 // one of SERVICE_CONFIG_DELAYED_AUTO_START_INFO service startup type
 }
 
 func toString(p *uint16) string {
