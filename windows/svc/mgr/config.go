@@ -20,9 +20,6 @@ const (
 	StartAutomatic = windows.SERVICE_AUTO_START   // the service will start by itself whenever the computer reboots
 	StartDisabled  = windows.SERVICE_DISABLED     // the service cannot be started
 
-	// ServiceDelayedAutoStart types
-	ServiceDelayedAutoStartTrue  = 1
-	ServiceDelayedAutoStartFalse = 0
 	// The severity of the error, and action taken,
 	// if this service fails to start.
 	ErrorCritical = windows.SERVICE_ERROR_CRITICAL
@@ -46,9 +43,16 @@ type Config struct {
 	Password         string
 	Description      string
 	SidType          uint32 // one of SERVICE_SID_TYPE, the type of sid to use for the service
-	DelayedAutoStart uint32 // one of SERVICE_CONFIG_DELAYED_AUTO_START_INFO service startup type
+	DelayedAutoStart bool   // one of SERVICE_DELAYED_AUTO_START_INFO, the service is started after other auto-start services are started plus a short delay
 }
 
+func toBool(b uint32) bool {
+	if b != 0 {
+		return true
+	}
+	return false
+}
+	
 func toString(p *uint16) string {
 	if p == nil {
 		return ""
@@ -116,7 +120,7 @@ func (s *Service) Config() (Config, error) {
 		ServiceStartName: toString(p.ServiceStartName),
 		DisplayName:      toString(p.DisplayName),
 		Description:      toString(p2.Description),
-		DelayedAutoStart: p3.IsDelayedAutoStartUp,
+		DelayedAutoStart: toBool(p3.IsDelayedAutoStartUp),
 	}, nil
 }
 
@@ -130,8 +134,11 @@ func updateSidType(handle windows.Handle, sidType uint32) error {
 	return windows.ChangeServiceConfig2(handle, windows.SERVICE_CONFIG_SERVICE_SID_INFO, (*byte)(unsafe.Pointer(&sidType)))
 }
 
-func updateStartUp(handle windows.Handle, isDelayed uint32) error {
-	d := windows.SERVICE_DELAYED_AUTO_START_INFO{IsDelayedAutoStartUp: isDelayed}
+func updateStartUp(handle windows.Handle, isDelayed bool) error {
+	d := windows.SERVICE_DELAYED_AUTO_START_INFO{IsDelayedAutoStartUp: 0}
+	if isDelayed {
+		d = windows.SERVICE_DELAYED_AUTO_START_INFO{IsDelayedAutoStartUp: 1}
+	}
 	return windows.ChangeServiceConfig2(handle,
 		windows.SERVICE_CONFIG_DELAYED_AUTO_START_INFO, (*byte)(unsafe.Pointer(&d)))
 }
