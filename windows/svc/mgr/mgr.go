@@ -149,7 +149,7 @@ func (m *Mgr) CreateService(name, exepath string, c Config, args ...string) (*Se
 			return nil, err
 		}
 	}
-	if c.DelayedAutoStart == ServiceDelayedAutoStartTrue {
+	if c.DelayedAutoStart {
 		err = updateStartUp(h, c.DelayedAutoStart)
 		if err != nil {
 			windows.DeleteService(h)
