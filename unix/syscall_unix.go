@@ -60,6 +60,17 @@ func ErrnoName(e syscall.Errno) string {
 	return ""
 }
 
+// ErrnoDesc returns the error description for error number e.
+func ErrnoDesc(e syscall.Errno) string {
+	i := sort.Search(len(errorList), func(i int) bool {
+		return errorList[i].num >= e
+	})
+	if i < len(errorList) && errorList[i].num == e {
+		return errorList[i].desc
+	}
+	return ""
+}
+
 // SignalName returns the signal name for signal number s.
 func SignalName(s syscall.Signal) string {
 	i := sort.Search(len(signalList), func(i int) bool {
