@@ -81,7 +81,7 @@ func testConfig(t *testing.T, s *mgr.Service, should mgr.Config) mgr.Config {
 		t.Fatalf("Config failed: %s", err)
 	}
 	if should.DelayedAutoStart != is.DelayedAutoStart {
-		t.Fatalf("config mismatch: DelayedAutoStart is %t, but should have %t", is.DelayedAutoStart, should.DelayedAutoStart)
+		t.Fatalf("config mismatch: DelayedAutoStart is %v, but should have %v", is.DelayedAutoStart, should.DelayedAutoStart)
 	}
 	if should.DisplayName != is.DisplayName {
 		t.Fatalf("config mismatch: DisplayName is %q, but should have %q", is.DisplayName, should.DisplayName)
