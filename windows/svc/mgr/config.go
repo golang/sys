@@ -45,7 +45,7 @@ type Config struct {
 	SidType          uint32 // one of SERVICE_SID_TYPE, the type of sid to use for the service
 	DelayedAutoStart bool   // the service is started after other auto-start services are started plus a short delay
 }
-	
+
 func toString(p *uint16) string {
 	if p == nil {
 		return ""
