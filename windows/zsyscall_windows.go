@@ -209,6 +209,7 @@ var (
 	procGenerateConsoleCtrlEvent           = modkernel32.NewProc("GenerateConsoleCtrlEvent")
 	procGetProcessId                       = modkernel32.NewProc("GetProcessId")
 	procOpenThread                         = modkernel32.NewProc("OpenThread")
+	procSetProcessPriorityBoost            = modkernel32.NewProc("SetProcessPriorityBoost")
 	procDefineDosDeviceW                   = modkernel32.NewProc("DefineDosDeviceW")
 	procDeleteVolumeMountPointW            = modkernel32.NewProc("DeleteVolumeMountPointW")
 	procFindFirstVolumeW                   = modkernel32.NewProc("FindFirstVolumeW")
@@ -2247,6 +2248,24 @@ func OpenThread(desiredAccess uint32, inheritHandle bool, threadId uint32) (hand
 	r0, _, e1 := syscall.Syscall(procOpenThread.Addr(), 3, uintptr(desiredAccess), uintptr(_p0), uintptr(threadId))
 	handle = Handle(r0)
 	if handle == 0 {
+		if e1 != 0 {
+			err = errnoErr(e1)
+		} else {
+			err = syscall.EINVAL
+		}
+	}
+	return
+}
+
+func SetProcessPriorityBoost(process Handle, disable bool) (err error) {
+	var _p0 uint32
+	if disable {
+		_p0 = 1
+	} else {
+		_p0 = 0
+	}
+	r1, _, e1 := syscall.Syscall(procSetProcessPriorityBoost.Addr(), 2, uintptr(process), uintptr(_p0), 0)
+	if r1 == 0 {
 		if e1 != 0 {
 			err = errnoErr(e1)
 		} else {
