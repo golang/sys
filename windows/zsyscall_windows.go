@@ -305,6 +305,8 @@ var (
 	procDuplicateTokenEx                   = modadvapi32.NewProc("DuplicateTokenEx")
 	procGetUserProfileDirectoryW           = moduserenv.NewProc("GetUserProfileDirectoryW")
 	procGetSystemDirectoryW                = modkernel32.NewProc("GetSystemDirectoryW")
+	procGetWindowsDirectoryW               = modkernel32.NewProc("GetWindowsDirectoryW")
+	procGetSystemWindowsDirectoryW         = modkernel32.NewProc("GetSystemWindowsDirectoryW")
 	procWTSQueryUserToken                  = modwtsapi32.NewProc("WTSQueryUserToken")
 	procWTSEnumerateSessionsW              = modwtsapi32.NewProc("WTSEnumerateSessionsW")
 	procWTSFreeMemory                      = modwtsapi32.NewProc("WTSFreeMemory")
@@ -3321,6 +3323,32 @@ func GetUserProfileDirectory(t Token, dir *uint16, dirLen *uint32) (err error) {
 
 func getSystemDirectory(dir *uint16, dirLen uint32) (len uint32, err error) {
 	r0, _, e1 := syscall.Syscall(procGetSystemDirectoryW.Addr(), 2, uintptr(unsafe.Pointer(dir)), uintptr(dirLen), 0)
+	len = uint32(r0)
+	if len == 0 {
+		if e1 != 0 {
+			err = errnoErr(e1)
+		} else {
+			err = syscall.EINVAL
+		}
+	}
+	return
+}
+
+func getWindowsDirectory(dir *uint16, dirLen uint32) (len uint32, err error) {
+	r0, _, e1 := syscall.Syscall(procGetWindowsDirectoryW.Addr(), 2, uintptr(unsafe.Pointer(dir)), uintptr(dirLen), 0)
+	len = uint32(r0)
+	if len == 0 {
+		if e1 != 0 {
+			err = errnoErr(e1)
+		} else {
+			err = syscall.EINVAL
+		}
+	}
+	return
+}
+
+func getSystemWindowsDirectory(dir *uint16, dirLen uint32) (len uint32, err error) {
+	r0, _, e1 := syscall.Syscall(procGetSystemWindowsDirectoryW.Addr(), 2, uintptr(unsafe.Pointer(dir)), uintptr(dirLen), 0)
 	len = uint32(r0)
 	if len == 0 {
 		if e1 != 0 {
