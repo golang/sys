@@ -55,18 +55,31 @@ func identIn(item *ast.Ident, s []*ast.Ident) bool {
 	return false
 }
 
-// Remove values in a that are not in b. a is mutated.
+func identAt(item *ast.Ident, s []*ast.Ident) int {
+	for i, v := range s {
+		if v.Name == item.Name {
+			return i
+		}
+	}
+	return -1
+}
+
+// Remove values in a that are not in b: must have the same name and value.
+// a is mutated.
 func valInter(a, b *ast.ValueSpec) {
 	for i := 0; i < len(a.Names); {
-		if identIn(a.Names[i], b.Names) {
+		j := identAt(a.Names[i], b.Names)
+		if j >= 0 && exprEqual(a.Values[i], b.Values[j]) {
+			// Same name and value.
 			i++
 			continue
 		}
+		// Value in a not in b or they have different values: remove.
 		valDelAt(a, i)
 	}
 }
 
-// Remove values in a that are in b. a is mutated.
+// Remove values in a that are in b (same name only). a is mutated.
 func valDiff(a, b *ast.ValueSpec) {
 	for i := 0; i < len(a.Names); {
 		if !identIn(a.Names[i], b.Names) {

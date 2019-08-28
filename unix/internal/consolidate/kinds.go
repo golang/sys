@@ -22,7 +22,6 @@ type (
 )
 
 // Add the new const to the flatten list of all const definitions.
-// Only the name of the consts is considered as they are unique for a given GOOS/GOARCH.
 func (k *kinds) pushConst(decl *ast.GenDecl) {
 loop:
 	for _, spec := range decl.Specs {
