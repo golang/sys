@@ -4,6 +4,11 @@
 
 package consolidate
 
+import (
+	"fmt"
+	"strings"
+)
+
 type (
 	// FileStats holds statistics for a go source code file.
 	FileStats struct {
@@ -28,12 +33,12 @@ func (s *Stats) clear() {
 }
 
 func (s Stats) String() string {
-	var buf builder
+	var sb strings.Builder
 	for _, as := range s.Agg {
-		_, _ = buf.WriteString(as.String())
-		buf.Newline()
+		_, _ = sb.WriteString(as.String())
+		_ = sb.WriteByte('\n')
 	}
-	return buf.String()
+	return sb.String()
 }
 
 func (s *AggStats) clear() {
@@ -42,15 +47,15 @@ func (s *AggStats) clear() {
 }
 
 func (s AggStats) String() string {
-	var buf builder
-	_, _ = buf.WriteString(s.FileStats.String())
-	buf.Newline()
+	var sb strings.Builder
+	_, _ = sb.WriteString(s.FileStats.String())
+	_ = sb.WriteByte('\n')
 	for _, fs := range s.Arch {
-		_, _ = buf.WriteString("  ")
-		_, _ = buf.WriteString(fs.String())
-		buf.Newline()
+		_, _ = sb.WriteString("  ")
+		_, _ = sb.WriteString(fs.String())
+		_ = sb.WriteByte('\n')
 	}
-	return buf.String()
+	return sb.String()
 }
 
 func (s *FileStats) clear() {
@@ -61,12 +66,12 @@ func (s *FileStats) clear() {
 }
 
 func (s FileStats) String() string {
-	var buf builder
-	buf.Printf("file=%q ", s.Name)
-	buf.Printf("\t\tconsts=%d", s.Consts)
-	buf.Printf("\t\ttypes=%d", s.Types)
-	buf.Printf("\t\tfuncs=%d", s.Funcs)
-	return buf.String()
+	var sb strings.Builder
+	_, _ = fmt.Fprintf(&sb, "file=%q ", s.Name)
+	_, _ = fmt.Fprintf(&sb, "\t\tconsts=%d", s.Consts)
+	_, _ = fmt.Fprintf(&sb, "\t\ttypes=%d", s.Types)
+	_, _ = fmt.Fprintf(&sb, "\t\tfuncs=%d", s.Funcs)
+	return sb.String()
 }
 
 func (s *FileStats) set(name string, k *kinds) {
