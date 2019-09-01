@@ -46,15 +46,6 @@ func exprEqual(a, b ast.Expr) bool {
 //-----------------------------------------------------------------------------
 // ast.ValueSpec
 
-func identIn(item *ast.Ident, s []*ast.Ident) bool {
-	for _, v := range s {
-		if v.Name == item.Name {
-			return true
-		}
-	}
-	return false
-}
-
 func identAt(item *ast.Ident, s []*ast.Ident) int {
 	for i, v := range s {
 		if v.Name == item.Name {
@@ -82,7 +73,7 @@ func valInter(a, b *ast.ValueSpec) {
 // Remove values in a that are in b (same name only). a is mutated.
 func valDiff(a, b *ast.ValueSpec) {
 	for i := 0; i < len(a.Names); {
-		if !identIn(a.Names[i], b.Names) {
+		if identAt(a.Names[i], b.Names) < 0 {
 			i++
 			continue
 		}

@@ -244,17 +244,20 @@ func (r *Registry) ReadStats(s *Stats) {
 // trimFile removes objects from f that are not in k.
 func trimFile(f *ast.File, k *kinds) {
 	for i := 0; i < len(f.Decls); i++ {
+		// Whether or not the declaration becomes empty.
+		var empty bool
+
 		switch d := f.Decls[i].(type) {
 		case *ast.GenDecl:
 			switch d.Tok {
 			case token.CONST:
+				if len(k.consts) == 0 {
+					// No more constants.
+					d.Specs = nil
+					break
+				}
 				for i := 0; i < len(d.Specs); i++ {
 					val := d.Specs[i].(*ast.ValueSpec)
-					if len(k.consts) == 0 {
-						d.Specs = typeDelAt(d.Specs, i)
-						i--
-						continue
-					}
 					for _, v := range k.consts {
 						if exprEqual(val.Type, v.Type) {
 							valInter(val, v)
@@ -266,12 +269,13 @@ func trimFile(f *ast.File, k *kinds) {
 						}
 					}
 				}
-				if len(d.Specs) == 0 {
-					f.Decls = declDelAt(f.Decls, i)
-					i--
-				}
 
 			case token.TYPE:
+				if len(k.types) == 0 {
+					// No more types.
+					d.Specs = nil
+					break
+				}
 				for i := 0; i < len(d.Specs); {
 					spec := d.Specs[i].(*ast.TypeSpec)
 					if typeIn(spec, k.types) {
@@ -280,17 +284,17 @@ func trimFile(f *ast.File, k *kinds) {
 					}
 					d.Specs = typeDelAt(d.Specs, i)
 				}
-				if len(d.Specs) == 0 {
-					f.Decls = declDelAt(f.Decls, i)
-					i--
-				}
 			}
+			empty = len(d.Specs) == 0
 
 		case *ast.FuncDecl:
-			if !funcIn(d, k.funcs) {
-				f.Decls = declDelAt(f.Decls, i)
-				i--
-			}
+			empty = !funcIn(d, k.funcs)
+		}
+
+		// Remove the declaration if empty.
+		if empty {
+			f.Decls = declDelAt(f.Decls, i)
+			i--
 		}
 	}
 }
@@ -306,12 +310,10 @@ func stringIn(key string, s []string) bool {
 	return false
 }
 
-const nostring = ""
-
 func stringDelAt(s []string, i int) []string {
 	if i+1 < len(s) {
 		copy(s[i:], s[i+1:])
 	}
-	s[len(s)-1] = nostring
+	s[len(s)-1] = ""
 	return s[:len(s)-1]
 }
