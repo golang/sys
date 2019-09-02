@@ -38,6 +38,25 @@ func TestIoctlGetInt(t *testing.T) {
 	t.Logf("%d bits of entropy available", v)
 }
 
+func TestIoctlRetInt(t *testing.T) {
+	f, err := os.Open("/proc/self/ns/mnt")
+	if err != nil {
+		t.Skipf("skipping test, %v", err)
+	}
+	defer f.Close()
+
+	v, err := unix.IoctlRetInt(int(f.Fd()), unix.NS_GET_NSTYPE)
+	if err != nil {
+		if err == unix.ENOTTY {
+			t.Skipf("old kernel? (need Linux >= 4.11)")
+		}
+		t.Fatalf("failed to perform ioctl: %v", err)
+	}
+	if v != unix.CLONE_NEWNS {
+		t.Fatalf("unexpected return from ioctl; expected %v, got %v", v, unix.CLONE_NEWNS)
+	}
+}
+
 func TestIoctlGetRTCTime(t *testing.T) {
 	f, err := os.Open("/dev/rtc0")
 	if err != nil {

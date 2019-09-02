@@ -71,6 +71,17 @@ func Fchmodat(dirfd int, path string, mode uint32, flags int) (err error) {
 // ioctl itself should not be exposed directly, but additional get/set
 // functions for specific types are permissible.
 
+// IoctlRetInt performs an ioctl operation specified by req on a device
+// associated with opened file descriptor fd, and returns a non-negative
+// integer that is returned by the ioctl syscall.
+func IoctlRetInt(fd int, req uint) (int, error) {
+	ret, _, err := Syscall(SYS_IOCTL, uintptr(fd), uintptr(req), 0)
+	if err != 0 {
+		return 0, err
+	}
+	return int(ret), nil
+}
+
 // IoctlSetPointerInt performs an ioctl operation which sets an
 // integer value on fd, using the specified request number. The ioctl
 // argument is called with a pointer to the integer value, rather than
