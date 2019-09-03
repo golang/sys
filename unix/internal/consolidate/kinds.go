@@ -23,10 +23,27 @@ type (
 
 // Add the new const to the flatten list of all const definitions.
 func (k *kinds) pushConst(decl *ast.GenDecl) {
+	// addComment adds the comment from src to dst at position i.
+	addComment := func(src, dst *ast.ValueSpec, i int) {
+		if src.Comment == nil {
+			return
+		}
+		// A comment group must contain at least one comment,
+		// only initialize the group if needed.
+		if dst.Comment == nil {
+			dst.Comment = &ast.CommentGroup{}
+		}
+		// Fill in any gap.
+		if n := i - len(dst.Comment.List); n > 0 {
+			dst.Comment.List = append(dst.Comment.List, make([]*ast.Comment, n)...)
+		}
+		// Only the first comment line is kept.
+		dst.Comment.List = append(dst.Comment.List, src.Comment.List[0])
+	}
 loop:
 	for _, spec := range decl.Specs {
 		val := spec.(*ast.ValueSpec)
-		for _, v := range k.consts {
+		for i, v := range k.consts {
 			if exprEqual(v.Type, val.Type) {
 				// Existing Type.
 				v.Names = append(v.Names, val.Names...)
@@ -35,6 +52,8 @@ loop:
 					v.Values = append(v.Values, make([]ast.Expr, n)...)
 				}
 				v.Values = append(v.Values, val.Values...)
+				// Comments.
+				addComment(val, v, i)
 				continue loop
 			}
 		}
@@ -43,6 +62,7 @@ loop:
 			Names:  append([]*ast.Ident{}, val.Names...),
 			Values: append([]ast.Expr{}, val.Values...),
 		}
+		addComment(val, v, len(k.consts))
 		k.consts = append(k.consts, v)
 	}
 }
@@ -88,8 +108,9 @@ func (k *kinds) interConst(kk *kinds) {
 		// Clone the first kinds.
 		for _, v := range kk.consts {
 			val := &ast.ValueSpec{
-				Names:  append([]*ast.Ident{}, v.Names...),
-				Values: append([]ast.Expr{}, v.Values...),
+				Names:   append([]*ast.Ident{}, v.Names...),
+				Values:  append([]ast.Expr{}, v.Values...),
+				Comment: v.Comment,
 			}
 			k.consts = append(k.consts, val)
 		}
@@ -106,6 +127,7 @@ func (k *kinds) interConst(kk *kinds) {
 			}
 		}
 	}
+	return
 }
 
 // Intersection of types in k and kk.
@@ -217,6 +239,23 @@ func (k *kinds) hasImport(name string) (found bool) {
 	return false
 }
 
+// cleanComments removes unused comments from removed items.
+func (k *kinds) cleanComments(cg []*ast.CommentGroup) []*ast.CommentGroup {
+	for _, v := range k.consts {
+		if v.Comment == nil {
+			continue
+		}
+		for _, c := range v.Comment.List {
+			cg = commentDel(c, cg)
+			if cg == nil {
+				return nil
+			}
+		}
+	}
+	//TODO no support for comments in types and funcs.
+	return cg
+}
+
 func (k *kinds) print(w io.Writer) error {
 	if err := k.printConst(w); err != nil {
 		return err
@@ -242,7 +281,6 @@ func (k *kinds) printConst(w io.Writer) error {
 	node := &ast.GenDecl{
 		Lparen: 1, // Make sure there is a parenthesis
 		Tok:    token.CONST,
-		Specs:  make([]ast.Spec, 0, len(k.consts)),
 	}
 	// Make sure that constants are on their own line.
 	for _, v := range k.consts {
@@ -250,6 +288,15 @@ func (k *kinds) printConst(w io.Writer) error {
 			spec := &ast.ValueSpec{
 				Names:  v.Names[i : i+1],
 				Values: v.Values[i : i+1],
+			}
+			// Reset the name position to have comments properly added
+			// at the end of the line.
+			spec.Names[0].NamePos = 0
+
+			if v.Comment != nil {
+				spec.Comment = &ast.CommentGroup{
+					List: v.Comment.List[i : i+1],
+				}
 			}
 			node.Specs = append(node.Specs, spec)
 		}

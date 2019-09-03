@@ -79,7 +79,6 @@ func main() {
 	// Load the generated source code (file names start with 'z').
 	filter := func(fi os.FileInfo) bool {
 		name := fi.Name()
-		// Skip files not of the form: z<name>_<goos>_<goarch>.go
 		return strings.HasPrefix(name, "z") && strings.Count(name, "_") == 2
 	}
 	fset := token.NewFileSet()

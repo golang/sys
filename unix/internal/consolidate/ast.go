@@ -237,6 +237,53 @@ func declDelAt(s []ast.Decl, i int) []ast.Decl {
 
 //-----------------------------------------------------------------------------
 
+// commentDel removes the comment from the slice of groups.
+// It can only be found once.
+func commentDel(comment *ast.Comment, s []*ast.CommentGroup) []*ast.CommentGroup {
+	for si, cg := range s {
+		for i, c := range cg.List {
+			if c.Text != comment.Text {
+				continue
+			}
+			// The comment can only be found once in the group.
+			// Once found, remove it and if the group becomes empty
+			// and as a comment group must contain at least one comment,
+			// clear it.
+			if len(cg.List) > 1 {
+				// Comment to be removed with remaining comments.
+				cg.List = commentDelAt(cg.List, i)
+				return s
+			}
+			// No more comments in the group: remove it.
+			if len(s) == 1 {
+				// Empty slice of comment groups, it must be nil.
+				return nil
+			}
+			// Remove the group.
+			return commentgroupDelAt(s, si)
+		}
+	}
+	return s
+}
+
+func commentDelAt(s []*ast.Comment, i int) []*ast.Comment {
+	if i+1 < len(s) {
+		copy(s[i:], s[i+1:])
+	}
+	s[len(s)-1] = nil
+	return s[:len(s)-1]
+}
+
+func commentgroupDelAt(s []*ast.CommentGroup, i int) []*ast.CommentGroup {
+	if i+1 < len(s) {
+		copy(s[i:], s[i+1:])
+	}
+	s[len(s)-1] = nil
+	return s[:len(s)-1]
+}
+
+//-----------------------------------------------------------------------------
+
 type visitor func(ast.Node) bool
 
 func (v visitor) Visit(node ast.Node) ast.Visitor {
