@@ -419,14 +419,4 @@ const (
 	SYS_RT_SIGTIMEDWAIT_TIME64       = 421
 	SYS_FUTEX_TIME64                 = 422
 	SYS_SCHED_RR_GET_INTERVAL_TIME64 = 423
-	SYS_PIDFD_SEND_SIGNAL            = 424
-	SYS_IO_URING_SETUP               = 425
-	SYS_IO_URING_ENTER               = 426
-	SYS_IO_URING_REGISTER            = 427
-	SYS_OPEN_TREE                    = 428
-	SYS_MOVE_MOUNT                   = 429
-	SYS_FSOPEN                       = 430
-	SYS_FSCONFIG                     = 431
-	SYS_FSMOUNT                      = 432
-	SYS_FSPICK                       = 433
 )
