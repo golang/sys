@@ -726,6 +726,7 @@ const (
 	SizeofRtAttr            = C.sizeof_struct_rtattr
 	SizeofIfInfomsg         = C.sizeof_struct_ifinfomsg
 	SizeofIfAddrmsg         = C.sizeof_struct_ifaddrmsg
+	SizeofIfaCacheinfo      = C.sizeof_struct_ifa_cacheinfo
 	SizeofRtMsg             = C.sizeof_struct_rtmsg
 	SizeofRtNexthop         = C.sizeof_struct_rtnexthop
 	SizeofNdUseroptmsg      = C.sizeof_struct_nduseroptmsg
@@ -745,6 +746,8 @@ type RtAttr C.struct_rtattr
 type IfInfomsg C.struct_ifinfomsg
 
 type IfAddrmsg C.struct_ifaddrmsg
+
+type IfaCacheinfo C.struct_ifa_cacheinfo
 
 type RtMsg C.struct_rtmsg
 
