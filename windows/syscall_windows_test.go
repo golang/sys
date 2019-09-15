@@ -10,6 +10,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"strings"
 	"syscall"
 	"testing"
 
@@ -224,5 +225,140 @@ func TestRtlGetVersion(t *testing.T) {
 	// these two functions should return the same thing.
 	if version.MajorVersion != major || version.MinorVersion != minor || version.BuildNumber != build {
 		t.Fatalf("%d.%d.%d != %d.%d.%d", version.MajorVersion, version.MinorVersion, version.BuildNumber, major, minor, build)
+	}
+}
+
+func TestGetNamedSecurityInfo(t *testing.T) {
+	path, err := windows.GetSystemDirectory()
+	if err != nil {
+		t.Fatal(err)
+	}
+	sd, err := windows.GetNamedSecurityInfo(path, windows.SE_FILE_OBJECT, windows.OWNER_SECURITY_INFORMATION)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !sd.IsValid() {
+		t.Fatal("Invalid security descriptor")
+	}
+	sdOwner, _, err := sd.Owner()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !sdOwner.IsValid() {
+		t.Fatal("Invalid security descriptor owner")
+	}
+}
+
+func TestGetSecurityInfo(t *testing.T) {
+	process, _ := windows.GetCurrentProcess()
+	sd, err := windows.GetSecurityInfo(process, windows.SE_KERNEL_OBJECT, windows.DACL_SECURITY_INFORMATION)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !sd.IsValid() {
+		t.Fatal("Invalid security descriptor")
+	}
+	sdStr := sd.String()
+	if !strings.HasPrefix(sdStr, "D:(A;") {
+		t.Fatalf("DACL = %q; want D:(A;...", sdStr)
+	}
+}
+
+func TestSddlConversion(t *testing.T) {
+	sd, err := windows.SecurityDescriptorFromString("O:BA")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !sd.IsValid() {
+		t.Fatal("Invalid security descriptor")
+	}
+	sdOwner, _, err := sd.Owner()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !sdOwner.IsValid() {
+		t.Fatal("Invalid security descriptor owner")
+	}
+	if !sdOwner.IsWellKnown(windows.WinBuiltinAdministratorsSid) {
+		got, _ := sdOwner.String()
+		t.Fatalf("Owner = %q; want S-1-5-32-544", got)
+	}
+}
+
+func TestBuildSecurityDescriptor(t *testing.T) {
+	const want = "O:SYD:(A;;GA;;;BA)"
+
+	adminSid, err := windows.CreateWellKnownSid(windows.WinBuiltinAdministratorsSid)
+	if err != nil {
+		t.Fatal(err)
+	}
+	systemSid, err := windows.CreateWellKnownSid(windows.WinLocalSystemSid)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	access := []windows.EXPLICIT_ACCESS{{
+		AccessPermissions: windows.GENERIC_ALL,
+		AccessMode:        windows.GRANT_ACCESS,
+		Trustee: windows.TRUSTEE{
+			TrusteeForm:  windows.TRUSTEE_IS_SID,
+			TrusteeType:  windows.TRUSTEE_IS_GROUP,
+			TrusteeValue: windows.TrusteeValueFromSID(adminSid),
+		},
+	}}
+	owner := &windows.TRUSTEE{
+		TrusteeForm:  windows.TRUSTEE_IS_SID,
+		TrusteeType:  windows.TRUSTEE_IS_USER,
+		TrusteeValue: windows.TrusteeValueFromSID(systemSid),
+	}
+
+	sd, err := windows.BuildSecurityDescriptor(owner, nil, access, nil, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	sd, err = sd.ToAbsolute()
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = sd.SetSACL(nil, false, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := sd.String(); got != want {
+		t.Fatalf("SD = %q; want %q", got, want)
+	}
+	sd, err = sd.ToSelfRelative()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := sd.String(); got != want {
+		t.Fatalf("SD = %q; want %q", got, want)
+	}
+
+	sd, err = windows.NewSecurityDescriptor()
+	if err != nil {
+		t.Fatal(err)
+	}
+	acl, err := windows.ACLFromEntries(access, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = sd.SetDACL(acl, true, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = sd.SetOwner(systemSid, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := sd.String(); got != want {
+		t.Fatalf("SD = %q; want %q", got, want)
+	}
+	sd, err = sd.ToSelfRelative()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := sd.String(); got != want {
+		t.Fatalf("SD = %q; want %q", got, want)
 	}
 }
