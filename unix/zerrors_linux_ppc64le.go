@@ -2587,7 +2587,7 @@ const (
 	TIPC_SUB_PORTS                       = 0x1
 	TIPC_SUB_SERVICE                     = 0x2
 	TIPC_TOP_SRV                         = 0x1
-	TIPC_WAIT_FOREVER                    = -0x1
+	TIPC_WAIT_FOREVER                    = 0xffffffff
 	TIPC_WITHDRAWN                       = 0x2
 	TIPC_ZONE_BITS                       = 0x8
 	TIPC_ZONE_CLUSTER_MASK               = 0xfffff000

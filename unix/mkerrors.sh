@@ -267,6 +267,11 @@ struct ltchars {
 #define FS_KEY_DESC_PREFIX              "fscrypt:"
 #define FS_KEY_DESC_PREFIX_SIZE         8
 #define FS_MAX_KEY_SIZE                 64
+
+// The code generator produces -0x1 for (~0), but an unsigned value is necessary
+// for the tipc_subscr timeout __u32 field.
+#undef TIPC_WAIT_FOREVER
+#define TIPC_WAIT_FOREVER 0xffffffff
 '
 
 includes_NetBSD='
