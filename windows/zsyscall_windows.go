@@ -694,7 +694,14 @@ func ExitProcess(exitcode uint32) {
 }
 
 func IsWow64Process(handle Handle, isWow64 *bool) (err error) {
-	r1, _, e1 := syscall.Syscall(procIsWow64Process.Addr(), 2, uintptr(handle), uintptr(unsafe.Pointer(isWow64)), 0)
+	var _p0 uint32
+	if *isWow64 {
+		_p0 = 1
+	} else {
+		_p0 = 0
+	}
+	r1, _, e1 := syscall.Syscall(procIsWow64Process.Addr(), 2, uintptr(handle), uintptr(unsafe.Pointer(&_p0)), 0)
+	*isWow64 = _p0 != 0
 	if r1 == 0 {
 		if e1 != 0 {
 			err = errnoErr(e1)
