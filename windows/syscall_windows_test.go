@@ -99,12 +99,8 @@ func TestCreateWellKnownSid(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Unable to create well known sid for administrators: %v", err)
 	}
-	sidStr, err := sid.String()
-	if err != nil {
-		t.Fatalf("Unable to convert sid into string: %v", err)
-	}
-	if sidStr != "S-1-5-32-544" {
-		t.Fatalf("Expecting administrators to be S-1-5-32-544, but found %s instead", sidStr)
+	if got, want := sid.String(), "S-1-5-32-544"; got != want {
+		t.Fatalf("Builtin Administrators SID = %s, want %s", got, want)
 	}
 }
 
@@ -279,8 +275,7 @@ func TestSddlConversion(t *testing.T) {
 		t.Fatal("Invalid security descriptor owner")
 	}
 	if !sdOwner.IsWellKnown(windows.WinBuiltinAdministratorsSid) {
-		got, _ := sdOwner.String()
-		t.Fatalf("Owner = %q; want S-1-5-32-544", got)
+		t.Fatalf("Owner = %q; want S-1-5-32-544", sdOwner)
 	}
 }
 
