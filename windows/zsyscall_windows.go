@@ -1209,29 +1209,15 @@ func GetStartupInfo(startupInfo *StartupInfo) (err error) {
 	return
 }
 
-func GetCurrentProcess() (pseudoHandle Handle, err error) {
-	r0, _, e1 := syscall.Syscall(procGetCurrentProcess.Addr(), 0, 0, 0, 0)
+func GetCurrentProcess() (pseudoHandle Handle) {
+	r0, _, _ := syscall.Syscall(procGetCurrentProcess.Addr(), 0, 0, 0, 0)
 	pseudoHandle = Handle(r0)
-	if pseudoHandle == 0 {
-		if e1 != 0 {
-			err = errnoErr(e1)
-		} else {
-			err = syscall.EINVAL
-		}
-	}
 	return
 }
 
-func GetCurrentThread() (pseudoHandle Handle, err error) {
-	r0, _, e1 := syscall.Syscall(procGetCurrentThread.Addr(), 0, 0, 0, 0)
+func GetCurrentThread() (pseudoHandle Handle) {
+	r0, _, _ := syscall.Syscall(procGetCurrentThread.Addr(), 0, 0, 0, 0)
 	pseudoHandle = Handle(r0)
-	if pseudoHandle == 0 {
-		if e1 != 0 {
-			err = errnoErr(e1)
-		} else {
-			err = syscall.EINVAL
-		}
-	}
 	return
 }
 

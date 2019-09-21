@@ -250,8 +250,7 @@ func TestGetNamedSecurityInfo(t *testing.T) {
 }
 
 func TestGetSecurityInfo(t *testing.T) {
-	process, _ := windows.GetCurrentProcess()
-	sd, err := windows.GetSecurityInfo(process, windows.SE_KERNEL_OBJECT, windows.DACL_SECURITY_INFORMATION)
+	sd, err := windows.GetSecurityInfo(windows.GetCurrentProcess(), windows.SE_KERNEL_OBJECT, windows.DACL_SECURITY_INFORMATION)
 	if err != nil {
 		t.Fatal(err)
 	}

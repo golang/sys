@@ -652,17 +652,9 @@ type Token Handle
 // associated with current process. It is a real
 // token that needs to be closed, unlike
 // GetCurrentProcessToken.
-func OpenCurrentProcessToken() (Token, error) {
-	p, e := GetCurrentProcess()
-	if e != nil {
-		return 0, e
-	}
-	var t Token
-	e = OpenProcessToken(p, TOKEN_QUERY|TOKEN_DUPLICATE, &t)
-	if e != nil {
-		return 0, e
-	}
-	return t, nil
+func OpenCurrentProcessToken() (token Token, err error) {
+	err = OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY|TOKEN_DUPLICATE, &token)
+	return
 }
 
 // GetCurrentProcessToken returns the access token associated with
