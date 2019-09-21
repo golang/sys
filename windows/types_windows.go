@@ -471,12 +471,6 @@ func NsecToTimeval(nsec int64) (tv Timeval) {
 	return
 }
 
-type SecurityAttributes struct {
-	Length             uint32
-	SecurityDescriptor uintptr
-	InheritHandle      uint32
-}
-
 type Overlapped struct {
 	Internal     uintptr
 	InternalHigh uintptr

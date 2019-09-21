@@ -901,6 +901,12 @@ type SECURITY_DESCRIPTOR struct {
 	dacl     *ACL
 }
 
+type SecurityAttributes struct {
+	Length             uint32
+	SecurityDescriptor *SECURITY_DESCRIPTOR
+	InheritHandle      uint32
+}
+
 type SE_OBJECT_TYPE uint32
 
 // Constants for type SE_OBJECT_TYPE
