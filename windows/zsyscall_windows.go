@@ -119,8 +119,6 @@ var (
 	procTerminateProcess                                     = modkernel32.NewProc("TerminateProcess")
 	procGetExitCodeProcess                                   = modkernel32.NewProc("GetExitCodeProcess")
 	procGetStartupInfoW                                      = modkernel32.NewProc("GetStartupInfoW")
-	procGetCurrentProcess                                    = modkernel32.NewProc("GetCurrentProcess")
-	procGetCurrentThread                                     = modkernel32.NewProc("GetCurrentThread")
 	procGetProcessTimes                                      = modkernel32.NewProc("GetProcessTimes")
 	procDuplicateHandle                                      = modkernel32.NewProc("DuplicateHandle")
 	procWaitForSingleObject                                  = modkernel32.NewProc("WaitForSingleObject")
@@ -1206,18 +1204,6 @@ func GetStartupInfo(startupInfo *StartupInfo) (err error) {
 			err = syscall.EINVAL
 		}
 	}
-	return
-}
-
-func GetCurrentProcess() (pseudoHandle Handle) {
-	r0, _, _ := syscall.Syscall(procGetCurrentProcess.Addr(), 0, 0, 0, 0)
-	pseudoHandle = Handle(r0)
-	return
-}
-
-func GetCurrentThread() (pseudoHandle Handle) {
-	r0, _, _ := syscall.Syscall(procGetCurrentThread.Addr(), 0, 0, 0, 0)
-	pseudoHandle = Handle(r0)
 	return
 }
 
