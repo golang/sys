@@ -309,15 +309,31 @@ func NewCallbackCDecl(fn interface{}) uintptr {
 
 // GetCurrentProcess returns the handle for the current process.
 // It is a pseudo handle that does not need to be closed.
-func GetCurrentProcess() Handle {
-	return Handle(^uintptr(1 - 1))
+// The returned error is always nil.
+//
+// Deprecated: use CurrentProcess for the same Handle without the nil
+// error.
+func GetCurrentProcess() (Handle, error) {
+	return CurrentProcess(), nil
 }
+
+// CurrentProcess returns the handle for the current process.
+// It is a pseudo handle that does not need to be closed.
+func CurrentProcess() Handle { return Handle(^uintptr(1 - 1)) }
 
 // GetCurrentThread returns the handle for the current thread.
 // It is a pseudo handle that does not need to be closed.
-func GetCurrentThread() Handle {
-	return Handle(^uintptr(2 - 1))
+// The returned error is always nil.
+//
+// Deprecated: use CurrentThread for the same Handle without the nil
+// error.
+func GetCurrentThread() (Handle, error) {
+	return CurrentThread(), nil
 }
+
+// CurrentThread returns the handle for the current thread.
+// It is a pseudo handle that does not need to be closed.
+func CurrentThread() Handle { return Handle(^uintptr(2 - 1)) }
 
 // GetProcAddressByOrdinal retrieves the address of the exported
 // function from module by ordinal.
