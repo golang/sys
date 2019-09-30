@@ -101,6 +101,8 @@ var (
 	procDeleteFileW                                          = modkernel32.NewProc("DeleteFileW")
 	procMoveFileW                                            = modkernel32.NewProc("MoveFileW")
 	procMoveFileExW                                          = modkernel32.NewProc("MoveFileExW")
+	procLockFileEx                                           = modkernel32.NewProc("LockFileEx")
+	procUnlockFileEx                                         = modkernel32.NewProc("UnlockFileEx")
 	procGetComputerNameW                                     = modkernel32.NewProc("GetComputerNameW")
 	procGetComputerNameExW                                   = modkernel32.NewProc("GetComputerNameExW")
 	procSetEndOfFile                                         = modkernel32.NewProc("SetEndOfFile")
@@ -984,6 +986,30 @@ func MoveFile(from *uint16, to *uint16) (err error) {
 
 func MoveFileEx(from *uint16, to *uint16, flags uint32) (err error) {
 	r1, _, e1 := syscall.Syscall(procMoveFileExW.Addr(), 3, uintptr(unsafe.Pointer(from)), uintptr(unsafe.Pointer(to)), uintptr(flags))
+	if r1 == 0 {
+		if e1 != 0 {
+			err = errnoErr(e1)
+		} else {
+			err = syscall.EINVAL
+		}
+	}
+	return
+}
+
+func LockFileEx(file Handle, flags uint32, reserved uint32, bytesLow uint32, bytesHigh uint32, overlapped *Overlapped) (err error) {
+	r1, _, e1 := syscall.Syscall6(procLockFileEx.Addr(), 6, uintptr(file), uintptr(flags), uintptr(reserved), uintptr(bytesLow), uintptr(bytesHigh), uintptr(unsafe.Pointer(overlapped)))
+	if r1 == 0 {
+		if e1 != 0 {
+			err = errnoErr(e1)
+		} else {
+			err = syscall.EINVAL
+		}
+	}
+	return
+}
+
+func UnlockFileEx(file Handle, reserved uint32, bytesLow uint32, bytesHigh uint32, overlapped *Overlapped) (err error) {
+	r1, _, e1 := syscall.Syscall6(procUnlockFileEx.Addr(), 5, uintptr(file), uintptr(reserved), uintptr(bytesLow), uintptr(bytesHigh), uintptr(unsafe.Pointer(overlapped)), 0)
 	if r1 == 0 {
 		if e1 != 0 {
 			err = errnoErr(e1)

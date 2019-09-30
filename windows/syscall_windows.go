@@ -57,6 +57,10 @@ const (
 	FILE_VOLUME_IS_COMPRESSED         = 0x00008000
 	FILE_VOLUME_QUOTAS                = 0x00000020
 
+	// Flags for LockFileEx.
+	LOCKFILE_FAIL_IMMEDIATELY = 0x00000001
+	LOCKFILE_EXCLUSIVE_LOCK   = 0x00000002
+
 	// Return values of SleepEx and other APC functions
 	STATUS_USER_APC    = 0x000000C0
 	WAIT_IO_COMPLETION = STATUS_USER_APC
@@ -160,6 +164,8 @@ func NewCallbackCDecl(fn interface{}) uintptr {
 //sys	DeleteFile(path *uint16) (err error) = DeleteFileW
 //sys	MoveFile(from *uint16, to *uint16) (err error) = MoveFileW
 //sys	MoveFileEx(from *uint16, to *uint16, flags uint32) (err error) = MoveFileExW
+//sys	LockFileEx(file Handle, flags uint32, reserved uint32, bytesLow uint32, bytesHigh uint32, overlapped *Overlapped) (err error)
+//sys	UnlockFileEx(file Handle, reserved uint32, bytesLow uint32, bytesHigh uint32, overlapped *Overlapped) (err error)
 //sys	GetComputerName(buf *uint16, n *uint32) (err error) = GetComputerNameW
 //sys	GetComputerNameEx(nametype uint32, buf *uint16, n *uint32) (err error) = GetComputerNameExW
 //sys	SetEndOfFile(handle Handle) (err error)
