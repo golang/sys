@@ -1206,7 +1206,7 @@ func OpenProcess(desiredAccess uint32, inheritHandle bool, processId uint32) (ha
 
 func ShellExecute(hwnd Handle, verb *uint16, file *uint16, args *uint16, cwd *uint16, showCmd int32) (err error) {
 	r1, _, e1 := syscall.Syscall6(procShellExecuteW.Addr(), 6, uintptr(hwnd), uintptr(unsafe.Pointer(verb)), uintptr(unsafe.Pointer(file)), uintptr(unsafe.Pointer(args)), uintptr(unsafe.Pointer(cwd)), uintptr(showCmd))
-	if r1 == 0 {
+	if r1 <= 32 {
 		if e1 != 0 {
 			err = errnoErr(e1)
 		} else {
