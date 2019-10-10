@@ -356,3 +356,24 @@ func TestBuildSecurityDescriptor(t *testing.T) {
 		t.Fatalf("SD = %q; want %q", got, want)
 	}
 }
+
+func TestGetDiskFreeSpaceEx(t *testing.T) {
+	cwd, err := windows.UTF16PtrFromString(".")
+	if err != nil {
+		t.Fatalf(`failed to call UTF16PtrFromString("."): %v`, err)
+	}
+	var freeBytesAvailableToCaller, totalNumberOfBytes, totalNumberOfFreeBytes uint64
+	if err := windows.GetDiskFreeSpaceEx(cwd, &freeBytesAvailableToCaller, &totalNumberOfBytes, &totalNumberOfFreeBytes); err != nil {
+		t.Fatalf("failed to call GetDiskFreeSpaceEx: %v", err)
+	}
+
+	if freeBytesAvailableToCaller == 0 {
+		t.Errorf("freeBytesAvailableToCaller: got 0; want > 0")
+	}
+	if totalNumberOfBytes == 0 {
+		t.Errorf("totalNumberOfBytes: got 0; want > 0")
+	}
+	if totalNumberOfFreeBytes == 0 {
+		t.Errorf("totalNumberOfFreeBytes: got 0; want > 0")
+	}
+}
