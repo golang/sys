@@ -30,7 +30,7 @@ func Test_anyToSockaddr(t *testing.T) {
 		},
 		{
 			name: "AF_TIPC NameSeq",
-			rsa: (*RawSockaddrAny)(unsafe.Pointer(&RawSockaddrTIPC{
+			rsa: sockaddrTIPCToAny(RawSockaddrTIPC{
 				Family:   AF_TIPC,
 				Addrtype: TIPC_SERVICE_RANGE,
 				Scope:    1,
@@ -39,7 +39,7 @@ func Test_anyToSockaddr(t *testing.T) {
 					Lower: 2,
 					Upper: 3,
 				}).tipcAddr(),
-			})),
+			}),
 			sa: &SockaddrTIPC{
 				Scope: 1,
 				Addr: &TIPCServiceRange{
@@ -51,7 +51,7 @@ func Test_anyToSockaddr(t *testing.T) {
 		},
 		{
 			name: "AF_TIPC Name",
-			rsa: (*RawSockaddrAny)(unsafe.Pointer(&RawSockaddrTIPC{
+			rsa: sockaddrTIPCToAny(RawSockaddrTIPC{
 				Family:   AF_TIPC,
 				Addrtype: TIPC_SERVICE_ADDR,
 				Scope:    2,
@@ -60,7 +60,7 @@ func Test_anyToSockaddr(t *testing.T) {
 					Instance: 2,
 					Domain:   3,
 				}).tipcAddr(),
-			})),
+			}),
 			sa: &SockaddrTIPC{
 				Scope: 2,
 				Addr: &TIPCServiceName{
@@ -72,7 +72,7 @@ func Test_anyToSockaddr(t *testing.T) {
 		},
 		{
 			name: "AF_TIPC ID",
-			rsa: (*RawSockaddrAny)(unsafe.Pointer(&RawSockaddrTIPC{
+			rsa: sockaddrTIPCToAny(RawSockaddrTIPC{
 				Family:   AF_TIPC,
 				Addrtype: TIPC_SOCKET_ADDR,
 				Scope:    3,
@@ -80,7 +80,7 @@ func Test_anyToSockaddr(t *testing.T) {
 					Ref:  1,
 					Node: 2,
 				}).tipcAddr(),
-			})),
+			}),
 			sa: &SockaddrTIPC{
 				Scope: 3,
 				Addr: &TIPCSocketAddr{
@@ -213,4 +213,18 @@ func TestSockaddrTIPC_sockaddr(t *testing.T) {
 			}
 		})
 	}
+}
+
+func sockaddrTIPCToAny(in RawSockaddrTIPC) *RawSockaddrAny {
+	var out RawSockaddrAny
+
+	// Explicitly copy the contents of in into out to produce the correct
+	// sockaddr structure, without relying on unsafe casting to a type of a
+	// larger size.
+	copy(
+		(*(*[SizeofSockaddrAny]byte)(unsafe.Pointer(&out)))[:],
+		(*(*[SizeofSockaddrTIPC]byte)(unsafe.Pointer(&in)))[:],
+	)
+
+	return &out
 }
