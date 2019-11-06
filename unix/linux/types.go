@@ -283,7 +283,8 @@ struct my_epoll_event {
 	// padding is not specified in linux/eventpoll.h but added to conform to the
 	// alignment requirements of EABI
 	int32_t padFd;
-#elif defined(__powerpc64__) || defined(__s390x__) || defined(__sparc__) || defined(__riscv)
+#elif defined(__powerpc64__) || defined(__s390x__) || defined(__sparc__) || defined(__riscv) \
+		|| (defined(__mips__) && _MIPS_SIM == _MIPS_SIM_ABI64)
 	int32_t _padFd;
 #endif
 	int32_t fd;
