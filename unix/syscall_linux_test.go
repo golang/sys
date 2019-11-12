@@ -693,6 +693,11 @@ func TestEpoll(t *testing.T) {
 	}
 
 	if n != 1 {
-		t.Logf("EpollWait: wrong number of events: got %v, expected 1", n)
+		t.Errorf("EpollWait: wrong number of events: got %v, expected 1", n)
+	}
+
+	got := int(events[0].Fd)
+	if got != fd {
+		t.Errorf("EpollWait: wrong Fd in event: got %v, expected %v", got, fd)
 	}
 }
