@@ -309,15 +309,6 @@ func TestPselect(t *testing.T) {
 }
 
 func TestSchedSetaffinity(t *testing.T) {
-	runtime.LockOSThread()
-	defer runtime.UnlockOSThread()
-
-	var oldMask unix.CPUSet
-	err := unix.SchedGetaffinity(0, &oldMask)
-	if err != nil {
-		t.Fatalf("SchedGetaffinity: %v", err)
-	}
-
 	var newMask unix.CPUSet
 	newMask.Zero()
 	if newMask.Count() != 0 {
@@ -338,6 +329,15 @@ func TestSchedSetaffinity(t *testing.T) {
 		t.Errorf("CpuClr: didn't clear CPU %d in set: %v", cpu, newMask)
 	}
 
+	runtime.LockOSThread()
+	defer runtime.UnlockOSThread()
+
+	var oldMask unix.CPUSet
+	err := unix.SchedGetaffinity(0, &oldMask)
+	if err != nil {
+		t.Fatalf("SchedGetaffinity: %v", err)
+	}
+
 	if runtime.NumCPU() < 2 {
 		t.Skip("skipping setaffinity tests on single CPU system")
 	}
@@ -349,6 +349,7 @@ func TestSchedSetaffinity(t *testing.T) {
 	// setaffinity should only be called with enabled cores. The valid cores
 	// are found from the oldMask, but if none are found then the setaffinity
 	// tests are skipped. Issue #27875.
+	cpu = 1
 	if !oldMask.IsSet(cpu) {
 		newMask.Zero()
 		for i := 0; i < len(oldMask); i++ {
