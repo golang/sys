@@ -49,13 +49,13 @@ func TestTime(t *testing.T) {
 		}
 
 		now = time.Now()
-
-		if int64(ut) == now.Unix() {
+		diff := int64(ut) - now.Unix()
+		if -1 <= diff && diff <= 1 {
 			return
 		}
 	}
 
-	t.Errorf("Time: return value %v should be nearly equal to time.Now().Unix() %v", ut, now.Unix())
+	t.Errorf("Time: return value %v should be nearly equal to time.Now().Unix() %v±1", ut, now.Unix())
 }
 
 func TestUtime(t *testing.T) {
