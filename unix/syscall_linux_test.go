@@ -297,7 +297,9 @@ func TestPselect(t *testing.T) {
 	start := time.Now()
 	_, err = unix.Pselect(0, nil, nil, nil, &ts, nil)
 	took := time.Since(start)
-	if err != nil {
+	if err == unix.EINTR {
+		t.Skipf("Pselect interrupted after %v timeout", took)
+	} else if err != nil {
 		t.Fatalf("Pselect: %v", err)
 	}
 
