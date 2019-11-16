@@ -287,20 +287,31 @@ func TestSelect(t *testing.T) {
 }
 
 func TestPselect(t *testing.T) {
-	_, err := unix.Pselect(0, nil, nil, nil, &unix.Timespec{Sec: 0, Nsec: 0}, nil)
-	if err != nil {
-		t.Fatalf("Pselect: %v", err)
+	for {
+		_, err := unix.Pselect(0, nil, nil, nil, &unix.Timespec{Sec: 0, Nsec: 0}, nil)
+		if err != nil {
+			t.Fatalf("Pselect: %v", err)
+		} else if err == unix.EINTR {
+			t.Logf("Pselect interrupted")
+			continue
+		}
+		break
 	}
 
 	dur := 2500 * time.Microsecond
 	ts := unix.NsecToTimespec(int64(dur))
-	start := time.Now()
-	_, err = unix.Pselect(0, nil, nil, nil, &ts, nil)
-	took := time.Since(start)
-	if err == unix.EINTR {
-		t.Skipf("Pselect interrupted after %v timeout", took)
-	} else if err != nil {
-		t.Fatalf("Pselect: %v", err)
+	var took time.Duration
+	for {
+		start := time.Now()
+		_, err := unix.Pselect(0, nil, nil, nil, &ts, nil)
+		took = time.Since(start)
+		if err == unix.EINTR {
+			t.Logf("Pselect interrupted after %v", took)
+			continue
+		} else if err != nil {
+			t.Fatalf("Pselect: %v", err)
+		}
+		break
 	}
 
 	if took < dur {
