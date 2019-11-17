@@ -585,11 +585,11 @@ func TestClockNanosleep(t *testing.T) {
 		until := start.Add(delay)
 		abs := unix.NsecToTimespec(until.UnixNano())
 		err := unix.ClockNanosleep(unix.CLOCK_REALTIME, unix.TIMER_ABSTIME, &abs, nil)
-		if err != nil {
-			t.Errorf("ClockNanosleep(CLOCK_REALTIME, TIMER_ABSTIME, %#v (=%v), nil) = %v", &abs, until, err)
-		} else if err == unix.EINTR {
+		if err == unix.EINTR {
 			t.Logf("ClockNanosleep interrupted after %v", time.Since(start))
 			continue
+		} else if err != nil {
+			t.Errorf("ClockNanosleep(CLOCK_REALTIME, TIMER_ABSTIME, %#v (=%v), nil) = %v", &abs, until, err)
 		} else if slept := time.Since(start); slept < delay {
 			t.Errorf("ClockNanosleep(CLOCK_REALTIME, TIMER_ABSTIME, %#v (=%v), nil) slept only %v", &abs, until, slept)
 		}
