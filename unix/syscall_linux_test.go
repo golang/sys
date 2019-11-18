@@ -289,11 +289,11 @@ func TestSelect(t *testing.T) {
 func TestPselect(t *testing.T) {
 	for {
 		_, err := unix.Pselect(0, nil, nil, nil, &unix.Timespec{Sec: 0, Nsec: 0}, nil)
-		if err != nil {
-			t.Fatalf("Pselect: %v", err)
-		} else if err == unix.EINTR {
+		if err == unix.EINTR {
 			t.Logf("Pselect interrupted")
 			continue
+		} else if err != nil {
+			t.Fatalf("Pselect: %v", err)
 		}
 		break
 	}
