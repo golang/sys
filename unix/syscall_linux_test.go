@@ -239,12 +239,15 @@ func TestRlimitAs(t *testing.T) {
 
 func TestPselect(t *testing.T) {
 	for {
-		_, err := unix.Pselect(0, nil, nil, nil, &unix.Timespec{Sec: 0, Nsec: 0}, nil)
+		n, err := unix.Pselect(0, nil, nil, nil, &unix.Timespec{Sec: 0, Nsec: 0}, nil)
 		if err == unix.EINTR {
 			t.Logf("Pselect interrupted")
 			continue
 		} else if err != nil {
 			t.Fatalf("Pselect: %v", err)
+		}
+		if n != 0 {
+			t.Fatalf("Pselect: got %v ready file descriptors, expected 0", n)
 		}
 		break
 	}
@@ -254,13 +257,16 @@ func TestPselect(t *testing.T) {
 	var took time.Duration
 	for {
 		start := time.Now()
-		_, err := unix.Pselect(0, nil, nil, nil, &ts, nil)
+		n, err := unix.Pselect(0, nil, nil, nil, &ts, nil)
 		took = time.Since(start)
 		if err == unix.EINTR {
 			t.Logf("Pselect interrupted after %v", took)
 			continue
 		} else if err != nil {
 			t.Fatalf("Pselect: %v", err)
+		}
+		if n != 0 {
+			t.Fatalf("Pselect: got %v ready file descriptors, expected 0", n)
 		}
 		break
 	}
