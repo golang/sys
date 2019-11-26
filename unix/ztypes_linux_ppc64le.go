@@ -181,6 +181,55 @@ type FscryptKey struct {
 	Size uint32
 }
 
+type FscryptPolicyV1 struct {
+	Version                   uint8
+	Contents_encryption_mode  uint8
+	Filenames_encryption_mode uint8
+	Flags                     uint8
+	Master_key_descriptor     [8]uint8
+}
+
+type FscryptPolicyV2 struct {
+	Version                   uint8
+	Contents_encryption_mode  uint8
+	Filenames_encryption_mode uint8
+	Flags                     uint8
+	_                         [4]uint8
+	Master_key_identifier     [16]uint8
+}
+
+type FscryptGetPolicyExArg struct {
+	Size   uint64
+	Policy [24]byte
+}
+
+type FscryptKeySpecifier struct {
+	Type uint32
+	_    uint32
+	U    [32]byte
+}
+
+type FscryptAddKeyArg struct {
+	Key_spec FscryptKeySpecifier
+	Raw_size uint32
+	_        [9]uint32
+}
+
+type FscryptRemoveKeyArg struct {
+	Key_spec             FscryptKeySpecifier
+	Removal_status_flags uint32
+	_                    [5]uint32
+}
+
+type FscryptGetKeyStatusArg struct {
+	Key_spec     FscryptKeySpecifier
+	_            [6]uint32
+	Status       uint32
+	Status_flags uint32
+	User_count   uint32
+	_            [13]uint32
+}
+
 type KeyctlDHParams struct {
 	Private int32
 	Prime   int32

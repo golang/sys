@@ -440,6 +440,20 @@ type FscryptPolicy C.struct_fscrypt_policy
 
 type FscryptKey C.struct_fscrypt_key
 
+type FscryptPolicyV1 C.struct_fscrypt_policy_v1
+
+type FscryptPolicyV2 C.struct_fscrypt_policy_v2
+
+type FscryptGetPolicyExArg C.struct_fscrypt_get_policy_ex_arg
+
+type FscryptKeySpecifier C.struct_fscrypt_key_specifier
+
+type FscryptAddKeyArg C.struct_fscrypt_add_key_arg
+
+type FscryptRemoveKeyArg C.struct_fscrypt_remove_key_arg
+
+type FscryptGetKeyStatusArg C.struct_fscrypt_get_key_status_arg
+
 // Structure for Keyctl
 
 type KeyctlDHParams C.struct_keyctl_dh_params
