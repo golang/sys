@@ -686,3 +686,17 @@ func TestEpoll(t *testing.T) {
 		t.Errorf("EpollWait: wrong Fd in event: got %v, expected %v", got, fd)
 	}
 }
+
+func TestPrctlRetInt(t *testing.T) {
+	err := unix.Prctl(unix.PR_SET_NO_NEW_PRIVS, 1, 0, 0, 0)
+	if err != nil {
+		t.Skipf("Prctl: %v, skipping test", err)
+	}
+	v, err := unix.PrctlRetInt(unix.PR_GET_NO_NEW_PRIVS, 0, 0, 0, 0)
+	if err != nil {
+		t.Fatalf("failed to perform prctl: %v", err)
+	}
+	if v != 1 {
+		t.Fatalf("unexpected return from prctl; got %v, expected %v", v, 1)
+	}
+}
