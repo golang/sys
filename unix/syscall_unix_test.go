@@ -680,8 +680,23 @@ func TestFstatat(t *testing.T) {
 		t.Fatalf("Fstatat: %v", err)
 	}
 
-	if st1 != st2 {
-		t.Errorf("Fstatat: returned stat does not match Lstat")
+	if st2.Dev != st1.Dev {
+		t.Errorf("Fstatat: got dev %v, expected %v", st2.Dev, st1.Dev)
+	}
+	if st2.Ino != st1.Ino {
+		t.Errorf("Fstatat: got ino %v, expected %v", st2.Ino, st1.Ino)
+	}
+	if st2.Mode != st1.Mode {
+		t.Errorf("Fstatat: got mode %v, expected %v", st2.Mode, st1.Mode)
+	}
+	if st2.Uid != st1.Uid {
+		t.Errorf("Fstatat: got uid %v, expected %v", st2.Uid, st1.Uid)
+	}
+	if st2.Gid != st1.Gid {
+		t.Errorf("Fstatat: got gid %v, expected %v", st2.Gid, st1.Gid)
+	}
+	if st2.Size != st1.Size {
+		t.Errorf("Fstatat: got size %v, expected %v", st2.Size, st1.Size)
 	}
 }
 
