@@ -791,6 +791,45 @@ func TestRenameat(t *testing.T) {
 	}
 }
 
+func TestUtimesNanoAt(t *testing.T) {
+	defer chtmpdir(t)()
+
+	symlink := "symlink1"
+	os.Remove(symlink)
+	err := os.Symlink("nonexisting", symlink)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Some filesystems only support microsecond resolution. Account for
+	// that in Nsec.
+	ts := []unix.Timespec{
+		{Sec: 1111, Nsec: 2000},
+		{Sec: 3333, Nsec: 4000},
+	}
+	err = unix.UtimesNanoAt(unix.AT_FDCWD, symlink, ts, unix.AT_SYMLINK_NOFOLLOW)
+	if err != nil {
+		t.Fatalf("UtimesNanoAt: %v", err)
+	}
+
+	var st unix.Stat_t
+	err = unix.Lstat(symlink, &st)
+	if err != nil {
+		t.Fatalf("Lstat: %v", err)
+	}
+
+	// Only check Mtim, Atim might not be supported by the underlying filesystem
+	expected := ts[1]
+	if st.Mtim.Nsec == 0 {
+		// Some filesystems only support 1-second time stamp resolution
+		// and will always set Nsec to 0.
+		expected.Nsec = 0
+	}
+	if st.Mtim != expected {
+		t.Errorf("UtimesNanoAt: wrong mtime: got %v, expected %v", st.Mtim, expected)
+	}
+}
+
 // mktmpfifo creates a temporary FIFO and provides a cleanup function.
 func mktmpfifo(t *testing.T) (*os.File, func()) {
 	err := unix.Mkfifo("fifo", 0666)
