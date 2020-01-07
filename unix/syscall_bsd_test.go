@@ -64,3 +64,12 @@ func TestSysctlUint32(t *testing.T) {
 	}
 	t.Logf("kern.maxproc: %v", maxproc)
 }
+
+func TestSysctlClockinfo(t *testing.T) {
+	ci, err := unix.SysctlClockinfo("kern.clockrate")
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Logf("tick = %v, hz = %v, profhz = %v, stathz = %v",
+		ci.Tick, ci.Hz, ci.Profhz, ci.Stathz)
+}

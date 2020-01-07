@@ -27,15 +27,6 @@ func stringsFromByteSlice(buf []byte) []string {
 	return result
 }
 
-func TestSysctlClockinfo(t *testing.T) {
-	ci, err := unix.SysctlClockinfo("kern.clockrate")
-	if err != nil {
-		t.Fatal(err)
-	}
-	t.Logf("tick = %v, tickadj = %v, hz = %v, profhz = %v, stathz = %v",
-		ci.Tick, ci.Tickadj, ci.Hz, ci.Profhz, ci.Stathz)
-}
-
 func TestIoctlPtmget(t *testing.T) {
 	fd, err := unix.Open("/dev/ptmx", unix.O_NOCTTY|unix.O_RDWR, 0666)
 	if err != nil {
