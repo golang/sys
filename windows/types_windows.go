@@ -1213,13 +1213,6 @@ const (
 	AI_NUMERICHOST = 4
 )
 
-type GUID struct {
-	Data1 uint32
-	Data2 uint16
-	Data3 uint16
-	Data4 [8]byte
-}
-
 var WSAID_CONNECTEX = GUID{
 	0x25a207b9,
 	0xddf3,
