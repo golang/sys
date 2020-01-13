@@ -12,6 +12,7 @@ import (
 )
 
 func TestPpoll(t *testing.T) {
+	defer chtmpdir(t)()
 	f, cleanup := mktmpfifo(t)
 	defer cleanup()
 
