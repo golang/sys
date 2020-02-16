@@ -406,6 +406,16 @@ type Timeval C.struct_timeval
 
 type Timex C.struct_timex
 
+const (
+	TIME_OK    = C.TIME_OK
+	TIME_INS   = C.TIME_INS
+	TIME_DEL   = C.TIME_DEL
+	TIME_OOP   = C.TIME_OOP
+	TIME_WAIT  = C.TIME_WAIT
+	TIME_ERROR = C.TIME_ERROR
+	TIME_BAD   = C.TIME_BAD
+)
+
 type Time_t C.time_t
 
 type Tms C.struct_tms
