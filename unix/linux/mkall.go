@@ -187,6 +187,13 @@ func main() {
 		}
 	}
 
+	fmt.Printf("----- GENERATING: merging generated files -----\n")
+	if err := mergeFiles(); err != nil {
+		fmt.Printf("%v\n***** FAILURE:    merging generated files *****\n\n", err)
+	} else {
+		fmt.Printf("----- SUCCESS:    merging generated files -----\n\n")
+	}
+
 	fmt.Printf("----- GENERATING ptrace pairs -----\n")
 	ok := true
 	for _, p := range ptracePairs {
@@ -547,6 +554,25 @@ func (t *target) mksyscallFlags() (flags []string) {
 		flags = append(flags, "-arm")
 	}
 	return
+}
+
+// Merge all the generated files for Linux targets
+func mergeFiles() error {
+	// Setup environment variables
+	os.Setenv("GOOS", runtime.GOOS)
+	os.Setenv("GOARCH", runtime.GOARCH)
+
+	// Merge each of the four type of files
+	for _, ztyp := range []string{"zerrors"} {
+		cmd := makeCommand("go", "run", "mkmerge.go", "-out", fmt.Sprintf("%s_%s.go", ztyp, GOOS), fmt.Sprintf("%s_%s_*.go", ztyp, GOOS))
+		err := cmd.Run()
+		if err != nil {
+			return fmt.Errorf("could not merge %s files: %w", ztyp, err)
+		}
+		fmt.Printf("%s files merged\n", ztyp)
+	}
+
+	return nil
 }
 
 // generatePtracePair takes a pair of GOARCH values that can run each
