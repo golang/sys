@@ -563,7 +563,7 @@ func mergeFiles() error {
 	os.Setenv("GOARCH", runtime.GOARCH)
 
 	// Merge each of the four type of files
-	for _, ztyp := range []string{"zerrors", "zsyscall", "zsysnum"} {
+	for _, ztyp := range []string{"zerrors", "zsyscall", "zsysnum", "ztypes"} {
 		cmd := makeCommand("go", "run", "mkmerge.go", "-out", fmt.Sprintf("%s_%s.go", ztyp, GOOS), fmt.Sprintf("%s_%s_*.go", ztyp, GOOS))
 		err := cmd.Run()
 		if err != nil {
