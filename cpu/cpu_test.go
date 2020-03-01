@@ -42,6 +42,14 @@ func TestARM64minimalFeatures(t *testing.T) {
 	}
 }
 
+func TestMIPS64Initialized(t *testing.T) {
+	if runtime.GOARCH == "mips64" || runtime.GOARCH == "mips64le" {
+		if !cpu.Initialized {
+			t.Fatal("Initialized expected true, got false")
+		}
+	}
+}
+
 // On ppc64x, the ISA bit for POWER8 should always be set on POWER8 and beyond.
 func TestPPC64minimalFeatures(t *testing.T) {
 	// Do not run this with gccgo on ppc64, as it doesn't have POWER8 as a minimum
