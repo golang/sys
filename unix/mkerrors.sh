@@ -280,6 +280,11 @@ struct ltchars {
 // for the tipc_subscr timeout __u32 field.
 #undef TIPC_WAIT_FOREVER
 #define TIPC_WAIT_FOREVER 0xffffffff
+
+// Copied from linux/l2tp.h
+// Including linux/l2tp.h here causes conflicts between linux/in.h
+// and netinet/in.h included via net/route.h above.
+#define IPPROTO_L2TP		115
 '
 
 includes_NetBSD='
