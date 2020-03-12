@@ -847,7 +847,6 @@ type SockaddrL2TPIP struct {
 }
 
 func (sa *SockaddrL2TPIP) sockaddr() (unsafe.Pointer, _Socklen, error) {
-
 	sa.raw.Family = AF_INET
 	sa.raw.Conn_id = sa.ConnId
 	for i := 0; i < len(sa.Addr); i++ {
@@ -865,14 +864,12 @@ type SockaddrL2TPIP6 struct {
 }
 
 func (sa *SockaddrL2TPIP6) sockaddr() (unsafe.Pointer, _Socklen, error) {
-
 	sa.raw.Family = AF_INET6
 	sa.raw.Conn_id = sa.ConnId
 	sa.raw.Scope_id = sa.ZoneId
 	for i := 0; i < len(sa.Addr); i++ {
 		sa.raw.Addr[i] = sa.Addr[i]
 	}
-
 	return unsafe.Pointer(&sa.raw), SizeofSockaddrL2TPIP6, nil
 }
 
