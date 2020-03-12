@@ -162,9 +162,7 @@ func Test_anyToSockaddr(t *testing.T) {
 				} else if err != nil {
 					t.Fatalf("socket(%v): %v", tt.skt, err)
 				}
-				defer func() {
-					Close(fd)
-				}()
+				defer Close(fd)
 			}
 			sa, err := anyToSockaddr(fd, tt.rsa)
 			if err != tt.err {
