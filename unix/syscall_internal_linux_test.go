@@ -154,7 +154,12 @@ func Test_anyToSockaddr(t *testing.T) {
 			var err error
 			if tt.skt.domain != 0 {
 				fd, err = Socket(tt.skt.domain, tt.skt.typ, tt.skt.protocol)
-				if err != nil {
+				// Some sockaddr types need specific kernel modules running: if these
+				// are not present we'll get EPROTONOSUPPORT back when trying to create
+				// the socket.  Skip the test in this situation.
+				if err == EPROTONOSUPPORT {
+					t.Skip("socket family/protocol not supported by kernel")
+				} else if err != nil {
 					t.Fatalf("socket(%v): %v", tt.skt, err)
 				}
 				defer func() {
