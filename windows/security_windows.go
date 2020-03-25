@@ -1230,7 +1230,7 @@ func (sd *SECURITY_DESCRIPTOR) String() string {
 		return ""
 	}
 	defer LocalFree(Handle(unsafe.Pointer(sddl)))
-	return UTF16ToString((*[(1 << 30) - 1]uint16)(unsafe.Pointer(sddl))[:strLen:strLen])
+	return UTF16PtrToString(sddl, int(strLen))
 }
 
 // ToAbsolute converts a self-relative security descriptor into an absolute one.

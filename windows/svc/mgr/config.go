@@ -50,7 +50,7 @@ func toString(p *uint16) string {
 	if p == nil {
 		return ""
 	}
-	return syscall.UTF16ToString((*[4096]uint16)(unsafe.Pointer(p))[:])
+	return windows.UTF16PtrToString(p, 4096)
 }
 
 func toStringSlice(ps *uint16) []string {

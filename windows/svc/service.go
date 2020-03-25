@@ -224,10 +224,10 @@ const (
 func (s *service) run() {
 	s.goWaits.Wait()
 	s.h = windows.Handle(ssHandle)
-	argv := (*[100]*int16)(unsafe.Pointer(sArgv))[:sArgc:sArgc]
+	argv := (*[100]*uint16)(unsafe.Pointer(sArgv))[:sArgc:sArgc]
 	args := make([]string, len(argv))
 	for i, a := range argv {
-		args[i] = syscall.UTF16ToString((*[1 << 20]uint16)(unsafe.Pointer(a))[:])
+		args[i] = windows.UTF16PtrToString(a, 1<<20)
 	}
 
 	cmdsToHandler := make(chan ChangeRequest)
