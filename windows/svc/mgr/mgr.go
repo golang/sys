@@ -201,7 +201,7 @@ func (m *Mgr) ListServices() ([]string, error) {
 	if servicesReturned == 0 {
 		return nil, nil
 	}
-	services := (*[1 << 20]windows.ENUM_SERVICE_STATUS_PROCESS)(unsafe.Pointer(&buf[0]))[:servicesReturned]
+	services := (*[1 << 20]windows.ENUM_SERVICE_STATUS_PROCESS)(unsafe.Pointer(&buf[0]))[:servicesReturned:servicesReturned]
 	var names []string
 	for _, s := range services {
 		name := syscall.UTF16ToString((*[1 << 20]uint16)(unsafe.Pointer(s.ServiceName))[:])

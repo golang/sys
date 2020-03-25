@@ -69,7 +69,7 @@ func (s *Service) RecoveryActions() ([]RecoveryAction, error) {
 	}
 
 	var recoveryActions []RecoveryAction
-	actions := (*[1024]windows.SC_ACTION)(unsafe.Pointer(p.Actions))[:p.ActionsCount]
+	actions := (*[1024]windows.SC_ACTION)(unsafe.Pointer(p.Actions))[:p.ActionsCount:p.ActionsCount]
 	for _, action := range actions {
 		recoveryActions = append(recoveryActions, RecoveryAction{Type: int(action.Type), Delay: time.Duration(action.Delay) * time.Millisecond})
 	}

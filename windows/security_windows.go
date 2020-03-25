@@ -1224,12 +1224,13 @@ func (sd *SECURITY_DESCRIPTOR) IsValid() bool {
 // used with %v formatting directives.
 func (sd *SECURITY_DESCRIPTOR) String() string {
 	var sddl *uint16
-	err := convertSecurityDescriptorToStringSecurityDescriptor(sd, 1, 0xff, &sddl, nil)
+	var strLen uint32
+	err := convertSecurityDescriptorToStringSecurityDescriptor(sd, 1, 0xff, &sddl, &strLen)
 	if err != nil {
 		return ""
 	}
 	defer LocalFree(Handle(unsafe.Pointer(sddl)))
-	return UTF16ToString((*[(1 << 30) - 1]uint16)(unsafe.Pointer(sddl))[:])
+	return UTF16ToString((*[(1 << 30) - 1]uint16)(unsafe.Pointer(sddl))[:strLen:strLen])
 }
 
 // ToAbsolute converts a self-relative security descriptor into an absolute one.
@@ -1308,7 +1309,7 @@ func (absoluteSD *SECURITY_DESCRIPTOR) ToSelfRelative() (selfRelativeSD *SECURIT
 
 func (selfRelativeSD *SECURITY_DESCRIPTOR) copySelfRelativeSecurityDescriptor() *SECURITY_DESCRIPTOR {
 	sdBytes := make([]byte, selfRelativeSD.Length())
-	copy(sdBytes, (*[(1 << 31) - 1]byte)(unsafe.Pointer(selfRelativeSD))[:len(sdBytes)])
+	copy(sdBytes, (*[(1 << 31) - 1]byte)(unsafe.Pointer(selfRelativeSD))[:len(sdBytes):len(sdBytes)])
 	return (*SECURITY_DESCRIPTOR)(unsafe.Pointer(&sdBytes[0]))
 }
 
@@ -1391,6 +1392,6 @@ func ACLFromEntries(explicitEntries []EXPLICIT_ACCESS, mergedACL *ACL) (acl *ACL
 	}
 	defer LocalFree(Handle(unsafe.Pointer(winHeapACL)))
 	aclBytes := make([]byte, winHeapACL.aclSize)
-	copy(aclBytes, (*[(1 << 31) - 1]byte)(unsafe.Pointer(winHeapACL))[:len(aclBytes)])
+	copy(aclBytes, (*[(1 << 31) - 1]byte)(unsafe.Pointer(winHeapACL))[:len(aclBytes):len(aclBytes)])
 	return (*ACL)(unsafe.Pointer(&aclBytes[0])), nil
 }
