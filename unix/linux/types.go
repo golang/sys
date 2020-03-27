@@ -88,6 +88,7 @@ struct termios2 {
 #include <linux/fanotify.h>
 #include <linux/filter.h>
 #include <linux/fs.h>
+#include <linux/fsverity.h>
 #include <linux/genetlink.h>
 #include <linux/hdreg.h>
 #include <linux/icmpv6.h>
@@ -2283,3 +2284,9 @@ const (
 	DEVLINK_DPIPE_HEADER_IPV4                 = C.DEVLINK_DPIPE_HEADER_IPV4
 	DEVLINK_DPIPE_HEADER_IPV6                 = C.DEVLINK_DPIPE_HEADER_IPV6
 )
+
+// fs-verity
+
+type FsverityDigest C.struct_fsverity_digest
+
+type FsverityEnableArg C.struct_fsverity_enable_arg
