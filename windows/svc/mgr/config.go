@@ -47,9 +47,6 @@ type Config struct {
 }
 
 func toString(p *uint16) string {
-	if p == nil {
-		return ""
-	}
 	return windows.UTF16PtrToString(p, 4096)
 }
 
