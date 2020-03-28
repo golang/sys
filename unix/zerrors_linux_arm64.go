@@ -310,6 +310,7 @@ const (
 	SO_TYPE                          = 0x3
 	SO_WIFI_STATUS                   = 0x29
 	SO_ZEROCOPY                      = 0x3c
+	SO_ORIGINAL_DST                  = 0x50
 	SVE_MAGIC                        = 0x53564501
 	TAB1                             = 0x800
 	TAB2                             = 0x1000
