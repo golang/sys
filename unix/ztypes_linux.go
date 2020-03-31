@@ -114,7 +114,8 @@ type FscryptKeySpecifier struct {
 type FscryptAddKeyArg struct {
 	Key_spec FscryptKeySpecifier
 	Raw_size uint32
-	_        [9]uint32
+	Key_id   uint32
+	_        [8]uint32
 }
 
 type FscryptRemoveKeyArg struct {
@@ -479,7 +480,7 @@ const (
 	IFLA_NEW_IFINDEX        = 0x31
 	IFLA_MIN_MTU            = 0x32
 	IFLA_MAX_MTU            = 0x33
-	IFLA_MAX                = 0x35
+	IFLA_MAX                = 0x36
 	IFLA_INFO_KIND          = 0x1
 	IFLA_INFO_DATA          = 0x2
 	IFLA_INFO_XSTATS        = 0x3
