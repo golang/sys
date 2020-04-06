@@ -106,6 +106,7 @@ struct termios2 {
 #include <linux/netfilter/nfnetlink.h>
 #include <linux/netfilter.h>
 #include <linux/netlink.h>
+#include <linux/nexthop.h>
 #include <linux/openat2.h>
 #include <linux/perf_event.h>
 #include <linux/random.h>
@@ -2303,3 +2304,23 @@ const (
 type FsverityDigest C.struct_fsverity_digest
 
 type FsverityEnableArg C.struct_fsverity_enable_arg
+
+// nexthop
+
+type Nhmsg C.struct_nhmsg
+
+type NexthopGrp C.struct_nexthop_grp
+
+const (
+	NHA_UNSPEC     = C.NHA_UNSPEC
+	NHA_ID         = C.NHA_ID
+	NHA_GROUP      = C.NHA_GROUP
+	NHA_GROUP_TYPE = C.NHA_GROUP_TYPE
+	NHA_BLACKHOLE  = C.NHA_BLACKHOLE
+	NHA_OIF        = C.NHA_OIF
+	NHA_GATEWAY    = C.NHA_GATEWAY
+	NHA_ENCAP_TYPE = C.NHA_ENCAP_TYPE
+	NHA_ENCAP      = C.NHA_ENCAP
+	NHA_GROUPS     = C.NHA_GROUPS
+	NHA_MASTER     = C.NHA_MASTER
+)
