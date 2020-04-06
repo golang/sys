@@ -5,6 +5,7 @@
 package windows
 
 import (
+	"strconv"
 	"sync"
 	"sync/atomic"
 	"syscall"
@@ -98,6 +99,35 @@ func (d *DLL) FindProc(name string) (proc *Proc, err error) {
 // MustFindProc is like FindProc but panics if search fails.
 func (d *DLL) MustFindProc(name string) *Proc {
 	p, e := d.FindProc(name)
+	if e != nil {
+		panic(e)
+	}
+	return p
+}
+
+// FindProcByOrdinal searches DLL d for procedure by ordinal and returns *Proc
+// if found. It returns an error if search fails.
+func (d *DLL) FindProcByOrdinal(ordinal int) (proc *Proc, err error) {
+	a, e := GetProcAddressByOrdinal(d.Handle, uintptr(ordinal))
+	name := "#" + strconv.Itoa(ordinal)
+	if e != nil {
+		return nil, &DLLError{
+			Err:     e,
+			ObjName: name,
+			Msg:     "Failed to find " + name + " procedure in " + d.Name + ": " + e.Error(),
+		}
+	}
+	p := &Proc{
+		Dll:  d,
+		Name: name,
+		addr: a,
+	}
+	return p, nil
+}
+
+// MustFindProcByOrdinal is like FindProcByOrdinal but panics if search fails.
+func (d *DLL) MustFindProcByOrdinal(ordinal int) *Proc {
+	p, e := d.FindProcByOrdinal(ordinal)
 	if e != nil {
 		panic(e)
 	}
