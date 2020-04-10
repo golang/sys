@@ -663,24 +663,3 @@ func TestPrctlRetInt(t *testing.T) {
 		t.Fatalf("unexpected return from prctl; got %v, expected %v", v, 1)
 	}
 }
-
-func TestOpenat2(t *testing.T) {
-	how := &unix.OpenHow{
-		Flags:   unix.O_RDONLY,
-		Resolve: unix.RESOLVE_NO_MAGICLINKS,
-	}
-	fd, err := unix.Openat2(-1, "/proc/self/fd/1", how)
-	switch err {
-	case nil:
-		unix.Close(fd)
-		t.Fatal("expected ELOOP, got nil")
-	case unix.ELOOP:
-		return
-	case unix.ENOSYS:
-		t.Skip("old kernel? (need Linux >= 5.6)")
-	case unix.ENOENT:
-		t.Skipf("openat2: %v, skipping test", err)
-	default:
-		t.Fatalf("unexpected error from openat2: %v", err)
-	}
-}
