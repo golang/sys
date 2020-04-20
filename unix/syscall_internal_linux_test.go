@@ -8,6 +8,7 @@ package unix
 
 import (
 	"reflect"
+	"strings"
 	"testing"
 	"unsafe"
 )
@@ -135,6 +136,25 @@ func Test_anyToSockaddr(t *testing.T) {
 				ConnId: 0x1234abcd,
 			},
 			skt: SocketSpec{domain: AF_INET6, typ: SOCK_DGRAM, protocol: IPPROTO_L2TP},
+		},
+		{
+			name: "AF_UNIX unnamed/abstract",
+			rsa: sockaddrUnixToAny(RawSockaddrUnix{
+				Family: AF_UNIX,
+			}),
+			sa: &SockaddrUnix{
+				Name: "@",
+			},
+		},
+		{
+			name: "AF_UNIX named",
+			rsa: sockaddrUnixToAny(RawSockaddrUnix{
+				Family: AF_UNIX,
+				Path:   [108]int8{'g', 'o', 'p', 'h', 'e', 'r'},
+			}),
+			sa: &SockaddrUnix{
+				Name: "gopher",
+			},
 		},
 		{
 			name: "AF_MAX EAFNOSUPPORT",
@@ -373,6 +393,76 @@ func TestSockaddrL2TPIP6_sockaddr(t *testing.T) {
 	}
 }
 
+func TestSockaddrUnix_sockaddr(t *testing.T) {
+	tests := []struct {
+		name string
+		sa   *SockaddrUnix
+		raw  *RawSockaddrUnix
+		slen _Socklen
+		err  error
+	}{
+		{
+			name: "unnamed",
+			sa:   &SockaddrUnix{},
+			raw: &RawSockaddrUnix{
+				Family: AF_UNIX,
+			},
+			slen: 2, // family (uint16)
+		},
+		{
+			name: "abstract",
+			sa: &SockaddrUnix{
+				Name: "@",
+			},
+			raw: &RawSockaddrUnix{
+				Family: AF_UNIX,
+			},
+			slen: 3, // family (uint16) + NULL
+		},
+		{
+			name: "named",
+			sa: &SockaddrUnix{
+				Name: "gopher",
+			},
+			raw: &RawSockaddrUnix{
+				Family: AF_UNIX,
+				Path:   [108]int8{'g', 'o', 'p', 'h', 'e', 'r'},
+			},
+			slen: _Socklen(3 + len("gopher")), // family (uint16) + len(gopher)
+		},
+		{
+			name: "named too long",
+			sa: &SockaddrUnix{
+				Name: strings.Repeat("A", 108),
+			},
+			err: EINVAL,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			out, l, err := tt.sa.sockaddr()
+			if err != tt.err {
+				t.Fatalf("unexpected error: %v, want: %v", err, tt.err)
+			}
+
+			if l != tt.slen {
+				t.Fatalf("unexpected Socklen: %d, want %d", l, tt.slen)
+			}
+			if out == nil {
+				// No pointer to cast, return early.
+				return
+			}
+
+			raw := (*RawSockaddrUnix)(out)
+			if !reflect.DeepEqual(raw, tt.raw) {
+				t.Fatalf("unexpected RawSockaddrUnix:\n got: %#v\nwant: %#v", raw, tt.raw)
+			}
+		})
+	}
+
+}
+
 // These helpers explicitly copy the contents of in into out to produce
 // the correct sockaddr structure, without relying on unsafe casting to
 // a type of a larger size.
@@ -400,5 +490,19 @@ func sockaddrL2TPIP6ToAny(in RawSockaddrL2TPIP6) *RawSockaddrAny {
 		(*(*[SizeofSockaddrAny]byte)(unsafe.Pointer(&out)))[:],
 		(*(*[SizeofSockaddrL2TPIP6]byte)(unsafe.Pointer(&in)))[:],
 	)
+	return &out
+}
+
+func sockaddrUnixToAny(in RawSockaddrUnix) *RawSockaddrAny {
+	var out RawSockaddrAny
+
+	// Explicitly copy the contents of in into out to produce the correct
+	// sockaddr structure, without relying on unsafe casting to a type of a
+	// larger size.
+	copy(
+		(*(*[SizeofSockaddrAny]byte)(unsafe.Pointer(&out)))[:],
+		(*(*[SizeofSockaddrUnix]byte)(unsafe.Pointer(&in)))[:],
+	)
+
 	return &out
 }
