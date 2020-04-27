@@ -460,7 +460,6 @@ func TestSockaddrUnix_sockaddr(t *testing.T) {
 			}
 		})
 	}
-
 }
 
 // These helpers explicitly copy the contents of in into out to produce
