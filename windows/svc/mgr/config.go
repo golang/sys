@@ -45,26 +45,19 @@ type Config struct {
 	DelayedAutoStart bool   // the service is started after other auto-start services are started plus a short delay
 }
 
-func toString(p *uint16) string {
-	return windows.UTF16PtrToString(p, 4096)
-}
-
 func toStringSlice(ps *uint16) []string {
 	r := make([]string, 0)
 	p := unsafe.Pointer(ps)
 
-	offset := func(count int) uintptr {
-		return unsafe.Sizeof(uint16(0)) * (uintptr)(count)
-	}
-
 	for {
-		s := windows.UTF16PtrToString((*uint16)(p), 4096)
-		if s == "" {
+		s := windows.UTF16PtrToString((*uint16)(p))
+		if len(s) == 0 {
 			break
 		}
 
 		r = append(r, s)
-		p = unsafe.Pointer(uintptr(p) + offset(len(s)+1))
+		offset := unsafe.Sizeof(uint16(0)) * (uintptr)(len(s)+1)
+		p = unsafe.Pointer(uintptr(p) + offset)
 	}
 
 	return r
@@ -109,13 +102,13 @@ func (s *Service) Config() (Config, error) {
 		ServiceType:      p.ServiceType,
 		StartType:        p.StartType,
 		ErrorControl:     p.ErrorControl,
-		BinaryPathName:   toString(p.BinaryPathName),
-		LoadOrderGroup:   toString(p.LoadOrderGroup),
+		BinaryPathName:   windows.UTF16PtrToString(p.BinaryPathName),
+		LoadOrderGroup:   windows.UTF16PtrToString(p.LoadOrderGroup),
 		TagId:            p.TagId,
 		Dependencies:     toStringSlice(p.Dependencies),
-		ServiceStartName: toString(p.ServiceStartName),
-		DisplayName:      toString(p.DisplayName),
-		Description:      toString(p2.Description),
+		ServiceStartName: windows.UTF16PtrToString(p.ServiceStartName),
+		DisplayName:      windows.UTF16PtrToString(p.DisplayName),
+		Description:      windows.UTF16PtrToString(p2.Description),
 		DelayedAutoStart: delayedStart,
 	}, nil
 }

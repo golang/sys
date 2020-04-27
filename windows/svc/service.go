@@ -227,7 +227,7 @@ func (s *service) run() {
 	argv := (*[100]*uint16)(unsafe.Pointer(sArgv))[:sArgc:sArgc]
 	args := make([]string, len(argv))
 	for i, a := range argv {
-		args[i] = windows.UTF16PtrToString(a, 1<<20)
+		args[i] = windows.UTF16PtrToString(a)
 	}
 
 	cmdsToHandler := make(chan ChangeRequest)

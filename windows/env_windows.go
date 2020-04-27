@@ -39,7 +39,7 @@ func (token Token) Environ(inheritExisting bool) (env []string, err error) {
 	defer DestroyEnvironmentBlock(block)
 	blockp := uintptr(unsafe.Pointer(block))
 	for {
-		entry := UTF16PtrToString((*uint16)(unsafe.Pointer(blockp)), (1<<30)-1)
+		entry := UTF16PtrToString((*uint16)(unsafe.Pointer(blockp)))
 		if len(entry) == 0 {
 			break
 		}

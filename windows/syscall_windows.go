@@ -117,23 +117,22 @@ func UTF16PtrFromString(s string) (*uint16, error) {
 	return &a[0], nil
 }
 
-// UTF16PtrToString is like UTF16ToString, but takes *uint16
-// as a parameter instead of []uint16.
-// max is how many times p can be advanced looking for the null terminator.
-// If max is hit, the string is truncated at that point.
-func UTF16PtrToString(p *uint16, max int) string {
+// UTF16PtrToString takes a pointer to a UTF-16 sequence and returns the corresponding UTF-8 encoded string.
+// If the pointer is nil, this returns the empty string. This assumes that the UTF-16 sequence is terminated
+// at a zero word; if the zero word is not present, the program may crash.
+func UTF16PtrToString(p *uint16) string {
 	if p == nil {
 		return ""
 	}
-	// Find NUL terminator.
-	end := unsafe.Pointer(p)
-	n := 0
-	for *(*uint16)(end) != 0 && n < max {
-		end = unsafe.Pointer(uintptr(end) + unsafe.Sizeof(*p))
-		n++
+
+	var encoded []uint16
+	for *p != 0 {
+		encoded = append(encoded, *p)
+
+		p = (*uint16)(unsafe.Pointer(uintptr(unsafe.Pointer(p)) + unsafe.Sizeof(*p)))
 	}
-	s := (*[(1 << 30) - 1]uint16)(unsafe.Pointer(p))[:n:n]
-	return string(utf16.Decode(s))
+
+	return string(utf16.Decode(encoded))
 }
 
 func Getpagesize() int { return 4096 }
@@ -1402,7 +1401,7 @@ func (t Token) KnownFolderPath(folderID *KNOWNFOLDERID, flags uint32) (string, e
 		return "", err
 	}
 	defer CoTaskMemFree(unsafe.Pointer(p))
-	return UTF16PtrToString(p, (1<<30)-1), nil
+	return UTF16PtrToString(p), nil
 }
 
 // RtlGetVersion returns the version of the underlying operating system, ignoring

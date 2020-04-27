@@ -112,7 +112,7 @@ func (s *Service) RebootMessage() (string, error) {
 		return "", err
 	}
 	p := (*windows.SERVICE_FAILURE_ACTIONS)(unsafe.Pointer(&b[0]))
-	return toString(p.RebootMsg), nil
+	return windows.UTF16PtrToString(p.RebootMsg), nil
 }
 
 // SetRecoveryCommand sets the command line of the process to execute in response to the RunCommand service controller action.
@@ -131,5 +131,5 @@ func (s *Service) RecoveryCommand() (string, error) {
 		return "", err
 	}
 	p := (*windows.SERVICE_FAILURE_ACTIONS)(unsafe.Pointer(&b[0]))
-	return toString(p.Command), nil
+	return windows.UTF16PtrToString(p.Command), nil
 }

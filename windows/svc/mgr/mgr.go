@@ -73,7 +73,7 @@ func (m *Mgr) LockStatus() (*LockStatus, error) {
 		status := &LockStatus{
 			IsLocked: lockStatus.IsLocked != 0,
 			Age:      time.Duration(lockStatus.LockDuration) * time.Second,
-			Owner:    toString(lockStatus.LockOwner),
+			Owner:    windows.UTF16PtrToString(lockStatus.LockOwner),
 		}
 		return status, nil
 	}
@@ -204,7 +204,7 @@ func (m *Mgr) ListServices() ([]string, error) {
 	services := (*[1 << 20]windows.ENUM_SERVICE_STATUS_PROCESS)(unsafe.Pointer(&buf[0]))[:servicesReturned:servicesReturned]
 	var names []string
 	for _, s := range services {
-		name := toString(s.ServiceName)
+		name := windows.UTF16PtrToString(s.ServiceName)
 		names = append(names, name)
 	}
 	return names, nil
