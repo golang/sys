@@ -1,4 +1,7 @@
-FROM ubuntu:19.04
+FROM ubuntu:20.04
+
+# Disable interactive prompts on package installation
+ENV DEBIAN_FRONTEND noninteractive
 
 # Dependencies to get the git sources and go binaries
 RUN apt-get update && apt-get install -y  --no-install-recommends \
