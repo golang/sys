@@ -46,6 +46,7 @@ package unix
 #include <sys/statvfs.h>
 #include <sys/sysinfo.h>
 #include <sys/time.h>
+#include <sys/timerfd.h>
 #include <sys/times.h>
 #include <sys/timex.h>
 #include <sys/un.h>
@@ -409,6 +410,8 @@ type Timespec C.struct_timespec
 type Timeval C.struct_timeval
 
 type Timex C.struct_timex
+
+type ItimerSpec C.struct_itimerspec
 
 const (
 	TIME_OK    = C.TIME_OK
