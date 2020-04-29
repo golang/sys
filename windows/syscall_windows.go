@@ -8,6 +8,7 @@ package windows
 
 import (
 	errorspkg "errors"
+	"strings"
 	"sync"
 	"syscall"
 	"time"
@@ -125,14 +126,24 @@ func UTF16PtrToString(p *uint16) string {
 		return ""
 	}
 
-	var encoded []uint16
-	for *p != 0 {
-		encoded = append(encoded, *p)
+	var sb strings.Builder
+
+	for r := rune(*p); r != 0; r = rune(*p) {
+		if !utf16.IsSurrogate(r) {
+			sb.WriteRune(r)
+		} else {
+			p = (*uint16)(unsafe.Pointer(uintptr(unsafe.Pointer(p)) + unsafe.Sizeof(*p)))
+			sb.WriteRune(utf16.DecodeRune(r, rune(*p)))
+
+			if *p == 0 {
+				break
+			}
+		}
 
 		p = (*uint16)(unsafe.Pointer(uintptr(unsafe.Pointer(p)) + unsafe.Sizeof(*p)))
 	}
 
-	return string(utf16.Decode(encoded))
+	return sb.String()
 }
 
 func Getpagesize() int { return 4096 }
