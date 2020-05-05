@@ -126,6 +126,10 @@ func UTF16PtrToString(p *uint16) string {
 	if p == nil {
 		return ""
 	}
+	if *p == 0 {
+		return ""
+	}
+
 	// Find NUL terminator.
 	n := 0
 	for ptr := unsafe.Pointer(p); *(*uint16)(ptr) != 0; n++ {
