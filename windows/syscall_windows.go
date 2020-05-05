@@ -8,12 +8,13 @@ package windows
 
 import (
 	errorspkg "errors"
-	"strings"
 	"sync"
 	"syscall"
 	"time"
 	"unicode/utf16"
 	"unsafe"
+
+	"golang.org/x/sys/internal/unsafeheader"
 )
 
 type Handle uintptr
@@ -125,25 +126,19 @@ func UTF16PtrToString(p *uint16) string {
 	if p == nil {
 		return ""
 	}
-
-	var sb strings.Builder
-
-	for r := rune(*p); r != 0; r = rune(*p) {
-		if !utf16.IsSurrogate(r) {
-			sb.WriteRune(r)
-		} else {
-			p = (*uint16)(unsafe.Pointer(uintptr(unsafe.Pointer(p)) + unsafe.Sizeof(*p)))
-			sb.WriteRune(utf16.DecodeRune(r, rune(*p)))
-
-			if *p == 0 {
-				break
-			}
-		}
-
-		p = (*uint16)(unsafe.Pointer(uintptr(unsafe.Pointer(p)) + unsafe.Sizeof(*p)))
+	// Find NUL terminator.
+	n := 0
+	for ptr := unsafe.Pointer(p); *(*uint16)(ptr) != 0; n++ {
+		ptr = unsafe.Pointer(uintptr(ptr) + unsafe.Sizeof(*p))
 	}
 
-	return sb.String()
+	var s []uint16
+	h := (*unsafeheader.Slice)(unsafe.Pointer(&s))
+	h.Data = unsafe.Pointer(p)
+	h.Len = n
+	h.Cap = n
+
+	return string(utf16.Decode(s))
 }
 
 func Getpagesize() int { return 4096 }

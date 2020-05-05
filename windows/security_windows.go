@@ -7,6 +7,8 @@ package windows
 import (
 	"syscall"
 	"unsafe"
+
+	"golang.org/x/sys/internal/unsafeheader"
 )
 
 const (
@@ -1230,7 +1232,13 @@ func (sd *SECURITY_DESCRIPTOR) String() string {
 		return ""
 	}
 	defer LocalFree(Handle(unsafe.Pointer(sddl)))
-	return UTF16PtrToString(sddl)
+
+	var utf16s []uint16
+	h := (*unsafeheader.Slice)(unsafe.Pointer(&utf16s))
+	h.Data = unsafe.Pointer(sddl)
+	h.Len = int(strLen)
+	h.Cap = int(strLen)
+	return UTF16ToString(utf16s)
 }
 
 // ToAbsolute converts a self-relative security descriptor into an absolute one.
@@ -1308,9 +1316,14 @@ func (absoluteSD *SECURITY_DESCRIPTOR) ToSelfRelative() (selfRelativeSD *SECURIT
 }
 
 func (selfRelativeSD *SECURITY_DESCRIPTOR) copySelfRelativeSecurityDescriptor() *SECURITY_DESCRIPTOR {
-	sdBytes := make([]byte, selfRelativeSD.Length())
-	copy(sdBytes, (*[(1 << 31) - 1]byte)(unsafe.Pointer(selfRelativeSD))[:len(sdBytes):len(sdBytes)])
-	return (*SECURITY_DESCRIPTOR)(unsafe.Pointer(&sdBytes[0]))
+	var dst, src []byte
+	dst = make([]byte, selfRelativeSD.Length())
+	h := (*unsafeheader.Slice)(unsafe.Pointer(&src))
+	h.Data = unsafe.Pointer(selfRelativeSD)
+	h.Len = len(dst)
+	h.Cap = len(dst)
+	copy(dst, src)
+	return (*SECURITY_DESCRIPTOR)(unsafe.Pointer(&dst[0]))
 }
 
 // SecurityDescriptorFromString converts an SDDL string describing a security descriptor into a
