@@ -79,3 +79,24 @@ func TestGetWindowsDirectory(t *testing.T) {
 		t.Fatalf("System Windows directory does not end in windows: %s", d2)
 	}
 }
+func TestFindProcByOrdinal(t *testing.T) {
+	// Attempt calling shlwapi.dll:IsOS, resolving it by ordinal, as
+	// suggested in
+	// https://msdn.microsoft.com/en-us/library/windows/desktop/bb773795.aspx
+	dll, err := windows.LoadDLL("shlwapi.dll")
+	if err != nil {
+		t.Fatalf("Failed to load shlwapi.dll: %s", err)
+	}
+	procIsOS, err := dll.FindProcByOrdinal(437)
+	if err != nil {
+		t.Fatalf("Could not find shlwapi.dll:IsOS by ordinal: %s", err)
+	}
+	if procIsOS.Name != "#437" {
+		t.Fatalf("Proc's name is incorrect: %s,expected #437", procIsOS.Name)
+	}
+	const OS_NT = 1
+	r, _, _ := syscall.Syscall(procIsOS.Addr(), 1, OS_NT, 0, 0)
+	if r == 0 {
+		t.Error("shlwapi.dll:IsOS(OS_NT) returned 0, expected non-zero value")
+	}
+}
