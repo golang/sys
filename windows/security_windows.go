@@ -1226,19 +1226,12 @@ func (sd *SECURITY_DESCRIPTOR) IsValid() bool {
 // used with %v formatting directives.
 func (sd *SECURITY_DESCRIPTOR) String() string {
 	var sddl *uint16
-	var strLen uint32
-	err := convertSecurityDescriptorToStringSecurityDescriptor(sd, 1, 0xff, &sddl, &strLen)
+	err := convertSecurityDescriptorToStringSecurityDescriptor(sd, 1, 0xff, &sddl, nil)
 	if err != nil {
 		return ""
 	}
 	defer LocalFree(Handle(unsafe.Pointer(sddl)))
-
-	var utf16s []uint16
-	h := (*unsafeheader.Slice)(unsafe.Pointer(&utf16s))
-	h.Data = unsafe.Pointer(sddl)
-	h.Len = int(strLen)
-	h.Cap = int(strLen)
-	return UTF16ToString(utf16s)
+	return UTF16PtrToString(sddl)
 }
 
 // ToAbsolute converts a self-relative security descriptor into an absolute one.
@@ -1316,12 +1309,15 @@ func (absoluteSD *SECURITY_DESCRIPTOR) ToSelfRelative() (selfRelativeSD *SECURIT
 }
 
 func (selfRelativeSD *SECURITY_DESCRIPTOR) copySelfRelativeSecurityDescriptor() *SECURITY_DESCRIPTOR {
-	var dst, src []byte
-	dst = make([]byte, selfRelativeSD.Length())
+	sdLen := (int)(selfRelativeSD.Length())
+
+	var src []byte
 	h := (*unsafeheader.Slice)(unsafe.Pointer(&src))
 	h.Data = unsafe.Pointer(selfRelativeSD)
-	h.Len = len(dst)
-	h.Cap = len(dst)
+	h.Len = sdLen
+	h.Cap = sdLen
+
+	dst := make([]byte, sdLen)
 	copy(dst, src)
 	return (*SECURITY_DESCRIPTOR)(unsafe.Pointer(&dst[0]))
 }
