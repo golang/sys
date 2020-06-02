@@ -73,6 +73,22 @@ func TestIoctlGetRTCTime(t *testing.T) {
 	t.Logf("RTC time: %04d-%02d-%02d %02d:%02d:%02d", v.Year+1900, v.Mon+1, v.Mday, v.Hour, v.Min, v.Sec)
 }
 
+func TestIoctlGetRTCWkAlrm(t *testing.T) {
+	f, err := os.Open("/dev/rtc0")
+	if err != nil {
+		t.Skipf("skipping test, %v", err)
+	}
+	defer f.Close()
+
+	v, err := unix.IoctlGetRTCWkAlrm(int(f.Fd()))
+	if err != nil {
+		t.Fatalf("failed to perform ioctl: %v", err)
+	}
+
+	t.Logf("RTC wake alarm enabled '%d'; time: %04d-%02d-%02d %02d:%02d:%02d",
+		v.Enabled, v.Time.Year+1900, v.Time.Mon+1, v.Time.Mday, v.Time.Hour, v.Time.Min, v.Time.Sec)
+}
+
 func TestPpoll(t *testing.T) {
 	if runtime.GOOS == "android" {
 		t.Skip("mkfifo syscall is not available on android, skipping test")
