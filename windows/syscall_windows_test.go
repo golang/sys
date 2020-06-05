@@ -404,3 +404,20 @@ func TestGetPreferredUILanguages(t *testing.T) {
 		}
 	}
 }
+
+func TestProcessWorkingSetSizeEx(t *testing.T) {
+	// Grab a handle to the current process
+	hProcess := windows.CurrentProcess()
+
+	// Allocate memory to store the result of the query
+	var minimumWorkingSetSize, maximumWorkingSetSize uintptr
+
+	// Make the system-call
+	var flag uint32
+	windows.GetProcessWorkingSetSizeEx(hProcess, &minimumWorkingSetSize, &maximumWorkingSetSize, &flag)
+
+	// Set the new limits to the current ones
+	if err := windows.SetProcessWorkingSetSizeEx(hProcess, minimumWorkingSetSize, maximumWorkingSetSize, flag); err != nil {
+		t.Error(err)
+	}
+}
