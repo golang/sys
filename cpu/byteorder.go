@@ -44,15 +44,20 @@ func (bigEndian) Uint64(b []byte) uint64 {
 func hostByteOrder() byteOrder {
 	switch runtime.GOARCH {
 	case "386", "amd64", "amd64p32",
+		"alpha",
 		"arm", "arm64",
 		"mipsle", "mips64le", "mips64p32le",
+		"nios2",
 		"ppc64le",
-		"riscv", "riscv64":
+		"riscv", "riscv64",
+		"sh":
 		return littleEndian{}
 	case "armbe", "arm64be",
+		"m68k",
 		"mips", "mips64", "mips64p32",
 		"ppc", "ppc64",
 		"s390", "s390x",
+		"shbe",
 		"sparc", "sparc64":
 		return bigEndian{}
 	}
