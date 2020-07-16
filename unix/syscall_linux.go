@@ -1803,7 +1803,7 @@ func bytes2iovec(bs [][]byte) []Iovec {
 	for i, b := range bs {
 		iovecs[i].SetLen(len(b))
 		if len(b) > 0 {
-			iovecs[i].Base = &b[0]
+			iovecs[i].Base = &bs[i][0]
 		} else {
 			iovecs[i].Base = (*byte)(unsafe.Pointer(&_zero))
 		}
