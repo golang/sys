@@ -380,6 +380,10 @@ func (cmsg *Cmsghdr) SetLen(length int) {
 	cmsg.Len = uint32(length)
 }
 
+func (iov *IovecRemote) SetBase(length uintptr) {
+	iov.Base = uint32(length)
+}
+
 func (iov *IovecRemote) SetLen(length int) {
 	iov.Len = uint32(length)
 }
