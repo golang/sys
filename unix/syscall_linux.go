@@ -2122,6 +2122,9 @@ func Klogset(typ int, arg int) (err error) {
 	return nil
 }
 
+//sys	ProcessVmReadv(pid int, localIov []Iovec, remoteIov []IovecRemote, flags uint) (n int, err error) = SYS_PROCESS_VM_READV
+//sys	ProcessVmWritev(pid int, localIov []Iovec, remoteIov []IovecRemote, flags uint) (n int, err error) = SYS_PROCESS_VM_WRITEV
+
 /*
  * Unimplemented
  */

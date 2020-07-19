@@ -380,6 +380,10 @@ func (cmsg *Cmsghdr) SetLen(length int) {
 	cmsg.Len = uint32(length)
 }
 
+func (iov *IovecRemote) SetLen(length int) {
+	iov.Len = uint32(length)
+}
+
 //sys	poll(fds *PollFd, nfds int, timeout int) (n int, err error)
 
 func Poll(fds []PollFd, timeout int) (n int, err error) {

@@ -589,3 +589,10 @@ type TIPCSIOCNodeIDReq struct {
 	Peer uint32
 	Id   [16]uint8
 }
+
+type IovecRemote struct {
+	Base uint32
+	Len  uint32
+}
+
+const SizeofIovecRemote = 0x8
