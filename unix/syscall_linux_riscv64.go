@@ -187,14 +187,6 @@ func (cmsg *Cmsghdr) SetLen(length int) {
 	cmsg.Len = uint64(length)
 }
 
-func (iov *IovecRemote) SetBase(length uintptr) {
-	iov.Base = uint64(length)
-}
-
-func (iov *IovecRemote) SetLen(length int) {
-	iov.Len = uint64(length)
-}
-
 func InotifyInit() (fd int, err error) {
 	return InotifyInit1(0)
 }

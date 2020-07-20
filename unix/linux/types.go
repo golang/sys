@@ -380,15 +380,6 @@ struct tipc_service_name {
 	// From the union.
 	__u32 domain;
 };
-
-// iovec_remote is iovec with the pointer replaced with an integer.
-// It is used for process_vm_readv and process_vm_writev, where the pointer
-// would refer to a location in a different process' address space, which
-// confuses the Go garbage collector.
-struct iovec_remote {
-	uintptr_t iov_base;
-	size_t iov_len;
-};
 */
 import "C"
 
@@ -2397,9 +2388,3 @@ const (
 	NHA_GROUPS     = C.NHA_GROUPS
 	NHA_MASTER     = C.NHA_MASTER
 )
-
-// process_vm_{read,write}v
-
-type IovecRemote C.struct_iovec_remote
-
-const SizeofIovecRemote = C.sizeof_struct_iovec_remote
