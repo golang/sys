@@ -85,6 +85,7 @@ struct termios2 {
 #include <linux/cgroupstats.h>
 #include <linux/cryptouser.h>
 #include <linux/devlink.h>
+#include <linux/dm-ioctl.h>
 #include <linux/errqueue.h>
 #include <linux/fanotify.h>
 #include <linux/filter.h>
@@ -470,6 +471,25 @@ type FscryptAddKeyArg C.struct_fscrypt_add_key_arg
 type FscryptRemoveKeyArg C.struct_fscrypt_remove_key_arg
 
 type FscryptGetKeyStatusArg C.struct_fscrypt_get_key_status_arg
+
+// Device Mapper
+
+type DmIoctl C.struct_dm_ioctl
+
+type DmTargetSpec C.struct_dm_target_spec
+
+type DmTargetDeps C.struct_dm_target_deps
+
+type DmNameList C.struct_dm_name_list
+
+type DmTargetVersions C.struct_dm_target_versions
+
+type DmTargetMsg C.struct_dm_target_msg
+
+const (
+	SizeofDmIoctl      = C.sizeof_struct_dm_ioctl
+	SizeofDmTargetSpec = C.sizeof_struct_dm_target_spec
+)
 
 // Structure for Keyctl
 

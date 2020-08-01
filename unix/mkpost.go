@@ -81,6 +81,15 @@ func main() {
 	convertStatvfsRegex := regexp.MustCompile(`((Fstype|Mnton|Mntfrom)name)(\s+)\[(\d+)\]int8`)
 	b = convertStatvfsRegex.ReplaceAll(b, []byte("$1$3[$4]byte"))
 
+	// Convert []int8 to []byte in device mapper ioctl interface
+	convertDmIoctlNames := regexp.MustCompile(`(Name|Uuid|Target_type|Data)(\s+)\[(\d+)\]u?int8`)
+	dmIoctlTypes := regexp.MustCompile(`type Dm(\S+) struct {[^}]*}`)
+	dmStructs := dmIoctlTypes.FindAll(b, -1)
+	for _, s := range dmStructs {
+		newNames := convertDmIoctlNames.ReplaceAll(s, []byte("$1$2[$3]byte"))
+		b = bytes.Replace(b, s, newNames, 1)
+	}
+
 	// Convert [1024]int8 to [1024]byte in Ptmget members
 	convertPtmget := regexp.MustCompile(`([SC]n)(\s+)\[(\d+)\]u?int8`)
 	b = convertPtmget.ReplaceAll(b, []byte("$1[$3]byte"))
