@@ -815,6 +815,8 @@ type FdSet C.fd_set
 
 type Sysinfo_t C.struct_sysinfo
 
+const SI_LOAD_SHIFT = C.SI_LOAD_SHIFT
+
 type Utsname C.struct_utsname
 
 type Ustat_t C.struct_ustat

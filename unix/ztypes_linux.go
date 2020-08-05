@@ -673,6 +673,8 @@ type InotifyEvent struct {
 
 const SizeofInotifyEvent = 0x10
 
+const SI_LOAD_SHIFT = 0x10
+
 type Utsname struct {
 	Sysname    [65]byte
 	Nodename   [65]byte
