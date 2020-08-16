@@ -257,6 +257,16 @@ struct my_sockaddr_un {
 #endif
 };
 
+// copied from /usr/include/netiucv/iucv.h modified with explicit signed chars.
+struct sockaddr_iucv {
+	sa_family_t siucv_family;
+	unsigned short siucv_port;
+	unsigned int siucv_addr;
+	signed char siucv_nodeid[8];
+	signed char siucv_user_id[8];
+	signed char siucv_name[8];
+};
+
 #ifdef __ARM_EABI__
 typedef struct user_regs PtraceRegs;
 #elif defined(__aarch64__)
@@ -540,6 +550,8 @@ type RawSockaddrL2TPIP C.struct_sockaddr_l2tpip
 
 type RawSockaddrL2TPIP6 C.struct_sockaddr_l2tpip6
 
+type RawSockaddrIUCV C.struct_sockaddr_iucv
+
 type RawSockaddr C.struct_sockaddr
 
 type RawSockaddrAny C.struct_sockaddr_any
@@ -594,6 +606,7 @@ const (
 	SizeofSockaddrTIPC      = C.sizeof_struct_sockaddr_tipc
 	SizeofSockaddrL2TPIP    = C.sizeof_struct_sockaddr_l2tpip
 	SizeofSockaddrL2TPIP6   = C.sizeof_struct_sockaddr_l2tpip6
+	SizeofSockaddrIUCV      = C.sizeof_struct_sockaddr_iucv
 	SizeofLinger            = C.sizeof_struct_linger
 	SizeofIovec             = C.sizeof_struct_iovec
 	SizeofIPMreq            = C.sizeof_struct_ip_mreq

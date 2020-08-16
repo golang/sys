@@ -310,6 +310,15 @@ type RawSockaddrL2TPIP6 struct {
 	Conn_id  uint32
 }
 
+type RawSockaddrIUCV struct {
+	Family  uint16
+	Port    uint16
+	Addr    uint32
+	Nodeid  [8]int8
+	User_id [8]int8
+	Name    [8]int8
+}
+
 type _Socklen uint32
 
 type Linger struct {
@@ -422,6 +431,7 @@ const (
 	SizeofSockaddrTIPC      = 0x10
 	SizeofSockaddrL2TPIP    = 0x10
 	SizeofSockaddrL2TPIP6   = 0x20
+	SizeofSockaddrIUCV      = 0x20
 	SizeofLinger            = 0x8
 	SizeofIPMreq            = 0x8
 	SizeofIPMreqn           = 0xc
