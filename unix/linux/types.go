@@ -257,6 +257,16 @@ struct my_sockaddr_un {
 #endif
 };
 
+// copied from /usr/include/netiucv/iucv.h modified with explicit signed chars.
+struct sockaddr_iucv {
+	sa_family_t siucv_family;
+	unsigned short siucv_port;
+	unsigned int siucv_addr;
+	signed char siucv_nodeid[8];
+	signed char siucv_user_id[8];
+	signed char siucv_name[8];
+};
+
 #ifdef __ARM_EABI__
 typedef struct user_regs PtraceRegs;
 #elif defined(__aarch64__)

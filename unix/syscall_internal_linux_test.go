@@ -157,6 +157,18 @@ func Test_anyToSockaddr(t *testing.T) {
 			},
 		},
 		{
+			name: "AF_IUCV",
+			rsa: sockaddrIUCVToAny(RawSockaddrIUCV{
+				Family:  AF_IUCV,
+				User_id: [8]int8{'*', 'M', 'S', 'G', ' ', ' ', ' ', ' '},
+				Name:    [8]int8{' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+			}),
+			sa: &SockaddrIUCV{
+				UserID: "*MSG    ",
+				Name:   "        ",
+			},
+		},
+		{
 			name: "AF_MAX EAFNOSUPPORT",
 			rsa: &RawSockaddrAny{
 				Addr: RawSockaddr{
@@ -503,5 +515,14 @@ func sockaddrUnixToAny(in RawSockaddrUnix) *RawSockaddrAny {
 		(*(*[SizeofSockaddrUnix]byte)(unsafe.Pointer(&in)))[:],
 	)
 
+	return &out
+}
+
+func sockaddrIUCVToAny(in RawSockaddrIUCV) *RawSockaddrAny {
+	var out RawSockaddrAny
+	copy(
+		(*(*[SizeofSockaddrAny]byte)(unsafe.Pointer(&out)))[:],
+		(*(*[SizeofSockaddrUnix]byte)(unsafe.Pointer(&in)))[:],
+	)
 	return &out
 }

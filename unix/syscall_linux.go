@@ -902,8 +902,12 @@ func (sa *SockaddrIUCV) sockaddr() (unsafe.Pointer, _Socklen, error) {
 		sa.raw.User_id[i] = ' '
 		sa.raw.Name[i] = ' '
 	}
-	copy(sa.raw.User_id[:], []byte(sa.UserID))
-	copy(sa.raw.Name[:], []byte(sa.Name))
+	for i, b := range []byte(sa.UserID[:8]) {
+		sa.raw.User_id[i] = int8(b)
+	}
+	for i, b := range []byte(sa.Name[:8]) {
+		sa.raw.Name[i] = int8(b)
+	}
 	return unsafe.Pointer(&sa.raw), SizeofSockaddrIUCV, nil
 }
 
@@ -1087,6 +1091,23 @@ func anyToSockaddr(fd int, rsa *RawSockaddrAny) (Sockaddr, error) {
 		}
 
 		return sa, nil
+	case AF_IUCV:
+		pp := (*RawSockaddrIUCV)(unsafe.Pointer(rsa))
+
+		var user [8]byte
+		var name [8]byte
+
+		for i := 0; i < 8; i++ {
+			user[i] = byte(pp.User_id[i])
+			name[i] = byte(pp.Name[i])
+		}
+
+		sa := &SockaddrIUCV{
+			UserID: string(user[:]),
+			Name:   string(name[:]),
+		}
+		return sa, nil
+
 	}
 	return nil, EAFNOSUPPORT
 }

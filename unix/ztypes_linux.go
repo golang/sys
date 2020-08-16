@@ -311,12 +311,12 @@ type RawSockaddrL2TPIP6 struct {
 }
 
 type RawSockaddrIUCV struct {
-	Family   uint16
-	Port     uint16
-	Addr     uint32
-	Nodeid   [8]byte
-	User_id  [8]byte
-	Name     [8]byte
+	Family  uint16
+	Port    uint16
+	Addr    uint32
+	Nodeid  [8]int8
+	User_id [8]int8
+	Name    [8]int8
 }
 
 type _Socklen uint32
