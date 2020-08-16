@@ -885,6 +885,25 @@ func (sa *SockaddrL2TPIP6) sockaddr() (unsafe.Pointer, _Socklen, error) {
 	return unsafe.Pointer(&sa.raw), SizeofSockaddrL2TPIP6, nil
 }
 
+// SockaddrIUCV implements the Sockaddr interface for AF_IUCV sockets.
+type SockaddrIUCV struct {
+	UserID string
+	Name   string
+	raw    RawSockaddrIUCV
+}
+
+func (sa *SockaddrIUCV) sockaddr() (unsafe.Pointer, _Socklen, error) {
+	sa.raw.Family = AF_IUCV
+	for i := 0; i < 8; i++ {
+		sa.raw.Nodeid[i] = ' '
+		sa.raw.User_id[i] = ' '
+		sa.raw.Name[i] = ' '
+	}
+	copy(sa.raw.User_id[:], []byte(sa.UserID))
+	copy(sa.raw.Name[:], []byte(sa.Name))
+	return unsafe.Pointer(&sa.raw), SizeofSockaddrIUCV, nil
+}
+
 func anyToSockaddr(fd int, rsa *RawSockaddrAny) (Sockaddr, error) {
 	switch rsa.Addr.Family {
 	case AF_NETLINK:

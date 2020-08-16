@@ -540,6 +540,8 @@ type RawSockaddrL2TPIP C.struct_sockaddr_l2tpip
 
 type RawSockaddrL2TPIP6 C.struct_sockaddr_l2tpip6
 
+type RawSockaddrIUCV C.struct_sockaddr_iucv
+
 type RawSockaddr C.struct_sockaddr
 
 type RawSockaddrAny C.struct_sockaddr_any
@@ -594,6 +596,7 @@ const (
 	SizeofSockaddrTIPC      = C.sizeof_struct_sockaddr_tipc
 	SizeofSockaddrL2TPIP    = C.sizeof_struct_sockaddr_l2tpip
 	SizeofSockaddrL2TPIP6   = C.sizeof_struct_sockaddr_l2tpip6
+	SizeofSockaddrIUCV      = C.sizeof_struct_sockaddr_iucv
 	SizeofLinger            = C.sizeof_struct_linger
 	SizeofIovec             = C.sizeof_struct_iovec
 	SizeofIPMreq            = C.sizeof_struct_ip_mreq
