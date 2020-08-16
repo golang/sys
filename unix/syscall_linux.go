@@ -894,6 +894,9 @@ type SockaddrIUCV struct {
 
 func (sa *SockaddrIUCV) sockaddr() (unsafe.Pointer, _Socklen, error) {
 	sa.raw.Family = AF_IUCV
+	// These are EBCDIC encoded by the kernel, but we still need to pad them
+	// with blanks. Initializing with blanks allows the caller to feed in either
+	// a padded or an unpadded string.
 	for i := 0; i < 8; i++ {
 		sa.raw.Nodeid[i] = ' '
 		sa.raw.User_id[i] = ' '
