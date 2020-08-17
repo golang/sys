@@ -902,10 +902,13 @@ func (sa *SockaddrIUCV) sockaddr() (unsafe.Pointer, _Socklen, error) {
 		sa.raw.User_id[i] = ' '
 		sa.raw.Name[i] = ' '
 	}
-	for i, b := range []byte(sa.UserID[:8]) {
+	if len(sa.UserID) > 8 || len(sa.Name) > 8 {
+		return nil, 0, EINVAL
+	}
+	for i, b := range []byte(sa.UserID[:]) {
 		sa.raw.User_id[i] = int8(b)
 	}
-	for i, b := range []byte(sa.Name[:8]) {
+	for i, b := range []byte(sa.Name[:]) {
 		sa.raw.Name[i] = int8(b)
 	}
 	return unsafe.Pointer(&sa.raw), SizeofSockaddrIUCV, nil
