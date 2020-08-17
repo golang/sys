@@ -576,15 +576,10 @@ func sockaddrL2TPIP6ToAny(in RawSockaddrL2TPIP6) *RawSockaddrAny {
 
 func sockaddrUnixToAny(in RawSockaddrUnix) *RawSockaddrAny {
 	var out RawSockaddrAny
-
-	// Explicitly copy the contents of in into out to produce the correct
-	// sockaddr structure, without relying on unsafe casting to a type of a
-	// larger size.
 	copy(
 		(*(*[SizeofSockaddrAny]byte)(unsafe.Pointer(&out)))[:],
 		(*(*[SizeofSockaddrUnix]byte)(unsafe.Pointer(&in)))[:],
 	)
-
 	return &out
 }
 
