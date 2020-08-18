@@ -1111,6 +1111,21 @@ func anyToSockaddr(fd int, rsa *RawSockaddrAny) (Sockaddr, error) {
 		}
 		return sa, nil
 
+	case AF_CAN:
+		pp := (*RawSockaddrCAN)(unsafe.Pointer(rsa))
+		sa := &SockaddrCAN{
+			Ifindex: int(pp.Ifindex),
+		}
+		rx := (*[4]byte)(unsafe.Pointer(&sa.RxID))
+		for i := 0; i < 4; i++ {
+			rx[i] = pp.Addr[i]
+		}
+		tx := (*[4]byte)(unsafe.Pointer(&sa.TxID))
+		for i := 0; i < 4; i++ {
+			tx[i] = pp.Addr[i+4]
+		}
+		return sa, nil
+
 	}
 	return nil, EAFNOSUPPORT
 }
