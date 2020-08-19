@@ -105,6 +105,7 @@ struct termios2 {
 #include <linux/net_namespace.h>
 #include <linux/net_tstamp.h>
 #include <linux/netfilter/nf_tables.h>
+#include <linux/netfilter/nf_tables_compat.h>
 #include <linux/netfilter/nfnetlink.h>
 #include <linux/netfilter.h>
 #include <linux/netlink.h>
@@ -1740,6 +1741,24 @@ const (
 	NFTA_NG_OFFSET                    = C.NFTA_NG_OFFSET
 	NFT_NG_INCREMENTAL                = C.NFT_NG_INCREMENTAL
 	NFT_NG_RANDOM                     = C.NFT_NG_RANDOM
+)
+
+// netfilter nf_tables_compat
+// generated using:
+// perl -nlE '/^\s*(NFT\w+)/ && say "$1 = C.$1"' /usr/include/linux/netfilter/nf_tables_compat.h
+const (
+	NFTA_TARGET_UNSPEC = C.NFTA_TARGET_UNSPEC
+	NFTA_TARGET_NAME   = C.NFTA_TARGET_NAME
+	NFTA_TARGET_REV    = C.NFTA_TARGET_REV
+	NFTA_TARGET_INFO   = C.NFTA_TARGET_INFO
+	NFTA_MATCH_UNSPEC  = C.NFTA_MATCH_UNSPEC
+	NFTA_MATCH_NAME    = C.NFTA_MATCH_NAME
+	NFTA_MATCH_REV     = C.NFTA_MATCH_REV
+	NFTA_MATCH_INFO    = C.NFTA_MATCH_INFO
+	NFTA_COMPAT_UNSPEC = C.NFTA_COMPAT_UNSPEC
+	NFTA_COMPAT_NAME   = C.NFTA_COMPAT_NAME
+	NFTA_COMPAT_REV    = C.NFTA_COMPAT_REV
+	NFTA_COMPAT_TYPE   = C.NFTA_COMPAT_TYPE
 )
 
 type RTCTime C.struct_rtc_time
