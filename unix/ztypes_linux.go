@@ -1752,6 +1752,21 @@ const (
 	NFT_NG_RANDOM                     = 0x1
 )
 
+const (
+	NFTA_TARGET_UNSPEC = 0x0
+	NFTA_TARGET_NAME   = 0x1
+	NFTA_TARGET_REV    = 0x2
+	NFTA_TARGET_INFO   = 0x3
+	NFTA_MATCH_UNSPEC  = 0x0
+	NFTA_MATCH_NAME    = 0x1
+	NFTA_MATCH_REV     = 0x2
+	NFTA_MATCH_INFO    = 0x3
+	NFTA_COMPAT_UNSPEC = 0x0
+	NFTA_COMPAT_NAME   = 0x1
+	NFTA_COMPAT_REV    = 0x2
+	NFTA_COMPAT_TYPE   = 0x3
+)
+
 type RTCTime struct {
 	Sec   int32
 	Min   int32
