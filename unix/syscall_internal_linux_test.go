@@ -670,7 +670,7 @@ func sockaddrCANToAny(in RawSockaddrCAN) *RawSockaddrAny {
 	var out RawSockaddrAny
 	copy(
 		(*(*[SizeofSockaddrAny]byte)(unsafe.Pointer(&out)))[:],
-		(*(*[SizeofSockaddrUnix]byte)(unsafe.Pointer(&in)))[:],
+		(*(*[SizeofSockaddrCAN]byte)(unsafe.Pointer(&in)))[:],
 	)
 	return &out
 }
