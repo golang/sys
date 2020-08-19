@@ -169,6 +169,24 @@ func Test_anyToSockaddr(t *testing.T) {
 			},
 		},
 		{
+			name: "AF_CAN",
+			rsa: sockaddrCANToAny(RawSockaddrCAN{
+				Family:  AF_CAN,
+				Ifindex: 12345678,
+				Addr: [16]byte{
+					0x89, 0x67, 0x45, 0x23,
+					0x90, 0x78, 0x56, 0x34,
+					0x0, 0x0, 0x0, 0x0,
+					0x0, 0x0, 0x0, 0x0,
+				},
+			}),
+			sa: &SockaddrCAN{
+				Ifindex: 12345678,
+				RxID:    0x23456789,
+				TxID:    0x34567890,
+			},
+		},
+		{
 			name: "AF_MAX EAFNOSUPPORT",
 			rsa: &RawSockaddrAny{
 				Addr: RawSockaddr{
@@ -544,6 +562,62 @@ func TestSockaddrIUCV_sockaddr(t *testing.T) {
 	}
 }
 
+func TestSockaddrCAN_sockaddr(t *testing.T) {
+	tests := []struct {
+		name string
+		sa   *SockaddrCAN
+		raw  *RawSockaddrCAN
+		err  error
+	}{
+		{
+			name: "with ids",
+			sa: &SockaddrCAN{
+				Ifindex: 12345678,
+				RxID:    0x23456789,
+				TxID:    0x34567890,
+			},
+			raw: &RawSockaddrCAN{
+				Family:  AF_CAN,
+				Ifindex: 12345678,
+				Addr: [16]byte{
+					0x89, 0x67, 0x45, 0x23,
+					0x90, 0x78, 0x56, 0x34,
+					0x0, 0x0, 0x0, 0x0,
+					0x0, 0x0, 0x0, 0x0,
+				},
+			},
+		},
+		{
+			name: "negative ifindex",
+			sa: &SockaddrCAN{
+				Ifindex: -1,
+			},
+			err: EINVAL,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			out, l, err := tt.sa.sockaddr()
+			if err != tt.err {
+				t.Fatalf("unexpected error: %v, want: %v", err, tt.err)
+			}
+
+			// Must be 0 on error or a fixed size otherwise.
+			if (tt.err != nil && l != 0) || (tt.raw != nil && l != SizeofSockaddrCAN) {
+				t.Fatalf("unexpected Socklen: %d", l)
+			}
+
+			if out != nil {
+				raw := (*RawSockaddrCAN)(out)
+				if !reflect.DeepEqual(raw, tt.raw) {
+					t.Fatalf("unexpected RawSockaddrCAN:\n got: %#v\nwant: %#v", raw, tt.raw)
+				}
+			}
+		})
+	}
+}
+
 // These helpers explicitly copy the contents of in into out to produce
 // the correct sockaddr structure, without relying on unsafe casting to
 // a type of a larger size.
@@ -588,6 +662,15 @@ func sockaddrIUCVToAny(in RawSockaddrIUCV) *RawSockaddrAny {
 	copy(
 		(*(*[SizeofSockaddrAny]byte)(unsafe.Pointer(&out)))[:],
 		(*(*[SizeofSockaddrUnix]byte)(unsafe.Pointer(&in)))[:],
+	)
+	return &out
+}
+
+func sockaddrCANToAny(in RawSockaddrCAN) *RawSockaddrAny {
+	var out RawSockaddrAny
+	copy(
+		(*(*[SizeofSockaddrAny]byte)(unsafe.Pointer(&out)))[:],
+		(*(*[SizeofSockaddrCAN]byte)(unsafe.Pointer(&in)))[:],
 	)
 	return &out
 }
