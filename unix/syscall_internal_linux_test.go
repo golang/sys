@@ -594,13 +594,6 @@ func TestSockaddrCAN_sockaddr(t *testing.T) {
 			},
 			err: EINVAL,
 		},
-		{
-			name: "ifindex to big",
-			sa: &SockaddrCAN{
-				Ifindex: 0x80000000,
-			},
-			err: EINVAL,
-		},
 	}
 
 	for _, tt := range tests {
