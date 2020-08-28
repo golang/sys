@@ -81,6 +81,7 @@ struct termios2 {
 #include <linux/blkpg.h>
 #include <linux/bpf.h>
 #include <linux/can.h>
+#include <linux/can/raw.h>
 #include <linux/capability.h>
 #include <linux/cgroupstats.h>
 #include <linux/cryptouser.h>
@@ -2480,4 +2481,15 @@ const (
 	NHA_ENCAP      = C.NHA_ENCAP
 	NHA_GROUPS     = C.NHA_GROUPS
 	NHA_MASTER     = C.NHA_MASTER
+)
+
+// raw CAN sockets
+
+const (
+	CAN_RAW_FILTER        = C.CAN_RAW_FILTER
+	CAN_RAW_ERR_FILTER    = C.CAN_RAW_ERR_FILTER
+	CAN_RAW_LOOPBACK      = C.CAN_RAW_LOOPBACK
+	CAN_RAW_RECV_OWN_MSGS = C.CAN_RAW_RECV_OWN_MSGS
+	CAN_RAW_FD_FRAMES     = C.CAN_RAW_FD_FRAMES
+	CAN_RAW_JOIN_FILTERS  = C.CAN_RAW_JOIN_FILTERS
 )
