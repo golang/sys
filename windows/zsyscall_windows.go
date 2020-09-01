@@ -335,6 +335,7 @@ var (
 	procSetSecurityInfo                                      = modadvapi32.NewProc("SetSecurityInfo")
 	procGetNamedSecurityInfoW                                = modadvapi32.NewProc("GetNamedSecurityInfoW")
 	procSetNamedSecurityInfoW                                = modadvapi32.NewProc("SetNamedSecurityInfoW")
+	procGetExplicitEntriesFromAclW                           = modadvapi32.NewProc("GetExplicitEntriesFromAclW")
 	procBuildSecurityDescriptorW                             = modadvapi32.NewProc("BuildSecurityDescriptorW")
 	procInitializeSecurityDescriptor                         = modadvapi32.NewProc("InitializeSecurityDescriptor")
 	procGetSecurityDescriptorControl                         = modadvapi32.NewProc("GetSecurityDescriptorControl")
@@ -3755,6 +3756,14 @@ func SetNamedSecurityInfo(objectName string, objectType SE_OBJECT_TYPE, security
 
 func _SetNamedSecurityInfo(objectName *uint16, objectType SE_OBJECT_TYPE, securityInformation SECURITY_INFORMATION, owner *SID, group *SID, dacl *ACL, sacl *ACL) (ret error) {
 	r0, _, _ := syscall.Syscall9(procSetNamedSecurityInfoW.Addr(), 7, uintptr(unsafe.Pointer(objectName)), uintptr(objectType), uintptr(securityInformation), uintptr(unsafe.Pointer(owner)), uintptr(unsafe.Pointer(group)), uintptr(unsafe.Pointer(dacl)), uintptr(unsafe.Pointer(sacl)), 0, 0)
+	if r0 != 0 {
+		ret = syscall.Errno(r0)
+	}
+	return
+}
+
+func getExplicitEntriesFromAclW(acl *ACL, countAccessEntries *uint32, accessEntries **EXPLICIT_ACCESS) (ret error) {
+	r0, _, _ := syscall.Syscall(procGetExplicitEntriesFromAclW.Addr(), 3, uintptr(unsafe.Pointer(acl)), uintptr(unsafe.Pointer(countAccessEntries)), uintptr(unsafe.Pointer(accessEntries)))
 	if r0 != 0 {
 		ret = syscall.Errno(r0)
 	}
