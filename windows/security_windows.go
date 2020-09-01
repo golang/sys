@@ -1079,6 +1079,22 @@ func TrusteeValueFromObjectsAndName(objectsAndName *OBJECTS_AND_NAME) TrusteeVal
 	return TrusteeValue(unsafe.Pointer(objectsAndName))
 }
 
+func TrusteeValueToSID(val TrusteeValue) *SID {
+	return (*SID)(unsafe.Pointer(val))
+}
+
+func TrusteeValueToString(val TrusteeValue) string {
+	return UTF16PtrToString((*uint16)(unsafe.Pointer(val)))
+}
+
+func TrusteeValueToObjectsAndSid(val TrusteeValue) *OBJECTS_AND_SID {
+	return (*OBJECTS_AND_SID)(unsafe.Pointer(val))
+}
+
+func TrusteeValueToObjectsAndName(val TrusteeValue) *OBJECTS_AND_NAME {
+	return (*OBJECTS_AND_NAME)(unsafe.Pointer(val))
+}
+
 type TRUSTEE struct {
 	MultipleTrustee          *TRUSTEE
 	MultipleTrusteeOperation MULTIPLE_TRUSTEE_OPERATION
