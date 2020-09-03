@@ -13,6 +13,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 	"runtime"
 	"runtime/debug"
 	"strconv"
@@ -728,5 +729,64 @@ func TestTimerfd(t *testing.T) {
 		}
 
 		count += *(*uint64)(unsafe.Pointer(&buffer))
+	}
+}
+
+func TestOpenat2(t *testing.T) {
+	how := &unix.OpenHow{
+		Flags: unix.O_RDONLY,
+	}
+	fd, err := unix.Openat2(unix.AT_FDCWD, ".", how)
+	if err != nil {
+		if err == unix.ENOSYS || err == unix.EPERM {
+			t.Skipf("openat2: %v (old kernel? need Linux >= 5.6)", err)
+		}
+		t.Fatalf("openat2: %v", err)
+	}
+	if err := unix.Close(fd); err != nil {
+		t.Fatalf("close: %v", err)
+	}
+
+	// prepare
+	tempDir, err := ioutil.TempDir("", t.Name())
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer os.RemoveAll(tempDir)
+
+	subdir := filepath.Join(tempDir, "dir")
+	if err := os.Mkdir(subdir, 0755); err != nil {
+		t.Fatal(err)
+	}
+	symlink := filepath.Join(subdir, "symlink")
+	if err := os.Symlink("../", symlink); err != nil {
+		t.Fatal(err)
+	}
+
+	dirfd, err := unix.Open(subdir, unix.O_RDONLY, 0)
+	if err != nil {
+		t.Fatalf("open(%q): %v", subdir, err)
+	}
+	defer unix.Close(dirfd)
+
+	// openat2 with no extra flags -- should succeed
+	fd, err = unix.Openat2(dirfd, "symlink", how)
+	if err != nil {
+		t.Errorf("Openat2 should succeed, got %v", err)
+	}
+	if err := unix.Close(fd); err != nil {
+		t.Fatalf("close: %v", err)
+	}
+
+	// open with RESOLVE_BENEATH, should result in EXDEV
+	how.Resolve = unix.RESOLVE_BENEATH
+	fd, err = unix.Openat2(dirfd, "symlink", how)
+	if err == nil {
+		if err := unix.Close(fd); err != nil {
+			t.Fatalf("close: %v", err)
+		}
+	}
+	if err != unix.EXDEV {
+		t.Errorf("Openat2 should fail with EXDEV, got %v", err)
 	}
 }

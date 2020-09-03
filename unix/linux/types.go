@@ -111,6 +111,7 @@ struct termios2 {
 #include <linux/netfilter.h>
 #include <linux/netlink.h>
 #include <linux/nexthop.h>
+#include <linux/openat2.h>
 #include <linux/perf_event.h>
 #include <linux/random.h>
 #include <linux/rtc.h>
@@ -872,6 +873,18 @@ const (
 	AT_SYMLINK_NOFOLLOW = C.AT_SYMLINK_NOFOLLOW
 
 	AT_EACCESS = C.AT_EACCESS
+)
+
+type OpenHow C.struct_open_how
+
+const SizeofOpenHow = C.sizeof_struct_open_how
+
+const (
+	RESOLVE_BENEATH       = C.RESOLVE_BENEATH
+	RESOLVE_IN_ROOT       = C.RESOLVE_IN_ROOT
+	RESOLVE_NO_MAGICLINKS = C.RESOLVE_NO_MAGICLINKS
+	RESOLVE_NO_SYMLINKS   = C.RESOLVE_NO_SYMLINKS
+	RESOLVE_NO_XDEV       = C.RESOLVE_NO_XDEV
 )
 
 type PollFd C.struct_pollfd
