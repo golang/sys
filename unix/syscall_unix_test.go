@@ -165,7 +165,7 @@ func TestFcntlFlock(t *testing.T) {
 // "-test.run=^TestPassFD$" and an environment variable used to signal
 // that the test should become the child process instead.
 func TestPassFD(t *testing.T) {
-	if runtime.GOOS == "darwin" && (runtime.GOARCH == "arm" || runtime.GOARCH == "arm64") {
+	if (runtime.GOOS == "darwin" || runtime.GOOS == "ios") && (runtime.GOARCH == "arm" || runtime.GOARCH == "arm64") {
 		t.Skip("cannot exec subprocess on iOS, skipping test")
 	}
 
@@ -377,7 +377,7 @@ func TestRlimit(t *testing.T) {
 	}
 	set := rlimit
 	set.Cur = set.Max - 1
-	if runtime.GOOS == "darwin" && set.Cur > 4096 {
+	if (runtime.GOOS == "darwin" || runtime.GOOS == "ios") && set.Cur > 4096 {
 		// rlim_min for RLIMIT_NOFILE should be equal to
 		// or lower than kern.maxfilesperproc, which on
 		// some machines are 4096. See #40564.
@@ -394,7 +394,7 @@ func TestRlimit(t *testing.T) {
 	}
 	set = rlimit
 	set.Cur = set.Max - 1
-	if runtime.GOOS == "darwin" && set.Cur > 4096 {
+	if (runtime.GOOS == "darwin" || runtime.GOOS == "ios") && set.Cur > 4096 {
 		set.Cur = 4096
 	}
 	if set != get {
@@ -402,7 +402,7 @@ func TestRlimit(t *testing.T) {
 		// increase the soft limit of rlimit sandbox, though
 		// Setrlimit never reports an error.
 		switch runtime.GOOS {
-		case "darwin":
+		case "darwin", "ios":
 		default:
 			t.Fatalf("Rlimit: change failed: wanted %#v got %#v", set, get)
 		}
@@ -483,7 +483,7 @@ func TestDup(t *testing.T) {
 
 func TestPoll(t *testing.T) {
 	if runtime.GOOS == "android" ||
-		(runtime.GOOS == "darwin" && (runtime.GOARCH == "arm" || runtime.GOARCH == "arm64")) {
+		((runtime.GOOS == "darwin" || runtime.GOOS == "ios") && (runtime.GOARCH == "arm" || runtime.GOARCH == "arm64")) {
 		t.Skip("mkfifo syscall is not available on android and iOS, skipping test")
 	}
 
@@ -597,7 +597,7 @@ func TestGetwd(t *testing.T) {
 	switch runtime.GOOS {
 	case "android":
 		dirs = []string{"/", "/system/bin"}
-	case "darwin":
+	case "darwin", "ios":
 		switch runtime.GOARCH {
 		case "arm", "arm64":
 			d1, err := ioutil.TempDir("", "d1")

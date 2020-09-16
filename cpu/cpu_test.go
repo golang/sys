@@ -31,7 +31,7 @@ func TestAVX2hasAVX(t *testing.T) {
 }
 
 func TestARM64minimalFeatures(t *testing.T) {
-	if runtime.GOARCH != "arm64" || runtime.GOOS == "darwin" {
+	if runtime.GOARCH != "arm64" || (runtime.GOOS == "darwin" || runtime.GOOS == "ios") {
 		return
 	}
 	if !cpu.ARM64.HasASIMD {
