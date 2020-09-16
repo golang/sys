@@ -57,7 +57,9 @@ func TestClonefile(t *testing.T) {
 
 	clonedName := file.Name() + "-cloned"
 	err := unix.Clonefile(file.Name(), clonedName, 0)
-	if err != nil {
+	if err == unix.ENOSYS || err == unix.ENOTSUP {
+		t.Skip("clonefile is not available or supported, skipping test")
+	} else if err != nil {
 		t.Fatal(err)
 	}
 	defer os.Remove(clonedName)
@@ -78,10 +80,11 @@ func TestClonefileatWithCwd(t *testing.T) {
 
 	clonedName := file.Name() + "-cloned"
 	err := unix.Clonefileat(unix.AT_FDCWD, file.Name(), unix.AT_FDCWD, clonedName, 0)
-	if err != nil {
+	if err == unix.ENOSYS || err == unix.ENOTSUP {
+		t.Skip("clonefileat is not available or supported, skipping test")
+	} else if err != nil {
 		t.Fatal(err)
 	}
-
 	defer os.Remove(clonedName)
 
 	clonedData, err := ioutil.ReadFile(clonedName)
@@ -134,7 +137,9 @@ func TestClonefileatWithRelativePaths(t *testing.T) {
 	src := path.Base(srcFile.Name())
 	dst := path.Base(dstFile.Name())
 	err = unix.Clonefileat(srcFd, src, dstFd, dst, 0)
-	if err != nil {
+	if err == unix.ENOSYS || err == unix.ENOTSUP {
+		t.Skip("clonefileat is not available or supported, skipping test")
+	} else if err != nil {
 		t.Fatal(err)
 	}
 
@@ -165,7 +170,9 @@ func TestFclonefileat(t *testing.T) {
 	os.Remove(dstFile.Name())
 
 	err = unix.Fclonefileat(fd, unix.AT_FDCWD, dstFile.Name(), 0)
-	if err != nil {
+	if err == unix.ENOSYS || err == unix.ENOTSUP {
+		t.Skip("clonefileat is not available or supported, skipping test")
+	} else if err != nil {
 		t.Fatal(err)
 	}
 
