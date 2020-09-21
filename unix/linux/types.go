@@ -465,6 +465,10 @@ type Fsid C.fsid_t
 
 type Flock_t C.struct_flock
 
+type FileCloneRange C.struct_file_clone_range
+
+type FileDedupeRange C.struct_file_dedupe_range
+
 // Filesystem Encryption
 
 type FscryptPolicy C.struct_fscrypt_policy
