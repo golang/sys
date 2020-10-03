@@ -105,26 +105,20 @@ func (p *Param) tmpVar() string {
 
 // BoolTmpVarCode returns source code for bool temp variable.
 func (p *Param) BoolTmpVarCode() string {
-	const code = `var %s uint32
-	if %s {
-		%s = 1
-	} else {
-		%s = 0
+	const code = `var %[1]s uint32
+	if %[2]s {
+		%[1]s = 1
 	}`
-	tmp := p.tmpVar()
-	return fmt.Sprintf(code, tmp, p.Name, tmp, tmp)
+	return fmt.Sprintf(code, p.tmpVar(), p.Name)
 }
 
 // BoolPointerTmpVarCode returns source code for bool temp variable.
 func (p *Param) BoolPointerTmpVarCode() string {
-	const code = `var %s uint32
-	if *%s {
-		%s = 1
-	} else {
-		%s = 0
+	const code = `var %[1]s uint32
+	if *%[2]s {
+		%[1]s = 1
 	}`
-	tmp := p.tmpVar()
-	return fmt.Sprintf(code, tmp, p.Name, tmp, tmp)
+	return fmt.Sprintf(code, p.tmpVar(), p.Name)
 }
 
 // SliceTmpVarCode returns source code for slice temp variable.
