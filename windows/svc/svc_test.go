@@ -132,3 +132,23 @@ func TestExample(t *testing.T) {
 		t.Errorf("%q string does not contain %q", string(out), want)
 	}
 }
+
+func TestIsAnInteractiveSession(t *testing.T) {
+	isInteractive, err := svc.IsAnInteractiveSession()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !isInteractive {
+		t.Error("IsAnInteractiveSession retuns false when running interactively.")
+	}
+}
+
+func TestIsWindowsService(t *testing.T) {
+	isSvc, err := svc.IsWindowsService()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if isSvc {
+		t.Error("IsWindowsService retuns true when not running in a service.")
+	}
+}

@@ -180,6 +180,7 @@ var (
 	procRegEnumKeyExW                                        = modadvapi32.NewProc("RegEnumKeyExW")
 	procRegQueryValueExW                                     = modadvapi32.NewProc("RegQueryValueExW")
 	procGetCurrentProcessId                                  = modkernel32.NewProc("GetCurrentProcessId")
+	procProcessIdToSessionId                                 = modkernel32.NewProc("ProcessIdToSessionId")
 	procGetConsoleMode                                       = modkernel32.NewProc("GetConsoleMode")
 	procSetConsoleMode                                       = modkernel32.NewProc("SetConsoleMode")
 	procGetConsoleScreenBufferInfo                           = modkernel32.NewProc("GetConsoleScreenBufferInfo")
@@ -1940,6 +1941,18 @@ func RegQueryValueEx(key Handle, name *uint16, reserved *uint32, valtype *uint32
 func GetCurrentProcessId() (pid uint32) {
 	r0, _, _ := syscall.Syscall(procGetCurrentProcessId.Addr(), 0, 0, 0, 0)
 	pid = uint32(r0)
+	return
+}
+
+func ProcessIdToSessionId(pid uint32, sessionid *uint32) (err error) {
+	r1, _, e1 := syscall.Syscall(procProcessIdToSessionId.Addr(), 2, uintptr(pid), uintptr(unsafe.Pointer(sessionid)), 0)
+	if r1 == 0 {
+		if e1 != 0 {
+			err = errnoErr(e1)
+		} else {
+			err = syscall.EINVAL
+		}
+	}
 	return
 }
 
