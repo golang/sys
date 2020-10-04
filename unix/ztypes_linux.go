@@ -2567,3 +2567,9 @@ const (
 	CAN_RAW_FD_FRAMES     = 0x5
 	CAN_RAW_JOIN_FILTERS  = 0x6
 )
+
+type WatchdogInfo struct {
+	Options  uint32
+	Version  uint32
+	Identity [32]uint8
+}

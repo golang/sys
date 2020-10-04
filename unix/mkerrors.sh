@@ -546,7 +546,7 @@ ccflags="$@"
 		$2 ~ /^XATTR_(CREATE|REPLACE|NO(DEFAULT|FOLLOW|SECURITY)|SHOWCOMPRESSION)/ ||
 		$2 ~ /^ATTR_(BIT_MAP_COUNT|(CMN|VOL|FILE)_)/ ||
 		$2 ~ /^FSOPT_/ ||
-		$2 ~ /^WDIOC_/ ||
+		$2 ~ /^WDIO[CFS]_/ ||
 		$2 ~ /^NFN/ ||
 		$2 ~ /^XDP_/ ||
 		$2 ~ /^RWF_/ ||
