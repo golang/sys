@@ -121,9 +121,9 @@ func IoctlGetRTCWkAlrm(fd int) (*RTCWkAlrm, error) {
 	return &value, err
 }
 
-// IoctlFileClone performs an FICLONERANGE ioctl operation to clone the range of
-// data conveyed in value to the file associated with the file descriptor
-// destFd. See the ioctl_ficlonerange(2) man page for details.
+// IoctlFileCloneRange performs an FICLONERANGE ioctl operation to clone the
+// range of data conveyed in value to the file associated with the file
+// descriptor destFd. See the ioctl_ficlonerange(2) man page for details.
 func IoctlFileCloneRange(destFd int, value *FileCloneRange) error {
 	err := ioctl(destFd, FICLONERANGE, uintptr(unsafe.Pointer(value)))
 	runtime.KeepAlive(value)
@@ -137,9 +137,9 @@ func IoctlFileClone(destFd, srcFd int) error {
 	return ioctl(destFd, FICLONE, uintptr(srcFd))
 }
 
-// IoctlFileClone performs an FIDEDUPERANGE ioctl operation to share the range of
-// data conveyed in value with the file associated with the file descriptor
-// destFd. See the ioctl_fideduperange(2) man page for details.
+// IoctlFileDedupeRange performs an FIDEDUPERANGE ioctl operation to share the
+// range of data conveyed in value with the file associated with the file
+// descriptor destFd. See the ioctl_fideduperange(2) man page for details.
 func IoctlFileDedupeRange(destFd int, value *FileDedupeRange) error {
 	err := ioctl(destFd, FIDEDUPERANGE, uintptr(unsafe.Pointer(value)))
 	runtime.KeepAlive(value)
