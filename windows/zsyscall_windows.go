@@ -183,6 +183,7 @@ var (
 	procGetConsoleMode                                       = modkernel32.NewProc("GetConsoleMode")
 	procSetConsoleMode                                       = modkernel32.NewProc("SetConsoleMode")
 	procGetConsoleScreenBufferInfo                           = modkernel32.NewProc("GetConsoleScreenBufferInfo")
+	procSetConsoleCursorPosition                             = modkernel32.NewProc("SetConsoleCursorPosition")
 	procWriteConsoleW                                        = modkernel32.NewProc("WriteConsoleW")
 	procReadConsoleW                                         = modkernel32.NewProc("ReadConsoleW")
 	procCreateToolhelp32Snapshot                             = modkernel32.NewProc("CreateToolhelp32Snapshot")
@@ -1968,6 +1969,18 @@ func SetConsoleMode(console Handle, mode uint32) (err error) {
 
 func GetConsoleScreenBufferInfo(console Handle, info *ConsoleScreenBufferInfo) (err error) {
 	r1, _, e1 := syscall.Syscall(procGetConsoleScreenBufferInfo.Addr(), 2, uintptr(console), uintptr(unsafe.Pointer(info)), 0)
+	if r1 == 0 {
+		if e1 != 0 {
+			err = errnoErr(e1)
+		} else {
+			err = syscall.EINVAL
+		}
+	}
+	return
+}
+
+func SetConsoleCursorPosition(console Handle, position Coord) (err error) {
+	r1, _, e1 := syscall.Syscall(procSetConsoleCursorPosition.Addr(), 2, uintptr(console), uintptr(*((*uint32)(unsafe.Pointer(&position)))), 0)
 	if r1 == 0 {
 		if e1 != 0 {
 			err = errnoErr(e1)

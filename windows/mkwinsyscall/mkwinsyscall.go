@@ -202,6 +202,11 @@ func (p *Param) SyscallArgList() []string {
 		s = fmt.Sprintf("unsafe.Pointer(%s)", p.Name)
 	case t == "bool":
 		s = p.tmpVar()
+	case t == "Coord":
+		// Convert a COORD into a uintptr (by fooling the type system). This code
+		// assumes the two SHORTs are correctly laid out; the "cast" to uint32 is
+		// just to get a pointer to pass.
+		s = fmt.Sprintf("*((*uint32)(unsafe.Pointer(&%s)))", p.Name)
 	case strings.HasPrefix(t, "[]"):
 		return []string{
 			fmt.Sprintf("uintptr(unsafe.Pointer(%s))", p.tmpVar()),
