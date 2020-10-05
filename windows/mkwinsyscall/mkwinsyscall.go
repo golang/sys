@@ -303,17 +303,13 @@ func (r *Rets) SetReturnValuesCode() string {
 
 func (r *Rets) useLongHandleErrorCode(retvar string) string {
 	const code = `if %s {
-		if e1 != 0 {
-			err = errnoErr(e1)
-		} else {
-			err = %sEINVAL
-		}
+		err = errnoErr(e1)
 	}`
 	cond := retvar + " == 0"
 	if r.FailCond != "" {
 		cond = strings.Replace(r.FailCond, "failretval", retvar, 1)
 	}
-	return fmt.Sprintf(code, cond, syscalldot())
+	return fmt.Sprintf(code, cond)
 }
 
 // SetErrorCode returns source code that sets return parameters.
@@ -867,7 +863,7 @@ var (
 func errnoErr(e {{syscalldot}}Errno) error {
 	switch e {
 	case 0:
-		return nil
+		return {{syscalldot}}EINVAL
 	case errnoERROR_IO_PENDING:
 		return errERROR_IO_PENDING
 	}
