@@ -663,6 +663,7 @@ func (src *Source) DLLs() []string {
 			r = append(r, name)
 		}
 	}
+	sort.Strings(r)
 	return r
 }
 
@@ -697,6 +698,13 @@ func (src *Source) ParseFile(path string) error {
 		return err
 	}
 	src.Files = append(src.Files, path)
+	sort.Slice(src.Funcs, func(i, j int) bool {
+		fi, fj := src.Funcs[i], src.Funcs[j]
+		if fi.DLLName() == fj.DLLName() {
+			return fi.DLLFuncName() < fj.DLLFuncName()
+		}
+		return fi.DLLName() < fj.DLLName()
+	})
 
 	// get package name
 	fset := token.NewFileSet()
