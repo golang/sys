@@ -411,6 +411,12 @@ func TestRlimit(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Setrlimit: restore failed: %#v %v", rlimit, err)
 	}
+
+	// make sure RLIM_INFINITY can be assigned to Rlimit members
+	_ = unix.Rlimit{
+		Cur: unix.RLIM_INFINITY,
+		Max: unix.RLIM_INFINITY,
+	}
 }
 
 func TestSeekFailure(t *testing.T) {

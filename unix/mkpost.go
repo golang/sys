@@ -57,6 +57,10 @@ func main() {
 	fdSetRegex := regexp.MustCompile(`type (FdSet) struct {(\s+)X__fds_bits(\s+\S+\s+)}`)
 	b = fdSetRegex.ReplaceAll(b, []byte("type $1 struct {${2}Bits$3}"))
 
+	// Intentionally export __icmp6_filt field in icmpv6_filter
+	icmpV6Regex := regexp.MustCompile(`type (ICMPv6Filter) struct {(\s+)X__icmp6_filt(\s+\S+\s+)}`)
+	b = icmpV6Regex.ReplaceAll(b, []byte("type $1 struct {${2}Filt$3}"))
+
 	// If we have empty Ptrace structs, we should delete them. Only s390x emits
 	// nonempty Ptrace structs.
 	ptraceRexexp := regexp.MustCompile(`type Ptrace((Psw|Fpregs|Per) struct {\s*})`)
