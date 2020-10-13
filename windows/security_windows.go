@@ -1079,6 +1079,22 @@ func TrusteeValueFromObjectsAndName(objectsAndName *OBJECTS_AND_NAME) TrusteeVal
 	return TrusteeValue(unsafe.Pointer(objectsAndName))
 }
 
+func TrusteeValueToSID(val TrusteeValue) *SID {
+	return (*SID)(unsafe.Pointer(val))
+}
+
+func TrusteeValueToString(val TrusteeValue) string {
+	return UTF16PtrToString((*uint16)(unsafe.Pointer(val)))
+}
+
+func TrusteeValueToObjectsAndSid(val TrusteeValue) *OBJECTS_AND_SID {
+	return (*OBJECTS_AND_SID)(unsafe.Pointer(val))
+}
+
+func TrusteeValueToObjectsAndName(val TrusteeValue) *OBJECTS_AND_NAME {
+	return (*OBJECTS_AND_NAME)(unsafe.Pointer(val))
+}
+
 type TRUSTEE struct {
 	MultipleTrustee          *TRUSTEE
 	MultipleTrusteeOperation MULTIPLE_TRUSTEE_OPERATION
@@ -1106,6 +1122,7 @@ type OBJECTS_AND_NAME struct {
 //sys	SetSecurityInfo(handle Handle, objectType SE_OBJECT_TYPE, securityInformation SECURITY_INFORMATION, owner *SID, group *SID, dacl *ACL, sacl *ACL) = advapi32.SetSecurityInfo
 //sys	getNamedSecurityInfo(objectName string, objectType SE_OBJECT_TYPE, securityInformation SECURITY_INFORMATION, owner **SID, group **SID, dacl **ACL, sacl **ACL, sd **SECURITY_DESCRIPTOR) (ret error) = advapi32.GetNamedSecurityInfoW
 //sys	SetNamedSecurityInfo(objectName string, objectType SE_OBJECT_TYPE, securityInformation SECURITY_INFORMATION, owner *SID, group *SID, dacl *ACL, sacl *ACL) (ret error) = advapi32.SetNamedSecurityInfoW
+//sys	getExplicitEntriesFromAclW(acl *ACL, countAccessEntries *uint32, accessEntries **EXPLICIT_ACCESS) (ret error) = advapi32.GetExplicitEntriesFromAclW
 
 //sys	buildSecurityDescriptor(owner *TRUSTEE, group *TRUSTEE, countAccessEntries uint32, accessEntries *EXPLICIT_ACCESS, countAuditEntries uint32, auditEntries *EXPLICIT_ACCESS, oldSecurityDescriptor *SECURITY_DESCRIPTOR, sizeNewSecurityDescriptor *uint32, newSecurityDescriptor **SECURITY_DESCRIPTOR) (ret error) = advapi32.BuildSecurityDescriptorW
 //sys	initializeSecurityDescriptor(absoluteSD *SECURITY_DESCRIPTOR, revision uint32) (err error) = advapi32.InitializeSecurityDescriptor
@@ -1356,6 +1373,29 @@ func GetNamedSecurityInfo(objectName string, objectType SE_OBJECT_TYPE, security
 	}
 	defer LocalFree(Handle(unsafe.Pointer(winHeapSD)))
 	return winHeapSD.copySelfRelativeSecurityDescriptor(), nil
+}
+
+// GetExplicitEntriesFromAcl queries the explicit entries from a given ACL
+func GetExplicitEntriesFromAcl(acl *ACL) ([]EXPLICIT_ACCESS, error) {
+	var entries *EXPLICIT_ACCESS
+	var size uint32
+	err := getExplicitEntriesFromAclW(
+		acl,
+		&size,
+		&entries,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	defer LocalFree(Handle(unsafe.Pointer(entries)))
+	var accesses []EXPLICIT_ACCESS
+	for i := 0; i < int(size); i++ {
+		accesses = append(accesses, *entries)
+		entries = (*EXPLICIT_ACCESS)(unsafe.Pointer((uintptr(unsafe.Pointer(entries)) + unsafe.Sizeof(*entries))))
+	}
+
+	return accesses, nil
 }
 
 // BuildSecurityDescriptor makes a new security descriptor using the input trustees, explicit access lists, and
