@@ -296,6 +296,7 @@ const (
 	FF0                           = 0x0
 	FF1                           = 0x8000
 	FFDLY                         = 0x8000
+	FIORDCHK                      = 0x6603
 	FLUSHALL                      = 0x1
 	FLUSHDATA                     = 0x0
 	FLUSHO                        = 0x2000
