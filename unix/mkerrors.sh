@@ -59,6 +59,7 @@ includes_Darwin='
 #include <stdint.h>
 #include <sys/attr.h>
 #include <sys/clonefile.h>
+#include <sys/kern_control.h>
 #include <sys/types.h>
 #include <sys/event.h>
 #include <sys/ptrace.h>
@@ -519,6 +520,7 @@ ccflags="$@"
 		$2 ~ /^CAP_/ ||
 		$2 ~ /^CP_/ ||
 		$2 ~ /^CPUSTATES$/ ||
+		$2 ~ /^CTLIOCGINFO$/ ||
 		$2 ~ /^ALG_/ ||
 		$2 ~ /^FI(CLONE|DEDUPERANGE)/ ||
 		$2 ~ /^FS_(POLICY_FLAGS|KEY_DESC|ENCRYPTION_MODE|[A-Z0-9_]+_KEY_SIZE)/ ||
