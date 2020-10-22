@@ -64,9 +64,11 @@ func archInit() {
 func readARM64Registers() {
 	Initialized = true
 
-	// ID_AA64ISAR0_EL1
-	isar0 := getisar0()
+	parseARM64SystemRegisters(getisar0(), getisar1(), getpfr0())
+}
 
+func parseARM64SystemRegisters(isar0, isar1, pfr0 uint64) {
+	// ID_AA64ISAR0_EL1
 	switch extractBits(isar0, 4, 7) {
 	case 1:
 		ARM64.HasAES = true
@@ -124,8 +126,6 @@ func readARM64Registers() {
 	}
 
 	// ID_AA64ISAR1_EL1
-	isar1 := getisar1()
-
 	switch extractBits(isar1, 0, 3) {
 	case 1:
 		ARM64.HasDCPOP = true
@@ -147,8 +147,6 @@ func readARM64Registers() {
 	}
 
 	// ID_AA64PFR0_EL1
-	pfr0 := getpfr0()
-
 	switch extractBits(pfr0, 16, 19) {
 	case 0:
 		ARM64.HasFP = true
