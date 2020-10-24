@@ -864,6 +864,7 @@ const (
 
 var (
 	errERROR_IO_PENDING error = {{syscalldot}}Errno(errnoERROR_IO_PENDING)
+	errERROR_EINVAL error     = {{syscalldot}}EINVAL
 )
 
 // errnoErr returns common boxed Errno values, to prevent
@@ -871,7 +872,7 @@ var (
 func errnoErr(e {{syscalldot}}Errno) error {
 	switch e {
 	case 0:
-		return {{syscalldot}}EINVAL
+		return errERROR_EINVAL
 	case errnoERROR_IO_PENDING:
 		return errERROR_IO_PENDING
 	}
