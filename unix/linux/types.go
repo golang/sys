@@ -113,6 +113,7 @@ struct termios2 {
 #include <linux/nexthop.h>
 #include <linux/openat2.h>
 #include <linux/perf_event.h>
+#include <linux/pps.h>
 #include <linux/random.h>
 #include <linux/rtc.h>
 #include <linux/rtnetlink.h>
@@ -2576,3 +2577,20 @@ const (
 // Watchdog API
 
 type WatchdogInfo C.struct_watchdog_info
+
+// PPS API
+
+type PPSFData C.struct_pps_fdata
+
+type PPSKParams C.struct_pps_kparams
+
+type PPSKInfo C.struct_pps_kinfo
+
+type PPSKTime C.struct_pps_ktime
+
+const (
+	PPS_GETPARAMS = C.PPS_GETPARAMS
+	PPS_SETPARAMS = C.PPS_SETPARAMS
+	PPS_GETCAP    = C.PPS_GETCAP
+	PPS_FETCH     = C.PPS_FETCH
+)

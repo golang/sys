@@ -2638,3 +2638,21 @@ type WatchdogInfo struct {
 	Version  uint32
 	Identity [32]uint8
 }
+
+type PPSFData struct {
+	Info    PPSKInfo
+	Timeout PPSKTime
+}
+
+type PPSKParams struct {
+	Api_version   int32
+	Mode          int32
+	Assert_off_tu PPSKTime
+	Clear_off_tu  PPSKTime
+}
+
+type PPSKTime struct {
+	Sec   int64
+	Nsec  int32
+	Flags uint32
+}
