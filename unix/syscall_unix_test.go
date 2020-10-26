@@ -537,9 +537,12 @@ func TestSelect(t *testing.T) {
 	}
 
 	dur := 250 * time.Millisecond
-	tv := unix.NsecToTimeval(int64(dur))
 	var took time.Duration
 	for {
+		// On some platforms (e.g. Linux), the passed-in timeval is
+		// updated by select(2). Make sure to reset to the full duration
+		// in case of an EINTR.
+		tv := unix.NsecToTimeval(int64(dur))
 		start := time.Now()
 		n, err := unix.Select(0, nil, nil, nil, &tv)
 		took = time.Since(start)
