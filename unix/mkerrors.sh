@@ -233,6 +233,7 @@ struct ltchars {
 #include <linux/net_namespace.h>
 #include <linux/nsfs.h>
 #include <linux/perf_event.h>
+#include <linux/pps.h>
 #include <linux/ptrace.h>
 #include <linux/random.h>
 #include <linux/reboot.h>
