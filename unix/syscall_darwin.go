@@ -64,7 +64,7 @@ func anyToSockaddrGOOS(fd int, rsa *RawSockaddrAny) (Sockaddr, error) {
 // Some external packages rely on SYS___SYSCTL being defined to implement their
 // own sysctl wrappers. Provide it here, even though direct syscalls are no
 // longer supported on darwin.
-const SYS___SYSCTL = 202
+const SYS___SYSCTL = SYS_SYSCTL
 
 // Translate "kern.hostname" to []_C_int{0,1,2,3}.
 func nametomib(name string) (mib []_C_int, err error) {
