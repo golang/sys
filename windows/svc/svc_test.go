@@ -49,6 +49,32 @@ func waitState(t *testing.T, s *mgr.Service, want svc.State) {
 	}
 }
 
+// stopAndDeleteIfInstalled stops and deletes service name,
+// if the service is running and / or installed.
+func stopAndDeleteIfInstalled(t *testing.T, m *mgr.Mgr, name string) {
+	s, err := m.OpenService(name)
+	if err != nil {
+		// Service is not installed.
+		return
+
+	}
+	defer s.Close()
+
+	// Make sure the service is not running, otherwise we won't be able to delete it.
+	if getState(t, s) == svc.Running {
+		_, err = s.Control(svc.Stop)
+		if err != nil {
+			t.Fatalf("Control(%s) failed: %s", s.Name, err)
+		}
+		waitState(t, s, svc.Stopped)
+	}
+
+	err = s.Delete()
+	if err != nil {
+		t.Fatalf("Delete failed: %s", err)
+	}
+}
+
 func TestExample(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping test in short mode - it modifies system services")
@@ -74,16 +100,9 @@ func TestExample(t *testing.T) {
 		t.Fatalf("failed to build service program: %v\n%v", err, string(o))
 	}
 
-	s, err := m.OpenService(name)
-	if err == nil {
-		err = s.Delete()
-		if err != nil {
-			s.Close()
-			t.Fatalf("Delete failed: %s", err)
-		}
-		s.Close()
-	}
-	s, err = m.CreateService(name, exepath, mgr.Config{DisplayName: "my service"}, "is", "auto-started")
+	stopAndDeleteIfInstalled(t, m, name)
+
+	s, err := m.CreateService(name, exepath, mgr.Config{DisplayName: "my service"}, "is", "auto-started")
 	if err != nil {
 		t.Fatalf("CreateService(%s) failed: %v", name, err)
 	}
