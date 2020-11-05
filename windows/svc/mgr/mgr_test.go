@@ -7,6 +7,7 @@
 package mgr_test
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"sort"
@@ -217,7 +218,7 @@ func TestMyService(t *testing.T) {
 		t.Skip("skipping test in short mode - it modifies system services")
 	}
 
-	const name = "myservice"
+	const name = "mymgrservice"
 
 	m, err := mgr.Connect()
 	if err != nil {
@@ -285,9 +286,9 @@ func TestMyService(t *testing.T) {
 	}
 
 	testSetRecoveryActions(t, s)
-	testRebootMessage(t, s, "myservice failed")
+	testRebootMessage(t, s, fmt.Sprintf("%s failed", name))
 	testRebootMessage(t, s, "") // delete reboot message
-	testRecoveryCommand(t, s, "sc query myservice")
+	testRecoveryCommand(t, s, fmt.Sprintf("sc query %s", name))
 	testRecoveryCommand(t, s, "") // delete recovery command
 
 	remove(t, s)
