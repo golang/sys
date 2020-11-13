@@ -31,6 +31,9 @@ like func declarations if //sys is replaced by func, but:
   //sys LoadLibrary(libname string) (handle uint32, err error) [failretval==-1] = LoadLibraryA
   and is [failretval==0] by default.
 
+* If the function name ends in a "?", then the function not existing is non-
+  fatal, and an error will be returned instead of panicking.
+
 Usage:
 	mkwinsyscall [flags] [path ...]
 
@@ -342,6 +345,7 @@ type Fn struct {
 	Params      []*Param
 	Rets        *Rets
 	PrintTrace  bool
+	MaybeAbsent bool
 	dllname     string
 	dllfuncname string
 	src         string
@@ -468,6 +472,10 @@ func newFn(s string) (*Fn, error) {
 		f.dllfuncname = a[1]
 	default:
 		return nil, errors.New("Could not extract dll name from \"" + f.src + "\"")
+	}
+	if n := f.dllfuncname; strings.HasSuffix(n, "?") {
+		f.dllfuncname = n[:len(n)-1]
+		f.MaybeAbsent = true
 	}
 	return f, nil
 }
@@ -899,13 +907,17 @@ func {{.Name}}({{.ParamList}}) {{template "results" .}}{
 
 {{define "funcbody"}}
 func {{.HelperName}}({{.HelperParamList}}) {{template "results" .}}{
-{{template "tmpvars" .}}	{{template "syscall" .}}	{{template "tmpvarsreadback" .}}
+{{template "maybeabsent" .}}	{{template "tmpvars" .}}	{{template "syscall" .}}	{{template "tmpvarsreadback" .}}
 {{template "seterror" .}}{{template "printtrace" .}}	return
 }
 {{end}}
 
 {{define "helpertmpvars"}}{{range .Params}}{{if .TmpVarHelperCode}}	{{.TmpVarHelperCode}}
 {{end}}{{end}}{{end}}
+
+{{define "maybeabsent"}}{{if .MaybeAbsent}}err = proc{{.DLLFuncName}}.Find()
+if err != nil { return }
+{{end}}{{end}}
 
 {{define "tmpvars"}}{{range .Params}}{{if .TmpVarCode}}	{{.TmpVarCode}}
 {{end}}{{end}}{{end}}
