@@ -174,6 +174,7 @@ func NewCallbackCDecl(fn interface{}) uintptr {
 //sys	FormatMessage(flags uint32, msgsrc uintptr, msgid uint32, langid uint32, buf []uint16, args *byte) (n uint32, err error) = FormatMessageW
 //sys	ExitProcess(exitcode uint32)
 //sys	IsWow64Process(handle Handle, isWow64 *bool) (err error) = IsWow64Process
+//sys	IsWow64Process2(handle Handle, processMachine *uint16, nativeMachine *uint16) (err error) = IsWow64Process2?
 //sys	CreateFile(name *uint16, access uint32, mode uint32, sa *SecurityAttributes, createmode uint32, attrs uint32, templatefile Handle) (handle Handle, err error) [failretval==InvalidHandle] = CreateFileW
 //sys	ReadFile(handle Handle, buf []byte, done *uint32, overlapped *Overlapped) (err error)
 //sys	WriteFile(handle Handle, buf []byte, done *uint32, overlapped *Overlapped) (err error)

@@ -5,6 +5,8 @@
 package windows_test
 
 import (
+	"debug/pe"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -456,5 +458,31 @@ func TestJobObjectInfo(t *testing.T) {
 
 	if have := info.ProcessMemoryLimit; wantMemLimit != have {
 		t.Errorf("ProcessMemoryLimit is wrong: want %v have %v", wantMemLimit, have)
+	}
+}
+
+func TestIsWow64Process2(t *testing.T) {
+	var processMachine, nativeMachine uint16
+	err := windows.IsWow64Process2(windows.CurrentProcess(), &processMachine, &nativeMachine)
+	if errors.Is(err, windows.ERROR_PROC_NOT_FOUND) {
+		maj, min, build := windows.RtlGetNtVersionNumbers()
+		if maj < 10 || (maj == 10 && min == 0 && build < 17763) {
+			t.Skip("not available on older versions of Windows")
+			return
+		}
+	}
+	if err != nil {
+		t.Fatalf("IsWow64Process2 failed: %v", err)
+	}
+	if processMachine == pe.IMAGE_FILE_MACHINE_UNKNOWN {
+		processMachine = nativeMachine
+	}
+	switch {
+	case processMachine == pe.IMAGE_FILE_MACHINE_AMD64 && runtime.GOARCH == "amd64":
+	case processMachine == pe.IMAGE_FILE_MACHINE_I386 && runtime.GOARCH == "386":
+	case processMachine == pe.IMAGE_FILE_MACHINE_ARMNT && runtime.GOARCH == "arm":
+	case processMachine == pe.IMAGE_FILE_MACHINE_ARM64 && runtime.GOARCH == "arm64":
+	default:
+		t.Errorf("IsWow64Process2 is wrong: want %v have %v", runtime.GOARCH, processMachine)
 	}
 }
