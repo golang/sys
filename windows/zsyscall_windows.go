@@ -1740,7 +1740,7 @@ func GetFileType(filehandle Handle) (n uint32, err error) {
 	return
 }
 
-func GetFinalPathNameByHandleW(file syscall.Handle, filePath *uint16, filePathSize uint32, flags uint32) (n uint32, err error) {
+func GetFinalPathNameByHandle(file Handle, filePath *uint16, filePathSize uint32, flags uint32) (n uint32, err error) {
 	r0, _, e1 := syscall.Syscall6(procGetFinalPathNameByHandleW.Addr(), 4, uintptr(file), uintptr(unsafe.Pointer(filePath)), uintptr(filePathSize), uintptr(flags), 0, 0)
 	n = uint32(r0)
 	if n == 0 {
