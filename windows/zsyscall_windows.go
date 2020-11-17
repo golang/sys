@@ -285,6 +285,7 @@ var (
 	procSetEvent                                             = modkernel32.NewProc("SetEvent")
 	procSetFileAttributesW                                   = modkernel32.NewProc("SetFileAttributesW")
 	procSetFileCompletionNotificationModes                   = modkernel32.NewProc("SetFileCompletionNotificationModes")
+	procSetFileInformationByHandle                           = modkernel32.NewProc("SetFileInformationByHandle")
 	procSetFilePointer                                       = modkernel32.NewProc("SetFilePointer")
 	procSetFileTime                                          = modkernel32.NewProc("SetFileTime")
 	procSetHandleInformation                                 = modkernel32.NewProc("SetHandleInformation")
@@ -2405,6 +2406,14 @@ func SetFileAttributes(name *uint16, attrs uint32) (err error) {
 
 func SetFileCompletionNotificationModes(handle Handle, flags uint8) (err error) {
 	r1, _, e1 := syscall.Syscall(procSetFileCompletionNotificationModes.Addr(), 2, uintptr(handle), uintptr(flags), 0)
+	if r1 == 0 {
+		err = errnoErr(e1)
+	}
+	return
+}
+
+func SetFileInformationByHandle(handle Handle, class uint32, inBuffer *byte, inBufferLen uint32) (err error) {
+	r1, _, e1 := syscall.Syscall6(procSetFileInformationByHandle.Addr(), 4, uintptr(handle), uintptr(class), uintptr(unsafe.Pointer(inBuffer)), uintptr(inBufferLen), 0, 0)
 	if r1 == 0 {
 		err = errnoErr(e1)
 	}

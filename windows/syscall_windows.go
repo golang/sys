@@ -188,6 +188,7 @@ func NewCallbackCDecl(fn interface{}) uintptr {
 //sys	FindClose(handle Handle) (err error)
 //sys	GetFileInformationByHandle(handle Handle, data *ByHandleFileInformation) (err error)
 //sys	GetFileInformationByHandleEx(handle Handle, class uint32, outBuffer *byte, outBufferLen uint32) (err error)
+//sys	SetFileInformationByHandle(handle Handle, class uint32, inBuffer *byte, inBufferLen uint32) (err error)
 //sys	GetCurrentDirectory(buflen uint32, buf *uint16) (n uint32, err error) = GetCurrentDirectoryW
 //sys	SetCurrentDirectory(path *uint16) (err error) = SetCurrentDirectoryW
 //sys	CreateDirectory(path *uint16, sa *SecurityAttributes) (err error) = CreateDirectoryW
