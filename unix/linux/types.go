@@ -103,6 +103,7 @@ struct termios2 {
 #include <linux/keyctl.h>
 #include <linux/loop.h>
 #include <linux/lwtunnel.h>
+#include <linux/mpls_iptunnel.h>
 #include <linux/ncsi.h>
 #include <linux/net_namespace.h>
 #include <linux/net_tstamp.h>
@@ -2923,7 +2924,7 @@ const (
 	PPS_FETCH     = C.PPS_FETCH
 )
 
-// lwtunnel APIs
+// lwtunnel and related APIs
 
 const (
 	LWTUNNEL_ENCAP_NONE       = C.LWTUNNEL_ENCAP_NONE
@@ -2936,4 +2937,9 @@ const (
 	LWTUNNEL_ENCAP_SEG6_LOCAL = C.LWTUNNEL_ENCAP_SEG6_LOCAL
 	LWTUNNEL_ENCAP_RPL        = C.LWTUNNEL_ENCAP_RPL
 	LWTUNNEL_ENCAP_MAX        = C.LWTUNNEL_ENCAP_MAX
+
+	MPLS_IPTUNNEL_UNSPEC = C.MPLS_IPTUNNEL_UNSPEC
+	MPLS_IPTUNNEL_DST    = C.MPLS_IPTUNNEL_DST
+	MPLS_IPTUNNEL_TTL    = C.MPLS_IPTUNNEL_TTL
+	MPLS_IPTUNNEL_MAX    = C.MPLS_IPTUNNEL_MAX
 )
