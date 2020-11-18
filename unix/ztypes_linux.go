@@ -2981,3 +2981,16 @@ type PPSKTime struct {
 	Nsec  int32
 	Flags uint32
 }
+
+const (
+	LWTUNNEL_ENCAP_NONE       = 0x0
+	LWTUNNEL_ENCAP_MPLS       = 0x1
+	LWTUNNEL_ENCAP_IP         = 0x2
+	LWTUNNEL_ENCAP_ILA        = 0x3
+	LWTUNNEL_ENCAP_IP6        = 0x4
+	LWTUNNEL_ENCAP_SEG6       = 0x5
+	LWTUNNEL_ENCAP_BPF        = 0x6
+	LWTUNNEL_ENCAP_SEG6_LOCAL = 0x7
+	LWTUNNEL_ENCAP_RPL        = 0x8
+	LWTUNNEL_ENCAP_MAX        = 0x8
+)
