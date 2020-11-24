@@ -1176,9 +1176,8 @@ func anyToSockaddr(fd int, rsa *RawSockaddrAny) (Sockaddr, error) {
 		return sa, nil
 
 	case AF_CAN:
-		var err error
-		var proto int
-		if proto, err = GetsockoptInt(fd, SOL_SOCKET, SO_PROTOCOL); err != nil {
+		proto, err := GetsockoptInt(fd, SOL_SOCKET, SO_PROTOCOL)
+		if err != nil {
 			return nil, err
 		}
 
