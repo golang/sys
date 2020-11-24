@@ -1197,9 +1197,7 @@ func anyToSockaddr(fd int, rsa *RawSockaddrAny) (Sockaddr, error) {
 				pgn[i] = pp.Addr[i+8]
 			}
 			addr := (*[1]byte)(unsafe.Pointer(&sa.Addr))
-			for i := 0; i < 1; i++ {
-				addr[i] = pp.Addr[i+12]
-			}
+			addr[0] = pp.Addr[12]
 			return sa, nil
 		default:
 			sa := &SockaddrCAN{
