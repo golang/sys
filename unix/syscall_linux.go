@@ -641,6 +641,32 @@ func (sa *SockaddrCAN) sockaddr() (unsafe.Pointer, _Socklen, error) {
 	return unsafe.Pointer(&sa.raw), SizeofSockaddrCAN, nil
 }
 
+type SockaddrJ1939 struct {
+	Ifindex int
+	Name    uint64
+	PGN     uint32
+	Addr    uint8
+	raw     RawSockaddrCAN
+}
+
+func (sa *SockaddrJ1939) sockaddr() (unsafe.Pointer, _Socklen, error) {
+	if sa.Ifindex < 0 || sa.Ifindex > 0x7fffffff {
+		return nil, 0, EINVAL
+	}
+	sa.raw.Family = AF_CAN
+	sa.raw.Ifindex = int32(sa.Ifindex)
+	n := (*[8]byte)(unsafe.Pointer(&sa.Name))
+	for i := 0; i < 8; i++ {
+		sa.raw.Addr[i] = n[i]
+	}
+	p := (*[4]byte)(unsafe.Pointer(&sa.PGN))
+	for i := 0; i < 4; i++ {
+		sa.raw.Addr[i+8] = p[i]
+	}
+	sa.raw.Addr[12] = sa.Addr
+	return unsafe.Pointer(&sa.raw), SizeofSockaddrCAN, nil
+}
+
 // SockaddrALG implements the Sockaddr interface for AF_ALG type sockets.
 // SockaddrALG enables userspace access to the Linux kernel's cryptography
 // subsystem. The Type and Name fields specify which type of hash or cipher
@@ -1150,20 +1176,46 @@ func anyToSockaddr(fd int, rsa *RawSockaddrAny) (Sockaddr, error) {
 		return sa, nil
 
 	case AF_CAN:
-		pp := (*RawSockaddrCAN)(unsafe.Pointer(rsa))
-		sa := &SockaddrCAN{
-			Ifindex: int(pp.Ifindex),
+		var err error
+		var proto int
+		if proto, err = GetsockoptInt(fd, SOL_SOCKET, SO_PROTOCOL); err != nil {
+			return nil, err
 		}
-		rx := (*[4]byte)(unsafe.Pointer(&sa.RxID))
-		for i := 0; i < 4; i++ {
-			rx[i] = pp.Addr[i]
-		}
-		tx := (*[4]byte)(unsafe.Pointer(&sa.TxID))
-		for i := 0; i < 4; i++ {
-			tx[i] = pp.Addr[i+4]
-		}
-		return sa, nil
 
+		pp := (*RawSockaddrCAN)(unsafe.Pointer(rsa))
+
+		switch proto {
+		case CAN_J1939:
+			sa := &SockaddrJ1939{
+				Ifindex: int(pp.Ifindex),
+			}
+			name := (*[8]byte)(unsafe.Pointer(&sa.Name))
+			for i := 0; i < 8; i++ {
+				name[i] = pp.Addr[i]
+			}
+			pgn := (*[4]byte)(unsafe.Pointer(&sa.PGN))
+			for i := 0; i < 4; i++ {
+				pgn[i] = pp.Addr[i+8]
+			}
+			addr := (*[1]byte)(unsafe.Pointer(&sa.Addr))
+			for i := 0; i < 1; i++ {
+				addr[i] = pp.Addr[i+12]
+			}
+			return sa, nil
+		default:
+			sa := &SockaddrCAN{
+				Ifindex: int(pp.Ifindex),
+			}
+			rx := (*[4]byte)(unsafe.Pointer(&sa.RxID))
+			for i := 0; i < 4; i++ {
+				rx[i] = pp.Addr[i]
+			}
+			tx := (*[4]byte)(unsafe.Pointer(&sa.TxID))
+			for i := 0; i < 4; i++ {
+				tx[i] = pp.Addr[i+4]
+			}
+			return sa, nil
+		}
 	}
 	return nil, EAFNOSUPPORT
 }

@@ -169,7 +169,7 @@ func Test_anyToSockaddr(t *testing.T) {
 			},
 		},
 		{
-			name: "AF_CAN",
+			name: "AF_CAN CAN_RAW",
 			rsa: sockaddrCANToAny(RawSockaddrCAN{
 				Family:  AF_CAN,
 				Ifindex: 12345678,
@@ -185,6 +185,27 @@ func Test_anyToSockaddr(t *testing.T) {
 				RxID:    0xAAAAAAAA,
 				TxID:    0xBBBBBBBB,
 			},
+			skt: SocketSpec{domain: AF_CAN, typ: SOCK_RAW, protocol: CAN_RAW},
+		},
+		{
+			name: "AF_CAN CAN_J1939",
+			rsa: sockaddrCANToAny(RawSockaddrCAN{
+				Family:  AF_CAN,
+				Ifindex: 12345678,
+				Addr: [16]byte{
+					0xAA, 0xAA, 0xAA, 0xAA,
+					0xAA, 0xAA, 0xAA, 0xAA,
+					0xBB, 0xBB, 0xBB, 0xBB,
+					0xCC, 0x00, 0x00, 0x00,
+				},
+			}),
+			sa: &SockaddrJ1939{
+				Ifindex: 12345678,
+				Name:    0xAAAAAAAAAAAAAAAA,
+				PGN:     0xBBBBBBBB,
+				Addr:    0xCC,
+			},
+			skt: SocketSpec{domain: AF_CAN, typ: SOCK_DGRAM, protocol: CAN_J1939},
 		},
 		{
 			name: "AF_MAX EAFNOSUPPORT",
