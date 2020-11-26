@@ -641,6 +641,10 @@ func (sa *SockaddrCAN) sockaddr() (unsafe.Pointer, _Socklen, error) {
 	return unsafe.Pointer(&sa.raw), SizeofSockaddrCAN, nil
 }
 
+// SockaddrCANJ1939 implements the Sockaddr interface for AF_CAN using J1939
+// protocol (https://en.wikipedia.org/wiki/SAE_J1939). For more information
+// on the purposes of the fields, check the official linux kernel documentation
+// available here: https://www.kernel.org/doc/Documentation/networking/j1939.rst
 type SockaddrCANJ1939 struct {
 	Ifindex int
 	Name    uint64
