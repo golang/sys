@@ -199,7 +199,7 @@ func Test_anyToSockaddr(t *testing.T) {
 					0xCC, 0x00, 0x00, 0x00,
 				},
 			}),
-			sa: &SockaddrJ1939{
+			sa: &SockaddrCANJ1939{
 				Ifindex: 12345678,
 				Name:    0xAAAAAAAAAAAAAAAA,
 				PGN:     0xBBBBBBBB,

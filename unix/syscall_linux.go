@@ -641,7 +641,7 @@ func (sa *SockaddrCAN) sockaddr() (unsafe.Pointer, _Socklen, error) {
 	return unsafe.Pointer(&sa.raw), SizeofSockaddrCAN, nil
 }
 
-type SockaddrJ1939 struct {
+type SockaddrCANJ1939 struct {
 	Ifindex int
 	Name    uint64
 	PGN     uint32
@@ -649,7 +649,7 @@ type SockaddrJ1939 struct {
 	raw     RawSockaddrCAN
 }
 
-func (sa *SockaddrJ1939) sockaddr() (unsafe.Pointer, _Socklen, error) {
+func (sa *SockaddrCANJ1939) sockaddr() (unsafe.Pointer, _Socklen, error) {
 	if sa.Ifindex < 0 || sa.Ifindex > 0x7fffffff {
 		return nil, 0, EINVAL
 	}
@@ -1185,7 +1185,7 @@ func anyToSockaddr(fd int, rsa *RawSockaddrAny) (Sockaddr, error) {
 
 		switch proto {
 		case CAN_J1939:
-			sa := &SockaddrJ1939{
+			sa := &SockaddrCANJ1939{
 				Ifindex: int(pp.Ifindex),
 			}
 			name := (*[8]byte)(unsafe.Pointer(&sa.Name))
