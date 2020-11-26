@@ -169,7 +169,7 @@ func Test_anyToSockaddr(t *testing.T) {
 			},
 		},
 		{
-			name: "AF_CAN",
+			name: "AF_CAN CAN_RAW",
 			rsa: sockaddrCANToAny(RawSockaddrCAN{
 				Family:  AF_CAN,
 				Ifindex: 12345678,
@@ -185,6 +185,27 @@ func Test_anyToSockaddr(t *testing.T) {
 				RxID:    0xAAAAAAAA,
 				TxID:    0xBBBBBBBB,
 			},
+			skt: SocketSpec{domain: AF_CAN, typ: SOCK_RAW, protocol: CAN_RAW},
+		},
+		{
+			name: "AF_CAN CAN_J1939",
+			rsa: sockaddrCANToAny(RawSockaddrCAN{
+				Family:  AF_CAN,
+				Ifindex: 12345678,
+				Addr: [16]byte{
+					0xAA, 0xAA, 0xAA, 0xAA,
+					0xAA, 0xAA, 0xAA, 0xAA,
+					0xBB, 0xBB, 0xBB, 0xBB,
+					0xCC, 0x00, 0x00, 0x00,
+				},
+			}),
+			sa: &SockaddrCANJ1939{
+				Ifindex: 12345678,
+				Name:    0xAAAAAAAAAAAAAAAA,
+				PGN:     0xBBBBBBBB,
+				Addr:    0xCC,
+			},
+			skt: SocketSpec{domain: AF_CAN, typ: SOCK_DGRAM, protocol: CAN_J1939},
 		},
 		{
 			name: "AF_MAX EAFNOSUPPORT",
@@ -205,10 +226,16 @@ func Test_anyToSockaddr(t *testing.T) {
 			if tt.skt.domain != 0 {
 				fd, err = Socket(tt.skt.domain, tt.skt.typ, tt.skt.protocol)
 				// Some sockaddr types need specific kernel modules running: if these
-				// are not present we'll get EPROTONOSUPPORT back when trying to create
-				// the socket.  Skip the test in this situation.
+				// are not present we'll get EPROTONOSUPPORT/EAFNOSUPPORT back when
+				// trying to create the socket.  Skip the test in this situation.
 				if err == EPROTONOSUPPORT {
 					t.Skip("socket family/protocol not supported by kernel")
+				} else if err == EAFNOSUPPORT {
+					t.Skip("socket address family not supported by kernel")
+				} else if err == EACCES {
+					// Some platforms might require elevated privileges to perform
+					// actions on sockets. Skip the test in this situation.
+					t.Skip("socket operation not permitted")
 				} else if err != nil {
 					t.Fatalf("socket(%v): %v", tt.skt, err)
 				}
