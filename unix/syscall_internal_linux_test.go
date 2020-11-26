@@ -230,7 +230,7 @@ func Test_anyToSockaddr(t *testing.T) {
 				// trying to create the socket.  Skip the test in this situation.
 				if err == EPROTONOSUPPORT {
 					t.Skip("socket family/protocol not supported by kernel")
-				} else if  err == EAFNOSUPPORT {
+				} else if err == EAFNOSUPPORT {
 					t.Skip("socket address family not supported by kernel")
 				} else if err == EACCES {
 					// Some platforms might require elevated privileges to perform
