@@ -232,7 +232,7 @@ func Test_anyToSockaddr(t *testing.T) {
 					t.Skip("socket family/protocol not supported by kernel")
 				} else if  err == EAFNOSUPPORT {
 					t.Skip("socket address family not supported by kernel")
-				} else if err == EPERM {
+				} else if err == EACCES {
 					// Some platforms might require elevated privileges to perform
 					// actions on sockets. Skip the test in this situation.
 					t.Skip("socket operation not permitted")
