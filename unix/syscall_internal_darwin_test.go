@@ -55,7 +55,6 @@ func Test_anyToSockaddr_darwin(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			fd := int(0)
-			var err error
 			sa, err := anyToSockaddr(fd, tt.rsa)
 			if err != tt.err {
 				t.Fatalf("unexpected error: %v, want: %v", err, tt.err)
