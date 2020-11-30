@@ -344,13 +344,14 @@ func (r *Rets) SetErrorCode() string {
 
 // Fn describes syscall function.
 type Fn struct {
-	Name        string
-	Params      []*Param
-	Rets        *Rets
-	PrintTrace  bool
-	dllname     string
-	dllfuncname string
-	src         string
+	Name                string
+	Params              []*Param
+	Rets                *Rets
+	PrintTrace          bool
+	WideCharStringParam bool
+	dllname             string
+	dllfuncname         string
+	src                 string
 	// TODO: get rid of this field and just use parameter index instead
 	curTmpVarIdx int // insure tmp variables have uniq names
 }
@@ -479,6 +480,10 @@ func newFn(s string) (*Fn, error) {
 		f.dllfuncname = n[:len(n)-1]
 		f.Rets.fnMaybeAbsent = true
 	}
+	if n := f.dllfuncname; strings.HasSuffix(n, "@W") {
+		f.dllfuncname = n[:len(n)-2]
+		f.WideCharStringParam = true
+	}
 	return f, nil
 }
 
@@ -596,6 +601,9 @@ func (p *Fn) MaybeAbsent() string {
 // IsUTF16 is true, if f is W (utf16) function. It is false
 // for all A (ascii) functions.
 func (f *Fn) IsUTF16() bool {
+	if f.WideCharStringParam {
+		return true
+	}
 	s := f.DLLFuncName()
 	return s[len(s)-1] == 'W'
 }
