@@ -178,6 +178,7 @@ const (
 	SizeofSockaddrDatalink = C.sizeof_struct_sockaddr_dl
 	SizeofSockaddrCtl      = C.sizeof_struct_sockaddr_ctl
 	SizeofLinger           = C.sizeof_struct_linger
+	SizeofIovec            = C.sizeof_struct_iovec
 	SizeofIPMreq           = C.sizeof_struct_ip_mreq
 	SizeofIPv6Mreq         = C.sizeof_struct_ipv6_mreq
 	SizeofMsghdr           = C.sizeof_struct_msghdr
