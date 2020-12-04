@@ -239,10 +239,11 @@ func join(ps []*Param, fn func(*Param) string, sep string) string {
 
 // Rets describes function return parameters.
 type Rets struct {
-	Name         string
-	Type         string
-	ReturnsError bool
-	FailCond     string
+	Name          string
+	Type          string
+	ReturnsError  bool
+	FailCond      string
+	fnMaybeAbsent bool
 }
 
 // ErrorVarName returns error variable name for r.
@@ -273,6 +274,8 @@ func (r *Rets) List() string {
 	s := join(r.ToParams(), func(p *Param) string { return p.Name + " " + p.Type }, ", ")
 	if len(s) > 0 {
 		s = "(" + s + ")"
+	} else if r.fnMaybeAbsent {
+		s = "(err error)"
 	}
 	return s
 }
@@ -345,7 +348,6 @@ type Fn struct {
 	Params      []*Param
 	Rets        *Rets
 	PrintTrace  bool
-	MaybeAbsent bool
 	dllname     string
 	dllfuncname string
 	src         string
@@ -475,7 +477,7 @@ func newFn(s string) (*Fn, error) {
 	}
 	if n := f.dllfuncname; strings.HasSuffix(n, "?") {
 		f.dllfuncname = n[:len(n)-1]
-		f.MaybeAbsent = true
+		f.Rets.fnMaybeAbsent = true
 	}
 	return f, nil
 }
@@ -573,6 +575,22 @@ func (f *Fn) HelperCallParamList() string {
 		a = append(a, s)
 	}
 	return strings.Join(a, ", ")
+}
+
+// MaybeAbsent returns source code for handling functions that are possibly unavailable.
+func (p *Fn) MaybeAbsent() string {
+	if !p.Rets.fnMaybeAbsent {
+		return ""
+	}
+	const code = `%[1]s = proc%[2]s.Find()
+	if %[1]s != nil {
+		return
+	}`
+	errorVar := p.Rets.ErrorVarName()
+	if errorVar == "" {
+		errorVar = "err"
+	}
+	return fmt.Sprintf(code, errorVar, p.DLLFuncName())
 }
 
 // IsUTF16 is true, if f is W (utf16) function. It is false
@@ -915,8 +933,7 @@ func {{.HelperName}}({{.HelperParamList}}) {{template "results" .}}{
 {{define "helpertmpvars"}}{{range .Params}}{{if .TmpVarHelperCode}}	{{.TmpVarHelperCode}}
 {{end}}{{end}}{{end}}
 
-{{define "maybeabsent"}}{{if .MaybeAbsent}}err = proc{{.DLLFuncName}}.Find()
-if err != nil { return }
+{{define "maybeabsent"}}{{if .MaybeAbsent}}{{.MaybeAbsent}}
 {{end}}{{end}}
 
 {{define "tmpvars"}}{{range .Params}}{{if .TmpVarCode}}	{{.TmpVarCode}}
