@@ -9,7 +9,7 @@ package unix
 import "time"
 
 // TimespecToNSec returns the time stored in ts as nanoseconds.
-func TimespecToNsec(ts Timespec) int64 { return int64(ts.Sec)*1e9 + int64(ts.Nsec) }
+func TimespecToNsec(ts Timespec) int64 { return ts.Nano() }
 
 // NsecToTimespec converts a number of nanoseconds into a Timespec.
 func NsecToTimespec(nsec int64) Timespec {
@@ -41,7 +41,7 @@ func TimeToTimespec(t time.Time) (Timespec, error) {
 }
 
 // TimevalToNsec returns the time stored in tv as nanoseconds.
-func TimevalToNsec(tv Timeval) int64 { return int64(tv.Sec)*1e9 + int64(tv.Usec)*1e3 }
+func TimevalToNsec(tv Timeval) int64 { return tv.Nano() }
 
 // NsecToTimeval converts a number of nanoseconds into a Timeval.
 func NsecToTimeval(nsec int64) Timeval {
