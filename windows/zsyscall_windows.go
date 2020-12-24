@@ -1165,12 +1165,9 @@ func CertDeleteCertificateFromStore(certContext *CertContext) (err error) {
 	return
 }
 
-func CertDuplicateCertificateContext(certContext *CertContext) (dupContext *CertContext, err error) {
-	r0, _, e1 := syscall.Syscall(procCertDuplicateCertificateContext.Addr(), 1, uintptr(unsafe.Pointer(certContext)), 0, 0)
+func CertDuplicateCertificateContext(certContext *CertContext) (dupContext *CertContext) {
+	r0, _, _ := syscall.Syscall(procCertDuplicateCertificateContext.Addr(), 1, uintptr(unsafe.Pointer(certContext)), 0, 0)
 	dupContext = (*CertContext)(unsafe.Pointer(r0))
-	if dupContext == nil {
-		err = errnoErr(e1)
-	}
 	return
 }
 
@@ -1230,16 +1227,7 @@ func CertVerifyCertificateChainPolicy(policyOID uintptr, chain *CertChainContext
 	return
 }
 
-func PFXImportCertStore(pfx *CryptDataBlob, password string, flags uint32) (store Handle, err error) {
-	var _p0 *uint16
-	_p0, err = syscall.UTF16PtrFromString(password)
-	if err != nil {
-		return
-	}
-	return _PFXImportCertStore(pfx, _p0, flags)
-}
-
-func _PFXImportCertStore(pfx *CryptDataBlob, password *uint16, flags uint32) (store Handle, err error) {
+func PFXImportCertStore(pfx *CryptDataBlob, password *uint16, flags uint32) (store Handle, err error) {
 	r0, _, e1 := syscall.Syscall(procPFXImportCertStore.Addr(), 3, uintptr(unsafe.Pointer(pfx)), uintptr(unsafe.Pointer(password)), uintptr(flags))
 	store = Handle(r0)
 	if store == 0 {
