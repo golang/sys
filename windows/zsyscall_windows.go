@@ -145,12 +145,15 @@ var (
 	procCertDeleteCertificateFromStore                       = modcrypt32.NewProc("CertDeleteCertificateFromStore")
 	procCertDuplicateCertificateContext                      = modcrypt32.NewProc("CertDuplicateCertificateContext")
 	procCertEnumCertificatesInStore                          = modcrypt32.NewProc("CertEnumCertificatesInStore")
+	procCertFindCertificateInStore                           = modcrypt32.NewProc("CertFindCertificateInStore")
+	procCertFindChainInStore                                 = modcrypt32.NewProc("CertFindChainInStore")
 	procCertFreeCertificateChain                             = modcrypt32.NewProc("CertFreeCertificateChain")
 	procCertFreeCertificateContext                           = modcrypt32.NewProc("CertFreeCertificateContext")
 	procCertGetCertificateChain                              = modcrypt32.NewProc("CertGetCertificateChain")
 	procCertOpenStore                                        = modcrypt32.NewProc("CertOpenStore")
 	procCertOpenSystemStoreW                                 = modcrypt32.NewProc("CertOpenSystemStoreW")
 	procCertVerifyCertificateChainPolicy                     = modcrypt32.NewProc("CertVerifyCertificateChainPolicy")
+	procCryptAcquireCertificatePrivateKey                    = modcrypt32.NewProc("CryptAcquireCertificatePrivateKey")
 	procPFXImportCertStore                                   = modcrypt32.NewProc("PFXImportCertStore")
 	procDnsNameCompare_W                                     = moddnsapi.NewProc("DnsNameCompare_W")
 	procDnsQuery_W                                           = moddnsapi.NewProc("DnsQuery_W")
@@ -1197,6 +1200,24 @@ func CertEnumCertificatesInStore(store Handle, prevContext *CertContext) (contex
 	return
 }
 
+func CertFindCertificateInStore(store Handle, certEncodingType uint32, findFlags uint32, findType uint32, findPara unsafe.Pointer, prevCertContext *CertContext) (cert *CertContext, err error) {
+	r0, _, e1 := syscall.Syscall6(procCertFindCertificateInStore.Addr(), 6, uintptr(store), uintptr(certEncodingType), uintptr(findFlags), uintptr(findType), uintptr(findPara), uintptr(unsafe.Pointer(prevCertContext)))
+	cert = (*CertContext)(unsafe.Pointer(r0))
+	if cert == nil {
+		err = errnoErr(e1)
+	}
+	return
+}
+
+func CertFindChainInStore(store Handle, certEncodingType uint32, findFlags uint32, findType uint32, findPara unsafe.Pointer, prevChainContext *CertChainContext) (certchain *CertChainContext, err error) {
+	r0, _, e1 := syscall.Syscall6(procCertFindChainInStore.Addr(), 6, uintptr(store), uintptr(certEncodingType), uintptr(findFlags), uintptr(findType), uintptr(findPara), uintptr(unsafe.Pointer(prevChainContext)))
+	certchain = (*CertChainContext)(unsafe.Pointer(r0))
+	if certchain == nil {
+		err = errnoErr(e1)
+	}
+	return
+}
+
 func CertFreeCertificateChain(ctx *CertChainContext) {
 	syscall.Syscall(procCertFreeCertificateChain.Addr(), 1, uintptr(unsafe.Pointer(ctx)), 0, 0)
 	return
@@ -1238,6 +1259,19 @@ func CertOpenSystemStore(hprov Handle, name *uint16) (store Handle, err error) {
 
 func CertVerifyCertificateChainPolicy(policyOID uintptr, chain *CertChainContext, para *CertChainPolicyPara, status *CertChainPolicyStatus) (err error) {
 	r1, _, e1 := syscall.Syscall6(procCertVerifyCertificateChainPolicy.Addr(), 4, uintptr(policyOID), uintptr(unsafe.Pointer(chain)), uintptr(unsafe.Pointer(para)), uintptr(unsafe.Pointer(status)), 0, 0)
+	if r1 == 0 {
+		err = errnoErr(e1)
+	}
+	return
+}
+
+func CryptAcquireCertificatePrivateKey(cert *CertContext, flags uint32, parameters unsafe.Pointer, cryptProvOrNCryptKey *Handle, keySpec *uint32, callerFreeProvOrNCryptKey *bool) (err error) {
+	var _p0 uint32
+	if *callerFreeProvOrNCryptKey {
+		_p0 = 1
+	}
+	r1, _, e1 := syscall.Syscall6(procCryptAcquireCertificatePrivateKey.Addr(), 6, uintptr(unsafe.Pointer(cert)), uintptr(flags), uintptr(parameters), uintptr(unsafe.Pointer(cryptProvOrNCryptKey)), uintptr(unsafe.Pointer(keySpec)), uintptr(unsafe.Pointer(&_p0)))
+	*callerFreeProvOrNCryptKey = _p0 != 0
 	if r1 == 0 {
 		err = errnoErr(e1)
 	}
