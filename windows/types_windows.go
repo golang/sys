@@ -287,6 +287,23 @@ const (
 	PKCS12_NO_PERSIST_KEY              = 0x00008000
 	PKCS12_INCLUDE_EXTENDED_PROPERTIES = 0x00000010
 
+	/* Flags for CryptAcquireCertificatePrivateKey */
+	CRYPT_ACQUIRE_CACHE_FLAG             = 0x00000001
+	CRYPT_ACQUIRE_USE_PROV_INFO_FLAG     = 0x00000002
+	CRYPT_ACQUIRE_COMPARE_KEY_FLAG       = 0x00000004
+	CRYPT_ACQUIRE_NO_HEALING             = 0x00000008
+	CRYPT_ACQUIRE_SILENT_FLAG            = 0x00000040
+	CRYPT_ACQUIRE_WINDOW_HANDLE_FLAG     = 0x00000080
+	CRYPT_ACQUIRE_NCRYPT_KEY_FLAGS_MASK  = 0x00070000
+	CRYPT_ACQUIRE_ALLOW_NCRYPT_KEY_FLAG  = 0x00010000
+	CRYPT_ACQUIRE_PREFER_NCRYPT_KEY_FLAG = 0x00020000
+	CRYPT_ACQUIRE_ONLY_NCRYPT_KEY_FLAG   = 0x00040000
+
+	/* pdwKeySpec for CryptAcquireCertificatePrivateKey */
+	AT_KEYEXCHANGE       = 1
+	AT_SIGNATURE         = 2
+	CERT_NCRYPT_KEY_SPEC = 0xFFFFFFFF
+
 	/* Default usage match type is AND with value zero */
 	USAGE_MATCH_TYPE_AND = 0
 	USAGE_MATCH_TYPE_OR  = 1
@@ -1249,6 +1266,17 @@ type CertChainPolicyStatus struct {
 	ChainIndex        uint32
 	ElementIndex      uint32
 	ExtraPolicyStatus Pointer
+}
+
+type CertChainFindByIssuerPara struct {
+	Size                   uint32
+	UsageIdentifier        *byte
+	KeySpec                uint32
+	AcquirePrivateKeyFlags uint32
+	IssuerCount            uint32
+	Issuer                 Pointer
+	FindCallback           Pointer
+	FindArg                Pointer
 }
 
 type CryptDataBlob struct {
