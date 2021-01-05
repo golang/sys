@@ -906,14 +906,17 @@ func TestPipe(t *testing.T) {
 	go func() {
 		n, err := unix.Write(w, []byte(s))
 		if err != nil {
-			t.Fatalf("bad write: %s\n", err)
+			t.Errorf("bad write: %s\n", err)
+			return
 		}
 		if n != len(s) {
-			t.Fatalf("bad write count: %d\n", n)
+			t.Errorf("bad write count: %d\n", n)
+			return
 		}
 		err = unix.Close(w)
 		if err != nil {
-			t.Fatalf("bad close: %s\n", err)
+			t.Errorf("bad close: %s\n", err)
+			return
 		}
 	}()
 	var buf [10 + len(s)]byte
