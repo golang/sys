@@ -41,6 +41,7 @@ var (
 	moddnsapi   = NewLazySystemDLL("dnsapi.dll")
 	modiphlpapi = NewLazySystemDLL("iphlpapi.dll")
 	modkernel32 = NewLazySystemDLL("kernel32.dll")
+	modmsi      = NewLazySystemDLL("msi.dll")
 	modmswsock  = NewLazySystemDLL("mswsock.dll")
 	modnetapi32 = NewLazySystemDLL("netapi32.dll")
 	modntdll    = NewLazySystemDLL("ntdll.dll")
@@ -320,6 +321,12 @@ var (
 	procWaitForSingleObject                                  = modkernel32.NewProc("WaitForSingleObject")
 	procWriteConsoleW                                        = modkernel32.NewProc("WriteConsoleW")
 	procWriteFile                                            = modkernel32.NewProc("WriteFile")
+	procMsiDatabaseOpenViewW                                 = modmsi.NewProc("MsiDatabaseOpenViewW")
+	procMsiInstallProductW                                   = modmsi.NewProc("MsiInstallProductW")
+	procMsiOpenDatabaseW                                     = modmsi.NewProc("MsiOpenDatabaseW")
+	procMsiRecordGetStringW                                  = modmsi.NewProc("MsiRecordGetStringW")
+	procMsiViewExecute                                       = modmsi.NewProc("MsiViewExecute")
+	procMsiViewFetch                                         = modmsi.NewProc("MsiViewFetch")
 	procAcceptEx                                             = modmswsock.NewProc("AcceptEx")
 	procGetAcceptExSockaddrs                                 = modmswsock.NewProc("GetAcceptExSockaddrs")
 	procTransmitFile                                         = modmswsock.NewProc("TransmitFile")
@@ -2727,6 +2734,86 @@ func WriteFile(handle Handle, buf []byte, done *uint32, overlapped *Overlapped) 
 	r1, _, e1 := syscall.Syscall6(procWriteFile.Addr(), 5, uintptr(handle), uintptr(unsafe.Pointer(_p0)), uintptr(len(buf)), uintptr(unsafe.Pointer(done)), uintptr(unsafe.Pointer(overlapped)), 0)
 	if r1 == 0 {
 		err = errnoErr(e1)
+	}
+	return
+}
+
+func MsiDatabaseOpenView(db windows.Handle, query string, view *windows.Handle) (e error) {
+	var _p0 *uint16
+	_p0, e = syscall.UTF16PtrFromString(query)
+	if e != nil {
+		return
+	}
+	return _MsiDatabaseOpenView(db, _p0, view)
+}
+
+func _MsiDatabaseOpenView(db windows.Handle, query *uint16, view *windows.Handle) (e error) {
+	r0, _, _ := syscall.Syscall(procMsiDatabaseOpenViewW.Addr(), 3, uintptr(db), uintptr(unsafe.Pointer(query)), uintptr(unsafe.Pointer(view)))
+	if r0 != 0 {
+		e = syscall.Errno(r0)
+	}
+	return
+}
+
+func MsiInstallProduct(path string, command string) (e error) {
+	var _p0 *uint16
+	_p0, e = syscall.UTF16PtrFromString(path)
+	if e != nil {
+		return
+	}
+	var _p1 *uint16
+	_p1, e = syscall.UTF16PtrFromString(command)
+	if e != nil {
+		return
+	}
+	return _MsiInstallProduct(_p0, _p1)
+}
+
+func _MsiInstallProduct(path *uint16, command *uint16) (e error) {
+	r0, _, _ := syscall.Syscall(procMsiInstallProductW.Addr(), 2, uintptr(unsafe.Pointer(path)), uintptr(unsafe.Pointer(command)), 0)
+	if r0 != 0 {
+		e = syscall.Errno(r0)
+	}
+	return
+}
+
+func MsiOpenDatabase(dbPath string, persist int, db *windows.Handle) (e error) {
+	var _p0 *uint16
+	_p0, e = syscall.UTF16PtrFromString(dbPath)
+	if e != nil {
+		return
+	}
+	return _MsiOpenDatabase(_p0, persist, db)
+}
+
+func _MsiOpenDatabase(dbPath *uint16, persist int, db *windows.Handle) (e error) {
+	r0, _, _ := syscall.Syscall(procMsiOpenDatabaseW.Addr(), 3, uintptr(unsafe.Pointer(dbPath)), uintptr(persist), uintptr(unsafe.Pointer(db)))
+	if r0 != 0 {
+		e = syscall.Errno(r0)
+	}
+	return
+}
+
+func MsiRecordGetString(record windows.Handle, field int, buf *byte, bufSize *int) (e error) {
+	r0, _, _ := syscall.Syscall6(procMsiRecordGetStringW.Addr(), 4, uintptr(record), uintptr(field), uintptr(unsafe.Pointer(buf)), uintptr(unsafe.Pointer(bufSize)), 0, 0)
+	if r0 != 0 {
+		e = syscall.Errno(r0)
+	}
+	return
+}
+
+func MsiViewExecute(view windows.Handle, record windows.Handle) (e error) {
+	r0, _, _ := syscall.Syscall(procMsiViewExecute.Addr(), 2, uintptr(view), uintptr(record), 0)
+	if r0 != 0 {
+		e = syscall.Errno(r0)
+	}
+	return
+}
+
+func MsiViewFetch(view windows.Handle, record *windows.Handle) (e error) {
+	r0, _, _ := syscall.Syscall(procMsiViewFetch.Addr(), 2, uintptr(view), uintptr(unsafe.Pointer(record)), 0)
+	if r0 != 0 {
+		e = syscall.Errno(r0)
 	}
 	return
 }

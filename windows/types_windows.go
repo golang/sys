@@ -248,6 +248,17 @@ const (
 )
 
 const (
+	// msiquery.h
+	// MsiOpenDatabaseW
+	MSIDBOPEN_READONLY = 0
+	MSIDBOPEN_TRANSACT = 1
+	MSIDBOPEN_DIRECT = 2
+	MSIDBOPEN_CREATE = 3
+	MSIDBOPEN_CREATEDIRECT = 4
+	MSIDBOPEN_PATCHFILE = 32
+)
+
+const (
 	// wincrypt.h
 	/* certenrolld_begin -- PROV_RSA_*/
 	PROV_RSA_FULL      = 1

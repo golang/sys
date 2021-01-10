@@ -324,6 +324,12 @@ func NewCallbackCDecl(fn interface{}) uintptr {
 //sys	SetProcessPriorityBoost(process Handle, disable bool) (err error) = kernel32.SetProcessPriorityBoost
 //sys	GetProcessWorkingSetSizeEx(hProcess Handle, lpMinimumWorkingSetSize *uintptr, lpMaximumWorkingSetSize *uintptr, flags *uint32)
 //sys	SetProcessWorkingSetSizeEx(hProcess Handle, dwMinimumWorkingSetSize uintptr, dwMaximumWorkingSetSize uintptr, flags uint32) (err error)
+//sys	MsiDatabaseOpenView(db windows.Handle, query string, view *windows.Handle) (e error) [failretval!=0] = msi.MsiDatabaseOpenViewW
+//sys	MsiInstallProduct(path string, command string) (e error) [failretval!=0] = msi.MsiInstallProductW
+//sys	MsiOpenDatabase(dbPath string, persist int, db *windows.Handle) (e error) [failretval!=0] = msi.MsiOpenDatabaseW
+//sys	MsiRecordGetString(record windows.Handle, field int, buf *byte, bufSize *int) (e error) [failretval!=0] = msi.MsiRecordGetStringW
+//sys	MsiViewExecute(view windows.Handle, record windows.Handle) (e error) [failretval!=0] = msi.MsiViewExecute
+//sys	MsiViewFetch(view windows.Handle, record *windows.Handle) (e error) [failretval!=0] = msi.MsiViewFetch
 
 // Volume Management Functions
 //sys	DefineDosDevice(flags uint32, deviceName *uint16, targetPath *uint16) (err error) = DefineDosDeviceW
