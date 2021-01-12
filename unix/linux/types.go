@@ -88,6 +88,7 @@ struct termios2 {
 #include <linux/devlink.h>
 #include <linux/dm-ioctl.h>
 #include <linux/errqueue.h>
+#include <linux/ethtool.h>
 #include <linux/ethtool_netlink.h>
 #include <linux/fanotify.h>
 #include <linux/filter.h>
@@ -3168,12 +3169,164 @@ const (
 	MPLS_IPTUNNEL_MAX    = C.MPLS_IPTUNNEL_MAX
 )
 
-// ethtool netlink interface, generated using:
+// ethtool and its netlink interface, generated using:
+//
+// perl -nlE '/^\s*(ETHTOOL_\w+)/ && say "$1 = C.$1"' ethtool.h
 // perl -nlE '/^\s*(ETHTOOL_\w+)/ && say "$1 = C.$1"' ethtool_netlink.h
 //
 // Note that a couple of constants produced by this command will be duplicated
 // by mkerrors.sh, so some manual pruning was necessary.
 const (
+	ETHTOOL_ID_UNSPEC                                                       = C.ETHTOOL_ID_UNSPEC
+	ETHTOOL_RX_COPYBREAK                                                    = C.ETHTOOL_RX_COPYBREAK
+	ETHTOOL_TX_COPYBREAK                                                    = C.ETHTOOL_TX_COPYBREAK
+	ETHTOOL_PFC_PREVENTION_TOUT                                             = C.ETHTOOL_PFC_PREVENTION_TOUT
+	ETHTOOL_TUNABLE_UNSPEC                                                  = C.ETHTOOL_TUNABLE_UNSPEC
+	ETHTOOL_TUNABLE_U8                                                      = C.ETHTOOL_TUNABLE_U8
+	ETHTOOL_TUNABLE_U16                                                     = C.ETHTOOL_TUNABLE_U16
+	ETHTOOL_TUNABLE_U32                                                     = C.ETHTOOL_TUNABLE_U32
+	ETHTOOL_TUNABLE_U64                                                     = C.ETHTOOL_TUNABLE_U64
+	ETHTOOL_TUNABLE_STRING                                                  = C.ETHTOOL_TUNABLE_STRING
+	ETHTOOL_TUNABLE_S8                                                      = C.ETHTOOL_TUNABLE_S8
+	ETHTOOL_TUNABLE_S16                                                     = C.ETHTOOL_TUNABLE_S16
+	ETHTOOL_TUNABLE_S32                                                     = C.ETHTOOL_TUNABLE_S32
+	ETHTOOL_TUNABLE_S64                                                     = C.ETHTOOL_TUNABLE_S64
+	ETHTOOL_PHY_ID_UNSPEC                                                   = C.ETHTOOL_PHY_ID_UNSPEC
+	ETHTOOL_PHY_DOWNSHIFT                                                   = C.ETHTOOL_PHY_DOWNSHIFT
+	ETHTOOL_PHY_FAST_LINK_DOWN                                              = C.ETHTOOL_PHY_FAST_LINK_DOWN
+	ETHTOOL_PHY_EDPD                                                        = C.ETHTOOL_PHY_EDPD
+	ETHTOOL_LINK_EXT_STATE_AUTONEG                                          = C.ETHTOOL_LINK_EXT_STATE_AUTONEG
+	ETHTOOL_LINK_EXT_STATE_LINK_TRAINING_FAILURE                            = C.ETHTOOL_LINK_EXT_STATE_LINK_TRAINING_FAILURE
+	ETHTOOL_LINK_EXT_STATE_LINK_LOGICAL_MISMATCH                            = C.ETHTOOL_LINK_EXT_STATE_LINK_LOGICAL_MISMATCH
+	ETHTOOL_LINK_EXT_STATE_BAD_SIGNAL_INTEGRITY                             = C.ETHTOOL_LINK_EXT_STATE_BAD_SIGNAL_INTEGRITY
+	ETHTOOL_LINK_EXT_STATE_NO_CABLE                                         = C.ETHTOOL_LINK_EXT_STATE_NO_CABLE
+	ETHTOOL_LINK_EXT_STATE_CABLE_ISSUE                                      = C.ETHTOOL_LINK_EXT_STATE_CABLE_ISSUE
+	ETHTOOL_LINK_EXT_STATE_EEPROM_ISSUE                                     = C.ETHTOOL_LINK_EXT_STATE_EEPROM_ISSUE
+	ETHTOOL_LINK_EXT_STATE_CALIBRATION_FAILURE                              = C.ETHTOOL_LINK_EXT_STATE_CALIBRATION_FAILURE
+	ETHTOOL_LINK_EXT_STATE_POWER_BUDGET_EXCEEDED                            = C.ETHTOOL_LINK_EXT_STATE_POWER_BUDGET_EXCEEDED
+	ETHTOOL_LINK_EXT_STATE_OVERHEAT                                         = C.ETHTOOL_LINK_EXT_STATE_OVERHEAT
+	ETHTOOL_LINK_EXT_SUBSTATE_AN_NO_PARTNER_DETECTED                        = C.ETHTOOL_LINK_EXT_SUBSTATE_AN_NO_PARTNER_DETECTED
+	ETHTOOL_LINK_EXT_SUBSTATE_AN_ACK_NOT_RECEIVED                           = C.ETHTOOL_LINK_EXT_SUBSTATE_AN_ACK_NOT_RECEIVED
+	ETHTOOL_LINK_EXT_SUBSTATE_AN_NEXT_PAGE_EXCHANGE_FAILED                  = C.ETHTOOL_LINK_EXT_SUBSTATE_AN_NEXT_PAGE_EXCHANGE_FAILED
+	ETHTOOL_LINK_EXT_SUBSTATE_AN_NO_PARTNER_DETECTED_FORCE_MODE             = C.ETHTOOL_LINK_EXT_SUBSTATE_AN_NO_PARTNER_DETECTED_FORCE_MODE
+	ETHTOOL_LINK_EXT_SUBSTATE_AN_FEC_MISMATCH_DURING_OVERRIDE               = C.ETHTOOL_LINK_EXT_SUBSTATE_AN_FEC_MISMATCH_DURING_OVERRIDE
+	ETHTOOL_LINK_EXT_SUBSTATE_AN_NO_HCD                                     = C.ETHTOOL_LINK_EXT_SUBSTATE_AN_NO_HCD
+	ETHTOOL_LINK_EXT_SUBSTATE_LT_KR_FRAME_LOCK_NOT_ACQUIRED                 = C.ETHTOOL_LINK_EXT_SUBSTATE_LT_KR_FRAME_LOCK_NOT_ACQUIRED
+	ETHTOOL_LINK_EXT_SUBSTATE_LT_KR_LINK_INHIBIT_TIMEOUT                    = C.ETHTOOL_LINK_EXT_SUBSTATE_LT_KR_LINK_INHIBIT_TIMEOUT
+	ETHTOOL_LINK_EXT_SUBSTATE_LT_KR_LINK_PARTNER_DID_NOT_SET_RECEIVER_READY = C.ETHTOOL_LINK_EXT_SUBSTATE_LT_KR_LINK_PARTNER_DID_NOT_SET_RECEIVER_READY
+	ETHTOOL_LINK_EXT_SUBSTATE_LT_REMOTE_FAULT                               = C.ETHTOOL_LINK_EXT_SUBSTATE_LT_REMOTE_FAULT
+	ETHTOOL_LINK_EXT_SUBSTATE_LLM_PCS_DID_NOT_ACQUIRE_BLOCK_LOCK            = C.ETHTOOL_LINK_EXT_SUBSTATE_LLM_PCS_DID_NOT_ACQUIRE_BLOCK_LOCK
+	ETHTOOL_LINK_EXT_SUBSTATE_LLM_PCS_DID_NOT_ACQUIRE_AM_LOCK               = C.ETHTOOL_LINK_EXT_SUBSTATE_LLM_PCS_DID_NOT_ACQUIRE_AM_LOCK
+	ETHTOOL_LINK_EXT_SUBSTATE_LLM_PCS_DID_NOT_GET_ALIGN_STATUS              = C.ETHTOOL_LINK_EXT_SUBSTATE_LLM_PCS_DID_NOT_GET_ALIGN_STATUS
+	ETHTOOL_LINK_EXT_SUBSTATE_LLM_FC_FEC_IS_NOT_LOCKED                      = C.ETHTOOL_LINK_EXT_SUBSTATE_LLM_FC_FEC_IS_NOT_LOCKED
+	ETHTOOL_LINK_EXT_SUBSTATE_LLM_RS_FEC_IS_NOT_LOCKED                      = C.ETHTOOL_LINK_EXT_SUBSTATE_LLM_RS_FEC_IS_NOT_LOCKED
+	ETHTOOL_LINK_EXT_SUBSTATE_BSI_LARGE_NUMBER_OF_PHYSICAL_ERRORS           = C.ETHTOOL_LINK_EXT_SUBSTATE_BSI_LARGE_NUMBER_OF_PHYSICAL_ERRORS
+	ETHTOOL_LINK_EXT_SUBSTATE_BSI_UNSUPPORTED_RATE                          = C.ETHTOOL_LINK_EXT_SUBSTATE_BSI_UNSUPPORTED_RATE
+	ETHTOOL_LINK_EXT_SUBSTATE_CI_UNSUPPORTED_CABLE                          = C.ETHTOOL_LINK_EXT_SUBSTATE_CI_UNSUPPORTED_CABLE
+	ETHTOOL_LINK_EXT_SUBSTATE_CI_CABLE_TEST_FAILURE                         = C.ETHTOOL_LINK_EXT_SUBSTATE_CI_CABLE_TEST_FAILURE
+	ETHTOOL_FLASH_ALL_REGIONS                                               = C.ETHTOOL_FLASH_ALL_REGIONS
+	ETHTOOL_F_UNSUPPORTED__BIT                                              = C.ETHTOOL_F_UNSUPPORTED__BIT
+	ETHTOOL_F_WISH__BIT                                                     = C.ETHTOOL_F_WISH__BIT
+	ETHTOOL_F_COMPAT__BIT                                                   = C.ETHTOOL_F_COMPAT__BIT
+	ETHTOOL_FEC_NONE_BIT                                                    = C.ETHTOOL_FEC_NONE_BIT
+	ETHTOOL_FEC_AUTO_BIT                                                    = C.ETHTOOL_FEC_AUTO_BIT
+	ETHTOOL_FEC_OFF_BIT                                                     = C.ETHTOOL_FEC_OFF_BIT
+	ETHTOOL_FEC_RS_BIT                                                      = C.ETHTOOL_FEC_RS_BIT
+	ETHTOOL_FEC_BASER_BIT                                                   = C.ETHTOOL_FEC_BASER_BIT
+	ETHTOOL_FEC_LLRS_BIT                                                    = C.ETHTOOL_FEC_LLRS_BIT
+	ETHTOOL_LINK_MODE_10baseT_Half_BIT                                      = C.ETHTOOL_LINK_MODE_10baseT_Half_BIT
+	ETHTOOL_LINK_MODE_10baseT_Full_BIT                                      = C.ETHTOOL_LINK_MODE_10baseT_Full_BIT
+	ETHTOOL_LINK_MODE_100baseT_Half_BIT                                     = C.ETHTOOL_LINK_MODE_100baseT_Half_BIT
+	ETHTOOL_LINK_MODE_100baseT_Full_BIT                                     = C.ETHTOOL_LINK_MODE_100baseT_Full_BIT
+	ETHTOOL_LINK_MODE_1000baseT_Half_BIT                                    = C.ETHTOOL_LINK_MODE_1000baseT_Half_BIT
+	ETHTOOL_LINK_MODE_1000baseT_Full_BIT                                    = C.ETHTOOL_LINK_MODE_1000baseT_Full_BIT
+	ETHTOOL_LINK_MODE_Autoneg_BIT                                           = C.ETHTOOL_LINK_MODE_Autoneg_BIT
+	ETHTOOL_LINK_MODE_TP_BIT                                                = C.ETHTOOL_LINK_MODE_TP_BIT
+	ETHTOOL_LINK_MODE_AUI_BIT                                               = C.ETHTOOL_LINK_MODE_AUI_BIT
+	ETHTOOL_LINK_MODE_MII_BIT                                               = C.ETHTOOL_LINK_MODE_MII_BIT
+	ETHTOOL_LINK_MODE_FIBRE_BIT                                             = C.ETHTOOL_LINK_MODE_FIBRE_BIT
+	ETHTOOL_LINK_MODE_BNC_BIT                                               = C.ETHTOOL_LINK_MODE_BNC_BIT
+	ETHTOOL_LINK_MODE_10000baseT_Full_BIT                                   = C.ETHTOOL_LINK_MODE_10000baseT_Full_BIT
+	ETHTOOL_LINK_MODE_Pause_BIT                                             = C.ETHTOOL_LINK_MODE_Pause_BIT
+	ETHTOOL_LINK_MODE_Asym_Pause_BIT                                        = C.ETHTOOL_LINK_MODE_Asym_Pause_BIT
+	ETHTOOL_LINK_MODE_2500baseX_Full_BIT                                    = C.ETHTOOL_LINK_MODE_2500baseX_Full_BIT
+	ETHTOOL_LINK_MODE_Backplane_BIT                                         = C.ETHTOOL_LINK_MODE_Backplane_BIT
+	ETHTOOL_LINK_MODE_1000baseKX_Full_BIT                                   = C.ETHTOOL_LINK_MODE_1000baseKX_Full_BIT
+	ETHTOOL_LINK_MODE_10000baseKX4_Full_BIT                                 = C.ETHTOOL_LINK_MODE_10000baseKX4_Full_BIT
+	ETHTOOL_LINK_MODE_10000baseKR_Full_BIT                                  = C.ETHTOOL_LINK_MODE_10000baseKR_Full_BIT
+	ETHTOOL_LINK_MODE_10000baseR_FEC_BIT                                    = C.ETHTOOL_LINK_MODE_10000baseR_FEC_BIT
+	ETHTOOL_LINK_MODE_20000baseMLD2_Full_BIT                                = C.ETHTOOL_LINK_MODE_20000baseMLD2_Full_BIT
+	ETHTOOL_LINK_MODE_20000baseKR2_Full_BIT                                 = C.ETHTOOL_LINK_MODE_20000baseKR2_Full_BIT
+	ETHTOOL_LINK_MODE_40000baseKR4_Full_BIT                                 = C.ETHTOOL_LINK_MODE_40000baseKR4_Full_BIT
+	ETHTOOL_LINK_MODE_40000baseCR4_Full_BIT                                 = C.ETHTOOL_LINK_MODE_40000baseCR4_Full_BIT
+	ETHTOOL_LINK_MODE_40000baseSR4_Full_BIT                                 = C.ETHTOOL_LINK_MODE_40000baseSR4_Full_BIT
+	ETHTOOL_LINK_MODE_40000baseLR4_Full_BIT                                 = C.ETHTOOL_LINK_MODE_40000baseLR4_Full_BIT
+	ETHTOOL_LINK_MODE_56000baseKR4_Full_BIT                                 = C.ETHTOOL_LINK_MODE_56000baseKR4_Full_BIT
+	ETHTOOL_LINK_MODE_56000baseCR4_Full_BIT                                 = C.ETHTOOL_LINK_MODE_56000baseCR4_Full_BIT
+	ETHTOOL_LINK_MODE_56000baseSR4_Full_BIT                                 = C.ETHTOOL_LINK_MODE_56000baseSR4_Full_BIT
+	ETHTOOL_LINK_MODE_56000baseLR4_Full_BIT                                 = C.ETHTOOL_LINK_MODE_56000baseLR4_Full_BIT
+	ETHTOOL_LINK_MODE_25000baseCR_Full_BIT                                  = C.ETHTOOL_LINK_MODE_25000baseCR_Full_BIT
+	ETHTOOL_LINK_MODE_25000baseKR_Full_BIT                                  = C.ETHTOOL_LINK_MODE_25000baseKR_Full_BIT
+	ETHTOOL_LINK_MODE_25000baseSR_Full_BIT                                  = C.ETHTOOL_LINK_MODE_25000baseSR_Full_BIT
+	ETHTOOL_LINK_MODE_50000baseCR2_Full_BIT                                 = C.ETHTOOL_LINK_MODE_50000baseCR2_Full_BIT
+	ETHTOOL_LINK_MODE_50000baseKR2_Full_BIT                                 = C.ETHTOOL_LINK_MODE_50000baseKR2_Full_BIT
+	ETHTOOL_LINK_MODE_100000baseKR4_Full_BIT                                = C.ETHTOOL_LINK_MODE_100000baseKR4_Full_BIT
+	ETHTOOL_LINK_MODE_100000baseSR4_Full_BIT                                = C.ETHTOOL_LINK_MODE_100000baseSR4_Full_BIT
+	ETHTOOL_LINK_MODE_100000baseCR4_Full_BIT                                = C.ETHTOOL_LINK_MODE_100000baseCR4_Full_BIT
+	ETHTOOL_LINK_MODE_100000baseLR4_ER4_Full_BIT                            = C.ETHTOOL_LINK_MODE_100000baseLR4_ER4_Full_BIT
+	ETHTOOL_LINK_MODE_50000baseSR2_Full_BIT                                 = C.ETHTOOL_LINK_MODE_50000baseSR2_Full_BIT
+	ETHTOOL_LINK_MODE_1000baseX_Full_BIT                                    = C.ETHTOOL_LINK_MODE_1000baseX_Full_BIT
+	ETHTOOL_LINK_MODE_10000baseCR_Full_BIT                                  = C.ETHTOOL_LINK_MODE_10000baseCR_Full_BIT
+	ETHTOOL_LINK_MODE_10000baseSR_Full_BIT                                  = C.ETHTOOL_LINK_MODE_10000baseSR_Full_BIT
+	ETHTOOL_LINK_MODE_10000baseLR_Full_BIT                                  = C.ETHTOOL_LINK_MODE_10000baseLR_Full_BIT
+	ETHTOOL_LINK_MODE_10000baseLRM_Full_BIT                                 = C.ETHTOOL_LINK_MODE_10000baseLRM_Full_BIT
+	ETHTOOL_LINK_MODE_10000baseER_Full_BIT                                  = C.ETHTOOL_LINK_MODE_10000baseER_Full_BIT
+	ETHTOOL_LINK_MODE_2500baseT_Full_BIT                                    = C.ETHTOOL_LINK_MODE_2500baseT_Full_BIT
+	ETHTOOL_LINK_MODE_5000baseT_Full_BIT                                    = C.ETHTOOL_LINK_MODE_5000baseT_Full_BIT
+	ETHTOOL_LINK_MODE_FEC_NONE_BIT                                          = C.ETHTOOL_LINK_MODE_FEC_NONE_BIT
+	ETHTOOL_LINK_MODE_FEC_RS_BIT                                            = C.ETHTOOL_LINK_MODE_FEC_RS_BIT
+	ETHTOOL_LINK_MODE_FEC_BASER_BIT                                         = C.ETHTOOL_LINK_MODE_FEC_BASER_BIT
+	ETHTOOL_LINK_MODE_50000baseKR_Full_BIT                                  = C.ETHTOOL_LINK_MODE_50000baseKR_Full_BIT
+	ETHTOOL_LINK_MODE_50000baseSR_Full_BIT                                  = C.ETHTOOL_LINK_MODE_50000baseSR_Full_BIT
+	ETHTOOL_LINK_MODE_50000baseCR_Full_BIT                                  = C.ETHTOOL_LINK_MODE_50000baseCR_Full_BIT
+	ETHTOOL_LINK_MODE_50000baseLR_ER_FR_Full_BIT                            = C.ETHTOOL_LINK_MODE_50000baseLR_ER_FR_Full_BIT
+	ETHTOOL_LINK_MODE_50000baseDR_Full_BIT                                  = C.ETHTOOL_LINK_MODE_50000baseDR_Full_BIT
+	ETHTOOL_LINK_MODE_100000baseKR2_Full_BIT                                = C.ETHTOOL_LINK_MODE_100000baseKR2_Full_BIT
+	ETHTOOL_LINK_MODE_100000baseSR2_Full_BIT                                = C.ETHTOOL_LINK_MODE_100000baseSR2_Full_BIT
+	ETHTOOL_LINK_MODE_100000baseCR2_Full_BIT                                = C.ETHTOOL_LINK_MODE_100000baseCR2_Full_BIT
+	ETHTOOL_LINK_MODE_100000baseLR2_ER2_FR2_Full_BIT                        = C.ETHTOOL_LINK_MODE_100000baseLR2_ER2_FR2_Full_BIT
+	ETHTOOL_LINK_MODE_100000baseDR2_Full_BIT                                = C.ETHTOOL_LINK_MODE_100000baseDR2_Full_BIT
+	ETHTOOL_LINK_MODE_200000baseKR4_Full_BIT                                = C.ETHTOOL_LINK_MODE_200000baseKR4_Full_BIT
+	ETHTOOL_LINK_MODE_200000baseSR4_Full_BIT                                = C.ETHTOOL_LINK_MODE_200000baseSR4_Full_BIT
+	ETHTOOL_LINK_MODE_200000baseLR4_ER4_FR4_Full_BIT                        = C.ETHTOOL_LINK_MODE_200000baseLR4_ER4_FR4_Full_BIT
+	ETHTOOL_LINK_MODE_200000baseDR4_Full_BIT                                = C.ETHTOOL_LINK_MODE_200000baseDR4_Full_BIT
+	ETHTOOL_LINK_MODE_200000baseCR4_Full_BIT                                = C.ETHTOOL_LINK_MODE_200000baseCR4_Full_BIT
+	ETHTOOL_LINK_MODE_100baseT1_Full_BIT                                    = C.ETHTOOL_LINK_MODE_100baseT1_Full_BIT
+	ETHTOOL_LINK_MODE_1000baseT1_Full_BIT                                   = C.ETHTOOL_LINK_MODE_1000baseT1_Full_BIT
+	ETHTOOL_LINK_MODE_400000baseKR8_Full_BIT                                = C.ETHTOOL_LINK_MODE_400000baseKR8_Full_BIT
+	ETHTOOL_LINK_MODE_400000baseSR8_Full_BIT                                = C.ETHTOOL_LINK_MODE_400000baseSR8_Full_BIT
+	ETHTOOL_LINK_MODE_400000baseLR8_ER8_FR8_Full_BIT                        = C.ETHTOOL_LINK_MODE_400000baseLR8_ER8_FR8_Full_BIT
+	ETHTOOL_LINK_MODE_400000baseDR8_Full_BIT                                = C.ETHTOOL_LINK_MODE_400000baseDR8_Full_BIT
+	ETHTOOL_LINK_MODE_400000baseCR8_Full_BIT                                = C.ETHTOOL_LINK_MODE_400000baseCR8_Full_BIT
+	ETHTOOL_LINK_MODE_FEC_LLRS_BIT                                          = C.ETHTOOL_LINK_MODE_FEC_LLRS_BIT
+	ETHTOOL_LINK_MODE_100000baseKR_Full_BIT                                 = C.ETHTOOL_LINK_MODE_100000baseKR_Full_BIT
+	ETHTOOL_LINK_MODE_100000baseSR_Full_BIT                                 = C.ETHTOOL_LINK_MODE_100000baseSR_Full_BIT
+	ETHTOOL_LINK_MODE_100000baseLR_ER_FR_Full_BIT                           = C.ETHTOOL_LINK_MODE_100000baseLR_ER_FR_Full_BIT
+	ETHTOOL_LINK_MODE_100000baseCR_Full_BIT                                 = C.ETHTOOL_LINK_MODE_100000baseCR_Full_BIT
+	ETHTOOL_LINK_MODE_100000baseDR_Full_BIT                                 = C.ETHTOOL_LINK_MODE_100000baseDR_Full_BIT
+	ETHTOOL_LINK_MODE_200000baseKR2_Full_BIT                                = C.ETHTOOL_LINK_MODE_200000baseKR2_Full_BIT
+	ETHTOOL_LINK_MODE_200000baseSR2_Full_BIT                                = C.ETHTOOL_LINK_MODE_200000baseSR2_Full_BIT
+	ETHTOOL_LINK_MODE_200000baseLR2_ER2_FR2_Full_BIT                        = C.ETHTOOL_LINK_MODE_200000baseLR2_ER2_FR2_Full_BIT
+	ETHTOOL_LINK_MODE_200000baseDR2_Full_BIT                                = C.ETHTOOL_LINK_MODE_200000baseDR2_Full_BIT
+	ETHTOOL_LINK_MODE_200000baseCR2_Full_BIT                                = C.ETHTOOL_LINK_MODE_200000baseCR2_Full_BIT
+	ETHTOOL_LINK_MODE_400000baseKR4_Full_BIT                                = C.ETHTOOL_LINK_MODE_400000baseKR4_Full_BIT
+	ETHTOOL_LINK_MODE_400000baseSR4_Full_BIT                                = C.ETHTOOL_LINK_MODE_400000baseSR4_Full_BIT
+	ETHTOOL_LINK_MODE_400000baseLR4_ER4_FR4_Full_BIT                        = C.ETHTOOL_LINK_MODE_400000baseLR4_ER4_FR4_Full_BIT
+	ETHTOOL_LINK_MODE_400000baseDR4_Full_BIT                                = C.ETHTOOL_LINK_MODE_400000baseDR4_Full_BIT
+	ETHTOOL_LINK_MODE_400000baseCR4_Full_BIT                                = C.ETHTOOL_LINK_MODE_400000baseCR4_Full_BIT
+	ETHTOOL_LINK_MODE_100baseFX_Half_BIT                                    = C.ETHTOOL_LINK_MODE_100baseFX_Half_BIT
+	ETHTOOL_LINK_MODE_100baseFX_Full_BIT                                    = C.ETHTOOL_LINK_MODE_100baseFX_Full_BIT
+
 	ETHTOOL_MSG_USER_NONE                     = C.ETHTOOL_MSG_USER_NONE
 	ETHTOOL_MSG_STRSET_GET                    = C.ETHTOOL_MSG_STRSET_GET
 	ETHTOOL_MSG_LINKINFO_GET                  = C.ETHTOOL_MSG_LINKINFO_GET
