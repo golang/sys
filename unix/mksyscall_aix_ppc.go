@@ -17,7 +17,7 @@ and read like func declarations if //sys is replaced by func, but:
 	* If go func name needs to be different than its libc name,
 	* or the function is not in libc, name could be specified
 	* at the end, after "=" sign, like
-	  //sys getsockopt(s int, level int, name int, val uintptr, vallen *_Socklen) (err error) = libsocket.getsockopt
+	  //sys	getsockopt(s int, level int, name int, val uintptr, vallen *_Socklen) (err error) = libsocket.getsockopt
 */
 package main
 
@@ -105,20 +105,18 @@ func main() {
 		s := bufio.NewScanner(file)
 		for s.Scan() {
 			t := s.Text()
-			t = strings.TrimSpace(t)
-			t = regexp.MustCompile(`\s+`).ReplaceAllString(t, ` `)
 			if p := regexp.MustCompile(`^package (\S+)$`).FindStringSubmatch(t); p != nil && pack == "" {
 				pack = p[1]
 			}
-			nonblock := regexp.MustCompile(`^\/\/sysnb `).FindStringSubmatch(t)
-			if regexp.MustCompile(`^\/\/sys `).FindStringSubmatch(t) == nil && nonblock == nil {
+			nonblock := regexp.MustCompile(`^\/\/sysnb\t`).FindStringSubmatch(t)
+			if regexp.MustCompile(`^\/\/sys\t`).FindStringSubmatch(t) == nil && nonblock == nil {
 				continue
 			}
 
 			// Line must be of the form
 			//	func Open(path string, mode int, perm int) (fd int, err error)
 			// Split into name, in params, out params.
-			f := regexp.MustCompile(`^\/\/sys(nb)? (\w+)\(([^()]*)\)\s*(?:\(([^()]+)\))?\s*(?:=\s*(?:(\w*)\.)?(\w*))?$`).FindStringSubmatch(t)
+			f := regexp.MustCompile(`^\/\/sys(nb)?\t(\w+)\(([^()]*)\)\s*(?:\(([^()]+)\))?\s*(?:=\s*(?:(\w*)\.)?(\w*))?$`).FindStringSubmatch(t)
 			if f == nil {
 				fmt.Fprintf(os.Stderr, "%s:%s\nmalformed //sys declaration\n", path, t)
 				os.Exit(1)
