@@ -473,7 +473,14 @@ type Flock_t C.struct_flock
 
 type FileCloneRange C.struct_file_clone_range
 
-type FileDedupeRange C.struct_file_dedupe_range
+type RawFileDedupeRange C.struct_file_dedupe_range
+
+type RawFileDedupeRangeInfo C.struct_file_dedupe_range_info
+
+const (
+	SizeofRawFileDedupeRange     = C.sizeof_struct_file_dedupe_range
+	SizeofRawFileDedupeRangeInfo = C.sizeof_struct_file_dedupe_range_info
+)
 
 // Filesystem Encryption
 

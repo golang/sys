@@ -83,13 +83,26 @@ type FileCloneRange struct {
 	Dest_offset uint64
 }
 
-type FileDedupeRange struct {
+type RawFileDedupeRange struct {
 	Src_offset uint64
 	Src_length uint64
 	Dest_count uint16
 	Reserved1  uint16
 	Reserved2  uint32
 }
+
+type RawFileDedupeRangeInfo struct {
+	Dest_fd       int64
+	Dest_offset   uint64
+	Bytes_deduped uint64
+	Status        int32
+	Reserved      uint32
+}
+
+const (
+	SizeofRawFileDedupeRange     = 0x18
+	SizeofRawFileDedupeRangeInfo = 0x20
+)
 
 type FscryptPolicy struct {
 	Version                   uint8
