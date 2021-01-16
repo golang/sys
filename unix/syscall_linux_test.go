@@ -839,12 +839,10 @@ func TestFideduperange(t *testing.T) {
 			unix.FileDedupeRangeInfo{
 			  Dest_fd: int64(f2.Fd()),
 				Dest_offset: uint64(0),
-				Bytes_deduped: uint64(4096),
 			},
 			unix.FileDedupeRangeInfo{
 			  Dest_fd: int64(f2.Fd()),
 				Dest_offset: uint64(4096),
-				Bytes_deduped: uint64(4096),
 			},
 		}}
 
