@@ -802,6 +802,7 @@ func TestFideduperange(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer f1.Close()
+	defer os.Remove(f1.Name())
 
 	for i := 0; i < 2; i += 1 {
 		_, err = f1.Write(make([]byte, 4096))
@@ -815,6 +816,7 @@ func TestFideduperange(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer f2.Close()
+	defer os.Remove(f2.Name())
 
 	for i := 0; i < 2; i += 1 {
 		data := make([]byte, 4096)
