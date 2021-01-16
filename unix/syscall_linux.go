@@ -140,7 +140,6 @@ func IoctlFileClone(destFd, srcFd int) error {
 type FileDedupeRange struct {
 	Src_offset uint64
 	Src_length uint64
-	Dest_count uint16
 	Reserved1  uint16
 	Reserved2  uint32
 	Info       []FileDedupeRangeInfo
@@ -155,12 +154,13 @@ type FileDedupeRangeInfo struct {
 }
 
 // IoctlFileDedupeRange performs an FIDEDUPERANGE ioctl operation to share the
-// range of data conveyed in value with the file associated with the file
-// descriptor destFd. See the ioctl_fideduperange(2) man page for details.
+// range of data conveyed in value from the file associated with the file
+// descriptor srcFd to the value.Info destinations. See the
+// ioctl_fideduperange(2) man page for details.
 func IoctlFileDedupeRange(srcFd int, value *FileDedupeRange) error {
 	buf := make([]byte, SizeofRawFileDedupeRange+
 		len(value.Info)*SizeofRawFileDedupeRangeInfo)
-	rawrange := (*FileDedupeRange)(unsafe.Pointer(&buf[0]))
+	rawrange := (*RawFileDedupeRange)(unsafe.Pointer(&buf[0]))
 	rawrange.Src_offset = value.Src_offset
 	rawrange.Src_length = value.Src_length
 	rawrange.Dest_count = uint16(len(value.Info))
@@ -170,7 +170,7 @@ func IoctlFileDedupeRange(srcFd int, value *FileDedupeRange) error {
 	for i := range value.Info {
 		rawinfo := (*RawFileDedupeRangeInfo)(unsafe.Pointer(
 			uintptr(unsafe.Pointer(&buf[0])) + uintptr(SizeofRawFileDedupeRange) +
-				uintptr(SizeofRawFileDedupeRangeInfo)))
+				uintptr(i*SizeofRawFileDedupeRangeInfo)))
 		rawinfo.Dest_fd = value.Info[i].Dest_fd
 		rawinfo.Dest_offset = value.Info[i].Dest_offset
 		rawinfo.Bytes_deduped = value.Info[i].Bytes_deduped
@@ -179,7 +179,16 @@ func IoctlFileDedupeRange(srcFd int, value *FileDedupeRange) error {
 	}
 
 	err := ioctl(srcFd, FIDEDUPERANGE, uintptr(unsafe.Pointer(&buf[0])))
-	runtime.KeepAlive(buf)
+
+	// Output
+	for i := range value.Info {
+		rawinfo := (*RawFileDedupeRangeInfo)(unsafe.Pointer(
+			uintptr(unsafe.Pointer(&buf[0])) + uintptr(SizeofRawFileDedupeRange) +
+				uintptr(i*SizeofRawFileDedupeRangeInfo)))
+		value.Info[i].Bytes_deduped = rawinfo.Bytes_deduped
+		value.Info[i].Status = rawinfo.Status
+	}
+
 	return err
 }
 

@@ -480,6 +480,8 @@ type RawFileDedupeRangeInfo C.struct_file_dedupe_range_info
 const (
 	SizeofRawFileDedupeRange     = C.sizeof_struct_file_dedupe_range
 	SizeofRawFileDedupeRangeInfo = C.sizeof_struct_file_dedupe_range_info
+	FILE_DEDUPE_RANGE_SAME       = C.FILE_DEDUPE_RANGE_SAME
+	FILE_DEDUPE_RANGE_DIFFERS    = C.FILE_DEDUPE_RANGE_DIFFERS
 )
 
 // Filesystem Encryption

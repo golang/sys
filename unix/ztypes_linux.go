@@ -102,6 +102,8 @@ type RawFileDedupeRangeInfo struct {
 const (
 	SizeofRawFileDedupeRange     = 0x18
 	SizeofRawFileDedupeRangeInfo = 0x20
+	FILE_DEDUPE_RANGE_SAME       = 0x0
+	FILE_DEDUPE_RANGE_DIFFERS    = 0x1
 )
 
 type FscryptPolicy struct {

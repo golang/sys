@@ -795,3 +795,90 @@ func TestOpenat2(t *testing.T) {
 		t.Errorf("Openat2 should fail with EXDEV, got %v", err)
 	}
 }
+
+func TestFideduperange(t *testing.T) {
+	f1, err := ioutil.TempFile("", t.Name())
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer f1.Close()
+
+	for i := 0; i < 2; i += 1 {
+		_, err = f1.Write(make([]byte, 4096))
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	f2, err := ioutil.TempFile("", t.Name())
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer f2.Close()
+
+	for i := 0; i < 2; i += 1 {
+		data := make([]byte, 4096)
+
+		// Make the 2nd block different
+		if i == 1 {
+		  data[1] = 1
+		}
+
+		_, err = f2.Write(data)
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	dedupe := unix.FileDedupeRange{
+		Src_offset: uint64(0),
+		Src_length: uint64(4096),
+		Info:       []unix.FileDedupeRangeInfo{
+			unix.FileDedupeRangeInfo{
+			  Dest_fd: int64(f2.Fd()),
+				Dest_offset: uint64(0),
+				Bytes_deduped: uint64(4096),
+			},
+			unix.FileDedupeRangeInfo{
+			  Dest_fd: int64(f2.Fd()),
+				Dest_offset: uint64(4096),
+				Bytes_deduped: uint64(4096),
+			},
+		}}
+
+	err = unix.IoctlFileDedupeRange(int(f1.Fd()), &dedupe)
+
+	if err != nil {
+		if err == unix.EOPNOTSUPP {
+			// We can't test if the fs doesn't support deduplication
+		  t.SkipNow()
+		}
+	  t.Fatal(err)
+	}
+
+	// The first Info should be equal
+	if dedupe.Info[0].Status < 0 {
+		// We expect status to be a negated errno
+	  t.Errorf("Unexpected error in FileDedupeRange: %s",
+			unix.ErrnoName(unix.Errno(-dedupe.Info[0].Status)))
+	} else if dedupe.Info[0].Status == unix.FILE_DEDUPE_RANGE_DIFFERS {
+	  t.Errorf("Unexpected different bytes in FileDedupeRange")
+	}
+	if dedupe.Info[0].Bytes_deduped != 4096 {
+	  t.Errorf("Unexpected amount of bytes deduped %v != %v",
+		  dedupe.Info[0].Bytes_deduped, 4096)
+	}
+
+	// The second Info should be different
+	if dedupe.Info[1].Status < 0 {
+		// We expect status to be a negated errno
+	  t.Errorf("Unexpected error in FileDedupeRange: %s",
+			unix.ErrnoName(unix.Errno(-dedupe.Info[1].Status)))
+	} else if dedupe.Info[1].Status == unix.FILE_DEDUPE_RANGE_SAME {
+	  t.Errorf("Unexpected equal bytes in FileDedupeRange")
+	}
+	if dedupe.Info[1].Bytes_deduped != 0 {
+	  t.Errorf("Unexpected amount of bytes deduped %v != %v",
+		  dedupe.Info[1].Bytes_deduped, 0)
+	}
+}
