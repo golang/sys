@@ -2904,9 +2904,12 @@ func GetShellWindow() (shellWindow HWND) {
 	return
 }
 
-func GetWindowThreadProcessId(hwnd HWND, pid *uint32) (tid uint32) {
-	r0, _, _ := syscall.Syscall(procGetWindowThreadProcessId.Addr(), 2, uintptr(hwnd), uintptr(unsafe.Pointer(pid)), 0)
+func GetWindowThreadProcessId(hwnd HWND, pid *uint32) (tid uint32, err error) {
+	r0, _, e1 := syscall.Syscall(procGetWindowThreadProcessId.Addr(), 2, uintptr(hwnd), uintptr(unsafe.Pointer(pid)), 0)
 	tid = uint32(r0)
+	if tid == 0 {
+		err = errnoErr(e1)
+	}
 	return
 }
 
