@@ -15,6 +15,27 @@ import (
 	"testing"
 )
 
+// hasExec reports whether the current system can start new processes
+// using os.StartProcess or (more commonly) exec.Command.
+// Copied from internal/testenv.HasExec
+func hasExec() bool {
+	switch runtime.GOOS {
+	case "js", "ios":
+		return false
+	}
+	return true
+}
+
+// mustHaveExec checks that the current system can start new processes
+// using os.StartProcess or (more commonly) exec.Command.
+// If not, mustHaveExec calls t.Skip with an explanation.
+// Copied from internal/testenv.MustHaveExec
+func mustHaveExec(t testing.TB) {
+	if !hasExec() {
+		t.Skipf("skipping test: cannot exec subprocess on %s/%s", runtime.GOOS, runtime.GOARCH)
+	}
+}
+
 func TestFixCmd(t *testing.T) {
 	cmd := &exec.Cmd{Path: "hello"}
 	fixCmd("hello", cmd)
@@ -30,6 +51,8 @@ func TestFixCmd(t *testing.T) {
 }
 
 func TestCommand(t *testing.T) {
+	mustHaveExec(t)
+
 	for _, cmd := range []func(string) *Cmd{
 		func(s string) *Cmd { return Command(s) },
 		func(s string) *Cmd { return CommandContext(context.Background(), s) },
@@ -71,6 +94,8 @@ func TestCommand(t *testing.T) {
 }
 
 func TestLookPath(t *testing.T) {
+	mustHaveExec(t)
+
 	tmpDir, err := ioutil.TempDir("", "execabs-test")
 	if err != nil {
 		t.Fatalf("ioutil.TempDir failed: %s", err)
