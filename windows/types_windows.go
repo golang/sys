@@ -498,6 +498,22 @@ const (
 	SECURITY_FLAG_IGNORE_WRONG_USAGE       = 0x00000200
 	SECURITY_FLAG_IGNORE_CERT_CN_INVALID   = 0x00001000
 	SECURITY_FLAG_IGNORE_CERT_DATE_INVALID = 0x00002000
+
+	/* Flags for Crypt[Un]ProtectData */
+	CRYPTPROTECT_UI_FORBIDDEN      = 0x1
+	CRYPTPROTECT_LOCAL_MACHINE     = 0x4
+	CRYPTPROTECT_CRED_SYNC         = 0x8
+	CRYPTPROTECT_AUDIT             = 0x10
+	CRYPTPROTECT_NO_RECOVERY       = 0x20
+	CRYPTPROTECT_VERIFY_PROTECTION = 0x40
+	CRYPTPROTECT_CRED_REGENERATE   = 0x80
+
+	/* Flags for CryptProtectPromptStruct */
+	CRYPTPROTECT_PROMPT_ON_UNPROTECT   = 1
+	CRYPTPROTECT_PROMPT_ON_PROTECT     = 2
+	CRYPTPROTECT_PROMPT_RESERVED       = 4
+	CRYPTPROTECT_PROMPT_STRONG         = 8
+	CRYPTPROTECT_PROMPT_REQUIRE_STRONG = 16
 )
 
 const (
@@ -1335,6 +1351,13 @@ type CertStrongSignPara struct {
 	Size                      uint32
 	InfoChoice                uint32
 	InfoOrSerializedInfoOrOID unsafe.Pointer
+}
+
+type CryptProtectPromptStruct struct {
+	Size        uint32
+	PromptFlags uint32
+	App         HWND
+	Prompt      *uint16
 }
 
 type WinTrustData struct {
