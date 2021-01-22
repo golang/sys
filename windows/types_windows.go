@@ -520,10 +520,58 @@ const (
 	REALTIME_PRIORITY_CLASS       = 0x00000100
 )
 
+/* wintrust.h constants for WinVerifyTrustEx */
+const (
+	WTD_UI_ALL    = 1
+	WTD_UI_NONE   = 2
+	WTD_UI_NOBAD  = 3
+	WTD_UI_NOGOOD = 4
+
+	WTD_REVOKE_NONE       = 0
+	WTD_REVOKE_WHOLECHAIN = 1
+
+	WTD_CHOICE_FILE    = 1
+	WTD_CHOICE_CATALOG = 2
+	WTD_CHOICE_BLOB    = 3
+	WTD_CHOICE_SIGNER  = 4
+	WTD_CHOICE_CERT    = 5
+
+	WTD_STATEACTION_IGNORE           = 0x00000000
+	WTD_STATEACTION_VERIFY           = 0x00000010
+	WTD_STATEACTION_CLOSE            = 0x00000002
+	WTD_STATEACTION_AUTO_CACHE       = 0x00000003
+	WTD_STATEACTION_AUTO_CACHE_FLUSH = 0x00000004
+
+	WTD_USE_IE4_TRUST_FLAG                  = 0x1
+	WTD_NO_IE4_CHAIN_FLAG                   = 0x2
+	WTD_NO_POLICY_USAGE_FLAG                = 0x4
+	WTD_REVOCATION_CHECK_NONE               = 0x10
+	WTD_REVOCATION_CHECK_END_CERT           = 0x20
+	WTD_REVOCATION_CHECK_CHAIN              = 0x40
+	WTD_REVOCATION_CHECK_CHAIN_EXCLUDE_ROOT = 0x80
+	WTD_SAFER_FLAG                          = 0x100
+	WTD_HASH_ONLY_FLAG                      = 0x200
+	WTD_USE_DEFAULT_OSVER_CHECK             = 0x400
+	WTD_LIFETIME_SIGNING_FLAG               = 0x800
+	WTD_CACHE_ONLY_URL_RETRIEVAL            = 0x1000
+	WTD_DISABLE_MD2_MD4                     = 0x2000
+	WTD_MOTW                                = 0x4000
+
+	WTD_UICONTEXT_EXECUTE = 0
+	WTD_UICONTEXT_INSTALL = 1
+)
+
 var (
 	OID_PKIX_KP_SERVER_AUTH = []byte("1.3.6.1.5.5.7.3.1\x00")
 	OID_SERVER_GATED_CRYPTO = []byte("1.3.6.1.4.1.311.10.3.3\x00")
 	OID_SGC_NETSCAPE        = []byte("2.16.840.1.113730.4.1\x00")
+
+	WINTRUST_ACTION_GENERIC_VERIFY_V2 = GUID{
+		Data1: 0xaac56b,
+		Data2: 0xcd44,
+		Data3: 0x11d0,
+		Data4: [8]byte{0x8c, 0xc2, 0x0, 0xc0, 0x4f, 0xc2, 0x95, 0xee},
+	}
 )
 
 // Pointer represents a pointer to an arbitrary Windows type.
@@ -1281,6 +1329,44 @@ type CertPoliciesInfo struct {
 
 type CertPolicyQualifierInfo struct {
 	// Not implemented
+}
+
+type CertStrongSignPara struct {
+	Size                      uint32
+	InfoChoice                uint32
+	InfoOrSerializedInfoOrOID unsafe.Pointer
+}
+
+type WinTrustData struct {
+	Size                            uint32
+	PolicyCallbackData              uintptr
+	SIPClientData                   uintptr
+	UIChoice                        uint32
+	RevocationChecks                uint32
+	UnionChoice                     uint32
+	FileOrCatalogOrBlobOrSgnrOrCert unsafe.Pointer
+	StateAction                     uint32
+	StateData                       Handle
+	URLReference                    *uint16
+	ProvFlags                       uint32
+	UIContext                       uint32
+	SignatureSettings               *WinTrustSignatureSettings
+}
+
+type WinTrustFileInfo struct {
+	Size         uint32
+	FilePath     *uint16
+	File         Handle
+	KnownSubject *GUID
+}
+
+type WinTrustSignatureSettings struct {
+	Size             uint32
+	Index            uint32
+	Flags            uint32
+	SecondarySigs    uint32
+	VerifiedSigIndex uint32
+	CryptoPolicy     *CertStrongSignPara
 }
 
 const (
