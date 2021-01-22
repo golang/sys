@@ -427,6 +427,67 @@ const (
 	CERT_CLOSE_STORE_FORCE_FLAG = 0x00000001
 	CERT_CLOSE_STORE_CHECK_FLAG = 0x00000002
 
+	/* CryptQueryObject object type */
+	CERT_QUERY_OBJECT_FILE = 1
+	CERT_QUERY_OBJECT_BLOB = 2
+
+	/* CryptQueryObject content type flags */
+	CERT_QUERY_CONTENT_CERT                    = 1
+	CERT_QUERY_CONTENT_CTL                     = 2
+	CERT_QUERY_CONTENT_CRL                     = 3
+	CERT_QUERY_CONTENT_SERIALIZED_STORE        = 4
+	CERT_QUERY_CONTENT_SERIALIZED_CERT         = 5
+	CERT_QUERY_CONTENT_SERIALIZED_CTL          = 6
+	CERT_QUERY_CONTENT_SERIALIZED_CRL          = 7
+	CERT_QUERY_CONTENT_PKCS7_SIGNED            = 8
+	CERT_QUERY_CONTENT_PKCS7_UNSIGNED          = 9
+	CERT_QUERY_CONTENT_PKCS7_SIGNED_EMBED      = 10
+	CERT_QUERY_CONTENT_PKCS10                  = 11
+	CERT_QUERY_CONTENT_PFX                     = 12
+	CERT_QUERY_CONTENT_CERT_PAIR               = 13
+	CERT_QUERY_CONTENT_PFX_AND_LOAD            = 14
+	CERT_QUERY_CONTENT_FLAG_CERT               = (1 << CERT_QUERY_CONTENT_CERT)
+	CERT_QUERY_CONTENT_FLAG_CTL                = (1 << CERT_QUERY_CONTENT_CTL)
+	CERT_QUERY_CONTENT_FLAG_CRL                = (1 << CERT_QUERY_CONTENT_CRL)
+	CERT_QUERY_CONTENT_FLAG_SERIALIZED_STORE   = (1 << CERT_QUERY_CONTENT_SERIALIZED_STORE)
+	CERT_QUERY_CONTENT_FLAG_SERIALIZED_CERT    = (1 << CERT_QUERY_CONTENT_SERIALIZED_CERT)
+	CERT_QUERY_CONTENT_FLAG_SERIALIZED_CTL     = (1 << CERT_QUERY_CONTENT_SERIALIZED_CTL)
+	CERT_QUERY_CONTENT_FLAG_SERIALIZED_CRL     = (1 << CERT_QUERY_CONTENT_SERIALIZED_CRL)
+	CERT_QUERY_CONTENT_FLAG_PKCS7_SIGNED       = (1 << CERT_QUERY_CONTENT_PKCS7_SIGNED)
+	CERT_QUERY_CONTENT_FLAG_PKCS7_UNSIGNED     = (1 << CERT_QUERY_CONTENT_PKCS7_UNSIGNED)
+	CERT_QUERY_CONTENT_FLAG_PKCS7_SIGNED_EMBED = (1 << CERT_QUERY_CONTENT_PKCS7_SIGNED_EMBED)
+	CERT_QUERY_CONTENT_FLAG_PKCS10             = (1 << CERT_QUERY_CONTENT_PKCS10)
+	CERT_QUERY_CONTENT_FLAG_PFX                = (1 << CERT_QUERY_CONTENT_PFX)
+	CERT_QUERY_CONTENT_FLAG_CERT_PAIR          = (1 << CERT_QUERY_CONTENT_CERT_PAIR)
+	CERT_QUERY_CONTENT_FLAG_PFX_AND_LOAD       = (1 << CERT_QUERY_CONTENT_PFX_AND_LOAD)
+	CERT_QUERY_CONTENT_FLAG_ALL                = (CERT_QUERY_CONTENT_FLAG_CERT | CERT_QUERY_CONTENT_FLAG_CTL | CERT_QUERY_CONTENT_FLAG_CRL | CERT_QUERY_CONTENT_FLAG_SERIALIZED_STORE | CERT_QUERY_CONTENT_FLAG_SERIALIZED_CERT | CERT_QUERY_CONTENT_FLAG_SERIALIZED_CTL | CERT_QUERY_CONTENT_FLAG_SERIALIZED_CRL | CERT_QUERY_CONTENT_FLAG_PKCS7_SIGNED | CERT_QUERY_CONTENT_FLAG_PKCS7_UNSIGNED | CERT_QUERY_CONTENT_FLAG_PKCS7_SIGNED_EMBED | CERT_QUERY_CONTENT_FLAG_PKCS10 | CERT_QUERY_CONTENT_FLAG_PFX | CERT_QUERY_CONTENT_FLAG_CERT_PAIR)
+	CERT_QUERY_CONTENT_FLAG_ALL_ISSUER_CERT    = (CERT_QUERY_CONTENT_FLAG_CERT | CERT_QUERY_CONTENT_FLAG_SERIALIZED_STORE | CERT_QUERY_CONTENT_FLAG_SERIALIZED_CERT | CERT_QUERY_CONTENT_FLAG_PKCS7_SIGNED | CERT_QUERY_CONTENT_FLAG_PKCS7_UNSIGNED)
+
+	/* CryptQueryObject format type flags */
+	CERT_QUERY_FORMAT_BINARY                     = 1
+	CERT_QUERY_FORMAT_BASE64_ENCODED             = 2
+	CERT_QUERY_FORMAT_ASN_ASCII_HEX_ENCODED      = 3
+	CERT_QUERY_FORMAT_FLAG_BINARY                = (1 << CERT_QUERY_FORMAT_BINARY)
+	CERT_QUERY_FORMAT_FLAG_BASE64_ENCODED        = (1 << CERT_QUERY_FORMAT_BASE64_ENCODED)
+	CERT_QUERY_FORMAT_FLAG_ASN_ASCII_HEX_ENCODED = (1 << CERT_QUERY_FORMAT_ASN_ASCII_HEX_ENCODED)
+	CERT_QUERY_FORMAT_FLAG_ALL                   = (CERT_QUERY_FORMAT_FLAG_BINARY | CERT_QUERY_FORMAT_FLAG_BASE64_ENCODED | CERT_QUERY_FORMAT_FLAG_ASN_ASCII_HEX_ENCODED)
+
+	/* CertGetNameString name types */
+	CERT_NAME_EMAIL_TYPE            = 1
+	CERT_NAME_RDN_TYPE              = 2
+	CERT_NAME_ATTR_TYPE             = 3
+	CERT_NAME_SIMPLE_DISPLAY_TYPE   = 4
+	CERT_NAME_FRIENDLY_DISPLAY_TYPE = 5
+	CERT_NAME_DNS_TYPE              = 6
+	CERT_NAME_URL_TYPE              = 7
+	CERT_NAME_UPN_TYPE              = 8
+
+	/* CertGetNameString flags */
+	CERT_NAME_ISSUER_FLAG              = 0x1
+	CERT_NAME_DISABLE_IE4_UTF8_FLAG    = 0x10000
+	CERT_NAME_SEARCH_ALL_NAMES_FLAG    = 0x2
+	CERT_NAME_STR_ENABLE_PUNYCODE_FLAG = 0x00200000
+
 	/* AuthType values for SSLExtraCertChainPolicyPara struct */
 	AUTHTYPE_CLIENT = 1
 	AUTHTYPE_SERVER = 2
@@ -1051,7 +1112,57 @@ type MibIfRow struct {
 }
 
 type CertInfo struct {
-	// Not implemented
+	Version              uint32
+	SerialNumber         CryptIntegerBlob
+	SignatureAlgorithm   CryptAlgorithmIdentifier
+	Issuer               CertNameBlob
+	NotBefore            Filetime
+	NotAfter             Filetime
+	Subject              CertNameBlob
+	SubjectPublicKeyInfo CertPublicKeyInfo
+	IssuerUniqueId       CryptBitBlob
+	SubjectUniqueId      CryptBitBlob
+	CountExtensions      uint32
+	Extensions           *CertExtension
+}
+
+type CertExtension struct {
+	ObjId    *byte
+	Critical bool
+	Value    CryptObjidBlob
+}
+
+type CryptAlgorithmIdentifier struct {
+	ObjId      *byte
+	Parameters CryptObjidBlob
+}
+
+type CertPublicKeyInfo struct {
+	Algorithm CryptAlgorithmIdentifier
+	PublicKey CryptBitBlob
+}
+
+type DataBlob struct {
+	Size uint32
+	Data *byte
+}
+type CryptIntegerBlob DataBlob
+type CryptUintBlob DataBlob
+type CryptObjidBlob DataBlob
+type CertNameBlob DataBlob
+type CertRdnValueBlob DataBlob
+type CertBlob DataBlob
+type CrlBlob DataBlob
+type CryptDataBlob DataBlob
+type CryptHashBlob DataBlob
+type CryptDigestBlob DataBlob
+type CryptDerBlob DataBlob
+type CryptAttrBlob DataBlob
+
+type CryptBitBlob struct {
+	Size       uint32
+	Data       *byte
+	UnusedBits uint32
 }
 
 type CertContext struct {
@@ -1157,9 +1268,19 @@ type CertChainPolicyStatus struct {
 	ExtraPolicyStatus Pointer
 }
 
-type CryptDataBlob struct {
-	Size uint32
-	Data *byte
+type CertPolicy struct {
+	Identifier      *byte
+	CountQualifiers uint32
+	Qualifiers      *CertPolicyQualifierInfo
+}
+
+type CertPoliciesInfo struct {
+	Count       uint32
+	PolicyInfos *CertPolicy
+}
+
+type CertPolicyQualifierInfo struct {
+	// Not implemented
 }
 
 const (
