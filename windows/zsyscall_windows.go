@@ -51,6 +51,7 @@ var (
 	modshell32  = NewLazySystemDLL("shell32.dll")
 	moduser32   = NewLazySystemDLL("user32.dll")
 	moduserenv  = NewLazySystemDLL("userenv.dll")
+	modwevtapi  = NewLazySystemDLL("wevtapi.dll")
 	modws2_32   = NewLazySystemDLL("ws2_32.dll")
 	modwtsapi32 = NewLazySystemDLL("wtsapi32.dll")
 
@@ -350,6 +351,12 @@ var (
 	procCreateEnvironmentBlock                               = moduserenv.NewProc("CreateEnvironmentBlock")
 	procDestroyEnvironmentBlock                              = moduserenv.NewProc("DestroyEnvironmentBlock")
 	procGetUserProfileDirectoryW                             = moduserenv.NewProc("GetUserProfileDirectoryW")
+	procEvtClose                                             = modwevtapi.NewProc("EvtClose")
+	procEvtCreateBookmark                                    = modwevtapi.NewProc("EvtCreateBookmark")
+	procEvtNext                                              = modwevtapi.NewProc("EvtNext")
+	procEvtRender                                            = modwevtapi.NewProc("EvtRender")
+	procEvtSubscribe                                         = modwevtapi.NewProc("EvtSubscribe")
+	procEvtUpdateBookmark                                    = modwevtapi.NewProc("EvtUpdateBookmark")
 	procFreeAddrInfoW                                        = modws2_32.NewProc("FreeAddrInfoW")
 	procGetAddrInfoW                                         = modws2_32.NewProc("GetAddrInfoW")
 	procWSACleanup                                           = modws2_32.NewProc("WSACleanup")
@@ -2985,6 +2992,56 @@ func DestroyEnvironmentBlock(block *uint16) (err error) {
 
 func GetUserProfileDirectory(t Token, dir *uint16, dirLen *uint32) (err error) {
 	r1, _, e1 := syscall.Syscall(procGetUserProfileDirectoryW.Addr(), 3, uintptr(t), uintptr(unsafe.Pointer(dir)), uintptr(unsafe.Pointer(dirLen)))
+	if r1 == 0 {
+		err = errnoErr(e1)
+	}
+	return
+}
+
+func EvtClose(object Handle) (err error) {
+	r1, _, e1 := syscall.Syscall(procEvtClose.Addr(), 1, uintptr(object), 0, 0)
+	if r1 == 0 {
+		err = errnoErr(e1)
+	}
+	return
+}
+
+func EvtCreateBookmark(bookmarkXML *uint16) (handle Handle, err error) {
+	r0, _, e1 := syscall.Syscall(procEvtCreateBookmark.Addr(), 1, uintptr(unsafe.Pointer(bookmarkXML)), 0, 0)
+	handle = Handle(r0)
+	if handle == 0 {
+		err = errnoErr(e1)
+	}
+	return
+}
+
+func EvtNext(resultSet Handle, eventArraySize uint32, eventArray *Handle, timeout uint32, flags uint32, numReturned *uint32) (err error) {
+	r1, _, e1 := syscall.Syscall6(procEvtNext.Addr(), 6, uintptr(resultSet), uintptr(eventArraySize), uintptr(unsafe.Pointer(eventArray)), uintptr(timeout), uintptr(flags), uintptr(unsafe.Pointer(numReturned)))
+	if r1 == 0 {
+		err = errnoErr(e1)
+	}
+	return
+}
+
+func EvtRender(context Handle, fragment Handle, flags uint32, bufferSize uint32, buffer *byte, bufferUsed *uint32, propertyCount *uint32) (err error) {
+	r1, _, e1 := syscall.Syscall9(procEvtRender.Addr(), 7, uintptr(context), uintptr(fragment), uintptr(flags), uintptr(bufferSize), uintptr(unsafe.Pointer(buffer)), uintptr(unsafe.Pointer(bufferUsed)), uintptr(unsafe.Pointer(propertyCount)), 0, 0)
+	if r1 == 0 {
+		err = errnoErr(e1)
+	}
+	return
+}
+
+func EvtSubscribe(session Handle, signalEvent Handle, channelPath *uint16, query *uint16, bookmark Handle, context uintptr, callback syscall.Handle, flags uint32) (handle Handle, err error) {
+	r0, _, e1 := syscall.Syscall9(procEvtSubscribe.Addr(), 8, uintptr(session), uintptr(signalEvent), uintptr(unsafe.Pointer(channelPath)), uintptr(unsafe.Pointer(query)), uintptr(bookmark), uintptr(context), uintptr(callback), uintptr(flags), 0)
+	handle = Handle(r0)
+	if handle == 0 {
+		err = errnoErr(e1)
+	}
+	return
+}
+
+func EvtUpdateBookmark(bookmark Handle, event Handle) (err error) {
+	r1, _, e1 := syscall.Syscall(procEvtUpdateBookmark.Addr(), 2, uintptr(bookmark), uintptr(event), 0)
 	if r1 == 0 {
 		err = errnoErr(e1)
 	}
