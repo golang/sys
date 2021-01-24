@@ -1192,7 +1192,7 @@ type CertInfo struct {
 
 type CertExtension struct {
 	ObjId    *byte
-	Critical bool
+	Critical int32
 	Value    CryptObjidBlob
 }
 
@@ -1332,7 +1332,7 @@ type CertChainPolicyStatus struct {
 	ExtraPolicyStatus Pointer
 }
 
-type CertPolicy struct {
+type CertPolicyInfo struct {
 	Identifier      *byte
 	CountQualifiers uint32
 	Qualifiers      *CertPolicyQualifierInfo
@@ -1340,7 +1340,7 @@ type CertPolicy struct {
 
 type CertPoliciesInfo struct {
 	Count       uint32
-	PolicyInfos *CertPolicy
+	PolicyInfos *CertPolicyInfo
 }
 
 type CertPolicyQualifierInfo struct {
