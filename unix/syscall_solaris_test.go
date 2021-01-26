@@ -74,3 +74,11 @@ func TestStatvfs(t *testing.T) {
 		}
 	}
 }
+
+func TestSysconf(t *testing.T) {
+	n, err := unix.Sysconf(3 /* SC_CLK_TCK */)
+	if err != nil {
+		t.Fatalf("Sysconf: %v", err)
+	}
+	t.Logf("Sysconf(SC_CLK_TCK) = %d", n)
+}
