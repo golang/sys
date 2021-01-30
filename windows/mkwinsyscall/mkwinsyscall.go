@@ -644,6 +644,7 @@ func (f *Fn) HelperName() string {
 // Source files and functions.
 type Source struct {
 	Funcs           []*Fn
+	DLLFuncNames    []*Fn
 	Files           []string
 	StdLibImports   []string
 	ExternalImports []string
@@ -674,6 +675,15 @@ func ParseFiles(fs []string) (*Source, error) {
 	for _, file := range fs {
 		if err := src.ParseFile(file); err != nil {
 			return nil, err
+		}
+	}
+	src.DLLFuncNames = make([]*Fn, 0, len(src.Funcs))
+	uniq := make(map[string]bool, len(src.Funcs))
+	for _, fn := range src.Funcs {
+		name := fn.DLLFuncName()
+		if !uniq[name] {
+			src.DLLFuncNames = append(src.DLLFuncNames, fn)
+			uniq[name] = true
 		}
 	}
 	return src, nil
@@ -920,7 +930,7 @@ var (
 {{define "dlls"}}{{range .DLLs}}	mod{{.}} = {{newlazydll .}}
 {{end}}{{end}}
 
-{{define "funcnames"}}{{range .Funcs}}	proc{{.DLLFuncName}} = mod{{.DLLName}}.NewProc("{{.DLLFuncName}}")
+{{define "funcnames"}}{{range .DLLFuncNames}}	proc{{.DLLFuncName}} = mod{{.DLLName}}.NewProc("{{.DLLFuncName}}")
 {{end}}{{end}}
 
 {{define "helperbody"}}
