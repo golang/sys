@@ -96,6 +96,7 @@ struct termios2 {
 #include <linux/fsverity.h>
 #include <linux/genetlink.h>
 #include <linux/hdreg.h>
+#include <linux/hidraw.h>
 #include <linux/icmpv6.h>
 #include <linux/if_alg.h>
 #include <linux/if_bridge.h>
@@ -3632,4 +3633,9 @@ const (
 	ETHTOOL_A_TUNNEL_INFO_HEADER              = C.ETHTOOL_A_TUNNEL_INFO_HEADER
 	ETHTOOL_A_TUNNEL_INFO_UDP_PORTS           = C.ETHTOOL_A_TUNNEL_INFO_UDP_PORTS
 	ETHTOOL_A_TUNNEL_INFO_MAX                 = C.ETHTOOL_A_TUNNEL_INFO_MAX
+)
+
+type (
+	HIDRawReportDescriptor C.struct_hidraw_report_descriptor
+	HIDRawDevInfo          C.struct_hidraw_devinfo
 )
