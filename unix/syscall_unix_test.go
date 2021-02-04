@@ -896,3 +896,42 @@ func chtmpdir(t *testing.T) func() {
 		os.RemoveAll(d)
 	}
 }
+
+func TestPipe(t *testing.T) {
+	const s = "hello"
+	var pipes [2]int
+	unix.Pipe(pipes[:])
+	r := pipes[0]
+	w := pipes[1]
+	go func() {
+		n, err := unix.Write(w, []byte(s))
+		if err != nil {
+			t.Errorf("bad write: %s\n", err)
+			return
+		}
+		if n != len(s) {
+			t.Errorf("bad write count: %d\n", n)
+			return
+		}
+		err = unix.Close(w)
+		if err != nil {
+			t.Errorf("bad close: %s\n", err)
+			return
+		}
+	}()
+	var buf [10 + len(s)]byte
+	n, err := unix.Read(r, buf[:])
+	if err != nil {
+		t.Fatalf("bad read: %s\n", err)
+	}
+	if n != len(s) {
+		t.Fatalf("bad read count: %d\n", n)
+	}
+	if string(buf[:n]) != s {
+		t.Fatalf("bad contents: %s\n", string(buf[:n]))
+	}
+	err = unix.Close(r)
+	if err != nil {
+		t.Fatalf("bad close: %s\n", err)
+	}
+}
