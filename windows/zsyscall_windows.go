@@ -212,6 +212,7 @@ var (
 	procFreeLibrary                                          = modkernel32.NewProc("FreeLibrary")
 	procGenerateConsoleCtrlEvent                             = modkernel32.NewProc("GenerateConsoleCtrlEvent")
 	procGetACP                                               = modkernel32.NewProc("GetACP")
+	procGetCommTimeouts                                      = modkernel32.NewProc("GetCommTimeouts")
 	procGetCommandLineW                                      = modkernel32.NewProc("GetCommandLineW")
 	procGetComputerNameExW                                   = modkernel32.NewProc("GetComputerNameExW")
 	procGetComputerNameW                                     = modkernel32.NewProc("GetComputerNameW")
@@ -296,6 +297,7 @@ var (
 	procRemoveDirectoryW                                     = modkernel32.NewProc("RemoveDirectoryW")
 	procResetEvent                                           = modkernel32.NewProc("ResetEvent")
 	procResumeThread                                         = modkernel32.NewProc("ResumeThread")
+	procSetCommTimeouts                                      = modkernel32.NewProc("SetCommTimeouts")
 	procSetConsoleCursorPosition                             = modkernel32.NewProc("SetConsoleCursorPosition")
 	procSetConsoleMode                                       = modkernel32.NewProc("SetConsoleMode")
 	procSetCurrentDirectoryW                                 = modkernel32.NewProc("SetCurrentDirectoryW")
@@ -1787,6 +1789,14 @@ func GetACP() (acp uint32) {
 	return
 }
 
+func GetCommTimeouts(handle Handle, timeouts *CommTimeouts) (err error) {
+	r1, _, e1 := syscall.Syscall(procGetCommTimeouts.Addr(), 2, uintptr(handle), uintptr(unsafe.Pointer(timeouts)), 0)
+	if r1 == 0 {
+		err = errnoErr(e1)
+	}
+	return
+}
+
 func GetCommandLine() (cmd *uint16) {
 	r0, _, _ := syscall.Syscall(procGetCommandLineW.Addr(), 0, 0, 0, 0)
 	cmd = (*uint16)(unsafe.Pointer(r0))
@@ -2532,6 +2542,14 @@ func ResumeThread(thread Handle) (ret uint32, err error) {
 	r0, _, e1 := syscall.Syscall(procResumeThread.Addr(), 1, uintptr(thread), 0, 0)
 	ret = uint32(r0)
 	if ret == 0xffffffff {
+		err = errnoErr(e1)
+	}
+	return
+}
+
+func SetCommTimeouts(handle Handle, timeouts *CommTimeouts) (err error) {
+	r1, _, e1 := syscall.Syscall(procSetCommTimeouts.Addr(), 2, uintptr(handle), uintptr(unsafe.Pointer(timeouts)), 0)
+	if r1 == 0 {
 		err = errnoErr(e1)
 	}
 	return
