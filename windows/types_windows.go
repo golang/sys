@@ -1480,6 +1480,8 @@ type CertChainFindByIssuerPara struct {
 	Issuer                 Pointer
 	FindCallback           Pointer
 	FindArg                Pointer
+	IssuerChainIndex       *uint32
+	IssuerElementIndex     *uint32
 }
 
 type WinTrustData struct {
