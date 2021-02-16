@@ -122,7 +122,7 @@ func TestSignalNum(t *testing.T) {
 
 func TestFcntlInt(t *testing.T) {
 	t.Parallel()
-	file, err := ioutil.TempFile("", "TestFnctlInt")
+	file, err := ioutil.TempFile("", "TestFcntlInt")
 	if err != nil {
 		t.Fatal(err)
 	}
