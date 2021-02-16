@@ -38,6 +38,7 @@ package unix
 #include <sys/stat.h>
 #include <sys/time.h>
 #include <sys/types.h>
+#include <sys/ucred.h>
 #include <sys/uio.h>
 #include <sys/un.h>
 #include <sys/utsname.h>
@@ -150,6 +151,8 @@ type RawSockaddrCtl C.struct_sockaddr_ctl
 
 type _Socklen C.socklen_t
 
+type Xucred C.struct_xucred
+
 type Linger C.struct_linger
 
 type Iovec C.struct_iovec
@@ -177,6 +180,7 @@ const (
 	SizeofSockaddrUnix     = C.sizeof_struct_sockaddr_un
 	SizeofSockaddrDatalink = C.sizeof_struct_sockaddr_dl
 	SizeofSockaddrCtl      = C.sizeof_struct_sockaddr_ctl
+	SizeofXucred           = C.sizeof_struct_xucred
 	SizeofLinger           = C.sizeof_struct_linger
 	SizeofIovec            = C.sizeof_struct_iovec
 	SizeofIPMreq           = C.sizeof_struct_ip_mreq

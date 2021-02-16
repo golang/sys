@@ -7,8 +7,10 @@ package unix_test
 import (
 	"bytes"
 	"io/ioutil"
+	"net"
 	"os"
 	"path"
+	"syscall"
 	"testing"
 
 	"golang.org/x/sys/unix"
@@ -216,4 +218,38 @@ func TestFcntlFstore(t *testing.T) {
 		t.Errorf("FcntlFstore: got size = %d, want %d", st.Size(), 0)
 	}
 
+}
+
+func TestGetsockoptXucred(t *testing.T) {
+	fds, err := syscall.Socketpair(syscall.AF_LOCAL, syscall.SOCK_STREAM, 0)
+	if err != nil {
+		t.Fatalf("Socketpair: %v", err)
+	}
+	defer syscall.Close(fds[0])
+	defer syscall.Close(fds[1])
+
+	srvFile := os.NewFile(uintptr(fds[0]), "server")
+	defer srvFile.Close()
+	srv, err := net.FileConn(srvFile)
+	if err != nil {
+		t.Fatalf("FileConn: %v", err)
+	}
+	defer srv.Close()
+
+	cliFile := os.NewFile(uintptr(fds[1]), "client")
+	defer cliFile.Close()
+	cli, err := net.FileConn(cliFile)
+	if err != nil {
+		t.Fatalf("FileConn: %v", err)
+	}
+	defer cli.Close()
+
+	cred, err := unix.GetsockoptXucred(fds[1], unix.SOL_LOCAL, unix.LOCAL_PEERCRED)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Logf("got: %+v", cred)
+	if got, want := cred.Uid, os.Getuid(); int(got) != int(want) {
+		t.Errorf("uid = %v; want %v", got, want)
+	}
 }
