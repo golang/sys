@@ -52,9 +52,9 @@ type target struct {
 	Bits       int
 }
 
-// List of all Linux targets supported by the go compiler. Currently, riscv64
-// and sparc64 are not fully supported, but there is enough support already to
-// generate Go type and error definitions.
+// List of all Linux targets supported by the go compiler. Currently, sparc64 is
+// not fully supported, but there is enough support already to generate Go type
+// and error definitions.
 var targets = []target{
 	{
 		GoArch:    "386",
