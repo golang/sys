@@ -10,7 +10,6 @@ import (
 	"net"
 	"os"
 	"path"
-	"syscall"
 	"testing"
 
 	"golang.org/x/sys/unix"
@@ -221,12 +220,12 @@ func TestFcntlFstore(t *testing.T) {
 }
 
 func TestGetsockoptXucred(t *testing.T) {
-	fds, err := syscall.Socketpair(syscall.AF_LOCAL, syscall.SOCK_STREAM, 0)
+	fds, err := unix.Socketpair(unix.AF_LOCAL, unix.SOCK_STREAM, 0)
 	if err != nil {
 		t.Fatalf("Socketpair: %v", err)
 	}
-	defer syscall.Close(fds[0])
-	defer syscall.Close(fds[1])
+	defer unix.Close(fds[0])
+	defer unix.Close(fds[1])
 
 	srvFile := os.NewFile(uintptr(fds[0]), "server")
 	defer srvFile.Close()
@@ -251,5 +250,10 @@ func TestGetsockoptXucred(t *testing.T) {
 	t.Logf("got: %+v", cred)
 	if got, want := cred.Uid, os.Getuid(); int(got) != int(want) {
 		t.Errorf("uid = %v; want %v", got, want)
+	}
+	if cred.Ngroups > 0 {
+		if got, want := cred.Groups[0], os.Getgid(); int(got) != int(want) {
+			t.Errorf("gid = %v; want %v", got, want)
+		}
 	}
 }
