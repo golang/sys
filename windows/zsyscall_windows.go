@@ -2440,7 +2440,7 @@ func ReadConsole(console Handle, buf *uint16, toread uint32, read *uint32, input
 // The data is read into the array starting at buf.
 // toread is the amount of keypresses that should be read.
 // The actual amount of keypresses read is stored in read.
-// The differenc between ReadConsole and ReadConsoleInput is that 
+// The difference between ReadConsole and ReadConsoleInput is that 
 //  - ReadConsole only reads character insertion (reads any character key pressed)
 //  - ReadConsoleInput reads any key (both key press and key release) as well as mouse, focus and window size change events
 // See: https://docs.microsoft.com/en-us/windows/console/readconsoleinput

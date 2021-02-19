@@ -1,7 +1,9 @@
 package windows
 
 // InputRecord is the data structure that ReadConsoleInput writes into.
-// Original source: https://docs.microsoft.com/en-us/windows/console/input-record-str
+// All Documentation originally provided by Michael Niksa, et al. at Microsoft Corporation
+// under CC Attribution 4.0 International
+// via https://docs.microsoft.com/en-us/windows/console/input-record-str
 type InputRecord struct {
 	// 0x1: Key event
 	// 0x2: Will never be read when using ReadConsoleInput
