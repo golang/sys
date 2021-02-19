@@ -14,19 +14,19 @@ type InputRecord struct {
 	Type  uint16
 	_     [2]byte // discard the next two bytes
 
-	// Event contents can be one of:
-	// KEY_EVENT (Type == 1)
-	//  - Event[0] is 0x1 if the key is pressed, 0x0 if the key is released
-	//  - Event[3] is the keycode of the pressed key, see
+	// Data contents are:
+	// If the event is a key event (Type == 1):
+	//  - Data[0] is 0x1 if the key is pressed, 0x0 if the key is released
+	//  - Data[3] is the keycode of the pressed key, see
 	//    https://docs.microsoft.com/en-us/windows/win32/inputdev/virtual-key-codes
-	//  - Event[5] is the ascii or Unicode keycode.
-	//  - Event[6] stores the state of the modifier keys.
+	//  - Data[5] is the ascii or Unicode keycode.
+	//  - Data[6] stores the state of the modifier keys.
 	//  Original source: https://docs.microsoft.com/en-us/windows/console/key-event-record-str
 	// 
-	// WINDOW_BUFFER_SIZE_EVENT (TYPE == 4)
-	//  - Event[0] is the new amount of character rows
-	//  - Event[1] is the new amount of character columns
+	// If the event is a window buffer size event (Type == 4):
+	//  - Data[0] is the new amount of character rows
+	//  - Data[1] is the new amount of character columns
 	// Original source: https://docs.microsoft.com/en-us/windows/console/window-buffer-size-record-str
-	Event [6]uint16
+	Data [6]uint16
 }
 
