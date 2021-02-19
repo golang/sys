@@ -2421,6 +2421,11 @@ func QueryInformationJobObject(job Handle, JobObjectInformationClass int32, JobO
 	return
 }
 
+// ReadConsole reads characters from the console and writes the Unicode keycode(s) into buf
+// buf should point to the element in an array where writing should begin
+// toread specifies how many characters should be read
+// read should point to a uint32 where the number of characters actually read should be stored
+// inputControl should be set to NULL, as it currently has no effect
 func ReadConsole(console Handle, buf *uint16, toread uint32, read *uint32, inputControl *byte) (err error) {
 	r1, _, e1 := syscall.Syscall6(procReadConsoleW.Addr(), 5, uintptr(console), uintptr(unsafe.Pointer(buf)), uintptr(toread), uintptr(unsafe.Pointer(read)), uintptr(unsafe.Pointer(inputControl)), 0)
 	if r1 == 0 {
