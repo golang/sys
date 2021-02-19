@@ -2443,6 +2443,7 @@ func ReadConsole(console Handle, buf *uint16, toread uint32, read *uint32, input
 // The differenc between ReadConsole and ReadConsoleInput is that 
 //  - ReadConsole only reads character insertion (reads any character key pressed)
 //  - ReadConsoleInput reads any key (both key press and key release) as well as mouse, focus and window size change events
+// See: https://docs.microsoft.com/en-us/windows/console/readconsoleinput
 func ReadConsoleInput(console Handle, rec *InputRecord, toread uint32, read *uint32) (err error) {
 	r1, _, e1 := syscall.Syscall6(procReadConsoleInputW.Addr(), 4,
 		uintptr(console), uintptr(unsafe.Pointer(rec)), uintptr(toread),
