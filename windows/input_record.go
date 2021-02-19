@@ -8,7 +8,7 @@ type InputRecord struct {
 	// 0x2: The event is of type MOUSE_EVENT and will never be read when using ReadConsoleInput
 	// 0x4: The event is of type WINDOW_BUFFER_SIZE_EVENT: https://docs.microsoft.com/en-us/windows/console/window-buffer-size-record-str
 	// 0x8: The event is of type MENU_EVENT and should be ignored.
-	// 0x10: The event is of type FOCUS_EVENT: https://docs.microsoft.com/en-us/windows/console/focus-event-record-str
+	// 0x10: The event is of type FOCUS_EVENT and should be ignored.
 	Type  uint16
 	_ [2]byte // discard the next two bytes
 
@@ -26,8 +26,6 @@ type InputRecord struct {
 	// WINDOW_BUFFER_SIZE_EVENT (TYPE == 4)
 	//  - Event[0] is the new amount of character rows
 	//  - Event[1] is the new amount of character columns
-	// FOCUS_EVENT (Type == 16)
-	//  - Event[0] is 0x1 if the window is now focused and 0x0 if the window is now unfocused
 	Event [6]uint16
 }
 
