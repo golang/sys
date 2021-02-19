@@ -10,7 +10,7 @@ type InputRecord struct {
 	// 0x8: The event is of type MENU_EVENT and should be ignored.
 	// 0x10: The event is of type FOCUS_EVENT and should be ignored.
 	Type  uint16
-	_ [2]byte // discard the next two bytes
+	_     [2]byte // discard the next two bytes
 
 	// Event contents can be one of:
 	// KEY_EVENT (Type == 1)
