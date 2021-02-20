@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// +build ignore
-// +build aix
+//go:build ignore && aix
+// +build ignore,aix
 
 /*
 Input to cgo -godefs.  See also mkerrors.sh and mkall.sh
