@@ -171,3 +171,74 @@ func TestIsWindowsService(t *testing.T) {
 		t.Error("IsWindowsService retuns true when not running in a service.")
 	}
 }
+
+func TestIsWindowsServiceWhenParentExits(t *testing.T) {
+	if os.Getenv("GO_WANT_HELPER_PROCESS") == "parent" {
+		// in parent process
+
+		// Start the child and exit quickly.
+		child := exec.Command(os.Args[0], "-test.run=TestIsWindowsServiceWhenParentExits")
+		child.Env = append(os.Environ(), "GO_WANT_HELPER_PROCESS=child")
+		err := child.Start()
+		if err != nil {
+			fmt.Fprintf(os.Stderr, fmt.Sprintf("child start failed: %v", err))
+			os.Exit(1)
+		}
+		os.Exit(0)
+	}
+
+	if os.Getenv("GO_WANT_HELPER_PROCESS") == "child" {
+		// in child process
+		dumpPath := os.Getenv("GO_WANT_HELPER_PROCESS_FILE")
+		if dumpPath == "" {
+			// We cannot report this error. But main test will notice
+			// that we did not create dump file.
+			os.Exit(1)
+		}
+		var msg string
+		isSvc, err := svc.IsWindowsService()
+		if err != nil {
+			msg = err.Error()
+		}
+		if isSvc {
+			msg = "IsWindowsService retuns true when not running in a service."
+		}
+		err = os.WriteFile(dumpPath, []byte(msg), 0644)
+		if err != nil {
+			// We cannot report this error. But main test will notice
+			// that we did not create dump file.
+			os.Exit(2)
+		}
+		os.Exit(0)
+	}
+
+	// Run in a loop until it fails.
+	for i := 0; i < 10; i++ {
+		childDumpPath := filepath.Join(t.TempDir(), "issvc.txt")
+
+		parent := exec.Command(os.Args[0], "-test.run=TestIsWindowsServiceWhenParentExits")
+		parent.Env = append(os.Environ(),
+			"GO_WANT_HELPER_PROCESS=parent",
+			"GO_WANT_HELPER_PROCESS_FILE="+childDumpPath)
+		parentOutput, err := parent.CombinedOutput()
+		if err != nil {
+			t.Errorf("parent failed: %v: %v", err, string(parentOutput))
+		}
+		for i := 0; ; i++ {
+			if _, err := os.Stat(childDumpPath); err == nil {
+				break
+			}
+			time.Sleep(100 * time.Millisecond)
+			if i > 10 {
+				t.Fatal("timed out waiting for child ouput file to be created.")
+			}
+		}
+		childOutput, err := ioutil.ReadFile(childDumpPath)
+		if err != nil {
+			t.Fatalf("reading child ouput failed: %v", err)
+		}
+		if got, want := string(childOutput), ""; got != want {
+			t.Fatalf("child output: want %q, got %q", want, got)
+		}
+	}
+}
