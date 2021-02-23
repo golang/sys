@@ -11,6 +11,7 @@ import (
 	"flag"
 	"fmt"
 	"io/ioutil"
+	"net"
 	"os"
 	"os/exec"
 	"path"
@@ -294,6 +295,42 @@ func TestCapRightsSetAndClear(t *testing.T) {
 	}
 	if !b {
 		t.Fatalf("Wrong rights set")
+	}
+}
+
+func TestGetsockoptXucred(t *testing.T) {
+	fds, err := unix.Socketpair(unix.AF_LOCAL, unix.SOCK_STREAM, 0)
+	if err != nil {
+		t.Fatalf("Socketpair: %v", err)
+	}
+	defer unix.Close(fds[0])
+	defer unix.Close(fds[1])
+
+	srvFile := os.NewFile(uintptr(fds[0]), "server")
+	defer srvFile.Close()
+	srv, err := net.FileConn(srvFile)
+	if err != nil {
+		t.Fatalf("FileConn: %v", err)
+	}
+	defer srv.Close()
+
+	cliFile := os.NewFile(uintptr(fds[1]), "client")
+	defer cliFile.Close()
+	cli, err := net.FileConn(cliFile)
+	if err != nil {
+		t.Fatalf("FileConn: %v", err)
+	}
+	defer cli.Close()
+
+	cred, err := unix.GetsockoptXucred(fds[1], unix.SOL_LOCAL, unix.LOCAL_PEERCRED)
+	if err == unix.ENOTCONN {
+		t.Skip("GetsockoptXucred not supported with Socketpair on FreeBSD 11 and earlier")
+	} else if err != nil {
+		t.Fatal(err)
+	}
+	t.Logf("got: %+v", cred)
+	if got, want := cred.Uid, os.Getuid(); int(got) != int(want) {
+		t.Errorf("uid = %v; want %v", got, want)
 	}
 }
 
