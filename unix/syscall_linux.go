@@ -185,8 +185,11 @@ func IoctlFileDedupeRange(srcFd int, value *FileDedupeRange) error {
 		rawinfo := (*RawFileDedupeRangeInfo)(unsafe.Pointer(
 			uintptr(unsafe.Pointer(&buf[0])) + uintptr(SizeofRawFileDedupeRange) +
 				uintptr(i*SizeofRawFileDedupeRangeInfo)))
+		value.Info[i].Dest_fd = rawinfo.Dest_fd
+		value.Info[i].Dest_offset = rawinfo.Dest_offset
 		value.Info[i].Bytes_deduped = rawinfo.Bytes_deduped
 		value.Info[i].Status = rawinfo.Status
+		value.Info[i].Reserved = rawinfo.Reserved
 	}
 
 	return err

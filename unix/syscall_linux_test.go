@@ -798,8 +798,9 @@ func TestOpenat2(t *testing.T) {
 
 func TestFideduperange(t *testing.T) {
 	if runtime.GOOS == "android" {
-		// In android amd64 it returned ENOTTY
-		t.Skip("FIDEDUPERANGE ioctl is not available on android, skipping test")
+		// The ioctl in the build robot android-amd64 returned ENOTTY,
+		// an error not documented for that syscall.
+		t.Skip("FIDEDUPERANGE ioctl doesn't work the test android, skipping test")
 	}
 
 	f1, err := ioutil.TempFile("", t.Name())
@@ -809,8 +810,11 @@ func TestFideduperange(t *testing.T) {
 	defer f1.Close()
 	defer os.Remove(f1.Name())
 
+	// Test deduplication with two blocks of zeros
+	data := make([]byte, 4096)
+
 	for i := 0; i < 2; i += 1 {
-		_, err = f1.Write(make([]byte, 4096))
+		_, err = f1.Write(data)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -824,8 +828,6 @@ func TestFideduperange(t *testing.T) {
 	defer os.Remove(f2.Name())
 
 	for i := 0; i < 2; i += 1 {
-		data := make([]byte, 4096)
-
 		// Make the 2nd block different
 		if i == 1 {
 			data[1] = 1
@@ -852,12 +854,9 @@ func TestFideduperange(t *testing.T) {
 		}}
 
 	err = unix.IoctlFileDedupeRange(int(f1.Fd()), &dedupe)
-
-	if err != nil {
-		if err == unix.EOPNOTSUPP {
-			// We can't test if the fs doesn't support deduplication
-			t.Skipf("skipping test, %v", err)
-		}
+	if err == unix.EOPNOTSUPP || err == unix.EINVAL {
+		t.Skip("deduplication not supported on this filesystem")
+	} else if err != nil {
 		t.Fatal(err)
 	}
 
