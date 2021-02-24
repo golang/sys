@@ -800,7 +800,7 @@ func TestFideduperange(t *testing.T) {
 	if runtime.GOOS == "android" {
 		// The ioctl in the build robot android-amd64 returned ENOTTY,
 		// an error not documented for that syscall.
-		t.Skip("FIDEDUPERANGE ioctl doesn't work the test android, skipping test")
+		t.Skip("FIDEDUPERANGE ioctl doesn't work on android, skipping test")
 	}
 
 	f1, err := ioutil.TempFile("", t.Name())
