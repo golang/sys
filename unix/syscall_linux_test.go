@@ -796,3 +796,94 @@ func TestOpenat2(t *testing.T) {
 		t.Errorf("Openat2 should fail with EXDEV, got %v", err)
 	}
 }
+
+func TestFideduperange(t *testing.T) {
+	if runtime.GOOS == "android" {
+		// The ioctl in the build robot android-amd64 returned ENOTTY,
+		// an error not documented for that syscall.
+		t.Skip("FIDEDUPERANGE ioctl doesn't work on android, skipping test")
+	}
+
+	f1, err := ioutil.TempFile("", t.Name())
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer f1.Close()
+	defer os.Remove(f1.Name())
+
+	// Test deduplication with two blocks of zeros
+	data := make([]byte, 4096)
+
+	for i := 0; i < 2; i += 1 {
+		_, err = f1.Write(data)
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	f2, err := ioutil.TempFile("", t.Name())
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer f2.Close()
+	defer os.Remove(f2.Name())
+
+	for i := 0; i < 2; i += 1 {
+		// Make the 2nd block different
+		if i == 1 {
+			data[1] = 1
+		}
+
+		_, err = f2.Write(data)
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	dedupe := unix.FileDedupeRange{
+		Src_offset: uint64(0),
+		Src_length: uint64(4096),
+		Info: []unix.FileDedupeRangeInfo{
+			unix.FileDedupeRangeInfo{
+				Dest_fd:     int64(f2.Fd()),
+				Dest_offset: uint64(0),
+			},
+			unix.FileDedupeRangeInfo{
+				Dest_fd:     int64(f2.Fd()),
+				Dest_offset: uint64(4096),
+			},
+		}}
+
+	err = unix.IoctlFileDedupeRange(int(f1.Fd()), &dedupe)
+	if err == unix.EOPNOTSUPP || err == unix.EINVAL {
+		t.Skip("deduplication not supported on this filesystem")
+	} else if err != nil {
+		t.Fatal(err)
+	}
+
+	// The first Info should be equal
+	if dedupe.Info[0].Status < 0 {
+		// We expect status to be a negated errno
+		t.Errorf("Unexpected error in FileDedupeRange: %s",
+			unix.ErrnoName(unix.Errno(-dedupe.Info[0].Status)))
+	} else if dedupe.Info[0].Status == unix.FILE_DEDUPE_RANGE_DIFFERS {
+		t.Errorf("Unexpected different bytes in FileDedupeRange")
+	}
+	if dedupe.Info[0].Bytes_deduped != 4096 {
+		t.Errorf("Unexpected amount of bytes deduped %v != %v",
+			dedupe.Info[0].Bytes_deduped, 4096)
+	}
+
+	// The second Info should be different
+	if dedupe.Info[1].Status < 0 {
+		// We expect status to be a negated errno
+		t.Errorf("Unexpected error in FileDedupeRange: %s",
+			unix.ErrnoName(unix.Errno(-dedupe.Info[1].Status)))
+	} else if dedupe.Info[1].Status == unix.FILE_DEDUPE_RANGE_SAME {
+		t.Errorf("Unexpected equal bytes in FileDedupeRange")
+	}
+	if dedupe.Info[1].Bytes_deduped != 0 {
+		t.Errorf("Unexpected amount of bytes deduped %v != %v",
+			dedupe.Info[1].Bytes_deduped, 0)
+	}
+}
