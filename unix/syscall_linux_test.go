@@ -797,13 +797,7 @@ func TestOpenat2(t *testing.T) {
 	}
 }
 
-func TestFideduperange(t *testing.T) {
-	if runtime.GOOS == "android" {
-		// The ioctl in the build robot android-amd64 returned ENOTTY,
-		// an error not documented for that syscall.
-		t.Skip("FIDEDUPERANGE ioctl doesn't work on android, skipping test")
-	}
-
+func TestIoctlFileDedupeRange(t *testing.T) {
 	f1, err := ioutil.TempFile("", t.Name())
 	if err != nil {
 		t.Fatal(err)
@@ -855,7 +849,7 @@ func TestFideduperange(t *testing.T) {
 		}}
 
 	err = unix.IoctlFileDedupeRange(int(f1.Fd()), &dedupe)
-	if err == unix.EOPNOTSUPP || err == unix.EINVAL {
+	if err == unix.EOPNOTSUPP || err == unix.EINVAL || err == unix.ENOTTY {
 		t.Skip("deduplication not supported on this filesystem")
 	} else if err != nil {
 		t.Fatal(err)
@@ -863,9 +857,11 @@ func TestFideduperange(t *testing.T) {
 
 	// The first Info should be equal
 	if dedupe.Info[0].Status < 0 {
-		// We expect status to be a negated errno
-		t.Errorf("Unexpected error in FileDedupeRange: %s",
-			unix.ErrnoName(unix.Errno(-dedupe.Info[0].Status)))
+		errno := unix.Errno(-dedupe.Info[0].Status)
+		if errno == unix.EINVAL {
+			t.Skip("deduplication not supported on this filesystem")
+		}
+		t.Errorf("Unexpected error in FileDedupeRange: %s", unix.ErrnoName(errno))
 	} else if dedupe.Info[0].Status == unix.FILE_DEDUPE_RANGE_DIFFERS {
 		t.Errorf("Unexpected different bytes in FileDedupeRange")
 	}
@@ -876,9 +872,11 @@ func TestFideduperange(t *testing.T) {
 
 	// The second Info should be different
 	if dedupe.Info[1].Status < 0 {
-		// We expect status to be a negated errno
-		t.Errorf("Unexpected error in FileDedupeRange: %s",
-			unix.ErrnoName(unix.Errno(-dedupe.Info[1].Status)))
+		errno := unix.Errno(-dedupe.Info[1].Status)
+		if errno == unix.EINVAL {
+			t.Skip("deduplication not supported on this filesystem")
+		}
+		t.Errorf("Unexpected error in FileDedupeRange: %s", unix.ErrnoName(errno))
 	} else if dedupe.Info[1].Status == unix.FILE_DEDUPE_RANGE_SAME {
 		t.Errorf("Unexpected equal bytes in FileDedupeRange")
 	}
