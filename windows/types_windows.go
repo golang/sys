@@ -10,6 +10,10 @@ import (
 	"unsafe"
 )
 
+// NTStatus corresponds with NTSTATUS, error values returned by ntdll.dll and
+// other native functions.
+type NTStatus uint32
+
 const (
 	// Invented values to support what package os expects.
 	O_RDONLY   = 0x00000

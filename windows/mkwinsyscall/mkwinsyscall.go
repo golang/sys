@@ -318,11 +318,17 @@ func (r *Rets) SetErrorCode() string {
 	const code = `if r0 != 0 {
 		%s = %sErrno(r0)
 	}`
+	const ntstatus = `if r0 != 0 {
+		ntstatus = NTStatus(r0)
+	}`
 	if r.Name == "" && !r.ReturnsError {
 		return ""
 	}
 	if r.Name == "" {
 		return r.useLongHandleErrorCode("r1")
+	}
+	if r.Type == "error" && r.Name == "ntstatus" {
+		return ntstatus
 	}
 	if r.Type == "error" {
 		return fmt.Sprintf(code, r.Name, syscalldot())

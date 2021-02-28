@@ -486,3 +486,11 @@ func TestIsWow64Process2(t *testing.T) {
 		t.Errorf("IsWow64Process2 is wrong: want %v have %v", runtime.GOARCH, processMachine)
 	}
 }
+
+func TestNTStatusString(t *testing.T) {
+	want := "The name limit for the local computer network adapter card was exceeded."
+	got := windows.STATUS_TOO_MANY_NAMES.Error()
+	if want != got {
+		t.Errorf("NTStatus.Error did not return an expected error string - want %q; got %q", want, got)
+	}
+}

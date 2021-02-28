@@ -8,6 +8,7 @@ package windows
 
 import (
 	errorspkg "errors"
+	"fmt"
 	"sync"
 	"syscall"
 	"time"
@@ -65,9 +66,8 @@ const (
 	LOCKFILE_FAIL_IMMEDIATELY = 0x00000001
 	LOCKFILE_EXCLUSIVE_LOCK   = 0x00000002
 
-	// Return values of SleepEx and other APC functions
-	STATUS_USER_APC    = 0x000000C0
-	WAIT_IO_COMPLETION = STATUS_USER_APC
+	// Return value of SleepEx and other APC functions
+	WAIT_IO_COMPLETION = 0x000000C0
 )
 
 // StringToUTF16 is deprecated. Use UTF16FromString instead.
@@ -375,7 +375,8 @@ func NewCallbackCDecl(fn interface{}) uintptr {
 //sys	stringFromGUID2(rguid *GUID, lpsz *uint16, cchMax int32) (chars int32) = ole32.StringFromGUID2
 //sys	coCreateGuid(pguid *GUID) (ret error) = ole32.CoCreateGuid
 //sys	CoTaskMemFree(address unsafe.Pointer) = ole32.CoTaskMemFree
-//sys	rtlGetVersion(info *OsVersionInfoEx) (ret error) = ntdll.RtlGetVersion
+//sys	rtlNtStatusToDosError(ntstatus NTStatus) (ret syscall.Errno) = ntdll.RtlNtStatusToDosError
+//sys	rtlGetVersion(info *OsVersionInfoEx) (ntstatus error) = ntdll.RtlGetVersion
 //sys	rtlGetNtVersionNumbers(majorVersion *uint32, minorVersion *uint32, buildNumber *uint32) = ntdll.RtlGetNtVersionNumbers
 //sys	getProcessPreferredUILanguages(flags uint32, numLanguages *uint32, buf *uint16, bufSize *uint32) (err error) = kernel32.GetProcessPreferredUILanguages
 //sys	getThreadPreferredUILanguages(flags uint32, numLanguages *uint32, buf *uint16, bufSize *uint32) (err error) = kernel32.GetThreadPreferredUILanguages
@@ -1513,4 +1514,22 @@ func getUILanguages(flags uint32, f func(flags uint32, numLanguages *uint32, buf
 
 func SetConsoleCursorPosition(console Handle, position Coord) error {
 	return setConsoleCursorPosition(console, *((*uint32)(unsafe.Pointer(&position))))
+}
+
+func (s NTStatus) Errno() syscall.Errno {
+	return rtlNtStatusToDosError(s)
+}
+
+func langID(pri, sub uint16) uint32 { return uint32(sub)<<10 | uint32(pri) }
+
+func (s NTStatus) Error() string {
+	b := make([]uint16, 300)
+	n, err := FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM|FORMAT_MESSAGE_FROM_HMODULE|FORMAT_MESSAGE_ARGUMENT_ARRAY, modntdll.Handle(), uint32(s), langID(LANG_ENGLISH, SUBLANG_ENGLISH_US), b, nil)
+	if err != nil {
+		return fmt.Sprintf("NTSTATUS 0x%08x", uint32(s))
+	}
+	// trim terminating \r and \n
+	for ; n > 0 && (b[n-1] == '\n' || b[n-1] == '\r'); n-- {
+	}
+	return string(utf16.Decode(b[:n]))
 }
