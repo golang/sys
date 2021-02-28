@@ -16,6 +16,7 @@ import (
 	"strings"
 	"syscall"
 	"testing"
+	"time"
 	"unsafe"
 
 	"golang.org/x/sys/windows"
@@ -500,5 +501,38 @@ func TestNTStatusConversion(t *testing.T) {
 	got := windows.STATUS_TOO_MANY_NAMES.Errno()
 	if want != got {
 		t.Errorf("NTStatus.Errno = %q (0x%x); want %q (0x%x)", got.Error(), got, want.Error(), want)
+	}
+}
+
+func TestProcThreadAttributeListPointers(t *testing.T) {
+	list, err := windows.NewProcThreadAttributeList(1)
+	if err != nil {
+		t.Errorf("unable to create ProcThreadAttributeList: %v", err)
+	}
+	done := make(chan struct{})
+	fds := make([]syscall.Handle, 20)
+	runtime.SetFinalizer(&fds[0], func(*syscall.Handle) {
+		close(done)
+	})
+	err = list.Update(windows.PROC_THREAD_ATTRIBUTE_HANDLE_LIST, 0, unsafe.Pointer(&fds[0]), uintptr(len(fds))*unsafe.Sizeof(fds[0]), nil, nil)
+	if err != nil {
+		list.Delete()
+		t.Errorf("unable to update ProcThreadAttributeList: %v", err)
+		return
+	}
+	runtime.GC()
+	runtime.GC()
+	select {
+	case <-done:
+		t.Error("ProcThreadAttributeList was garbage collected unexpectedly")
+	default:
+	}
+	list.Delete()
+	runtime.GC()
+	runtime.GC()
+	select {
+	case <-done:
+	case <-time.After(time.Second):
+		t.Error("ProcThreadAttributeList was not garbage collected after a second")
 	}
 }
