@@ -82,6 +82,13 @@ func packagename() string {
 	return packageName
 }
 
+func windowsdot() string {
+	if packageName == "windows" {
+		return ""
+	}
+	return "windows."
+}
+
 func syscalldot() string {
 	if packageName == "syscall" {
 		return ""
@@ -319,7 +326,7 @@ func (r *Rets) SetErrorCode() string {
 		%s = %sErrno(r0)
 	}`
 	const ntstatus = `if r0 != 0 {
-		ntstatus = NTStatus(r0)
+		ntstatus = %sNTStatus(r0)
 	}`
 	if r.Name == "" && !r.ReturnsError {
 		return ""
@@ -328,7 +335,7 @@ func (r *Rets) SetErrorCode() string {
 		return r.useLongHandleErrorCode("r1")
 	}
 	if r.Type == "error" && r.Name == "ntstatus" {
-		return ntstatus
+		return fmt.Sprintf(ntstatus, windowsdot())
 	}
 	if r.Type == "error" {
 		return fmt.Sprintf(code, r.Name, syscalldot())
