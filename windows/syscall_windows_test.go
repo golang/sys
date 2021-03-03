@@ -494,3 +494,11 @@ func TestNTStatusString(t *testing.T) {
 		t.Errorf("NTStatus.Error did not return an expected error string - want %q; got %q", want, got)
 	}
 }
+
+func TestNTStatusConversion(t *testing.T) {
+	want := windows.ERROR_TOO_MANY_NAMES
+	got := windows.STATUS_TOO_MANY_NAMES.Errno()
+	if want != got {
+		t.Errorf("NTStatus.Errno = %q (0x%x); want %q (0x%x)", got.Error(), got, want.Error(), want)
+	}
+}

@@ -375,7 +375,7 @@ func NewCallbackCDecl(fn interface{}) uintptr {
 //sys	stringFromGUID2(rguid *GUID, lpsz *uint16, cchMax int32) (chars int32) = ole32.StringFromGUID2
 //sys	coCreateGuid(pguid *GUID) (ret error) = ole32.CoCreateGuid
 //sys	CoTaskMemFree(address unsafe.Pointer) = ole32.CoTaskMemFree
-//sys	rtlNtStatusToDosError(ntstatus NTStatus) (ret syscall.Errno) = ntdll.RtlNtStatusToDosError
+//sys	rtlNtStatusToDosErrorNoTeb(ntstatus NTStatus) (ret syscall.Errno) = ntdll.RtlNtStatusToDosErrorNoTeb
 //sys	rtlGetVersion(info *OsVersionInfoEx) (ntstatus error) = ntdll.RtlGetVersion
 //sys	rtlGetNtVersionNumbers(majorVersion *uint32, minorVersion *uint32, buildNumber *uint32) = ntdll.RtlGetNtVersionNumbers
 //sys	getProcessPreferredUILanguages(flags uint32, numLanguages *uint32, buf *uint16, bufSize *uint32) (err error) = kernel32.GetProcessPreferredUILanguages
@@ -1517,7 +1517,7 @@ func SetConsoleCursorPosition(console Handle, position Coord) error {
 }
 
 func (s NTStatus) Errno() syscall.Errno {
-	return rtlNtStatusToDosError(s)
+	return rtlNtStatusToDosErrorNoTeb(s)
 }
 
 func langID(pri, sub uint16) uint32 { return uint32(sub)<<10 | uint32(pri) }

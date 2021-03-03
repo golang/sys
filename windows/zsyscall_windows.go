@@ -346,7 +346,7 @@ var (
 	procNetUserGetInfo                                       = modnetapi32.NewProc("NetUserGetInfo")
 	procRtlGetNtVersionNumbers                               = modntdll.NewProc("RtlGetNtVersionNumbers")
 	procRtlGetVersion                                        = modntdll.NewProc("RtlGetVersion")
-	procRtlNtStatusToDosError                                = modntdll.NewProc("RtlNtStatusToDosError")
+	procRtlNtStatusToDosErrorNoTeb                           = modntdll.NewProc("RtlNtStatusToDosErrorNoTeb")
 	procCLSIDFromString                                      = modole32.NewProc("CLSIDFromString")
 	procCoCreateGuid                                         = modole32.NewProc("CoCreateGuid")
 	procCoTaskMemFree                                        = modole32.NewProc("CoTaskMemFree")
@@ -2960,8 +2960,8 @@ func rtlGetVersion(info *OsVersionInfoEx) (ntstatus error) {
 	return
 }
 
-func rtlNtStatusToDosError(ntstatus NTStatus) (ret syscall.Errno) {
-	r0, _, _ := syscall.Syscall(procRtlNtStatusToDosError.Addr(), 1, uintptr(ntstatus), 0, 0)
+func rtlNtStatusToDosErrorNoTeb(ntstatus NTStatus) (ret syscall.Errno) {
+	r0, _, _ := syscall.Syscall(procRtlNtStatusToDosErrorNoTeb.Addr(), 1, uintptr(ntstatus), 0, 0)
 	ret = syscall.Errno(r0)
 	return
 }
