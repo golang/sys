@@ -536,3 +536,29 @@ func TestProcThreadAttributeListPointers(t *testing.T) {
 		t.Error("ProcThreadAttributeList was not garbage collected after a second")
 	}
 }
+
+func TestPEBFilePath(t *testing.T) {
+	peb := windows.RtlGetCurrentPeb()
+	if peb == nil || peb.Ldr == nil {
+		t.Error("unable to retrieve PEB with valid Ldr")
+	}
+	var entry *windows.LDR_DATA_TABLE_ENTRY
+	for cur := peb.Ldr.InMemoryOrderModuleList.Flink; cur != &peb.Ldr.InMemoryOrderModuleList; cur = cur.Flink {
+		e := (*windows.LDR_DATA_TABLE_ENTRY)(unsafe.Pointer(uintptr(unsafe.Pointer(cur)) - unsafe.Offsetof(windows.LDR_DATA_TABLE_ENTRY{}.InMemoryOrderLinks)))
+		if e.DllBase == peb.ImageBaseAddress {
+			entry = e
+			break
+		}
+	}
+	if entry == nil {
+		t.Error("unable to find Ldr entry for current process")
+	}
+	osPath, err := os.Executable()
+	if err != nil {
+		t.Errorf("unable to get path to current executable: %v", err)
+	}
+	pebPath := entry.FullDllName.String()
+	if osPath != pebPath {
+		t.Errorf("expected os.Executable() to return same value as peb.Ldr.{entry}.FullDllName - want %#q; got %#q", osPath, pebPath)
+	}
+}

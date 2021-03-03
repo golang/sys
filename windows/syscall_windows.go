@@ -375,9 +375,6 @@ func NewCallbackCDecl(fn interface{}) uintptr {
 //sys	stringFromGUID2(rguid *GUID, lpsz *uint16, cchMax int32) (chars int32) = ole32.StringFromGUID2
 //sys	coCreateGuid(pguid *GUID) (ret error) = ole32.CoCreateGuid
 //sys	CoTaskMemFree(address unsafe.Pointer) = ole32.CoTaskMemFree
-//sys	rtlNtStatusToDosErrorNoTeb(ntstatus NTStatus) (ret syscall.Errno) = ntdll.RtlNtStatusToDosErrorNoTeb
-//sys	rtlGetVersion(info *OsVersionInfoEx) (ntstatus error) = ntdll.RtlGetVersion
-//sys	rtlGetNtVersionNumbers(majorVersion *uint32, minorVersion *uint32, buildNumber *uint32) = ntdll.RtlGetNtVersionNumbers
 //sys	getProcessPreferredUILanguages(flags uint32, numLanguages *uint32, buf *uint16, bufSize *uint32) (err error) = kernel32.GetProcessPreferredUILanguages
 //sys	getThreadPreferredUILanguages(flags uint32, numLanguages *uint32, buf *uint16, bufSize *uint32) (err error) = kernel32.GetThreadPreferredUILanguages
 //sys	getUserPreferredUILanguages(flags uint32, numLanguages *uint32, buf *uint16, bufSize *uint32) (err error) = kernel32.GetUserPreferredUILanguages
@@ -385,6 +382,20 @@ func NewCallbackCDecl(fn interface{}) uintptr {
 
 // Process Status API (PSAPI)
 //sys	EnumProcesses(processIds []uint32, bytesReturned *uint32) (err error) = psapi.EnumProcesses
+
+// NT Native APIs
+//sys	rtlNtStatusToDosErrorNoTeb(ntstatus NTStatus) (ret syscall.Errno) = ntdll.RtlNtStatusToDosErrorNoTeb
+//sys	rtlGetVersion(info *OsVersionInfoEx) (ntstatus error) = ntdll.RtlGetVersion
+//sys	rtlGetNtVersionNumbers(majorVersion *uint32, minorVersion *uint32, buildNumber *uint32) = ntdll.RtlGetNtVersionNumbers
+//sys	RtlGetCurrentPeb() (peb *PEB) = ntdll.RtlGetCurrentPeb
+//sys	RtlInitUnicodeString(destinationString *UNICODE_STRING, sourceString *uint16) = ntdll.RtlInitUnicodeString
+//sys	NtCreateFile(handle *Handle, access uint32, oa *OBJECT_ATTRIBUTES, iosb *IO_STATUS_BLOCK, allocationSize *int64, attributes uint32, share uint32, disposition uint32, options uint32, eabuffer uintptr, ealength uint32) (ntstatus error) = ntdll.NtCreateFile
+//sys	NtCreateNamedPipeFile(pipe *Handle, access uint32, oa *OBJECT_ATTRIBUTES, iosb *IO_STATUS_BLOCK, share uint32, disposition uint32, options uint32, typ uint32, readMode uint32, completionMode uint32, maxInstances uint32, inboundQuota uint32, outputQuota uint32, timeout *int64) (ntstatus error) = ntdll.NtCreateNamedPipeFile
+//sys	RtlDosPathNameToNtPathName(dosName *uint16, ntName *UNICODE_STRING, ntFileNamePart *uint16, relativeName *RTL_RELATIVE_NAME) (ntstatus error) = ntdll.RtlDosPathNameToNtPathName_U_WithStatus
+//sys	RtlDosPathNameToRelativeNtPathName(dosName *uint16, ntName *UNICODE_STRING, ntFileNamePart *uint16, relativeName *RTL_RELATIVE_NAME) (ntstatus error) = ntdll.RtlDosPathNameToRelativeNtPathName_U_WithStatus
+//sys	RtlDefaultNpAcl(acl **ACL) (ntstatus error) = ntdll.RtlDefaultNpAcl
+//sys	NtQueryInformationProcess(proc Handle, procInfoClass int32, procInfo unsafe.Pointer, procInfoLen uint32, retLen *uint32) (ntstatus error) = ntdll.NtQueryInformationProcess
+//sys	NtSetInformationProcess(proc Handle, procInfoClass int32, procInfo unsafe.Pointer, procInfoLen uint32) (ntstatus error) = ntdll.NtSetInformationProcess
 
 // syscall interface implementation for other packages
 
@@ -1532,4 +1543,32 @@ func (s NTStatus) Error() string {
 	for ; n > 0 && (b[n-1] == '\n' || b[n-1] == '\r'); n-- {
 	}
 	return string(utf16.Decode(b[:n]))
+}
+
+// NewUnicodeString returns a new UNICODE_STRING structure for use with native
+// NT APIs that work over the UNICODE_STRING type. Note that most Windows APIs
+// do not use UNICODE_STRING, and instead UTF16PtrFromString should be used for
+// the more common *uint16 string type.
+func NewUnicodeString(s string) (*UNICODE_STRING, error) {
+	var u UNICODE_STRING
+	s16, err := UTF16PtrFromString(s)
+	if err != nil {
+		return nil, err
+	}
+	RtlInitUnicodeString(&u, s16)
+	return &u, nil
+}
+
+// Slice returns a uint16 slice that aliases the data in the UNICODE_STRING.
+func (s *UNICODE_STRING) Slice() []uint16 {
+	var slice []uint16
+	hdr := (*unsafeheader.Slice)(unsafe.Pointer(&slice))
+	hdr.Data = unsafe.Pointer(s.Buffer)
+	hdr.Len = int(s.Length)
+	hdr.Cap = int(s.MaximumLength)
+	return slice
+}
+
+func (s *UNICODE_STRING) String() string {
+	return UTF16ToString(s.Slice())
 }

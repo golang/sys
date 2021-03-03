@@ -2276,3 +2276,275 @@ type CommTimeouts struct {
 	WriteTotalTimeoutMultiplier uint32
 	WriteTotalTimeoutConstant   uint32
 }
+
+type UNICODE_STRING struct {
+	Length        uint16
+	MaximumLength uint16
+	Buffer        *uint16
+}
+
+type LIST_ENTRY struct {
+	Flink *LIST_ENTRY
+	Blink *LIST_ENTRY
+}
+
+type LDR_DATA_TABLE_ENTRY struct {
+	reserved1          [2]uintptr
+	InMemoryOrderLinks LIST_ENTRY
+	reserved2          [2]uintptr
+	DllBase            uintptr
+	reserved3          [2]uintptr
+	FullDllName        UNICODE_STRING
+	reserved4          [8]byte
+	reserved5          [3]uintptr
+	reserved6          uintptr
+	TimeDateStamp      uint32
+}
+
+type PEB_LDR_DATA struct {
+	reserved1               [8]byte
+	reserved2               [3]uintptr
+	InMemoryOrderModuleList LIST_ENTRY
+}
+
+type PEB struct {
+	reserved1              [2]byte
+	BeingDebugged          byte
+	BitField               byte
+	reserved3              uintptr
+	ImageBaseAddress       uintptr
+	Ldr                    *PEB_LDR_DATA
+	ProcessParameters      uintptr
+	reserved4              [3]uintptr
+	AtlThunkSListPtr       uintptr
+	reserved5              uintptr
+	reserved6              uint32
+	reserved7              uintptr
+	reserved8              uint32
+	AtlThunkSListPtr32     uint32
+	reserved9              [45]uintptr
+	reserved10             [96]byte
+	PostProcessInitRoutine uintptr
+	reserved11             [128]byte
+	reserved12             [1]uintptr
+	SessionId              uint32
+}
+
+type OBJECT_ATTRIBUTES struct {
+	Length             uint32
+	RootDirectory      Handle
+	ObjectName         *UNICODE_STRING
+	Attributes         uint32
+	SecurityDescriptor *SECURITY_DESCRIPTOR
+	SecurityQoS        *SECURITY_QUALITY_OF_SERVICE
+}
+
+// Values for the Attributes member of OBJECT_ATTRIBUTES.
+const (
+	OBJ_INHERIT                       = 0x00000002
+	OBJ_PERMANENT                     = 0x00000010
+	OBJ_EXCLUSIVE                     = 0x00000020
+	OBJ_CASE_INSENSITIVE              = 0x00000040
+	OBJ_OPENIF                        = 0x00000080
+	OBJ_OPENLINK                      = 0x00000100
+	OBJ_KERNEL_HANDLE                 = 0x00000200
+	OBJ_FORCE_ACCESS_CHECK            = 0x00000400
+	OBJ_IGNORE_IMPERSONATED_DEVICEMAP = 0x00000800
+	OBJ_DONT_REPARSE                  = 0x00001000
+	OBJ_VALID_ATTRIBUTES              = 0x00001FF2
+)
+
+type IO_STATUS_BLOCK struct {
+	Status      NTStatus
+	Information uintptr
+}
+
+type RTLP_CURDIR_REF struct {
+	RefCount int32
+	Handle   Handle
+}
+
+type RTL_RELATIVE_NAME struct {
+	RelativeName        UNICODE_STRING
+	ContainingDirectory Handle
+	CurDirRef           *RTLP_CURDIR_REF
+}
+
+const (
+	// CreateDisposition flags for NtCreateFile and NtCreateNamedPipeFile.
+	FILE_SUPERSEDE           = 0x00000000
+	FILE_OPEN                = 0x00000001
+	FILE_CREATE              = 0x00000002
+	FILE_OPEN_IF             = 0x00000003
+	FILE_OVERWRITE           = 0x00000004
+	FILE_OVERWRITE_IF        = 0x00000005
+	FILE_MAXIMUM_DISPOSITION = 0x00000005
+
+	// CreateOptions flags for NtCreateFile and NtCreateNamedPipeFile.
+	FILE_DIRECTORY_FILE            = 0x00000001
+	FILE_WRITE_THROUGH             = 0x00000002
+	FILE_SEQUENTIAL_ONLY           = 0x00000004
+	FILE_NO_INTERMEDIATE_BUFFERING = 0x00000008
+	FILE_SYNCHRONOUS_IO_ALERT      = 0x00000010
+	FILE_SYNCHRONOUS_IO_NONALERT   = 0x00000020
+	FILE_NON_DIRECTORY_FILE        = 0x00000040
+	FILE_CREATE_TREE_CONNECTION    = 0x00000080
+	FILE_COMPLETE_IF_OPLOCKED      = 0x00000100
+	FILE_NO_EA_KNOWLEDGE           = 0x00000200
+	FILE_OPEN_REMOTE_INSTANCE      = 0x00000400
+	FILE_RANDOM_ACCESS             = 0x00000800
+	FILE_DELETE_ON_CLOSE           = 0x00001000
+	FILE_OPEN_BY_FILE_ID           = 0x00002000
+	FILE_OPEN_FOR_BACKUP_INTENT    = 0x00004000
+	FILE_NO_COMPRESSION            = 0x00008000
+	FILE_OPEN_REQUIRING_OPLOCK     = 0x00010000
+	FILE_DISALLOW_EXCLUSIVE        = 0x00020000
+	FILE_RESERVE_OPFILTER          = 0x00100000
+	FILE_OPEN_REPARSE_POINT        = 0x00200000
+	FILE_OPEN_NO_RECALL            = 0x00400000
+	FILE_OPEN_FOR_FREE_SPACE_QUERY = 0x00800000
+
+	// Parameter constants for NtCreateNamedPipeFile.
+
+	FILE_PIPE_BYTE_STREAM_TYPE = 0x00000000
+	FILE_PIPE_MESSAGE_TYPE     = 0x00000001
+
+	FILE_PIPE_ACCEPT_REMOTE_CLIENTS = 0x00000000
+	FILE_PIPE_REJECT_REMOTE_CLIENTS = 0x00000002
+
+	FILE_PIPE_TYPE_VALID_MASK = 0x00000003
+
+	FILE_PIPE_BYTE_STREAM_MODE = 0x00000000
+	FILE_PIPE_MESSAGE_MODE     = 0x00000001
+
+	FILE_PIPE_QUEUE_OPERATION    = 0x00000000
+	FILE_PIPE_COMPLETE_OPERATION = 0x00000001
+
+	FILE_PIPE_INBOUND     = 0x00000000
+	FILE_PIPE_OUTBOUND    = 0x00000001
+	FILE_PIPE_FULL_DUPLEX = 0x00000002
+
+	FILE_PIPE_DISCONNECTED_STATE = 0x00000001
+	FILE_PIPE_LISTENING_STATE    = 0x00000002
+	FILE_PIPE_CONNECTED_STATE    = 0x00000003
+	FILE_PIPE_CLOSING_STATE      = 0x00000004
+
+	FILE_PIPE_CLIENT_END = 0x00000000
+	FILE_PIPE_SERVER_END = 0x00000001
+)
+
+// ProcessInformationClasses for NtQueryInformationProcess and NtSetInformationProcess.
+const (
+	ProcessBasicInformation = iota
+	ProcessQuotaLimits
+	ProcessIoCounters
+	ProcessVmCounters
+	ProcessTimes
+	ProcessBasePriority
+	ProcessRaisePriority
+	ProcessDebugPort
+	ProcessExceptionPort
+	ProcessAccessToken
+	ProcessLdtInformation
+	ProcessLdtSize
+	ProcessDefaultHardErrorMode
+	ProcessIoPortHandlers
+	ProcessPooledUsageAndLimits
+	ProcessWorkingSetWatch
+	ProcessUserModeIOPL
+	ProcessEnableAlignmentFaultFixup
+	ProcessPriorityClass
+	ProcessWx86Information
+	ProcessHandleCount
+	ProcessAffinityMask
+	ProcessPriorityBoost
+	ProcessDeviceMap
+	ProcessSessionInformation
+	ProcessForegroundInformation
+	ProcessWow64Information
+	ProcessImageFileName
+	ProcessLUIDDeviceMapsEnabled
+	ProcessBreakOnTermination
+	ProcessDebugObjectHandle
+	ProcessDebugFlags
+	ProcessHandleTracing
+	ProcessIoPriority
+	ProcessExecuteFlags
+	ProcessResourceManagement
+	ProcessCookie
+	ProcessImageInformation
+	ProcessCycleTime
+	ProcessPagePriority
+	ProcessInstrumentationCallback
+	ProcessThreadStackAllocation
+	ProcessWorkingSetWatchEx
+	ProcessImageFileNameWin32
+	ProcessImageFileMapping
+	ProcessAffinityUpdateMode
+	ProcessMemoryAllocationMode
+	ProcessGroupInformation
+	ProcessTokenVirtualizationEnabled
+	ProcessConsoleHostProcess
+	ProcessWindowInformation
+	ProcessHandleInformation
+	ProcessMitigationPolicy
+	ProcessDynamicFunctionTableInformation
+	ProcessHandleCheckingMode
+	ProcessKeepAliveCount
+	ProcessRevokeFileHandles
+	ProcessWorkingSetControl
+	ProcessHandleTable
+	ProcessCheckStackExtentsMode
+	ProcessCommandLineInformation
+	ProcessProtectionInformation
+	ProcessMemoryExhaustion
+	ProcessFaultInformation
+	ProcessTelemetryIdInformation
+	ProcessCommitReleaseInformation
+	ProcessDefaultCpuSetsInformation
+	ProcessAllowedCpuSetsInformation
+	ProcessSubsystemProcess
+	ProcessJobMemoryInformation
+	ProcessInPrivate
+	ProcessRaiseUMExceptionOnInvalidHandleClose
+	ProcessIumChallengeResponse
+	ProcessChildProcessInformation
+	ProcessHighGraphicsPriorityInformation
+	ProcessSubsystemInformation
+	ProcessEnergyValues
+	ProcessActivityThrottleState
+	ProcessActivityThrottlePolicy
+	ProcessWin32kSyscallFilterInformation
+	ProcessDisableSystemAllowedCpuSets
+	ProcessWakeInformation
+	ProcessEnergyTrackingState
+	ProcessManageWritesToExecutableMemory
+	ProcessCaptureTrustletLiveDump
+	ProcessTelemetryCoverage
+	ProcessEnclaveInformation
+	ProcessEnableReadWriteVmLogging
+	ProcessUptimeInformation
+	ProcessImageSection
+	ProcessDebugAuthInformation
+	ProcessSystemResourceManagement
+	ProcessSequenceNumber
+	ProcessLoaderDetour
+	ProcessSecurityDomainInformation
+	ProcessCombineSecurityDomainsInformation
+	ProcessEnableLogging
+	ProcessLeapSecondInformation
+	ProcessFiberShadowStackAllocation
+	ProcessFreeFiberShadowStackAllocation
+	ProcessAltSystemCallInformation
+	ProcessDynamicEHContinuationTargets
+	ProcessDynamicEnforcedCetCompatibleRanges
+)
+
+type PROCESS_BASIC_INFORMATION struct {
+	ExitStatus                   NTStatus
+	PebBaseAddress               *PEB
+	AffinityMask                 uintptr
+	BasePriority                 int32
+	UniqueProcessId              Handle
+	InheritedFromUniqueProcessId Handle
+}
