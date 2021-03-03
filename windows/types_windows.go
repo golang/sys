@@ -2548,3 +2548,55 @@ type PROCESS_BASIC_INFORMATION struct {
 	UniqueProcessId              Handle
 	InheritedFromUniqueProcessId Handle
 }
+
+// Constants for LocalAlloc flags.
+const (
+	LMEM_FIXED          = 0x0
+	LMEM_MOVEABLE       = 0x2
+	LMEM_NOCOMPACT      = 0x10
+	LMEM_NODISCARD      = 0x20
+	LMEM_ZEROINIT       = 0x40
+	LMEM_MODIFY         = 0x80
+	LMEM_DISCARDABLE    = 0xf00
+	LMEM_VALID_FLAGS    = 0xf72
+	LMEM_INVALID_HANDLE = 0x8000
+	LHND                = LMEM_MOVEABLE | LMEM_ZEROINIT
+	LPTR                = LMEM_FIXED | LMEM_ZEROINIT
+	NONZEROLHND         = LMEM_MOVEABLE
+	NONZEROLPTR         = LMEM_FIXED
+)
+
+// Constants for the CreateNamedPipe-family of functions.
+const (
+	PIPE_ACCESS_INBOUND  = 0x1
+	PIPE_ACCESS_OUTBOUND = 0x2
+	PIPE_ACCESS_DUPLEX   = 0x3
+
+	PIPE_CLIENT_END = 0x0
+	PIPE_SERVER_END = 0x1
+
+	PIPE_WAIT                  = 0x0
+	PIPE_NOWAIT                = 0x1
+	PIPE_READMODE_BYTE         = 0x0
+	PIPE_READMODE_MESSAGE      = 0x2
+	PIPE_TYPE_BYTE             = 0x0
+	PIPE_TYPE_MESSAGE          = 0x4
+	PIPE_ACCEPT_REMOTE_CLIENTS = 0x0
+	PIPE_REJECT_REMOTE_CLIENTS = 0x8
+
+	PIPE_UNLIMITED_INSTANCES = 255
+)
+
+// Constants for security attributes when opening named pipes.
+const (
+	SECURITY_ANONYMOUS      = SecurityAnonymous << 16
+	SECURITY_IDENTIFICATION = SecurityIdentification << 16
+	SECURITY_IMPERSONATION  = SecurityImpersonation << 16
+	SECURITY_DELEGATION     = SecurityDelegation << 16
+
+	SECURITY_CONTEXT_TRACKING = 0x40000
+	SECURITY_EFFECTIVE_ONLY   = 0x80000
+
+	SECURITY_SQOS_PRESENT     = 0x100000
+	SECURITY_VALID_SQOS_FLAGS = 0x1f0000
+)
