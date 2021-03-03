@@ -5,6 +5,7 @@
 package windows_test
 
 import (
+	"bytes"
 	"debug/pe"
 	"errors"
 	"fmt"
@@ -560,5 +561,28 @@ func TestPEBFilePath(t *testing.T) {
 	pebPath := entry.FullDllName.String()
 	if osPath != pebPath {
 		t.Errorf("expected os.Executable() to return same value as peb.Ldr.{entry}.FullDllName - want %#q; got %#q", osPath, pebPath)
+	}
+}
+
+func TestResourceExtraction(t *testing.T) {
+	system32, err := windows.GetSystemDirectory()
+	if err != nil {
+		t.Errorf("unable to find system32 directory: %v", err)
+	}
+	cmd, err := windows.LoadLibrary(filepath.Join(system32, "cmd.exe"))
+	if err != nil {
+		t.Errorf("unable to load cmd.exe: %v", err)
+	}
+	defer windows.FreeLibrary(cmd)
+	rsrc, err := windows.FindResource(cmd, windows.CREATEPROCESS_MANIFEST_RESOURCE_ID, windows.RT_MANIFEST)
+	if err != nil {
+		t.Errorf("unable to find cmd.exe manifest resource: %v", err)
+	}
+	manifest, err := windows.LoadResourceData(cmd, rsrc)
+	if err != nil {
+		t.Errorf("unable to load cmd.exe manifest resource data: %v", err)
+	}
+	if !bytes.Contains(manifest, []byte("</assembly>")) {
+		t.Errorf("did not find </assembly> in manifest")
 	}
 }

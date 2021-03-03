@@ -2600,3 +2600,45 @@ const (
 	SECURITY_SQOS_PRESENT     = 0x100000
 	SECURITY_VALID_SQOS_FLAGS = 0x1f0000
 )
+
+// ResourceID represents a 16-bit resource identifier, traditionally created with the MAKEINTRESOURCE macro.
+type ResourceID uint16
+
+// ResourceIDOrString must be either a ResourceID, to specify a resource or resource type by ID,
+// or a string, to specify a resource or resource type by name.
+type ResourceIDOrString interface{}
+
+// Predefined resource names and types.
+var (
+	// Predefined names.
+	CREATEPROCESS_MANIFEST_RESOURCE_ID                 ResourceID = 1
+	ISOLATIONAWARE_MANIFEST_RESOURCE_ID                ResourceID = 2
+	ISOLATIONAWARE_NOSTATICIMPORT_MANIFEST_RESOURCE_ID ResourceID = 3
+	ISOLATIONPOLICY_MANIFEST_RESOURCE_ID               ResourceID = 4
+	ISOLATIONPOLICY_BROWSER_MANIFEST_RESOURCE_ID       ResourceID = 5
+	MINIMUM_RESERVED_MANIFEST_RESOURCE_ID              ResourceID = 1  // inclusive
+	MAXIMUM_RESERVED_MANIFEST_RESOURCE_ID              ResourceID = 16 // inclusive
+
+	// Predefined types.
+	RT_CURSOR       ResourceID = 1
+	RT_BITMAP       ResourceID = 2
+	RT_ICON         ResourceID = 3
+	RT_MENU         ResourceID = 4
+	RT_DIALOG       ResourceID = 5
+	RT_STRING       ResourceID = 6
+	RT_FONTDIR      ResourceID = 7
+	RT_FONT         ResourceID = 8
+	RT_ACCELERATOR  ResourceID = 9
+	RT_RCDATA       ResourceID = 10
+	RT_MESSAGETABLE ResourceID = 11
+	RT_GROUP_CURSOR ResourceID = 12
+	RT_GROUP_ICON   ResourceID = 14
+	RT_VERSION      ResourceID = 16
+	RT_DLGINCLUDE   ResourceID = 17
+	RT_PLUGPLAY     ResourceID = 19
+	RT_VXD          ResourceID = 20
+	RT_ANICURSOR    ResourceID = 21
+	RT_ANIICON      ResourceID = 22
+	RT_HTML         ResourceID = 23
+	RT_MANIFEST     ResourceID = 24
+)

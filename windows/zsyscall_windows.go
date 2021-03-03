@@ -205,6 +205,7 @@ var (
 	procFindNextFileW                                        = modkernel32.NewProc("FindNextFileW")
 	procFindNextVolumeMountPointW                            = modkernel32.NewProc("FindNextVolumeMountPointW")
 	procFindNextVolumeW                                      = modkernel32.NewProc("FindNextVolumeW")
+	procFindResourceW                                        = modkernel32.NewProc("FindResourceW")
 	procFindVolumeClose                                      = modkernel32.NewProc("FindVolumeClose")
 	procFindVolumeMountPointClose                            = modkernel32.NewProc("FindVolumeMountPointClose")
 	procFlushFileBuffers                                     = modkernel32.NewProc("FlushFileBuffers")
@@ -277,9 +278,11 @@ var (
 	procIsWow64Process2                                      = modkernel32.NewProc("IsWow64Process2")
 	procLoadLibraryExW                                       = modkernel32.NewProc("LoadLibraryExW")
 	procLoadLibraryW                                         = modkernel32.NewProc("LoadLibraryW")
+	procLoadResource                                         = modkernel32.NewProc("LoadResource")
 	procLocalAlloc                                           = modkernel32.NewProc("LocalAlloc")
 	procLocalFree                                            = modkernel32.NewProc("LocalFree")
 	procLockFileEx                                           = modkernel32.NewProc("LockFileEx")
+	procLockResource                                         = modkernel32.NewProc("LockResource")
 	procMapViewOfFile                                        = modkernel32.NewProc("MapViewOfFile")
 	procMoveFileExW                                          = modkernel32.NewProc("MoveFileExW")
 	procMoveFileW                                            = modkernel32.NewProc("MoveFileW")
@@ -326,6 +329,7 @@ var (
 	procSetStdHandle                                         = modkernel32.NewProc("SetStdHandle")
 	procSetVolumeLabelW                                      = modkernel32.NewProc("SetVolumeLabelW")
 	procSetVolumeMountPointW                                 = modkernel32.NewProc("SetVolumeMountPointW")
+	procSizeofResource                                       = modkernel32.NewProc("SizeofResource")
 	procSleepEx                                              = modkernel32.NewProc("SleepEx")
 	procTerminateJobObject                                   = modkernel32.NewProc("TerminateJobObject")
 	procTerminateProcess                                     = modkernel32.NewProc("TerminateProcess")
@@ -1747,6 +1751,15 @@ func FindNextVolume(findVolume Handle, volumeName *uint16, bufferLength uint32) 
 	return
 }
 
+func findResource(module Handle, name uintptr, resType uintptr) (resInfo Handle, err error) {
+	r0, _, e1 := syscall.Syscall(procFindResourceW.Addr(), 3, uintptr(module), uintptr(name), uintptr(resType))
+	resInfo = Handle(r0)
+	if resInfo == 0 {
+		err = errnoErr(e1)
+	}
+	return
+}
+
 func FindVolumeClose(findVolume Handle) (err error) {
 	r1, _, e1 := syscall.Syscall(procFindVolumeClose.Addr(), 1, uintptr(findVolume), 0, 0)
 	if r1 == 0 {
@@ -2371,6 +2384,15 @@ func _LoadLibrary(libname *uint16) (handle Handle, err error) {
 	return
 }
 
+func LoadResource(module Handle, resInfo Handle) (resData Handle, err error) {
+	r0, _, e1 := syscall.Syscall(procLoadResource.Addr(), 2, uintptr(module), uintptr(resInfo), 0)
+	resData = Handle(r0)
+	if resData == 0 {
+		err = errnoErr(e1)
+	}
+	return
+}
+
 func LocalAlloc(flags uint32, length uint32) (ptr uintptr, err error) {
 	r0, _, e1 := syscall.Syscall(procLocalAlloc.Addr(), 2, uintptr(flags), uintptr(length), 0)
 	ptr = uintptr(r0)
@@ -2392,6 +2414,15 @@ func LocalFree(hmem Handle) (handle Handle, err error) {
 func LockFileEx(file Handle, flags uint32, reserved uint32, bytesLow uint32, bytesHigh uint32, overlapped *Overlapped) (err error) {
 	r1, _, e1 := syscall.Syscall6(procLockFileEx.Addr(), 6, uintptr(file), uintptr(flags), uintptr(reserved), uintptr(bytesLow), uintptr(bytesHigh), uintptr(unsafe.Pointer(overlapped)))
 	if r1 == 0 {
+		err = errnoErr(e1)
+	}
+	return
+}
+
+func LockResource(resData Handle) (addr uintptr, err error) {
+	r0, _, e1 := syscall.Syscall(procLockResource.Addr(), 1, uintptr(resData), 0, 0)
+	addr = uintptr(r0)
+	if addr == 0 {
 		err = errnoErr(e1)
 	}
 	return
@@ -2805,6 +2836,15 @@ func SetVolumeLabel(rootPathName *uint16, volumeName *uint16) (err error) {
 func SetVolumeMountPoint(volumeMountPoint *uint16, volumeName *uint16) (err error) {
 	r1, _, e1 := syscall.Syscall(procSetVolumeMountPointW.Addr(), 2, uintptr(unsafe.Pointer(volumeMountPoint)), uintptr(unsafe.Pointer(volumeName)), 0)
 	if r1 == 0 {
+		err = errnoErr(e1)
+	}
+	return
+}
+
+func SizeofResource(module Handle, resInfo Handle) (size uint32, err error) {
+	r0, _, e1 := syscall.Syscall(procSizeofResource.Addr(), 2, uintptr(module), uintptr(resInfo), 0)
+	size = uint32(r0)
+	if size == 0 {
 		err = errnoErr(e1)
 	}
 	return
