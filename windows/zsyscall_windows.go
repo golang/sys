@@ -367,7 +367,10 @@ var (
 	procRtlNtStatusToDosErrorNoTeb                           = modntdll.NewProc("RtlNtStatusToDosErrorNoTeb")
 	procCLSIDFromString                                      = modole32.NewProc("CLSIDFromString")
 	procCoCreateGuid                                         = modole32.NewProc("CoCreateGuid")
+	procCoGetObject                                          = modole32.NewProc("CoGetObject")
+	procCoInitializeEx                                       = modole32.NewProc("CoInitializeEx")
 	procCoTaskMemFree                                        = modole32.NewProc("CoTaskMemFree")
+	procCoUninitialize                                       = modole32.NewProc("CoUninitialize")
 	procStringFromGUID2                                      = modole32.NewProc("StringFromGUID2")
 	procEnumProcesses                                        = modpsapi.NewProc("EnumProcesses")
 	procSubscribeServiceChangeNotifications                  = modsechost.NewProc("SubscribeServiceChangeNotifications")
@@ -3146,8 +3149,29 @@ func coCreateGuid(pguid *GUID) (ret error) {
 	return
 }
 
+func CoGetObject(name *uint16, bindOpts *BIND_OPTS3, guid *GUID, functionTable **uintptr) (ret error) {
+	r0, _, _ := syscall.Syscall6(procCoGetObject.Addr(), 4, uintptr(unsafe.Pointer(name)), uintptr(unsafe.Pointer(bindOpts)), uintptr(unsafe.Pointer(guid)), uintptr(unsafe.Pointer(functionTable)), 0, 0)
+	if r0 != 0 {
+		ret = syscall.Errno(r0)
+	}
+	return
+}
+
+func CoInitializeEx(reserved uintptr, coInit uint32) (ret error) {
+	r0, _, _ := syscall.Syscall(procCoInitializeEx.Addr(), 2, uintptr(reserved), uintptr(coInit), 0)
+	if r0 != 0 {
+		ret = syscall.Errno(r0)
+	}
+	return
+}
+
 func CoTaskMemFree(address unsafe.Pointer) {
 	syscall.Syscall(procCoTaskMemFree.Addr(), 1, uintptr(address), 0, 0)
+	return
+}
+
+func CoUninitialize() {
+	syscall.Syscall(procCoUninitialize.Addr(), 0, 0, 0, 0)
 	return
 }
 
