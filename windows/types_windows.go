@@ -2713,3 +2713,6 @@ const (
 	COINIT_DISABLE_OLE1DDE   = 0x4
 	COINIT_SPEED_OVER_MEMORY = 0x8
 )
+
+// Flag for QueryFullProcessImageName.
+const PROCESS_NAME_NATIVE = 1
