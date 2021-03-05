@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+//go:build windows
 // +build windows
 
 package svc_test
@@ -203,7 +204,7 @@ func TestIsWindowsServiceWhenParentExits(t *testing.T) {
 		if isSvc {
 			msg = "IsWindowsService retuns true when not running in a service."
 		}
-		err = os.WriteFile(dumpPath, []byte(msg), 0644)
+		err = ioutil.WriteFile(dumpPath, []byte(msg), 0644)
 		if err != nil {
 			// We cannot report this error. But main test will notice
 			// that we did not create dump file.
