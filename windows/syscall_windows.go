@@ -402,11 +402,12 @@ func NewCallbackCDecl(fn interface{}) uintptr {
 //sys	rtlGetVersion(info *OsVersionInfoEx) (ntstatus error) = ntdll.RtlGetVersion
 //sys	rtlGetNtVersionNumbers(majorVersion *uint32, minorVersion *uint32, buildNumber *uint32) = ntdll.RtlGetNtVersionNumbers
 //sys	RtlGetCurrentPeb() (peb *PEB) = ntdll.RtlGetCurrentPeb
-//sys	RtlInitUnicodeString(destinationString *UNICODE_STRING, sourceString *uint16) = ntdll.RtlInitUnicodeString
+//sys	RtlInitUnicodeString(destinationString *NTUnicodeString, sourceString *uint16) = ntdll.RtlInitUnicodeString
+//sys	RtlInitString(destinationString *NTString, sourceString *byte) = ntdll.RtlInitString
 //sys	NtCreateFile(handle *Handle, access uint32, oa *OBJECT_ATTRIBUTES, iosb *IO_STATUS_BLOCK, allocationSize *int64, attributes uint32, share uint32, disposition uint32, options uint32, eabuffer uintptr, ealength uint32) (ntstatus error) = ntdll.NtCreateFile
 //sys	NtCreateNamedPipeFile(pipe *Handle, access uint32, oa *OBJECT_ATTRIBUTES, iosb *IO_STATUS_BLOCK, share uint32, disposition uint32, options uint32, typ uint32, readMode uint32, completionMode uint32, maxInstances uint32, inboundQuota uint32, outputQuota uint32, timeout *int64) (ntstatus error) = ntdll.NtCreateNamedPipeFile
-//sys	RtlDosPathNameToNtPathName(dosName *uint16, ntName *UNICODE_STRING, ntFileNamePart *uint16, relativeName *RTL_RELATIVE_NAME) (ntstatus error) = ntdll.RtlDosPathNameToNtPathName_U_WithStatus
-//sys	RtlDosPathNameToRelativeNtPathName(dosName *uint16, ntName *UNICODE_STRING, ntFileNamePart *uint16, relativeName *RTL_RELATIVE_NAME) (ntstatus error) = ntdll.RtlDosPathNameToRelativeNtPathName_U_WithStatus
+//sys	RtlDosPathNameToNtPathName(dosName *uint16, ntName *NTUnicodeString, ntFileNamePart *uint16, relativeName *RTL_RELATIVE_NAME) (ntstatus error) = ntdll.RtlDosPathNameToNtPathName_U_WithStatus
+//sys	RtlDosPathNameToRelativeNtPathName(dosName *uint16, ntName *NTUnicodeString, ntFileNamePart *uint16, relativeName *RTL_RELATIVE_NAME) (ntstatus error) = ntdll.RtlDosPathNameToRelativeNtPathName_U_WithStatus
 //sys	RtlDefaultNpAcl(acl **ACL) (ntstatus error) = ntdll.RtlDefaultNpAcl
 //sys	NtQueryInformationProcess(proc Handle, procInfoClass int32, procInfo unsafe.Pointer, procInfoLen uint32, retLen *uint32) (ntstatus error) = ntdll.NtQueryInformationProcess
 //sys	NtSetInformationProcess(proc Handle, procInfoClass int32, procInfo unsafe.Pointer, procInfoLen uint32) (ntstatus error) = ntdll.NtSetInformationProcess
@@ -1560,12 +1561,12 @@ func (s NTStatus) Error() string {
 	return string(utf16.Decode(b[:n]))
 }
 
-// NewUnicodeString returns a new UNICODE_STRING structure for use with native
-// NT APIs that work over the UNICODE_STRING type. Note that most Windows APIs
-// do not use UNICODE_STRING, and instead UTF16PtrFromString should be used for
+// NewNTUnicodeString returns a new NTUnicodeString structure for use with native
+// NT APIs that work over the NTUnicodeString type. Note that most Windows APIs
+// do not use NTUnicodeString, and instead UTF16PtrFromString should be used for
 // the more common *uint16 string type.
-func NewUnicodeString(s string) (*UNICODE_STRING, error) {
-	var u UNICODE_STRING
+func NewNTUnicodeString(s string) (*NTUnicodeString, error) {
+	var u NTUnicodeString
 	s16, err := UTF16PtrFromString(s)
 	if err != nil {
 		return nil, err
@@ -1574,8 +1575,8 @@ func NewUnicodeString(s string) (*UNICODE_STRING, error) {
 	return &u, nil
 }
 
-// Slice returns a uint16 slice that aliases the data in the UNICODE_STRING.
-func (s *UNICODE_STRING) Slice() []uint16 {
+// Slice returns a uint16 slice that aliases the data in the NTUnicodeString.
+func (s *NTUnicodeString) Slice() []uint16 {
 	var slice []uint16
 	hdr := (*unsafeheader.Slice)(unsafe.Pointer(&slice))
 	hdr.Data = unsafe.Pointer(s.Buffer)
@@ -1584,8 +1585,36 @@ func (s *UNICODE_STRING) Slice() []uint16 {
 	return slice
 }
 
-func (s *UNICODE_STRING) String() string {
+func (s *NTUnicodeString) String() string {
 	return UTF16ToString(s.Slice())
+}
+
+// NewNTString returns a new NTString structure for use with native
+// NT APIs that work over the NTString type. Note that most Windows APIs
+// do not use NTString, and instead UTF16PtrFromString should be used for
+// the more common *uint16 string type.
+func NewNTString(s string) (*NTString, error) {
+	var nts NTString
+	s8, err := BytePtrFromString(s)
+	if err != nil {
+		return nil, err
+	}
+	RtlInitString(&nts, s8)
+	return &nts, nil
+}
+
+// Slice returns a byte slice that aliases the data in the NTString.
+func (s *NTString) Slice() []byte {
+	var slice []byte
+	hdr := (*unsafeheader.Slice)(unsafe.Pointer(&slice))
+	hdr.Data = unsafe.Pointer(s.Buffer)
+	hdr.Len = int(s.Length)
+	hdr.Cap = int(s.MaximumLength)
+	return slice
+}
+
+func (s *NTString) String() string {
+	return ByteSliceToString(s.Slice())
 }
 
 // FindResource resolves a resource of the given name and resource type.

@@ -364,6 +364,7 @@ var (
 	procRtlGetCurrentPeb                                     = modntdll.NewProc("RtlGetCurrentPeb")
 	procRtlGetNtVersionNumbers                               = modntdll.NewProc("RtlGetNtVersionNumbers")
 	procRtlGetVersion                                        = modntdll.NewProc("RtlGetVersion")
+	procRtlInitString                                        = modntdll.NewProc("RtlInitString")
 	procRtlInitUnicodeString                                 = modntdll.NewProc("RtlInitUnicodeString")
 	procRtlNtStatusToDosErrorNoTeb                           = modntdll.NewProc("RtlNtStatusToDosErrorNoTeb")
 	procCLSIDFromString                                      = modole32.NewProc("CLSIDFromString")
@@ -3096,7 +3097,7 @@ func RtlDefaultNpAcl(acl **ACL) (ntstatus error) {
 	return
 }
 
-func RtlDosPathNameToNtPathName(dosName *uint16, ntName *UNICODE_STRING, ntFileNamePart *uint16, relativeName *RTL_RELATIVE_NAME) (ntstatus error) {
+func RtlDosPathNameToNtPathName(dosName *uint16, ntName *NTUnicodeString, ntFileNamePart *uint16, relativeName *RTL_RELATIVE_NAME) (ntstatus error) {
 	r0, _, _ := syscall.Syscall6(procRtlDosPathNameToNtPathName_U_WithStatus.Addr(), 4, uintptr(unsafe.Pointer(dosName)), uintptr(unsafe.Pointer(ntName)), uintptr(unsafe.Pointer(ntFileNamePart)), uintptr(unsafe.Pointer(relativeName)), 0, 0)
 	if r0 != 0 {
 		ntstatus = NTStatus(r0)
@@ -3104,7 +3105,7 @@ func RtlDosPathNameToNtPathName(dosName *uint16, ntName *UNICODE_STRING, ntFileN
 	return
 }
 
-func RtlDosPathNameToRelativeNtPathName(dosName *uint16, ntName *UNICODE_STRING, ntFileNamePart *uint16, relativeName *RTL_RELATIVE_NAME) (ntstatus error) {
+func RtlDosPathNameToRelativeNtPathName(dosName *uint16, ntName *NTUnicodeString, ntFileNamePart *uint16, relativeName *RTL_RELATIVE_NAME) (ntstatus error) {
 	r0, _, _ := syscall.Syscall6(procRtlDosPathNameToRelativeNtPathName_U_WithStatus.Addr(), 4, uintptr(unsafe.Pointer(dosName)), uintptr(unsafe.Pointer(ntName)), uintptr(unsafe.Pointer(ntFileNamePart)), uintptr(unsafe.Pointer(relativeName)), 0, 0)
 	if r0 != 0 {
 		ntstatus = NTStatus(r0)
@@ -3131,7 +3132,12 @@ func rtlGetVersion(info *OsVersionInfoEx) (ntstatus error) {
 	return
 }
 
-func RtlInitUnicodeString(destinationString *UNICODE_STRING, sourceString *uint16) {
+func RtlInitString(destinationString *NTString, sourceString *byte) {
+	syscall.Syscall(procRtlInitString.Addr(), 2, uintptr(unsafe.Pointer(destinationString)), uintptr(unsafe.Pointer(sourceString)), 0)
+	return
+}
+
+func RtlInitUnicodeString(destinationString *NTUnicodeString, sourceString *uint16) {
 	syscall.Syscall(procRtlInitUnicodeString.Addr(), 2, uintptr(unsafe.Pointer(destinationString)), uintptr(unsafe.Pointer(sourceString)), 0)
 	return
 }

@@ -560,7 +560,20 @@ func TestPEBFilePath(t *testing.T) {
 	}
 	pebPath := entry.FullDllName.String()
 	if osPath != pebPath {
-		t.Errorf("expected os.Executable() to return same value as peb.Ldr.{entry}.FullDllName - want %#q; got %#q", osPath, pebPath)
+		t.Errorf("peb.Ldr.{entry}.FullDllName = %#q; want %#q", pebPath, osPath)
+	}
+	paramPath := peb.ProcessParameters.ImagePathName.String()
+	if osPath != paramPath {
+		t.Errorf("peb.ProcessParameters.ImagePathName.{entry}.ImagePathName = %#q; want %#q", paramPath, osPath)
+	}
+	osCwd, err := os.Getwd()
+	if err != nil {
+		t.Errorf("unable to get working directory: %v", err)
+	}
+	osCwd = filepath.Clean(osCwd)
+	paramCwd := filepath.Clean(peb.ProcessParameters.CurrentDirectory.DosPath.String())
+	if paramCwd != osCwd {
+		t.Errorf("peb.ProcessParameters.CurrentDirectory.DosPath = %#q; want %#q", paramCwd, osCwd)
 	}
 }
 
