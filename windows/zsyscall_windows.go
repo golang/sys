@@ -323,6 +323,7 @@ var (
 	procSetFileTime                                          = modkernel32.NewProc("SetFileTime")
 	procSetHandleInformation                                 = modkernel32.NewProc("SetHandleInformation")
 	procSetInformationJobObject                              = modkernel32.NewProc("SetInformationJobObject")
+	procSetNamedPipeHandleState                              = modkernel32.NewProc("SetNamedPipeHandleState")
 	procSetPriorityClass                                     = modkernel32.NewProc("SetPriorityClass")
 	procSetProcessPriorityBoost                              = modkernel32.NewProc("SetProcessPriorityBoost")
 	procSetProcessShutdownParameters                         = modkernel32.NewProc("SetProcessShutdownParameters")
@@ -2789,6 +2790,14 @@ func SetInformationJobObject(job Handle, JobObjectInformationClass uint32, JobOb
 	r0, _, e1 := syscall.Syscall6(procSetInformationJobObject.Addr(), 4, uintptr(job), uintptr(JobObjectInformationClass), uintptr(JobObjectInformation), uintptr(JobObjectInformationLength), 0, 0)
 	ret = int(r0)
 	if ret == 0 {
+		err = errnoErr(e1)
+	}
+	return
+}
+
+func SetNamedPipeHandleState(pipe Handle, state *uint32, maxCollectionCount *uint32, collectDataTimeout *uint32) (err error) {
+	r1, _, e1 := syscall.Syscall6(procSetNamedPipeHandleState.Addr(), 4, uintptr(pipe), uintptr(unsafe.Pointer(state)), uintptr(unsafe.Pointer(maxCollectionCount)), uintptr(unsafe.Pointer(collectDataTimeout)), 0, 0)
+	if r1 == 0 {
 		err = errnoErr(e1)
 	}
 	return
