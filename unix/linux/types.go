@@ -84,6 +84,7 @@ struct termios2 {
 #include <linux/can/raw.h>
 #include <linux/capability.h>
 #include <linux/cgroupstats.h>
+#include <linux/close_range.h>
 #include <linux/cryptouser.h>
 #include <linux/devlink.h>
 #include <linux/dm-ioctl.h>
@@ -3647,4 +3648,10 @@ const (
 type (
 	HIDRawReportDescriptor C.struct_hidraw_report_descriptor
 	HIDRawDevInfo          C.struct_hidraw_devinfo
+)
+
+// close_range
+const (
+	CLOSE_RANGE_UNSHARE = C.CLOSE_RANGE_UNSHARE
+	CLOSE_RANGE_CLOEXEC = C.CLOSE_RANGE_CLOEXEC
 )
