@@ -42,6 +42,6 @@ const (
 
 type strbuf C.struct_strbuf
 
-type strioctl C.struct_strioctl
+type Strioctl C.struct_strioctl
 
-type lifreq C.struct_lifreq
+type Lifreq C.struct_lifreq
