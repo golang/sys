@@ -11,28 +11,21 @@ import (
 	"unsafe"
 )
 
-//go:cgo_import_dynamic libc_pipe pipe "libc.so"
-//go:cgo_import_dynamic libc_pipe2 pipe2 "libc.so"
-//go:cgo_import_dynamic libc_getsockname getsockname "libsocket.so"
-//go:cgo_import_dynamic libc_getcwd getcwd "libc.so"
-//go:cgo_import_dynamic libc_getgroups getgroups "libc.so"
-//go:cgo_import_dynamic libc_setgroups setgroups "libc.so"
-//go:cgo_import_dynamic libc_wait4 wait4 "libc.so"
-//go:cgo_import_dynamic libc_gethostname gethostname "libc.so"
-//go:cgo_import_dynamic libc_utimes utimes "libc.so"
-//go:cgo_import_dynamic libc_utimensat utimensat "libc.so"
-//go:cgo_import_dynamic libc_fcntl fcntl "libc.so"
-//go:cgo_import_dynamic libc_futimesat futimesat "libc.so"
-//go:cgo_import_dynamic libc_accept accept "libsocket.so"
+//go:cgo_import_dynamic libc___major __major "libc.so"
+//go:cgo_import_dynamic libc___makedev __makedev "libc.so"
+//go:cgo_import_dynamic libc___minor __minor "libc.so"
+//go:cgo_import_dynamic libc___xnet_bind __xnet_bind "libsocket.so"
+//go:cgo_import_dynamic libc___xnet_connect __xnet_connect "libsocket.so"
+//go:cgo_import_dynamic libc___xnet_getsockopt __xnet_getsockopt "libsocket.so"
+//go:cgo_import_dynamic libc___xnet_llisten __xnet_llisten "libsocket.so"
 //go:cgo_import_dynamic libc___xnet_recvmsg __xnet_recvmsg "libsocket.so"
 //go:cgo_import_dynamic libc___xnet_sendmsg __xnet_sendmsg "libsocket.so"
-//go:cgo_import_dynamic libc_acct acct "libc.so"
-//go:cgo_import_dynamic libc___makedev __makedev "libc.so"
-//go:cgo_import_dynamic libc___major __major "libc.so"
-//go:cgo_import_dynamic libc___minor __minor "libc.so"
-//go:cgo_import_dynamic libc_ioctl ioctl "libc.so"
-//go:cgo_import_dynamic libc_poll poll "libc.so"
+//go:cgo_import_dynamic libc___xnet_sendto __xnet_sendto "libsocket.so"
+//go:cgo_import_dynamic libc___xnet_socket __xnet_socket "libsocket.so"
+//go:cgo_import_dynamic libc___xnet_socketpair __xnet_socketpair "libsocket.so"
+//go:cgo_import_dynamic libc_accept accept "libsocket.so"
 //go:cgo_import_dynamic libc_access access "libc.so"
+//go:cgo_import_dynamic libc_acct acct "libc.so"
 //go:cgo_import_dynamic libc_adjtime adjtime "libc.so"
 //go:cgo_import_dynamic libc_chdir chdir "libc.so"
 //go:cgo_import_dynamic libc_chmod chmod "libc.so"
@@ -49,29 +42,39 @@ import (
 //go:cgo_import_dynamic libc_fchmodat fchmodat "libc.so"
 //go:cgo_import_dynamic libc_fchown fchown "libc.so"
 //go:cgo_import_dynamic libc_fchownat fchownat "libc.so"
+//go:cgo_import_dynamic libc_fcntl fcntl "libc.so"
 //go:cgo_import_dynamic libc_fdatasync fdatasync "libc.so"
 //go:cgo_import_dynamic libc_flock flock "libc.so"
 //go:cgo_import_dynamic libc_fpathconf fpathconf "libc.so"
 //go:cgo_import_dynamic libc_fstat fstat "libc.so"
 //go:cgo_import_dynamic libc_fstatat fstatat "libc.so"
 //go:cgo_import_dynamic libc_fstatvfs fstatvfs "libc.so"
+//go:cgo_import_dynamic libc_fsync fsync "libc.so"
+//go:cgo_import_dynamic libc_ftruncate ftruncate "libc.so"
+//go:cgo_import_dynamic libc_futimesat futimesat "libc.so"
+//go:cgo_import_dynamic libc_getcwd getcwd "libc.so"
 //go:cgo_import_dynamic libc_getdents getdents "libc.so"
+//go:cgo_import_dynamic libc_getegid getegid "libc.so"
+//go:cgo_import_dynamic libc_geteuid geteuid "libc.so"
 //go:cgo_import_dynamic libc_getgid getgid "libc.so"
-//go:cgo_import_dynamic libc_getpid getpid "libc.so"
+//go:cgo_import_dynamic libc_getgroups getgroups "libc.so"
+//go:cgo_import_dynamic libc_gethostname gethostname "libc.so"
+//go:cgo_import_dynamic libc_getpeername getpeername "libsocket.so"
 //go:cgo_import_dynamic libc_getpgid getpgid "libc.so"
 //go:cgo_import_dynamic libc_getpgrp getpgrp "libc.so"
-//go:cgo_import_dynamic libc_geteuid geteuid "libc.so"
-//go:cgo_import_dynamic libc_getegid getegid "libc.so"
+//go:cgo_import_dynamic libc_getpid getpid "libc.so"
 //go:cgo_import_dynamic libc_getppid getppid "libc.so"
 //go:cgo_import_dynamic libc_getpriority getpriority "libc.so"
 //go:cgo_import_dynamic libc_getrlimit getrlimit "libc.so"
 //go:cgo_import_dynamic libc_getrusage getrusage "libc.so"
+//go:cgo_import_dynamic libc_getsockname getsockname "libsocket.so"
 //go:cgo_import_dynamic libc_gettimeofday gettimeofday "libc.so"
 //go:cgo_import_dynamic libc_getuid getuid "libc.so"
+//go:cgo_import_dynamic libc_ioctl ioctl "libc.so"
 //go:cgo_import_dynamic libc_kill kill "libc.so"
 //go:cgo_import_dynamic libc_lchown lchown "libc.so"
 //go:cgo_import_dynamic libc_link link "libc.so"
-//go:cgo_import_dynamic libc___xnet_llisten __xnet_llisten "libsocket.so"
+//go:cgo_import_dynamic libc_lseek lseek "libc.so"
 //go:cgo_import_dynamic libc_lstat lstat "libc.so"
 //go:cgo_import_dynamic libc_madvise madvise "libc.so"
 //go:cgo_import_dynamic libc_mkdir mkdir "libc.so"
@@ -82,27 +85,34 @@ import (
 //go:cgo_import_dynamic libc_mknodat mknodat "libc.so"
 //go:cgo_import_dynamic libc_mlock mlock "libc.so"
 //go:cgo_import_dynamic libc_mlockall mlockall "libc.so"
+//go:cgo_import_dynamic libc_mmap mmap "libc.so"
 //go:cgo_import_dynamic libc_mprotect mprotect "libc.so"
 //go:cgo_import_dynamic libc_msync msync "libc.so"
 //go:cgo_import_dynamic libc_munlock munlock "libc.so"
 //go:cgo_import_dynamic libc_munlockall munlockall "libc.so"
+//go:cgo_import_dynamic libc_munmap munmap "libc.so"
 //go:cgo_import_dynamic libc_nanosleep nanosleep "libc.so"
 //go:cgo_import_dynamic libc_open open "libc.so"
 //go:cgo_import_dynamic libc_openat openat "libc.so"
 //go:cgo_import_dynamic libc_pathconf pathconf "libc.so"
 //go:cgo_import_dynamic libc_pause pause "libc.so"
+//go:cgo_import_dynamic libc_pipe pipe "libc.so"
+//go:cgo_import_dynamic libc_pipe2 pipe2 "libc.so"
+//go:cgo_import_dynamic libc_poll poll "libc.so"
 //go:cgo_import_dynamic libc_pread pread "libc.so"
 //go:cgo_import_dynamic libc_pwrite pwrite "libc.so"
 //go:cgo_import_dynamic libc_read read "libc.so"
 //go:cgo_import_dynamic libc_readlink readlink "libc.so"
+//go:cgo_import_dynamic libc_recvfrom recvfrom "libsocket.so"
 //go:cgo_import_dynamic libc_rename rename "libc.so"
 //go:cgo_import_dynamic libc_renameat renameat "libc.so"
 //go:cgo_import_dynamic libc_rmdir rmdir "libc.so"
-//go:cgo_import_dynamic libc_lseek lseek "libc.so"
 //go:cgo_import_dynamic libc_select select "libc.so"
+//go:cgo_import_dynamic libc_sendfile sendfile "libsendfile.so"
 //go:cgo_import_dynamic libc_setegid setegid "libc.so"
 //go:cgo_import_dynamic libc_seteuid seteuid "libc.so"
 //go:cgo_import_dynamic libc_setgid setgid "libc.so"
+//go:cgo_import_dynamic libc_setgroups setgroups "libc.so"
 //go:cgo_import_dynamic libc_sethostname sethostname "libc.so"
 //go:cgo_import_dynamic libc_setpgid setpgid "libc.so"
 //go:cgo_import_dynamic libc_setpriority setpriority "libc.so"
@@ -110,6 +120,7 @@ import (
 //go:cgo_import_dynamic libc_setreuid setreuid "libc.so"
 //go:cgo_import_dynamic libc_setrlimit setrlimit "libc.so"
 //go:cgo_import_dynamic libc_setsid setsid "libc.so"
+//go:cgo_import_dynamic libc_setsockopt setsockopt "libsocket.so"
 //go:cgo_import_dynamic libc_setuid setuid "libc.so"
 //go:cgo_import_dynamic libc_shutdown shutdown "libsocket.so"
 //go:cgo_import_dynamic libc_stat stat "libc.so"
@@ -119,50 +130,18 @@ import (
 //go:cgo_import_dynamic libc_sysconf sysconf "libc.so"
 //go:cgo_import_dynamic libc_times times "libc.so"
 //go:cgo_import_dynamic libc_truncate truncate "libc.so"
-//go:cgo_import_dynamic libc_fsync fsync "libc.so"
-//go:cgo_import_dynamic libc_ftruncate ftruncate "libc.so"
 //go:cgo_import_dynamic libc_umask umask "libc.so"
-//go:cgo_import_dynamic libc_uname uname "libc.so"
 //go:cgo_import_dynamic libc_umount umount "libc.so"
+//go:cgo_import_dynamic libc_uname uname "libc.so"
 //go:cgo_import_dynamic libc_unlink unlink "libc.so"
 //go:cgo_import_dynamic libc_unlinkat unlinkat "libc.so"
 //go:cgo_import_dynamic libc_ustat ustat "libc.so"
 //go:cgo_import_dynamic libc_utime utime "libc.so"
-//go:cgo_import_dynamic libc___xnet_bind __xnet_bind "libsocket.so"
-//go:cgo_import_dynamic libc___xnet_connect __xnet_connect "libsocket.so"
-//go:cgo_import_dynamic libc_mmap mmap "libc.so"
-//go:cgo_import_dynamic libc_munmap munmap "libc.so"
-//go:cgo_import_dynamic libc_sendfile sendfile "libsendfile.so"
-//go:cgo_import_dynamic libc___xnet_sendto __xnet_sendto "libsocket.so"
-//go:cgo_import_dynamic libc___xnet_socket __xnet_socket "libsocket.so"
-//go:cgo_import_dynamic libc___xnet_socketpair __xnet_socketpair "libsocket.so"
+//go:cgo_import_dynamic libc_utimensat utimensat "libc.so"
+//go:cgo_import_dynamic libc_utimes utimes "libc.so"
+//go:cgo_import_dynamic libc_wait4 wait4 "libc.so"
 //go:cgo_import_dynamic libc_write write "libc.so"
-//go:cgo_import_dynamic libc___xnet_getsockopt __xnet_getsockopt "libsocket.so"
-//go:cgo_import_dynamic libc_getpeername getpeername "libsocket.so"
-//go:cgo_import_dynamic libc_setsockopt setsockopt "libsocket.so"
-//go:cgo_import_dynamic libc_recvfrom recvfrom "libsocket.so"
 
-//go:linkname procpipe libc_pipe
-//go:linkname procpipe2 libc_pipe2
-//go:linkname procgetsockname libc_getsockname
-//go:linkname procGetcwd libc_getcwd
-//go:linkname procgetgroups libc_getgroups
-//go:linkname procsetgroups libc_setgroups
-//go:linkname procwait4 libc_wait4
-//go:linkname procgethostname libc_gethostname
-//go:linkname procutimes libc_utimes
-//go:linkname procutimensat libc_utimensat
-//go:linkname procfcntl libc_fcntl
-//go:linkname procfutimesat libc_futimesat
-//go:linkname procaccept libc_accept
-//go:linkname proc__xnet_recvmsg libc___xnet_recvmsg
-//go:linkname proc__xnet_sendmsg libc___xnet_sendmsg
-//go:linkname procacct libc_acct
-//go:linkname proc__makedev libc___makedev
-//go:linkname proc__major libc___major
-//go:linkname proc__minor libc___minor
-//go:linkname procioctl libc_ioctl
-//go:linkname procpoll libc_poll
 //go:linkname procAccess libc_access
 //go:linkname procAdjtime libc_adjtime
 //go:linkname procChdir libc_chdir
@@ -186,13 +165,16 @@ import (
 //go:linkname procFstat libc_fstat
 //go:linkname procFstatat libc_fstatat
 //go:linkname procFstatvfs libc_fstatvfs
+//go:linkname procFsync libc_fsync
+//go:linkname procFtruncate libc_ftruncate
+//go:linkname procGetcwd libc_getcwd
 //go:linkname procGetdents libc_getdents
+//go:linkname procGetegid libc_getegid
+//go:linkname procGeteuid libc_geteuid
 //go:linkname procGetgid libc_getgid
-//go:linkname procGetpid libc_getpid
 //go:linkname procGetpgid libc_getpgid
 //go:linkname procGetpgrp libc_getpgrp
-//go:linkname procGeteuid libc_geteuid
-//go:linkname procGetegid libc_getegid
+//go:linkname procGetpid libc_getpid
 //go:linkname procGetppid libc_getppid
 //go:linkname procGetpriority libc_getpriority
 //go:linkname procGetrlimit libc_getrlimit
@@ -202,7 +184,6 @@ import (
 //go:linkname procKill libc_kill
 //go:linkname procLchown libc_lchown
 //go:linkname procLink libc_link
-//go:linkname proc__xnet_llisten libc___xnet_llisten
 //go:linkname procLstat libc_lstat
 //go:linkname procMadvise libc_madvise
 //go:linkname procMkdir libc_mkdir
@@ -224,12 +205,10 @@ import (
 //go:linkname procPause libc_pause
 //go:linkname procPread libc_pread
 //go:linkname procPwrite libc_pwrite
-//go:linkname procread libc_read
 //go:linkname procReadlink libc_readlink
 //go:linkname procRename libc_rename
 //go:linkname procRenameat libc_renameat
 //go:linkname procRmdir libc_rmdir
-//go:linkname proclseek libc_lseek
 //go:linkname procSelect libc_select
 //go:linkname procSetegid libc_setegid
 //go:linkname procSeteuid libc_seteuid
@@ -242,7 +221,6 @@ import (
 //go:linkname procSetrlimit libc_setrlimit
 //go:linkname procSetsid libc_setsid
 //go:linkname procSetuid libc_setuid
-//go:linkname procshutdown libc_shutdown
 //go:linkname procStat libc_stat
 //go:linkname procStatvfs libc_statvfs
 //go:linkname procSymlink libc_symlink
@@ -250,51 +228,52 @@ import (
 //go:linkname procSysconf libc_sysconf
 //go:linkname procTimes libc_times
 //go:linkname procTruncate libc_truncate
-//go:linkname procFsync libc_fsync
-//go:linkname procFtruncate libc_ftruncate
 //go:linkname procUmask libc_umask
 //go:linkname procUname libc_uname
-//go:linkname procumount libc_umount
 //go:linkname procUnlink libc_unlink
 //go:linkname procUnlinkat libc_unlinkat
 //go:linkname procUstat libc_ustat
 //go:linkname procUtime libc_utime
+//go:linkname proc__major libc___major
+//go:linkname proc__makedev libc___makedev
+//go:linkname proc__minor libc___minor
 //go:linkname proc__xnet_bind libc___xnet_bind
 //go:linkname proc__xnet_connect libc___xnet_connect
-//go:linkname procmmap libc_mmap
-//go:linkname procmunmap libc_munmap
-//go:linkname procsendfile libc_sendfile
+//go:linkname proc__xnet_getsockopt libc___xnet_getsockopt
+//go:linkname proc__xnet_llisten libc___xnet_llisten
+//go:linkname proc__xnet_recvmsg libc___xnet_recvmsg
+//go:linkname proc__xnet_sendmsg libc___xnet_sendmsg
 //go:linkname proc__xnet_sendto libc___xnet_sendto
 //go:linkname proc__xnet_socket libc___xnet_socket
 //go:linkname proc__xnet_socketpair libc___xnet_socketpair
-//go:linkname procwrite libc_write
-//go:linkname proc__xnet_getsockopt libc___xnet_getsockopt
+//go:linkname procaccept libc_accept
+//go:linkname procacct libc_acct
+//go:linkname procfcntl libc_fcntl
+//go:linkname procfutimesat libc_futimesat
+//go:linkname procgetgroups libc_getgroups
+//go:linkname procgethostname libc_gethostname
 //go:linkname procgetpeername libc_getpeername
-//go:linkname procsetsockopt libc_setsockopt
+//go:linkname procgetsockname libc_getsockname
+//go:linkname procioctl libc_ioctl
+//go:linkname proclseek libc_lseek
+//go:linkname procmmap libc_mmap
+//go:linkname procmunmap libc_munmap
+//go:linkname procpipe libc_pipe
+//go:linkname procpipe2 libc_pipe2
+//go:linkname procpoll libc_poll
+//go:linkname procread libc_read
 //go:linkname procrecvfrom libc_recvfrom
+//go:linkname procsendfile libc_sendfile
+//go:linkname procsetgroups libc_setgroups
+//go:linkname procsetsockopt libc_setsockopt
+//go:linkname procshutdown libc_shutdown
+//go:linkname procumount libc_umount
+//go:linkname procutimensat libc_utimensat
+//go:linkname procutimes libc_utimes
+//go:linkname procwait4 libc_wait4
+//go:linkname procwrite libc_write
 
 var (
-	procpipe,
-	procpipe2,
-	procgetsockname,
-	procGetcwd,
-	procgetgroups,
-	procsetgroups,
-	procwait4,
-	procgethostname,
-	procutimes,
-	procutimensat,
-	procfcntl,
-	procfutimesat,
-	procaccept,
-	proc__xnet_recvmsg,
-	proc__xnet_sendmsg,
-	procacct,
-	proc__makedev,
-	proc__major,
-	proc__minor,
-	procioctl,
-	procpoll,
 	procAccess,
 	procAdjtime,
 	procChdir,
@@ -318,13 +297,16 @@ var (
 	procFstat,
 	procFstatat,
 	procFstatvfs,
+	procFsync,
+	procFtruncate,
+	procGetcwd,
 	procGetdents,
+	procGetegid,
+	procGeteuid,
 	procGetgid,
-	procGetpid,
 	procGetpgid,
 	procGetpgrp,
-	procGeteuid,
-	procGetegid,
+	procGetpid,
 	procGetppid,
 	procGetpriority,
 	procGetrlimit,
@@ -334,7 +316,6 @@ var (
 	procKill,
 	procLchown,
 	procLink,
-	proc__xnet_llisten,
 	procLstat,
 	procMadvise,
 	procMkdir,
@@ -356,12 +337,10 @@ var (
 	procPause,
 	procPread,
 	procPwrite,
-	procread,
 	procReadlink,
 	procRename,
 	procRenameat,
 	procRmdir,
-	proclseek,
 	procSelect,
 	procSetegid,
 	procSeteuid,
@@ -374,7 +353,6 @@ var (
 	procSetrlimit,
 	procSetsid,
 	procSetuid,
-	procshutdown,
 	procStat,
 	procStatvfs,
 	procSymlink,
@@ -382,28 +360,50 @@ var (
 	procSysconf,
 	procTimes,
 	procTruncate,
-	procFsync,
-	procFtruncate,
 	procUmask,
 	procUname,
-	procumount,
 	procUnlink,
 	procUnlinkat,
 	procUstat,
 	procUtime,
+	proc__major,
+	proc__makedev,
+	proc__minor,
 	proc__xnet_bind,
 	proc__xnet_connect,
-	procmmap,
-	procmunmap,
-	procsendfile,
+	proc__xnet_getsockopt,
+	proc__xnet_llisten,
+	proc__xnet_recvmsg,
+	proc__xnet_sendmsg,
 	proc__xnet_sendto,
 	proc__xnet_socket,
 	proc__xnet_socketpair,
-	procwrite,
-	proc__xnet_getsockopt,
+	procaccept,
+	procacct,
+	procfcntl,
+	procfutimesat,
+	procgetgroups,
+	procgethostname,
 	procgetpeername,
+	procgetsockname,
+	procioctl,
+	proclseek,
+	procmmap,
+	procmunmap,
+	procpipe,
+	procpipe2,
+	procpoll,
+	procread,
+	procrecvfrom,
+	procsendfile,
+	procsetgroups,
 	procsetsockopt,
-	procrecvfrom syscallFunc
+	procshutdown,
+	procumount,
+	procutimensat,
+	procutimes,
+	procwait4,
+	procwrite syscallFunc
 )
 
 // THIS FILE IS GENERATED BY THE COMMAND AT THE TOP; DO NOT EDIT

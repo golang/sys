@@ -29,6 +29,7 @@ import (
 	"fmt"
 	"os"
 	"regexp"
+	"sort"
 	"strings"
 )
 
@@ -85,6 +86,16 @@ func parseParam(p string) Param {
 	return Param{ps[1], ps[2]}
 }
 
+// sortedKeys returns a sorted list of keys from a map
+func sortedKeys(m map[string]int) []string {
+	keys := make([]string, 0, len(m))
+	for k := range m {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+	return keys
+}
+
 func main() {
 	flag.Usage = usage
 	flag.Parse()
@@ -102,9 +113,9 @@ func main() {
 
 	pack := ""
 	text := ""
-	dynimports := ""
-	linknames := ""
-	var vars []string
+	dynimportMap := make(map[string]int)
+	linknameMap := make(map[string]int)
+	varsMap := make(map[string]int)
 	for _, path := range flag.Args() {
 		file, err := os.Open(path)
 		if err != nil {
@@ -163,12 +174,11 @@ func main() {
 			sysname = strings.ToLower(sysname) // All libc functions are lowercase.
 
 			// Runtime import of function to allow cross-platform builds.
-			dynimports += fmt.Sprintf("//go:cgo_import_dynamic libc_%s %s \"%s.so\"\n", sysname, sysname, modname)
+			dynimportMap[fmt.Sprintf("//go:cgo_import_dynamic libc_%s %s \"%s.so\"\n", sysname, sysname, modname)] = 1
 			// Link symbol to proc address variable.
-			linknames += fmt.Sprintf("//go:linkname %s libc_%s\n", sysvarname, sysname)
+			linknameMap[fmt.Sprintf("//go:linkname %s libc_%s\n", sysvarname, sysname)] = 1
 			// Library proc address variable.
-			vars = append(vars, sysvarname)
-
+			varsMap[sysvarname] = 1
 			// Go function header.
 			outlist := strings.Join(out, ", ")
 			if outlist != "" {
@@ -318,6 +328,9 @@ func main() {
 		syscallimp = "\"syscall\""
 	}
 
+	dynimports := strings.Join(sortedKeys(dynimportMap), "")
+	linknames := strings.Join(sortedKeys(linknameMap), "")
+	vars := sortedKeys(varsMap)
 	vardecls := "\t" + strings.Join(vars, ",\n\t")
 	vardecls += " syscallFunc"
 	fmt.Printf(srcTemplate, cmdLine(), goBuildTags(), plusBuildTags(), pack, syscallimp, imp, dynimports, linknames, vardecls, text)
