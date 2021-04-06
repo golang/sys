@@ -180,6 +180,8 @@ func NewCallbackCDecl(fn interface{}) uintptr {
 //sys	ExitProcess(exitcode uint32)
 //sys	IsWow64Process(handle Handle, isWow64 *bool) (err error) = IsWow64Process
 //sys	IsWow64Process2(handle Handle, processMachine *uint16, nativeMachine *uint16) (err error) = IsWow64Process2?
+//sys	IsWindowsVersionOrGreater(major uint16, minor uint16, sp uint16) (gt bool)
+//sys	IsWindowsServer() (t bool)
 //sys	CreateFile(name *uint16, access uint32, mode uint32, sa *SecurityAttributes, createmode uint32, attrs uint32, templatefile Handle) (handle Handle, err error) [failretval==InvalidHandle] = CreateFileW
 //sys	CreateNamedPipe(name *uint16, flags uint32, pipeMode uint32, maxInstances uint32, outSize uint32, inSize uint32, defaultTimeout uint32, sa *SecurityAttributes) (handle Handle, err error)  [failretval==InvalidHandle] = CreateNamedPipeW
 //sys	ConnectNamedPipe(pipe Handle, overlapped *Overlapped) (err error)
@@ -414,6 +416,18 @@ func NewCallbackCDecl(fn interface{}) uintptr {
 //sys	NtSetInformationProcess(proc Handle, procInfoClass int32, procInfo unsafe.Pointer, procInfoLen uint32) (ntstatus error) = ntdll.NtSetInformationProcess
 
 // syscall interface implementation for other packages
+
+// Version helpers, reimplemented in Go over the base
+// IsWindowsVersionOrGreater rather than call out to the helpers
+// defined in the DLL. That way, all the helpers are available
+// regardless of the Windows version, instead of functions
+// mysteriously disappearing when running on older Windows.
+
+func IsWindows10OrGreater() bool      { return IsWindowsVersionOrGreater(10, 0, 0) }
+func IsWindows8Point1OrGreater() bool { return IsWindowsVersionOrGreater(6, 3, 0) }
+func IsWindows8OrGreater() bool       { return IsWindowsVersionOrGreater(6, 2, 0) }
+func IsWindows7SP1OrGreater() bool    { return IsWindowsVersionOrGreater(6, 1, 1) }
+func IsWindows7OrGreater() bool       { return IsWindowsVersionOrGreater(6, 1, 0) }
 
 // GetCurrentProcess returns the handle for the current process.
 // It is a pseudo handle that does not need to be closed.
