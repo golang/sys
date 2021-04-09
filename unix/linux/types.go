@@ -3645,6 +3645,8 @@ const (
 	ETHTOOL_A_TUNNEL_INFO_MAX                 = C.ETHTOOL_A_TUNNEL_INFO_MAX
 )
 
+type EthtoolDrvinfo C.struct_ethtool_drvinfo
+
 type (
 	HIDRawReportDescriptor C.struct_hidraw_report_descriptor
 	HIDRawDevInfo          C.struct_hidraw_devinfo

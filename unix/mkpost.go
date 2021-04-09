@@ -95,6 +95,15 @@ func main() {
 		b = bytes.Replace(b, s, newNames, 1)
 	}
 
+	// Convert []int8 to []byte in EthtoolDrvinfo
+	convertEthtoolDrvinfoNames := regexp.MustCompile(`(Driver|Version|Fw_version|Bus_info|Erom_version|Reserved2)(\s+)\[(\d+)\]u?int8`)
+	ethtoolDrvinfoTypes := regexp.MustCompile(`type EthtoolDrvinfo struct {[^}]*}`)
+	ethtoolDrvinfoStructs := ethtoolDrvinfoTypes.FindAll(b, -1)
+	for _, s := range ethtoolDrvinfoStructs {
+		newNames := convertEthtoolDrvinfoNames.ReplaceAll(s, []byte("$1$2[$3]byte"))
+		b = bytes.Replace(b, s, newNames, 1)
+	}
+
 	// Convert []int8 to []byte in ctl_info ioctl interface
 	convertCtlInfoName := regexp.MustCompile(`(Name)(\s+)\[(\d+)\]int8`)
 	ctlInfoType := regexp.MustCompile(`type CtlInfo struct {[^}]*}`)
