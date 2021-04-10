@@ -857,16 +857,19 @@ type SockaddrVM struct {
 	// CID and Port specify a context ID and port address for a VM socket.
 	// Guests have a unique CID, and hosts may have a well-known CID of:
 	//  - VMADDR_CID_HYPERVISOR: refers to the hypervisor process.
+	//  - VMADDR_CID_LOCAL: refers to local communication (loopback).
 	//  - VMADDR_CID_HOST: refers to other processes on the host.
-	CID  uint32
-	Port uint32
-	raw  RawSockaddrVM
+	CID   uint32
+	Port  uint32
+	Flags uint8
+	raw   RawSockaddrVM
 }
 
 func (sa *SockaddrVM) sockaddr() (unsafe.Pointer, _Socklen, error) {
 	sa.raw.Family = AF_VSOCK
 	sa.raw.Port = sa.Port
 	sa.raw.Cid = sa.CID
+	sa.raw.Flags = sa.Flags
 
 	return unsafe.Pointer(&sa.raw), SizeofSockaddrVM, nil
 }
@@ -1171,8 +1174,9 @@ func anyToSockaddr(fd int, rsa *RawSockaddrAny) (Sockaddr, error) {
 	case AF_VSOCK:
 		pp := (*RawSockaddrVM)(unsafe.Pointer(rsa))
 		sa := &SockaddrVM{
-			CID:  pp.Cid,
-			Port: pp.Port,
+			CID:   pp.Cid,
+			Port:  pp.Port,
+			Flags: pp.Flags,
 		}
 		return sa, nil
 	case AF_BLUETOOTH:
