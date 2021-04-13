@@ -39,16 +39,19 @@ func TestSCMCredentials(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Socketpair: %v", err)
 		}
-		defer unix.Close(fds[0])
-		defer unix.Close(fds[1])
 
 		err = unix.SetsockoptInt(fds[0], unix.SOL_SOCKET, unix.SO_PASSCRED, 1)
 		if err != nil {
+			unix.Close(fds[0])
+			unix.Close(fds[1])
 			t.Fatalf("SetsockoptInt: %v", err)
 		}
 
 		srvFile := os.NewFile(uintptr(fds[0]), "server")
+		cliFile := os.NewFile(uintptr(fds[1]), "client")
 		defer srvFile.Close()
+		defer cliFile.Close()
+
 		srv, err := net.FileConn(srvFile)
 		if err != nil {
 			t.Errorf("FileConn: %v", err)
@@ -56,8 +59,6 @@ func TestSCMCredentials(t *testing.T) {
 		}
 		defer srv.Close()
 
-		cliFile := os.NewFile(uintptr(fds[1]), "client")
-		defer cliFile.Close()
 		cli, err := net.FileConn(cliFile)
 		if err != nil {
 			t.Errorf("FileConn: %v", err)
