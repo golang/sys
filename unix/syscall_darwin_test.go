@@ -224,19 +224,18 @@ func TestGetsockoptXucred(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Socketpair: %v", err)
 	}
-	defer unix.Close(fds[0])
-	defer unix.Close(fds[1])
 
 	srvFile := os.NewFile(uintptr(fds[0]), "server")
+	cliFile := os.NewFile(uintptr(fds[1]), "client")
 	defer srvFile.Close()
+	defer cliFile.Close()
+
 	srv, err := net.FileConn(srvFile)
 	if err != nil {
 		t.Fatalf("FileConn: %v", err)
 	}
 	defer srv.Close()
 
-	cliFile := os.NewFile(uintptr(fds[1]), "client")
-	defer cliFile.Close()
 	cli, err := net.FileConn(cliFile)
 	if err != nil {
 		t.Fatalf("FileConn: %v", err)
