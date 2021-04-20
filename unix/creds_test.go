@@ -89,8 +89,8 @@ func TestSCMCredentials(t *testing.T) {
 		if err != nil {
 			t.Fatalf("ReadMsgUnix: %v", err)
 		}
-		if flags != 0 {
-			t.Fatalf("ReadMsgUnix flags = 0x%x, want 0", flags)
+		if flags != 0 && flags != unix.MSG_CMSG_CLOEXEC {
+			t.Fatalf("ReadMsgUnix flags = %#x, want 0 or %#x (MSG_CMSG_CLOEXEC)", flags, unix.MSG_CMSG_CLOEXEC)
 		}
 		if n != tt.dataLen {
 			t.Fatalf("ReadMsgUnix n = %d, want %d", n, tt.dataLen)
