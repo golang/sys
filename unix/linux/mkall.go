@@ -108,6 +108,13 @@ var targets = []target{
 		Bits:      64,
 	},
 	{
+		GoArch:    "ppc",
+		LinuxArch: "powerpc",
+		GNUArch:   "powerpc-linux-gnu",
+		BigEndian: true,
+		Bits:      32,
+	},
+	{
 		GoArch:    "ppc64",
 		LinuxArch: "powerpc",
 		GNUArch:   "powerpc64-linux-gnu",
