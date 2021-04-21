@@ -45,8 +45,8 @@ RUN apt-get update && apt-get install -y \
         gcc-aarch64-linux-gnu       gcc-arm-linux-gnueabi     \
         gcc-mips-linux-gnu          gcc-mips64-linux-gnuabi64 \
         gcc-mips64el-linux-gnuabi64 gcc-mipsel-linux-gnu      \
-        gcc-powerpc64-linux-gnu     gcc-powerpc64le-linux-gnu \
-	gcc-riscv64-linux-gnu                                 \
+        gcc-powerpc-linux-gnu       gcc-powerpc64-linux-gnu   \
+        gcc-powerpc64le-linux-gnu   gcc-riscv64-linux-gnu     \
         gcc-s390x-linux-gnu         gcc-sparc64-linux-gnu     \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*

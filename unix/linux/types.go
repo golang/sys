@@ -260,7 +260,7 @@ struct sockaddr_rc {
 // copied from /usr/include/linux/un.h
 struct my_sockaddr_un {
 	sa_family_t sun_family;
-#if defined(__ARM_EABI__) || defined(__powerpc64__) || defined(__riscv)
+#if defined(__ARM_EABI__) || defined(__powerpc__) || defined(__powerpc64__) || defined(__riscv)
 	// on some platforms char is unsigned by default
 	signed char sun_path[108];
 #else
@@ -282,7 +282,7 @@ struct sockaddr_iucv {
 typedef struct user_regs PtraceRegs;
 #elif defined(__aarch64__)
 typedef struct user_pt_regs PtraceRegs;
-#elif defined(__mips__) || defined(__powerpc64__)
+#elif defined(__mips__) || defined(__powerpc__) || defined(__powerpc64__)
 typedef struct pt_regs PtraceRegs;
 #elif defined(__s390x__)
 typedef struct _user_regs_struct PtraceRegs;
@@ -310,8 +310,8 @@ struct my_epoll_event {
 	// padding is not specified in linux/eventpoll.h but added to conform to the
 	// alignment requirements of EABI
 	int32_t padFd;
-#elif defined(__powerpc64__) || defined(__s390x__) || defined(__sparc__) || defined(__riscv) \
-		|| (defined(__mips__) && _MIPS_SIM == _MIPS_SIM_ABI64)
+#elif defined(__powerpc__) || defined(__powerpc64__) || defined(__s390x__) || defined(__sparc__) \
+		|| defined(__riscv) || (defined(__mips__) && _MIPS_SIM == _MIPS_SIM_ABI64)
 	int32_t _padFd;
 #endif
 	int32_t fd;
