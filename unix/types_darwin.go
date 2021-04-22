@@ -160,6 +160,8 @@ type Iovec C.struct_iovec
 
 type IPMreq C.struct_ip_mreq
 
+type IPMreqn C.struct_ip_mreqn
+
 type IPv6Mreq C.struct_ipv6_mreq
 
 type Msghdr C.struct_msghdr
@@ -185,6 +187,7 @@ const (
 	SizeofLinger           = C.sizeof_struct_linger
 	SizeofIovec            = C.sizeof_struct_iovec
 	SizeofIPMreq           = C.sizeof_struct_ip_mreq
+	SizeofIPMreqn          = C.sizeof_struct_ip_mreqn
 	SizeofIPv6Mreq         = C.sizeof_struct_ipv6_mreq
 	SizeofMsghdr           = C.sizeof_struct_msghdr
 	SizeofCmsghdr          = C.sizeof_struct_cmsghdr
