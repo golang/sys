@@ -8,6 +8,7 @@
 package unix_test
 
 import (
+	"bytes"
 	"flag"
 	"fmt"
 	"io/ioutil"
@@ -20,6 +21,7 @@ import (
 	"syscall"
 	"testing"
 	"time"
+	"unsafe"
 
 	"golang.org/x/sys/unix"
 )
@@ -602,5 +604,268 @@ func chtmpdir(t *testing.T) func() {
 			t.Fatalf("chtmpdir: %v", err)
 		}
 		os.RemoveAll(d)
+	}
+}
+
+func TestMountUnmount(t *testing.T) {
+	b2s := func(arr []byte) string {
+		nulli := bytes.IndexByte(arr, 0)
+		if nulli == -1 {
+			return string(arr)
+		} else {
+			return string(arr[:nulli])
+		}
+	}
+	// use an available fs
+	var buffer struct {
+		header unix.W_Mnth
+		fsinfo [64]unix.W_Mntent
+	}
+	fsCount, err := unix.W_Getmntent_A((*byte)(unsafe.Pointer(&buffer)), int(unsafe.Sizeof(buffer)))
+	if err != nil {
+		t.Fatalf("W_Getmntent_A returns with error: %s", err.Error())
+	} else if fsCount == 0 {
+		t.Fatalf("W_Getmntent_A returns no entries")
+	}
+	var fs string
+	var fstype string
+	var mountpoint string
+	var available bool = false
+	for i := 0; i < fsCount; i++ {
+		err = unix.Unmount(b2s(buffer.fsinfo[i].Mountpoint[:]), unix.MTM_RDWR)
+		if err != nil {
+			// Unmount and Mount require elevated privilege
+			// If test is run without such permission, skip test
+			if err == unix.EPERM {
+				t.Logf("Permission denied for Unmount. Skipping test (Errno2:  %X)", unix.Errno2())
+				return
+			} else if err == unix.EBUSY {
+				continue
+			} else {
+				t.Fatalf("Unmount returns with error: %s", err.Error())
+			}
+		} else {
+			available = true
+			fs = b2s(buffer.fsinfo[i].Fsname[:])
+			fstype = b2s(buffer.fsinfo[i].Fstname[:])
+			mountpoint = b2s(buffer.fsinfo[i].Mountpoint[:])
+			t.Logf("using file system = %s; fstype = %s and mountpoint = %s\n", fs, fstype, mountpoint)
+			break
+		}
+	}
+	if !available {
+		t.Fatalf("No filesystem available")
+	}
+	// test unmount
+	buffer.header = unix.W_Mnth{}
+	fsCount, err = unix.W_Getmntent_A((*byte)(unsafe.Pointer(&buffer)), int(unsafe.Sizeof(buffer)))
+	if err != nil {
+		t.Fatalf("W_Getmntent_A returns with error: %s", err.Error())
+	}
+	for i := 0; i < fsCount; i++ {
+		if b2s(buffer.fsinfo[i].Fsname[:]) == fs {
+			t.Fatalf("File system found after unmount")
+		}
+	}
+	// test mount
+	err = unix.Mount(fs, mountpoint, fstype, unix.MTM_RDWR, "")
+	if err != nil {
+		t.Fatalf("Mount returns with error: %s", err.Error())
+	}
+	buffer.header = unix.W_Mnth{}
+	fsCount, err = unix.W_Getmntent_A((*byte)(unsafe.Pointer(&buffer)), int(unsafe.Sizeof(buffer)))
+	if err != nil {
+		t.Fatalf("W_Getmntent_A returns with error: %s", err.Error())
+	}
+	fsMounted := false
+	for i := 0; i < fsCount; i++ {
+		if b2s(buffer.fsinfo[i].Fsname[:]) == fs && b2s(buffer.fsinfo[i].Mountpoint[:]) == mountpoint {
+			fsMounted = true
+		}
+	}
+	if !fsMounted {
+		t.Fatalf("%s not mounted after Mount()", fs)
+	}
+}
+
+func TestChroot(t *testing.T) {
+	// create temp dir and tempfile 1
+	tempDir, err := ioutil.TempDir("", "TestChroot")
+	if err != nil {
+		t.Fatalf("TempDir: %s", err.Error())
+	}
+	defer os.RemoveAll(tempDir)
+	f, err := ioutil.TempFile(tempDir, "chroot_test_file")
+	if err != nil {
+		t.Fatalf("TempFile: %s", err.Error())
+	}
+	// chroot temp dir
+	err = unix.Chroot(tempDir)
+	// Chroot requires elevated privilege
+	// If test is run without such permission, skip test
+	if err == unix.EPERM {
+		t.Logf("Denied permission for Chroot. Skipping test (Errno2:  %X)", unix.Errno2())
+		return
+	} else if err != nil {
+		t.Fatalf("Chroot: %s", err.Error())
+	}
+	// check if tempDir contains test file
+	files, err := ioutil.ReadDir("/")
+	if err != nil {
+		t.Fatalf("ReadDir: %s", err.Error())
+	}
+	found := false
+	for _, file := range files {
+		if file.Name() == filepath.Base(f.Name()) {
+			found = true
+			break
+		}
+	}
+	if !found {
+		t.Fatalf("Temp file not found in temp dir")
+	}
+}
+
+func TestFlock(t *testing.T) {
+	if os.Getenv("GO_WANT_HELPER_PROCESS") == "1" {
+		defer os.Exit(0)
+		if len(os.Args) != 3 {
+			fmt.Printf("bad argument")
+			return
+		}
+		fn := os.Args[2]
+		f, err := os.OpenFile(fn, os.O_RDWR, 0755)
+		if err != nil {
+			fmt.Printf("%s", err.Error())
+			return
+		}
+		err = unix.Flock(int(f.Fd()), unix.LOCK_EX|unix.LOCK_NB)
+		// if the lock we are trying should be locked, ignore EAGAIN error
+		// otherwise, report all errors
+		if err != nil && err != unix.EAGAIN {
+			fmt.Printf("%s", err.Error())
+		}
+	} else {
+		// create temp dir and tempfile 1
+		tempDir, err := ioutil.TempDir("", "TestFlock")
+		if err != nil {
+			t.Fatalf("TempDir: %s", err.Error())
+		}
+		defer os.RemoveAll(tempDir)
+		f, err := ioutil.TempFile(tempDir, "flock_test_file")
+		if err != nil {
+			t.Fatalf("TempFile: %s", err.Error())
+		}
+		fd := int(f.Fd())
+
+		/* Test Case 1
+		 * Try acquiring an occupied lock from another process
+		 */
+		err = unix.Flock(fd, unix.LOCK_EX)
+		if err != nil {
+			t.Fatalf("Flock: %s", err.Error())
+		}
+		cmd := exec.Command(os.Args[0], "-test.run=TestFlock", f.Name())
+		cmd.Env = append(os.Environ(), "GO_WANT_HELPER_PROCESS=1")
+		out, err := cmd.CombinedOutput()
+		if len(out) > 0 || err != nil {
+			t.Fatalf("child process: %q, %v", out, err)
+		}
+		err = unix.Flock(fd, unix.LOCK_UN)
+		if err != nil {
+			t.Fatalf("Flock: %s", err.Error())
+		}
+
+		/* Test Case 2
+		 * Try locking with Flock and FcntlFlock for same file
+		 */
+		err = unix.Flock(fd, unix.LOCK_EX)
+		if err != nil {
+			t.Fatalf("Flock: %s", err.Error())
+		}
+		flock := unix.Flock_t{
+			Type:   int16(unix.F_WRLCK),
+			Whence: int16(0),
+			Start:  int64(0),
+			Len:    int64(0),
+			Pid:    int32(unix.Getppid()),
+		}
+		err = unix.FcntlFlock(f.Fd(), unix.F_SETLK, &flock)
+		if err != nil {
+			t.Fatalf("FcntlFlock: %s", err.Error())
+		}
+	}
+}
+
+func TestSelect(t *testing.T) {
+	for {
+		n, err := unix.Select(0, nil, nil, nil, &unix.Timeval{Sec: 0, Usec: 0})
+		if err == unix.EINTR {
+			t.Logf("Select interrupted")
+			continue
+		} else if err != nil {
+			t.Fatalf("Select: %v", err)
+		}
+		if n != 0 {
+			t.Fatalf("Select: got %v ready file descriptors, expected 0", n)
+		}
+		break
+	}
+
+	dur := 250 * time.Millisecond
+	var took time.Duration
+	for {
+		// On some platforms (e.g. Linux), the passed-in timeval is
+		// updated by select(2). Make sure to reset to the full duration
+		// in case of an EINTR.
+		tv := unix.NsecToTimeval(int64(dur))
+		start := time.Now()
+		n, err := unix.Select(0, nil, nil, nil, &tv)
+		took = time.Since(start)
+		if err == unix.EINTR {
+			t.Logf("Select interrupted after %v", took)
+			continue
+		} else if err != nil {
+			t.Fatalf("Select: %v", err)
+		}
+		if n != 0 {
+			t.Fatalf("Select: got %v ready file descriptors, expected 0", n)
+		}
+		break
+	}
+
+	// On some BSDs the actual timeout might also be slightly less than the requested.
+	// Add an acceptable margin to avoid flaky tests.
+	if took < dur*2/3 {
+		t.Errorf("Select: got %v timeout, expected at least %v", took, dur)
+	}
+
+	rr, ww, err := os.Pipe()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer rr.Close()
+	defer ww.Close()
+
+	if _, err := ww.Write([]byte("HELLO GOPHER")); err != nil {
+		t.Fatal(err)
+	}
+
+	rFdSet := &unix.FdSet{}
+	fd := int(rr.Fd())
+	rFdSet.Set(fd)
+
+	for {
+		n, err := unix.Select(fd+1, rFdSet, nil, nil, nil)
+		if err == unix.EINTR {
+			t.Log("Select interrupted")
+			continue
+		} else if err != nil {
+			t.Fatalf("Select: %v", err)
+		}
+		if n != 1 {
+			t.Fatalf("Select: got %v ready file descriptors, expected 1", n)
+		}
+		break
 	}
 }

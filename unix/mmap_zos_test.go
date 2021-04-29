@@ -33,7 +33,7 @@ func TestMmap(t *testing.T) {
 	fmt.Fprintf(destination, "%s\n", "0 <- Flipped between 0 and 1 when test runs successfully")
 	fmt.Fprintf(destination, "%s\n", "//Do not change contents - mmap test relies on this")
 	destination.Close()
-	fd, err := unix.Open(filename, unix.O_RDWR, 0o777)
+	fd, err := unix.Open(filename, unix.O_RDWR, 0777)
 	if err != nil {
 		t.Fatalf("Open: %v", err)
 	}
