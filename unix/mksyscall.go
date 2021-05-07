@@ -290,7 +290,7 @@ func main() {
 				sysname = strings.TrimPrefix(sysname, "SYS_")         // remove SYS_
 				sysname = strings.ToLower(sysname)                    // lowercase
 				libcFn = sysname
-				sysname = "funcPC(libc_" + sysname + "_trampoline)"
+				sysname = "libc_" + sysname + "_trampoline_addr"
 			}
 
 			// Actual call.
@@ -363,8 +363,8 @@ func main() {
 			if libc && !trampolines[libcFn] {
 				// some system calls share a trampoline, like read and readlen.
 				trampolines[libcFn] = true
-				// Declare assembly trampoline.
-				text += fmt.Sprintf("func libc_%s_trampoline()\n", libcFn)
+				// Declare assembly trampoline address.
+				text += fmt.Sprintf("var libc_%s_trampoline_addr uintptr\n\n", libcFn)
 				// Assembly trampoline calls the libc_* function, which this magic
 				// redirects to use the function from libSystem.
 				text += fmt.Sprintf("//go:cgo_import_dynamic libc_%s %s \"/usr/lib/libSystem.B.dylib\"\n", libcFn, libcFn)

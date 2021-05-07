@@ -18,6 +18,8 @@ import (
 	"strings"
 )
 
+const ptrsize = 8 // Pointer size. All supported platforms are 64-bit.
+
 func writeASMFile(in string, fileName string, buildTags string) {
 	trampolines := map[string]bool{}
 
@@ -31,14 +33,18 @@ func writeASMFile(in string, fileName string, buildTags string) {
 	fmt.Fprintf(&out, "\n")
 	fmt.Fprintf(&out, "#include \"textflag.h\"\n")
 	for _, line := range strings.Split(in, "\n") {
-		if !strings.HasPrefix(line, "func ") || !strings.HasSuffix(line, "_trampoline()") {
+		const prefix = "var "
+		const suffix = "_trampoline_addr uintptr"
+		if !strings.HasPrefix(line, prefix) || !strings.HasSuffix(line, suffix) {
 			continue
 		}
-		fn := line[5 : len(line)-13]
+		fn := strings.TrimSuffix(strings.TrimPrefix(line, prefix), suffix)
 		if !trampolines[fn] {
 			trampolines[fn] = true
-			fmt.Fprintf(&out, "TEXT ·%s_trampoline(SB),NOSPLIT,$0-0\n", fn)
-			fmt.Fprintf(&out, "\tJMP\t%s(SB)\n", fn)
+			fmt.Fprintf(&out, "\nTEXT %s_trampoline<>(SB),NOSPLIT,$0-0\n", fn)
+			fmt.Fprintf(&out, "\tJMP\t%s(SB)\n\n", fn)
+			fmt.Fprintf(&out, "GLOBL\t·%s_trampoline_addr(SB), RODATA, $%d\n", fn, ptrsize)
+			fmt.Fprintf(&out, "DATA\t·%s_trampoline_addr(SB)/%d, $%s_trampoline<>(SB)\n", fn, ptrsize, fn)
 		}
 	}
 	err := ioutil.WriteFile(fileName, out.Bytes(), 0644)
