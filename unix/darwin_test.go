@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-//go:build (darwin && go1.12 && amd64) || (darwin && go1.12 && 386)
-// +build darwin,go1.12,amd64 darwin,go1.12,386
+//go:build darwin && go1.12 && amd64
+// +build darwin,go1.12,amd64
 
 package unix
 

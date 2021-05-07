@@ -168,7 +168,7 @@ func TestFcntlFlock(t *testing.T) {
 // "-test.run=^TestPassFD$" and an environment variable used to signal
 // that the test should become the child process instead.
 func TestPassFD(t *testing.T) {
-	if runtime.GOOS == "darwin" && (runtime.GOARCH == "arm" || runtime.GOARCH == "arm64") {
+	if runtime.GOOS == "darwin" && runtime.GOARCH == "arm64" {
 		t.Skip("cannot exec subprocess on iOS, skipping test")
 	}
 
@@ -493,7 +493,7 @@ func TestGetwd(t *testing.T) {
 		dirs = []string{"/", "/system/bin"}
 	case "darwin":
 		switch runtime.GOARCH {
-		case "arm", "arm64":
+		case "arm64":
 			d1, err := ioutil.TempDir("", "d1")
 			if err != nil {
 				t.Fatalf("TempDir: %v", err)
