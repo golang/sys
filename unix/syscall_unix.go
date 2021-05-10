@@ -429,3 +429,91 @@ func Lutimes(path string, tv []Timeval) error {
 	}
 	return UtimesNanoAt(AT_FDCWD, path, ts, AT_SYMLINK_NOFOLLOW)
 }
+
+type ShmDetach func() error
+
+// sysv shm manager for os-specific implementations
+type shmface struct {
+	shmat  func(id int, addr uintptr, flag int) (ret uintptr, err error)
+	shmdt  func(addr uintptr) (err error)
+	shmget func(key int, size int, flag int) (id int, err error)
+	rmshm  func(id int) error
+}
+
+func (s *shmface) Get(key int, size int, flag int) (*SysvShm, error) {
+	id, errno := s.shmget(key, size, flag)
+	if errno != nil {
+		return nil, errno
+	}
+	return &SysvShm{iface: s, id: id, size: size}, nil
+}
+
+func (s *shmface) At(id int, size int, flag int) ([]byte, ShmDetach, error) {
+	shm := SysvShm{iface: s, id: id, size: size}
+	b, errno := shm.Attach(flag)
+	if errno != nil {
+		return nil, nil, errno
+	}
+	return b, shm.Detach, nil
+}
+
+// SysvShm is a partial wrapper for a SysV shared memory segment.
+type SysvShm struct {
+	iface *shmface
+	id    int
+	addr  uintptr
+	size  int
+}
+
+// Attach maps the shared memory via shmat and returns a slice for it.
+func (s *SysvShm) Attach(flag int) ([]byte, error) {
+	if s.iface == nil || s.addr != 0 {
+		return nil, EINVAL
+	}
+
+	addr, errno := s.iface.shmat(s.id, 0, flag)
+	if errno != nil {
+		return nil, errno
+	}
+
+	s.addr = addr
+
+	// Use unsafe to convert addr into a []byte.
+	var b []byte
+	hdr := (*unsafeheader.Slice)(unsafe.Pointer(&b))
+	hdr.Data = unsafe.Pointer(addr)
+	hdr.Cap = s.size
+	hdr.Len = s.size
+	return b, nil
+}
+
+// Detach unmaps the shared memory via shmdt.
+//
+// The slice returned by Attach is no longer valid after this call.
+func (s *SysvShm) Detach() error {
+	if s.iface == nil || s.addr == 0 {
+		return EINVAL
+	}
+
+	if errno := s.iface.shmdt(s.addr); errno != nil {
+		return errno
+	}
+
+	s.addr = 0
+	return nil
+}
+
+// Id returns the shmid that can be used for operating system-specific functionality.
+func (s *SysvShm) Id() int {
+	return s.id
+}
+
+// Remove will ask the OS to mark this shared memory segment for deletion. It
+// typically will not actually be removed until all processes detach from it.
+func (s *SysvShm) Remove() error {
+	if s.iface == nil {
+		return EINVAL
+	}
+
+	return s.iface.rmshm(s.id)
+}

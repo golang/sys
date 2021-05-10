@@ -256,3 +256,50 @@ func TestGetsockoptXucred(t *testing.T) {
 		}
 	}
 }
+
+func TestSysvSharedMemory(t *testing.T) {
+	// create ipc
+	shm, err := unix.Shmget(unix.IPC_PRIVATE, 1024, unix.IPC_CREAT|unix.IPC_EXCL|0o600)
+	if err != nil {
+		t.Fatalf("Shmget: %v", err)
+	}
+	defer func() {
+		err := shm.Remove()
+		if err != nil {
+			t.Errorf("Remove failed: %v", err)
+		}
+	}()
+
+	// attach
+	b1, err := shm.Attach(0)
+	if err != nil {
+		t.Fatalf("Attach: %v", err)
+	}
+
+	if len(b1) != 1024 {
+		t.Fatalf("b1 len = %v, want 1024", len(b1))
+	}
+
+	b1[42] = 'x'
+
+	// attach directly
+	b2, detach, err := unix.Shmat(shm.Id(), 1024, 0)
+	if err != nil {
+		t.Fatalf("Shmat: %v", err)
+	}
+	defer func() {
+		err := detach()
+		if err != nil {
+			t.Errorf("detach failed: %v", err)
+		}
+	}()
+
+	if len(b2) != 1024 {
+		t.Fatalf("b2 len = %v, want 1024", len(b2))
+	}
+
+	b2[43] = 'y'
+	if b2[42] != 'x' || b1[43] != 'y' {
+		t.Fatalf("shared memory isn't shared")
+	}
+}

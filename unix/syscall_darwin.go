@@ -400,6 +400,32 @@ func GetsockoptXucred(fd, level, opt int) (*Xucred, error) {
 
 //sys	sendfile(infd int, outfd int, offset int64, len *int64, hdtr unsafe.Pointer, flags int) (err error)
 
+//sys	shmat(id int, addr uintptr, flag int) (ret uintptr, err error)
+//sys	shmdt(addr uintptr) (err error)
+//sys	shmget(key int, size int, flag int) (id int, err error)
+
+var shm = &shmface{
+	shmat:  shmat,
+	shmdt:  shmdt,
+	shmget: shmget,
+	rmshm:  rmshm,
+}
+
+// Shmget returns a wrapper for the SysV shared memory segment associated with the key.
+func Shmget(key int, size int, flag int) (*SysvShm, error) {
+	return shm.Get(key, size, flag)
+}
+
+// Shmat maps the shared memory associated with id and returns a slice for it.
+// The memory can be unmapped using the ShmDetach function.
+func Shmat(id int, size int, flag int) ([]byte, ShmDetach, error) {
+	return shm.At(id, size, flag)
+}
+
+func rmshm(id int) error {
+	return Shmctl(id, IPC_RMID, nil)
+}
+
 /*
  * Exposed directly
  */
@@ -482,6 +508,7 @@ func GetsockoptXucred(fd, level, opt int) (*Xucred, error) {
 //sysnb	Setsid() (pid int, err error)
 //sysnb	Settimeofday(tp *Timeval) (err error)
 //sysnb	Setuid(uid int) (err error)
+//sys	Shmctl(id int, cmd int, buf *ShmidDs) (err error)
 //sys	Symlink(path string, link string) (err error)
 //sys	Symlinkat(oldpath string, newdirfd int, newpath string) (err error)
 //sys	Sync() (err error)
@@ -557,10 +584,6 @@ func GetsockoptXucred(fd, level, opt int) (*Xucred, error) {
 // Msgget
 // Msgsnd
 // Msgrcv
-// Shmat
-// Shmctl
-// Shmdt
-// Shmget
 // Shm_open
 // Shm_unlink
 // Sem_open

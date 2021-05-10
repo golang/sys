@@ -264,6 +264,24 @@ TEXT libc_sendfile_trampoline<>(SB),NOSPLIT,$0-0
 GLOBL	·libc_sendfile_trampoline_addr(SB), RODATA, $8
 DATA	·libc_sendfile_trampoline_addr(SB)/8, $libc_sendfile_trampoline<>(SB)
 
+TEXT libc_shmat_trampoline<>(SB),NOSPLIT,$0-0
+	JMP	libc_shmat(SB)
+
+GLOBL	·libc_shmat_trampoline_addr(SB), RODATA, $8
+DATA	·libc_shmat_trampoline_addr(SB)/8, $libc_shmat_trampoline<>(SB)
+
+TEXT libc_shmdt_trampoline<>(SB),NOSPLIT,$0-0
+	JMP	libc_shmdt(SB)
+
+GLOBL	·libc_shmdt_trampoline_addr(SB), RODATA, $8
+DATA	·libc_shmdt_trampoline_addr(SB)/8, $libc_shmdt_trampoline<>(SB)
+
+TEXT libc_shmget_trampoline<>(SB),NOSPLIT,$0-0
+	JMP	libc_shmget(SB)
+
+GLOBL	·libc_shmget_trampoline_addr(SB), RODATA, $8
+DATA	·libc_shmget_trampoline_addr(SB)/8, $libc_shmget_trampoline<>(SB)
+
 TEXT libc_access_trampoline<>(SB),NOSPLIT,$0-0
 	JMP	libc_access(SB)
 
@@ -737,6 +755,12 @@ TEXT libc_setuid_trampoline<>(SB),NOSPLIT,$0-0
 
 GLOBL	·libc_setuid_trampoline_addr(SB), RODATA, $8
 DATA	·libc_setuid_trampoline_addr(SB)/8, $libc_setuid_trampoline<>(SB)
+
+TEXT libc_shmctl_trampoline<>(SB),NOSPLIT,$0-0
+	JMP	libc_shmctl(SB)
+
+GLOBL	·libc_shmctl_trampoline_addr(SB), RODATA, $8
+DATA	·libc_shmctl_trampoline_addr(SB)/8, $libc_shmctl_trampoline<>(SB)
 
 TEXT libc_symlink_trampoline<>(SB),NOSPLIT,$0-0
 	JMP	libc_symlink(SB)
