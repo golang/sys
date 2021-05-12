@@ -10,6 +10,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"math/rand"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -597,5 +598,63 @@ func TestResourceExtraction(t *testing.T) {
 	}
 	if !bytes.Contains(manifest, []byte("</assembly>")) {
 		t.Errorf("did not find </assembly> in manifest")
+	}
+}
+
+func TestCommandLineRecomposition(t *testing.T) {
+	const (
+		maxCharsPerArg  = 35
+		maxArgsPerTrial = 80
+		doubleQuoteProb = 4
+		singleQuoteProb = 1
+		backSlashProb   = 3
+		spaceProb       = 1
+		trials          = 1000
+	)
+	randString := func(l int) []rune {
+		s := make([]rune, l)
+		for i := range s {
+			s[i] = rand.Int31()
+		}
+		return s
+	}
+	mungeString := func(s []rune, char rune, timesInTen int) {
+		if timesInTen < rand.Intn(10)+1 || len(s) == 0 {
+			return
+		}
+		s[rand.Intn(len(s))] = char
+	}
+	argStorage := make([]string, maxArgsPerTrial+1)
+	for i := 0; i < trials; i++ {
+		args := argStorage[:rand.Intn(maxArgsPerTrial)+2]
+		args[0] = "valid-filename-for-arg0"
+		for j := 1; j < len(args); j++ {
+			arg := randString(rand.Intn(maxCharsPerArg + 1))
+			mungeString(arg, '"', doubleQuoteProb)
+			mungeString(arg, '\'', singleQuoteProb)
+			mungeString(arg, '\\', backSlashProb)
+			mungeString(arg, ' ', spaceProb)
+			args[j] = string(arg)
+		}
+		commandLine := windows.ComposeCommandLine(args)
+		decomposedArgs, err := windows.DecomposeCommandLine(commandLine)
+		if err != nil {
+			t.Errorf("Unable to decompose %#q made from %v: %v", commandLine, args, err)
+			continue
+		}
+		if len(decomposedArgs) != len(args) {
+			t.Errorf("Incorrect decomposition length from %v to %#q to %v", args, commandLine, decomposedArgs)
+			continue
+		}
+		badMatches := make([]int, 0, len(args))
+		for i := range args {
+			if args[i] != decomposedArgs[i] {
+				badMatches = append(badMatches, i)
+			}
+		}
+		if len(badMatches) != 0 {
+			t.Errorf("Incorrect decomposition at indices %v from %v to %#q to %v", badMatches, args, commandLine, decomposedArgs)
+			continue
+		}
 	}
 }
