@@ -206,6 +206,54 @@ func Test_anyToSockaddr(t *testing.T) {
 			proto: makeProto(CAN_J1939),
 		},
 		{
+			name: "AF_NFC RAW",
+			rsa: sockaddrNFCToAny(RawSockaddrNFC{
+				Sa_family:    AF_NFC,
+				Dev_idx:      10,
+				Target_idx:   20,
+				Nfc_protocol: 30,
+			}),
+			sa: &SockaddrNFC{
+				DeviceIdx:   10,
+				TargetIdx:   20,
+				NFCProtocol: 30,
+			},
+			proto: makeProto(NFC_SOCKPROTO_RAW),
+		},
+		{
+			name: "AF_NFC LLCP",
+			rsa: sockaddrNFCLLCPToAny(RawSockaddrNFCLLCP{
+				Sa_family:        AF_NFC,
+				Dev_idx:          10,
+				Target_idx:       20,
+				Nfc_protocol:     30,
+				Dsap:             40,
+				Ssap:             50,
+				Service_name:     [63]uint8{'t', 'e', 's', 't'},
+				Service_name_len: 4,
+			}),
+			sa: &SockaddrNFCLLCP{
+				DeviceIdx:      10,
+				TargetIdx:      20,
+				NFCProtocol:    30,
+				DestinationSAP: 40,
+				SourceSAP:      50,
+				ServiceName:    "test",
+			},
+			proto: makeProto(NFC_SOCKPROTO_LLCP),
+		},
+		{
+			name: "AF_NFC unknown",
+			rsa: sockaddrNFCToAny(RawSockaddrNFC{
+				Sa_family:    AF_NFC,
+				Dev_idx:      10,
+				Target_idx:   20,
+				Nfc_protocol: 30,
+			}),
+			err:   EINVAL,
+			proto: makeProto(^0),
+		},
+		{
 			name: "AF_MAX EAFNOSUPPORT",
 			rsa: &RawSockaddrAny{
 				Addr: RawSockaddr{
@@ -631,6 +679,115 @@ func TestSockaddrCAN_sockaddr(t *testing.T) {
 	}
 }
 
+func TestSockaddrNFC_sockaddr(t *testing.T) {
+	tests := []struct {
+		name string
+		sa   *SockaddrNFC
+		raw  *RawSockaddrNFC
+		err  error
+	}{
+		{
+			name: "NFC RAW",
+			sa: &SockaddrNFC{
+				DeviceIdx:   12345678,
+				TargetIdx:   87654321,
+				NFCProtocol: 0xBBBBBBBB,
+			},
+			raw: &RawSockaddrNFC{
+				Sa_family:    AF_NFC,
+				Dev_idx:      12345678,
+				Target_idx:   87654321,
+				Nfc_protocol: 0xBBBBBBBB,
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			out, l, err := tt.sa.sockaddr()
+			if err != tt.err {
+				t.Fatalf("unexpected error: %v, want: %v", err, tt.err)
+			}
+
+			// Must be 0 on error or a fixed size otherwise.
+			if (tt.err != nil && l != 0) || (tt.raw != nil && l != SizeofSockaddrNFC) {
+				t.Fatalf("unexpected Socklen: %d", l)
+			}
+
+			if out != nil {
+				raw := (*RawSockaddrNFC)(out)
+				if !reflect.DeepEqual(raw, tt.raw) {
+					t.Fatalf("unexpected RawSockaddrNFC:\n got: %#v\nwant: %#v", raw, tt.raw)
+				}
+			}
+		})
+	}
+}
+
+func TestSockaddrNFCLLCP_sockaddr(t *testing.T) {
+	tests := []struct {
+		name string
+		sa   *SockaddrNFCLLCP
+		raw  *RawSockaddrNFCLLCP
+		err  error
+	}{
+		{
+			name: "valid",
+			sa: &SockaddrNFCLLCP{
+				DeviceIdx:      12345678,
+				TargetIdx:      87654321,
+				NFCProtocol:    0xBBBBBBBB,
+				DestinationSAP: 55,
+				SourceSAP:      56,
+				ServiceName:    "test service",
+			},
+			raw: &RawSockaddrNFCLLCP{
+				Sa_family:        AF_NFC,
+				Dev_idx:          12345678,
+				Target_idx:       87654321,
+				Nfc_protocol:     0xBBBBBBBB,
+				Dsap:             55,
+				Ssap:             56,
+				Service_name:     [63]uint8{'t', 'e', 's', 't', ' ', 's', 'e', 'r', 'v', 'i', 'c', 'e'},
+				Service_name_len: 12,
+			},
+		},
+		{
+			name: "too long service name",
+			sa: &SockaddrNFCLLCP{
+				DeviceIdx:      12345678,
+				TargetIdx:      87654321,
+				NFCProtocol:    0xBBBBBBBB,
+				DestinationSAP: 55,
+				SourceSAP:      56,
+				ServiceName:    "too long too long too long too long too long too long too long too long too long",
+			},
+			err: EINVAL,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			out, l, err := tt.sa.sockaddr()
+			if err != tt.err {
+				t.Fatalf("unexpected error: %v, want: %v", err, tt.err)
+			}
+
+			// Must be 0 on error or a fixed size otherwise.
+			if (tt.err != nil && l != 0) || (tt.raw != nil && l != SizeofSockaddrNFCLLCP) {
+				t.Fatalf("unexpected Socklen: %d", l)
+			}
+
+			if out != nil {
+				raw := (*RawSockaddrNFCLLCP)(out)
+				if !reflect.DeepEqual(raw, tt.raw) {
+					t.Fatalf("unexpected RawSockaddrNFCLLCP:\n got: %#v\nwant: %#v", raw, tt.raw)
+				}
+			}
+		})
+	}
+}
+
 // These helpers explicitly copy the contents of in into out to produce
 // the correct sockaddr structure, without relying on unsafe casting to
 // a type of a larger size.
@@ -684,6 +841,24 @@ func sockaddrCANToAny(in RawSockaddrCAN) *RawSockaddrAny {
 	copy(
 		(*(*[SizeofSockaddrAny]byte)(unsafe.Pointer(&out)))[:],
 		(*(*[SizeofSockaddrCAN]byte)(unsafe.Pointer(&in)))[:],
+	)
+	return &out
+}
+
+func sockaddrNFCToAny(in RawSockaddrNFC) *RawSockaddrAny {
+	var out RawSockaddrAny
+	copy(
+		(*(*[SizeofSockaddrAny]byte)(unsafe.Pointer(&out)))[:],
+		(*(*[SizeofSockaddrNFC]byte)(unsafe.Pointer(&in)))[:],
+	)
+	return &out
+}
+
+func sockaddrNFCLLCPToAny(in RawSockaddrNFCLLCP) *RawSockaddrAny {
+	var out RawSockaddrAny
+	copy(
+		(*(*[SizeofSockaddrAny]byte)(unsafe.Pointer(&out)))[:],
+		(*(*[SizeofSockaddrNFCLLCP]byte)(unsafe.Pointer(&in)))[:],
 	)
 	return &out
 }

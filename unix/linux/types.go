@@ -117,6 +117,7 @@ struct termios2 {
 #include <linux/netfilter.h>
 #include <linux/netlink.h>
 #include <linux/nexthop.h>
+#include <linux/nfc.h>
 #include <linux/openat2.h>
 #include <linux/perf_event.h>
 #include <linux/pps.h>
@@ -224,6 +225,8 @@ union sockaddr_all {
 	struct sockaddr_pppox s7;
 	struct sockaddr_l2tpip s8;
 	struct sockaddr_l2tpip6 s9;
+	struct sockaddr_nfc s10;
+	struct sockaddr_nfc_llcp s11;
 };
 
 struct sockaddr_any {
@@ -278,6 +281,18 @@ struct sockaddr_iucv {
 	signed char siucv_nodeid[8];
 	signed char siucv_user_id[8];
 	signed char siucv_name[8];
+};
+
+// copied from /usr/include/linux/nfc.h modified with explicit unsigned chars.
+struct my_sockaddr_nfc_llcp {
+	sa_family_t sa_family;
+	uint32_t dev_idx;
+	uint32_t target_idx;
+	uint32_t nfc_protocol;
+	uint8_t dsap;
+	uint8_t ssap;
+	uint8_t service_name[NFC_LLCP_MAX_SERVICE_NAME];
+	size_t service_name_len;
 };
 
 #ifdef __ARM_EABI__
@@ -578,6 +593,10 @@ type RawSockaddrL2TPIP6 C.struct_sockaddr_l2tpip6
 
 type RawSockaddrIUCV C.struct_sockaddr_iucv
 
+type RawSockaddrNFC C.struct_sockaddr_nfc
+
+type RawSockaddrNFCLLCP C.struct_my_sockaddr_nfc_llcp
+
 type RawSockaddr C.struct_sockaddr
 
 type RawSockaddrAny C.struct_sockaddr_any
@@ -633,6 +652,8 @@ const (
 	SizeofSockaddrL2TPIP    = C.sizeof_struct_sockaddr_l2tpip
 	SizeofSockaddrL2TPIP6   = C.sizeof_struct_sockaddr_l2tpip6
 	SizeofSockaddrIUCV      = C.sizeof_struct_sockaddr_iucv
+	SizeofSockaddrNFC       = C.sizeof_struct_sockaddr_nfc
+	SizeofSockaddrNFCLLCP   = C.sizeof_struct_sockaddr_nfc_llcp
 	SizeofLinger            = C.sizeof_struct_linger
 	SizeofIovec             = C.sizeof_struct_iovec
 	SizeofIPMreq            = C.sizeof_struct_ip_mreq
@@ -3703,4 +3724,75 @@ const (
 	MTD_FILE_MODE_OTP_FACTORY = C.MTD_FILE_MODE_OTP_FACTORY
 	MTD_FILE_MODE_OTP_USER    = C.MTD_FILE_MODE_OTP_USER
 	MTD_FILE_MODE_RAW         = C.MTD_FILE_MODE_RAW
+)
+
+// NFC Subsystem enums.
+
+const (
+	NFC_CMD_UNSPEC                    = C.NFC_CMD_UNSPEC
+	NFC_CMD_GET_DEVICE                = C.NFC_CMD_GET_DEVICE
+	NFC_CMD_DEV_UP                    = C.NFC_CMD_DEV_UP
+	NFC_CMD_DEV_DOWN                  = C.NFC_CMD_DEV_DOWN
+	NFC_CMD_DEP_LINK_UP               = C.NFC_CMD_DEP_LINK_UP
+	NFC_CMD_DEP_LINK_DOWN             = C.NFC_CMD_DEP_LINK_DOWN
+	NFC_CMD_START_POLL                = C.NFC_CMD_START_POLL
+	NFC_CMD_STOP_POLL                 = C.NFC_CMD_STOP_POLL
+	NFC_CMD_GET_TARGET                = C.NFC_CMD_GET_TARGET
+	NFC_EVENT_TARGETS_FOUND           = C.NFC_EVENT_TARGETS_FOUND
+	NFC_EVENT_DEVICE_ADDED            = C.NFC_EVENT_DEVICE_ADDED
+	NFC_EVENT_DEVICE_REMOVED          = C.NFC_EVENT_DEVICE_REMOVED
+	NFC_EVENT_TARGET_LOST             = C.NFC_EVENT_TARGET_LOST
+	NFC_EVENT_TM_ACTIVATED            = C.NFC_EVENT_TM_ACTIVATED
+	NFC_EVENT_TM_DEACTIVATED          = C.NFC_EVENT_TM_DEACTIVATED
+	NFC_CMD_LLC_GET_PARAMS            = C.NFC_CMD_LLC_GET_PARAMS
+	NFC_CMD_LLC_SET_PARAMS            = C.NFC_CMD_LLC_SET_PARAMS
+	NFC_CMD_ENABLE_SE                 = C.NFC_CMD_ENABLE_SE
+	NFC_CMD_DISABLE_SE                = C.NFC_CMD_DISABLE_SE
+	NFC_CMD_LLC_SDREQ                 = C.NFC_CMD_LLC_SDREQ
+	NFC_EVENT_LLC_SDRES               = C.NFC_EVENT_LLC_SDRES
+	NFC_CMD_FW_DOWNLOAD               = C.NFC_CMD_FW_DOWNLOAD
+	NFC_EVENT_SE_ADDED                = C.NFC_EVENT_SE_ADDED
+	NFC_EVENT_SE_REMOVED              = C.NFC_EVENT_SE_REMOVED
+	NFC_EVENT_SE_CONNECTIVITY         = C.NFC_EVENT_SE_CONNECTIVITY
+	NFC_EVENT_SE_TRANSACTION          = C.NFC_EVENT_SE_TRANSACTION
+	NFC_CMD_GET_SE                    = C.NFC_CMD_GET_SE
+	NFC_CMD_SE_IO                     = C.NFC_CMD_SE_IO
+	NFC_CMD_ACTIVATE_TARGET           = C.NFC_CMD_ACTIVATE_TARGET
+	NFC_CMD_VENDOR                    = C.NFC_CMD_VENDOR
+	NFC_CMD_DEACTIVATE_TARGET         = C.NFC_CMD_DEACTIVATE_TARGET
+	NFC_ATTR_UNSPEC                   = C.NFC_ATTR_UNSPEC
+	NFC_ATTR_DEVICE_INDEX             = C.NFC_ATTR_DEVICE_INDEX
+	NFC_ATTR_DEVICE_NAME              = C.NFC_ATTR_DEVICE_NAME
+	NFC_ATTR_PROTOCOLS                = C.NFC_ATTR_PROTOCOLS
+	NFC_ATTR_TARGET_INDEX             = C.NFC_ATTR_TARGET_INDEX
+	NFC_ATTR_TARGET_SENS_RES          = C.NFC_ATTR_TARGET_SENS_RES
+	NFC_ATTR_TARGET_SEL_RES           = C.NFC_ATTR_TARGET_SEL_RES
+	NFC_ATTR_TARGET_NFCID1            = C.NFC_ATTR_TARGET_NFCID1
+	NFC_ATTR_TARGET_SENSB_RES         = C.NFC_ATTR_TARGET_SENSB_RES
+	NFC_ATTR_TARGET_SENSF_RES         = C.NFC_ATTR_TARGET_SENSF_RES
+	NFC_ATTR_COMM_MODE                = C.NFC_ATTR_COMM_MODE
+	NFC_ATTR_RF_MODE                  = C.NFC_ATTR_RF_MODE
+	NFC_ATTR_DEVICE_POWERED           = C.NFC_ATTR_DEVICE_POWERED
+	NFC_ATTR_IM_PROTOCOLS             = C.NFC_ATTR_IM_PROTOCOLS
+	NFC_ATTR_TM_PROTOCOLS             = C.NFC_ATTR_TM_PROTOCOLS
+	NFC_ATTR_LLC_PARAM_LTO            = C.NFC_ATTR_LLC_PARAM_LTO
+	NFC_ATTR_LLC_PARAM_RW             = C.NFC_ATTR_LLC_PARAM_RW
+	NFC_ATTR_LLC_PARAM_MIUX           = C.NFC_ATTR_LLC_PARAM_MIUX
+	NFC_ATTR_SE                       = C.NFC_ATTR_SE
+	NFC_ATTR_LLC_SDP                  = C.NFC_ATTR_LLC_SDP
+	NFC_ATTR_FIRMWARE_NAME            = C.NFC_ATTR_FIRMWARE_NAME
+	NFC_ATTR_SE_INDEX                 = C.NFC_ATTR_SE_INDEX
+	NFC_ATTR_SE_TYPE                  = C.NFC_ATTR_SE_TYPE
+	NFC_ATTR_SE_AID                   = C.NFC_ATTR_SE_AID
+	NFC_ATTR_FIRMWARE_DOWNLOAD_STATUS = C.NFC_ATTR_FIRMWARE_DOWNLOAD_STATUS
+	NFC_ATTR_SE_APDU                  = C.NFC_ATTR_SE_APDU
+	NFC_ATTR_TARGET_ISO15693_DSFID    = C.NFC_ATTR_TARGET_ISO15693_DSFID
+	NFC_ATTR_TARGET_ISO15693_UID      = C.NFC_ATTR_TARGET_ISO15693_UID
+	NFC_ATTR_SE_PARAMS                = C.NFC_ATTR_SE_PARAMS
+	NFC_ATTR_VENDOR_ID                = C.NFC_ATTR_VENDOR_ID
+	NFC_ATTR_VENDOR_SUBCMD            = C.NFC_ATTR_VENDOR_SUBCMD
+	NFC_ATTR_VENDOR_DATA              = C.NFC_ATTR_VENDOR_DATA
+	NFC_SDP_ATTR_UNSPEC               = C.NFC_SDP_ATTR_UNSPEC
+	NFC_SDP_ATTR_URI                  = C.NFC_SDP_ATTR_URI
+	NFC_SDP_ATTR_SAP                  = C.NFC_SDP_ATTR_SAP
 )
