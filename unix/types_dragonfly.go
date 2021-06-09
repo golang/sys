@@ -241,6 +241,9 @@ type Winsize C.struct_winsize
 const (
 	AT_FDCWD            = C.AT_FDCWD
 	AT_SYMLINK_NOFOLLOW = C.AT_SYMLINK_NOFOLLOW
+	AT_REMOVEDIR        = C.AT_REMOVEDIR
+	AT_EACCESS          = C.AT_EACCESS
+	AT_SYMLINK_FOLLOW   = C.AT_SYMLINK_FOLLOW
 )
 
 // poll
