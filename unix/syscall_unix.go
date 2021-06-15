@@ -447,8 +447,9 @@ func SysvShmAttach(id int, addr uintptr, flag int) ([]byte, error) {
 
 	_, err := SysvShmCtl(id, IPC_STAT, &info)
 	if err != nil {
-		// release the shared memory if we can't find the size; ignoring error
-		// here since there's nothing sensible we can return here
+		// release the shared memory if we can't find the size
+
+		// ignoring error from shmdt as there's nothing sensible to return here
 		shmdt(addr)
 		return nil, err
 	}
