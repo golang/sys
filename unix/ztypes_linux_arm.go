@@ -634,3 +634,31 @@ const (
 const (
 	PIDFD_NONBLOCK = 0x800
 )
+
+type SysvIpcPerm struct {
+	_    int32
+	Uid  uint32
+	Gid  uint32
+	Cuid uint32
+	Cgid uint32
+	Mode uint32
+	_    uint16
+	_    uint16
+	_    uint32
+	_    uint32
+}
+type SysvShmDesc struct {
+	Perm   SysvIpcPerm
+	Segsz  uint32
+	Atime  int32
+	_      uint32
+	Dtime  int32
+	_      uint32
+	Ctime  int32
+	_      uint32
+	Cpid   int32
+	Lpid   int32
+	Nattch uint32
+	_      uint32
+	_      uint32
+}
