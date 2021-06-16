@@ -50,6 +50,21 @@ func main() {
 		b = sttimespec.ReplaceAll(b, []byte("Timespec"))
 	}
 
+	if goos == "darwin" {
+		// KinfoProc contains various pointers to objects stored
+		// in kernel space. Replace these by uintptr to prevent
+		// accidental dereferencing.
+		kinfoProcPointerRegex := regexp.MustCompile(`\*_Ctype_struct_(pgrp|proc|session|sigacts|ucred|user|vnode)`)
+		b = kinfoProcPointerRegex.ReplaceAll(b, []byte("uintptr"))
+
+		// ExternProc contains a p_un member that in kernel
+		// space stores a pair of pointers and in user space
+		// stores the process creation time. We only care about
+		// the process creation time.
+		externProcStarttimeRegex := regexp.MustCompile(`P_un\s*\[\d+\]byte`)
+		b = externProcStarttimeRegex.ReplaceAll(b, []byte("P_starttime Timeval"))
+	}
+
 	// Intentionally export __val fields in Fsid and Sigset_t
 	valRegex := regexp.MustCompile(`type (Fsid|Sigset_t) struct {(\s+)X__(bits|val)(\s+\S+\s+)}`)
 	b = valRegex.ReplaceAll(b, []byte("type $1 struct {${2}Val$4}"))

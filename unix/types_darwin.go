@@ -37,6 +37,7 @@ package unix
 #include <sys/signal.h>
 #include <sys/socket.h>
 #include <sys/stat.h>
+#include <sys/sysctl.h>
 #include <sys/time.h>
 #include <sys/types.h>
 #include <sys/ucred.h>
@@ -304,3 +305,21 @@ type Clockinfo C.struct_clockinfo
 // ctl_info
 
 type CtlInfo C.struct_ctl_info
+
+// KinfoProc
+
+const SizeofKinfoProc = C.sizeof_struct_kinfo_proc
+
+type Eproc C.struct_eproc
+
+type ExternProc C.struct_extern_proc
+
+type Itimerval C.struct_itimerval
+
+type KinfoProc C.struct_kinfo_proc
+
+type Vmspace C.struct_vmspace
+
+type Pcred C.struct__pcred
+
+type Ucred C.struct__ucred
