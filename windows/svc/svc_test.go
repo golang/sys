@@ -77,7 +77,7 @@ func stopAndDeleteIfInstalled(t *testing.T, m *mgr.Mgr, name string) {
 }
 
 func TestExample(t *testing.T) {
-	if testing.Short() {
+	if testing.Short() && os.Getenv("GO_BUILDER_NAME") != "" {
 		t.Skip("skipping test in short mode - it modifies system services")
 	}
 
