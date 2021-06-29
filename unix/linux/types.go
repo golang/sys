@@ -115,6 +115,7 @@ struct termios2 {
 #include <linux/netfilter/nf_tables_compat.h>
 #include <linux/netfilter/nfnetlink.h>
 #include <linux/netfilter.h>
+#include <linux/netfilter_ipv4.h>
 #include <linux/netlink.h>
 #include <linux/nexthop.h>
 #include <linux/nfc.h>
@@ -1766,6 +1767,8 @@ const (
 	NFPROTO_DECNET   = C.NFPROTO_DECNET
 	NFPROTO_NUMPROTO = C.NFPROTO_NUMPROTO
 )
+
+const SO_ORIGINAL_DST = C.SO_ORIGINAL_DST
 
 // netfilter nfnetlink
 type Nfgenmsg C.struct_nfgenmsg
