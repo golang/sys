@@ -1005,6 +1005,7 @@ const (
 	SO_READOPT                    = 0x1
 	SO_RECVUCRED                  = 0x400
 	SO_REUSEADDR                  = 0x4
+	SO_REUSEPORT                  = 0x2004
 	SO_SECATTR                    = 0x1011
 	SO_SNDBUF                     = 0x1001
 	SO_SNDLOWAT                   = 0x1003
