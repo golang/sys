@@ -5,6 +5,8 @@
 //go:build (darwin && amd64)
 // +build darwin,amd64
 
+package unix
+
 // SysvShmCtl performs control operations on the shared memory segment
 // specified by id.
 func SysvShmCtl(id, cmd int, desc *SysvShmDesc) (result int, err error) {
