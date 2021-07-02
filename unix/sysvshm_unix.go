@@ -42,11 +42,7 @@ func SysvShmAttach(id int, addr uintptr, flag int) ([]byte, error) {
 	return b, nil
 }
 
-// SysvShmCtl performs control operations on the shared memory segment
-// specified by id.
-func SysvShmCtl(id, cmd int, desc *SysvShmDesc) (result int, err error) {
-	return shmctl(id, cmd, desc)
-}
+
 
 // SysvShmDetach unmaps the shared memory slice returned from SysvShmAttach.
 //

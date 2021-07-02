@@ -3942,6 +3942,8 @@ const (
 	IPC_EXCL    = 0x400
 	IPC_NOWAIT  = 0x800
 	IPC_PRIVATE = 0x0
+
+	ipc_64 = 0x100
 )
 
 const (

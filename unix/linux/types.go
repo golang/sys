@@ -3848,6 +3848,8 @@ const (
 	IPC_EXCL    = C.IPC_EXCL
 	IPC_NOWAIT  = C.IPC_NOWAIT
 	IPC_PRIVATE = C.IPC_PRIVATE
+
+	ipc_64 = C.IPC_64
 )
 
 const (
