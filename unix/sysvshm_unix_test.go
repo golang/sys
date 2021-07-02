@@ -8,6 +8,7 @@
 package unix_test
 
 import (
+	"runtime"
 	"testing"
 
 	"golang.org/x/sys/unix"
@@ -16,6 +17,15 @@ import (
 func TestSysvSharedMemory(t *testing.T) {
 	// create ipc
 	id, err := unix.SysvShmGet(unix.IPC_PRIVATE, 1024, unix.IPC_CREAT|unix.IPC_EXCL|0o600)
+
+	// ipc isn't implemented on android, should fail
+	if runtime.GOOS == "android" {
+		if err != unix.ENOSYS {
+			t.Fatalf("expected android to fail, but it didn't")
+		}
+		return	
+	}
+
 	if err != nil {
 		t.Fatalf("SysvShmGet: %v", err)
 	}
