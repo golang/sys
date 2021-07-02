@@ -35,14 +35,12 @@ package unix
 #include <sys/epoll.h>
 #include <sys/inotify.h>
 #include <sys/ioctl.h>
-#include <sys/ipc.h>
 #include <sys/mman.h>
 #include <sys/mount.h>
 #include <sys/param.h>
 #include <sys/ptrace.h>
 #include <sys/resource.h>
 #include <sys/select.h>
-#include <sys/shm.h>
 #include <sys/signal.h>
 #include <sys/signalfd.h>
 #include <sys/statfs.h>
@@ -108,6 +106,7 @@ struct termios2 {
 #include <linux/if_packet.h>
 #include <linux/if_pppox.h>
 #include <linux/if_xdp.h>
+#include <linux/ipc.h>
 #include <linux/keyctl.h>
 #include <linux/landlock.h>
 #include <linux/loop.h>
@@ -130,6 +129,7 @@ struct termios2 {
 #include <linux/random.h>
 #include <linux/rtc.h>
 #include <linux/rtnetlink.h>
+#include <linux/shm.h>
 #include <linux/socket.h>
 #include <linux/stat.h>
 #include <linux/taskstats.h>
@@ -3840,8 +3840,8 @@ const (
 
 // shm
 
-type SysvIpcPerm C.struct_ipc_perm
-type SysvShmDesc C.struct_shmid_ds
+type SysvIpcPerm C.struct_ipc64_perm
+type SysvShmDesc C.struct_shmid64_ds
 
 const (
 	IPC_CREAT   = C.IPC_CREAT

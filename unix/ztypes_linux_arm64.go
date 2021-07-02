@@ -638,13 +638,14 @@ const (
 )
 
 type SysvIpcPerm struct {
-	_    int32
+	Key  int32
 	Uid  uint32
 	Gid  uint32
 	Cuid uint32
 	Cgid uint32
 	Mode uint32
-	_    uint16
+	_    [0]uint8
+	Seq  uint16
 	_    uint16
 	_    uint64
 	_    uint64

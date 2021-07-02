@@ -642,28 +642,29 @@ const (
 )
 
 type SysvIpcPerm struct {
-	_    int32
+	Key  int32
 	Uid  uint32
 	Gid  uint32
 	Cuid uint32
 	Cgid uint32
 	Mode uint32
-	_    uint16
+	_    [0]uint8
+	Seq  uint16
 	_    uint16
 	_    uint32
 	_    uint32
 }
 type SysvShmDesc struct {
-	Perm   SysvIpcPerm
-	Segsz  uint32
-	Atime  int32
-	Dtime  int32
-	Ctime  int32
-	Cpid   int32
-	Lpid   int32
-	Nattch uint32
-	_      uint16
-	_      uint16
-	_      uint16
-	_      uint16
+	Perm       SysvIpcPerm
+	Segsz      uint32
+	Atime      uint32
+	Dtime      uint32
+	Ctime      uint32
+	Cpid       int32
+	Lpid       int32
+	Nattch     uint32
+	Atime_high uint16
+	Dtime_high uint16
+	Ctime_high uint16
+	_          uint16
 }
