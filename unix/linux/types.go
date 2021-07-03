@@ -637,6 +637,8 @@ type CanFilter C.struct_can_filter
 
 type ifreq C.struct_ifreq
 
+type TCPRepairOpt C.struct_tcp_repair_opt
+
 const (
 	SizeofSockaddrInet4     = C.sizeof_struct_sockaddr_in
 	SizeofSockaddrInet6     = C.sizeof_struct_sockaddr_in6
@@ -673,6 +675,7 @@ const (
 	SizeofUcred             = C.sizeof_struct_ucred
 	SizeofTCPInfo           = C.sizeof_struct_tcp_info
 	SizeofCanFilter         = C.sizeof_struct_can_filter
+	SizeofTCPRepairOpt      = C.sizeof_struct_tcp_repair_opt
 )
 
 // Netlink routing and interface messages
