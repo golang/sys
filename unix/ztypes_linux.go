@@ -682,6 +682,16 @@ type NdMsg struct {
 }
 
 const (
+	ICMP_FILTER = 0x1
+
+	ICMPV6_FILTER             = 0x1
+	ICMPV6_FILTER_BLOCK       = 0x1
+	ICMPV6_FILTER_BLOCKOTHERS = 0x3
+	ICMPV6_FILTER_PASS        = 0x2
+	ICMPV6_FILTER_PASSONLY    = 0x4
+)
+
+const (
 	SizeofSockFilter = 0x8
 )
 

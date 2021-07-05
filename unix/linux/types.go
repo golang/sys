@@ -98,6 +98,7 @@ struct termios2 {
 #include <linux/genetlink.h>
 #include <linux/hdreg.h>
 #include <linux/hidraw.h>
+#include <linux/icmp.h>
 #include <linux/icmpv6.h>
 #include <linux/if_alg.h>
 #include <linux/if_bridge.h>
@@ -803,6 +804,18 @@ type RtNexthop C.struct_rtnexthop
 type NdUseroptmsg C.struct_nduseroptmsg
 
 type NdMsg C.struct_ndmsg
+
+// ICMP socket options
+
+const (
+	ICMP_FILTER = C.ICMP_FILTER
+
+	ICMPV6_FILTER             = C.ICMPV6_FILTER
+	ICMPV6_FILTER_BLOCK       = C.ICMPV6_FILTER_BLOCK
+	ICMPV6_FILTER_BLOCKOTHERS = C.ICMPV6_FILTER_BLOCKOTHERS
+	ICMPV6_FILTER_PASS        = C.ICMPV6_FILTER_PASS
+	ICMPV6_FILTER_PASSONLY    = C.ICMPV6_FILTER_PASSONLY
+)
 
 // Linux socket filter
 
