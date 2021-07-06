@@ -42,8 +42,6 @@ func SysvShmAttach(id int, addr uintptr, flag int) ([]byte, error) {
 	return b, nil
 }
 
-
-
 // SysvShmDetach unmaps the shared memory slice returned from SysvShmAttach.
 //
 // It is not safe to use the slice after calling this function.
@@ -56,6 +54,7 @@ func SysvShmDetach(data []byte) error {
 }
 
 // SysvShmGet returns the Sysv shared memory identifier associated with key.
+// If the IPC_CREAT flag is specified a new segment is created.
 func SysvShmGet(key, size, flag int) (id int, err error) {
 	return shmget(key, size, flag)
 }

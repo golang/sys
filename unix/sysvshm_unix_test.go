@@ -23,7 +23,7 @@ func TestSysvSharedMemory(t *testing.T) {
 		if err != unix.ENOSYS {
 			t.Fatalf("expected android to fail, but it didn't")
 		}
-		return	
+		return
 	}
 
 	if err != nil {
