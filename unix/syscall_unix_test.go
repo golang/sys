@@ -8,6 +8,7 @@
 package unix_test
 
 import (
+	"bytes"
 	"flag"
 	"fmt"
 	"io/ioutil"
@@ -887,6 +888,44 @@ func TestUtimesNanoAt(t *testing.T) {
 	}
 	if st.Mtim != expected {
 		t.Errorf("UtimesNanoAt: wrong mtime: got %v, expected %v", st.Mtim, expected)
+	}
+}
+
+func TestSend(t *testing.T) {
+	ec := make(chan error, 2)
+	ts := []byte("HELLO GOPHER")
+
+	fds, err := unix.Socketpair(unix.AF_LOCAL, unix.SOCK_STREAM, 0)
+	if err != nil {
+		t.Fatalf("Socketpair: %v", err)
+	}
+	defer unix.Close(fds[0])
+	defer unix.Close(fds[1])
+
+	go func() {
+		data := make([]byte, len(ts))
+
+		_, _, err := unix.Recvfrom(fds[1], data, 0)
+		if err != nil {
+			ec <- err
+		}
+		if !bytes.Equal(ts, data) {
+			ec <- fmt.Errorf("data sent != data received. Received %q", data)
+		}
+		ec <- nil
+	}()
+	err = unix.Send(fds[0], ts, 0)
+	if err != nil {
+		ec <- err
+	}
+
+	select {
+	case err = <-ec:
+		if err != nil {
+			t.Fatalf("Send: %v", err)
+		}
+	case <-time.After(2 * time.Second):
+		t.Fatal("Send: nothing received after 2 seconds")
 	}
 }
 
