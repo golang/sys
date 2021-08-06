@@ -125,6 +125,42 @@ func TestIoctlGetRTCWkAlrm(t *testing.T) {
 		v.Enabled, v.Time.Year+1900, v.Time.Mon+1, v.Time.Mday, v.Time.Hour, v.Time.Min, v.Time.Sec)
 }
 
+func TestIoctlIfreq(t *testing.T) {
+	s, err := unix.Socket(unix.AF_INET, unix.SOCK_STREAM, 0)
+	if err != nil {
+		t.Fatalf("failed to open socket: %v", err)
+	}
+	defer unix.Close(s)
+
+	ifis, err := net.Interfaces()
+	if err != nil {
+		t.Fatalf("failed to get network interfaces: %v", err)
+	}
+
+	// Compare the network interface fetched from rtnetlink with the data from
+	// the equivalent ioctl API.
+	for _, ifi := range ifis {
+		ifr, err := unix.NewIfreq(ifi.Name)
+		if err != nil {
+			t.Fatalf("failed to create ifreq for %q: %v", ifi.Name, err)
+		}
+
+		if err := unix.IoctlIfreq(s, unix.SIOCGIFINDEX, ifr); err != nil {
+			t.Fatalf("failed to get interface index for %q: %v", ifi.Name, err)
+		}
+
+		if want, got := ifi.Index, int(ifr.Uint32()); want != got {
+			t.Fatalf("unexpected interface index for %q: got: %d, want: %d",
+				ifi.Name, got, want)
+		}
+
+		if want, got := ifi.Name, ifr.Name(); want != got {
+			t.Fatalf("unexpected interface name for index %d: got: %q, want: %q",
+				ifi.Index, got, want)
+		}
+	}
+}
+
 func TestPpoll(t *testing.T) {
 	if runtime.GOOS == "android" {
 		t.Skip("mkfifo syscall is not available on android, skipping test")
