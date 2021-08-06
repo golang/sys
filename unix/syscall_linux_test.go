@@ -13,6 +13,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"net"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -25,6 +26,39 @@ import (
 
 	"golang.org/x/sys/unix"
 )
+
+func TestIoctlGetEthtoolDrvinfo(t *testing.T) {
+	if runtime.GOOS == "android" {
+		t.Skip("ethtool driver info is not available on android, skipping test")
+	}
+
+	s, err := unix.Socket(unix.AF_INET, unix.SOCK_STREAM, 0)
+	if err != nil {
+		t.Fatalf("failed to open socket: %v", err)
+	}
+	defer unix.Close(s)
+
+	ifis, err := net.Interfaces()
+	if err != nil {
+		t.Fatalf("failed to get network interfaces: %v", err)
+	}
+
+	// Print the interface name and associated driver information for each
+	// network interface supported by ethtool.
+	for _, ifi := range ifis {
+		drv, err := unix.IoctlGetEthtoolDrvinfo(s, ifi.Name)
+		if err != nil {
+			if err == unix.EOPNOTSUPP {
+				continue
+			}
+
+			t.Fatalf("failed to get ethtool driver info for %q: %v", ifi.Name, err)
+		}
+
+		// Trim trailing NULLs.
+		t.Logf("%s: %q", ifi.Name, string(bytes.TrimRight(drv.Driver[:], "\x00")))
+	}
+}
 
 func TestIoctlGetInt(t *testing.T) {
 	f, err := os.Open("/dev/random")

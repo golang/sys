@@ -14,6 +14,14 @@ import (
 	"unsafe"
 )
 
+func Test_ifreqSize(t *testing.T) {
+	// Ensure ifreq (generated) and ifreqData (hand-written due to
+	// unsafe.Pointer field) are identical in size.
+	if want, got := unsafe.Sizeof(ifreq{}), unsafe.Sizeof(ifreqData{}); want != got {
+		t.Fatalf("unexpected ifreq size: got: %d, want: %d", got, want)
+	}
+}
+
 func makeProto(proto int) *int {
 	return &proto
 }

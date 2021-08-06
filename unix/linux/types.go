@@ -634,6 +634,8 @@ type TCPInfo C.struct_tcp_info
 
 type CanFilter C.struct_can_filter
 
+type ifreq C.struct_ifreq
+
 const (
 	SizeofSockaddrInet4     = C.sizeof_struct_sockaddr_in
 	SizeofSockaddrInet6     = C.sizeof_struct_sockaddr_in6
