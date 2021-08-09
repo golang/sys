@@ -5,7 +5,6 @@
 package unix
 
 import (
-	"runtime"
 	"unsafe"
 )
 
@@ -33,9 +32,7 @@ func IoctlGetRTCTime(fd int) (*RTCTime, error) {
 }
 
 func IoctlSetRTCTime(fd int, value *RTCTime) error {
-	err := ioctlPtr(fd, RTC_SET_TIME, unsafe.Pointer(value))
-	runtime.KeepAlive(value)
-	return err
+	return ioctlPtr(fd, RTC_SET_TIME, unsafe.Pointer(value))
 }
 
 func IoctlGetRTCWkAlrm(fd int) (*RTCWkAlrm, error) {
@@ -45,9 +42,7 @@ func IoctlGetRTCWkAlrm(fd int) (*RTCWkAlrm, error) {
 }
 
 func IoctlSetRTCWkAlrm(fd int, value *RTCWkAlrm) error {
-	err := ioctlPtr(fd, RTC_WKALM_SET, unsafe.Pointer(value))
-	runtime.KeepAlive(value)
-	return err
+	return ioctlPtr(fd, RTC_WKALM_SET, unsafe.Pointer(value))
 }
 
 // IoctlGetEthtoolDrvinfo fetches ethtool driver information for the network
@@ -62,7 +57,6 @@ func IoctlGetEthtoolDrvinfo(fd int, ifname string) (*EthtoolDrvinfo, error) {
 	ifrd := ifr.SetData(unsafe.Pointer(&value))
 
 	err = ioctlPtr(fd, SIOCETHTOOL, unsafe.Pointer(&ifrd))
-	runtime.KeepAlive(ifrd)
 	return &value, err
 }
 
@@ -87,9 +81,7 @@ func IoctlWatchdogKeepalive(fd int) error {
 // range of data conveyed in value to the file associated with the file
 // descriptor destFd. See the ioctl_ficlonerange(2) man page for details.
 func IoctlFileCloneRange(destFd int, value *FileCloneRange) error {
-	err := ioctlPtr(destFd, FICLONERANGE, unsafe.Pointer(value))
-	runtime.KeepAlive(value)
-	return err
+	return ioctlPtr(destFd, FICLONERANGE, unsafe.Pointer(value))
 }
 
 // IoctlFileClone performs an FICLONE ioctl operation to clone the entire file
@@ -158,9 +150,7 @@ func IoctlFileDedupeRange(srcFd int, value *FileDedupeRange) error {
 }
 
 func IoctlHIDGetDesc(fd int, value *HIDRawReportDescriptor) error {
-	err := ioctlPtr(fd, HIDIOCGRDESC, unsafe.Pointer(value))
-	runtime.KeepAlive(value)
-	return err
+	return ioctlPtr(fd, HIDIOCGRDESC, unsafe.Pointer(value))
 }
 
 func IoctlHIDGetRawInfo(fd int) (*HIDRawDevInfo, error) {
