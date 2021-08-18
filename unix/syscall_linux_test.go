@@ -158,7 +158,57 @@ func TestIoctlIfreq(t *testing.T) {
 			t.Fatalf("unexpected interface name for index %d: got: %q, want: %q",
 				ifi.Index, got, want)
 		}
+
+		wantIP, ok := firstIPv4(t, &ifi)
+		if err := unix.IoctlIfreq(s, unix.SIOCGIFADDR, ifr); err != nil {
+			// Interface may have no assigned IPv4 address.
+			if err != unix.EADDRNOTAVAIL {
+				t.Fatalf("failed to get IPv4 address for %q: %v", ifi.Name, err)
+			}
+
+			// But if we found an address via rtnetlink, we should expect the
+			// ioctl to return one.
+			if ok {
+				t.Fatalf("found IPv4 address %q for %q but ioctl returned none", wantIP, ifi.Name)
+			}
+
+			continue
+		}
+
+		// Found an address, compare it directly.
+		addr, err := ifr.Inet4Addr()
+		if err != nil {
+			t.Fatalf("failed to get ifreq IPv4 address: %v", err)
+		}
+
+		if want, got := wantIP, addr; !want.Equal(got) {
+			t.Fatalf("unexpected first IPv4 address for %q: got: %q, want: %q",
+				ifi.Name, got, want)
+		}
 	}
+}
+
+// firstIPv4 reports whether the interface has an IPv4 address assigned,
+// returning the first discovered address.
+func firstIPv4(t *testing.T, ifi *net.Interface) (net.IP, bool) {
+	t.Helper()
+
+	addrs, err := ifi.Addrs()
+	if err != nil {
+		t.Fatalf("failed to get interface %q addresses: %v", ifi.Name, err)
+	}
+
+	for _, a := range addrs {
+		// Only want valid IPv4 addresses.
+		ipn, ok := a.(*net.IPNet)
+		if !ok || ipn.IP.To4() == nil {
+			continue
+		}
+
+		return ipn.IP, true
+	}
+
+	return nil, false
 }
 
 func TestPpoll(t *testing.T) {

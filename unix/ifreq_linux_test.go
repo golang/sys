@@ -8,6 +8,8 @@
 package unix
 
 import (
+	"bytes"
+	"net"
 	"testing"
 	"unsafe"
 )
@@ -71,6 +73,48 @@ func TestIfreqWithData(t *testing.T) {
 	got := *(*[5]byte)(ifrd.data)
 	if want != got {
 		t.Fatalf("unexpected ifreq data bytes:\n got: % #x\nwant: % #x", got, want)
+	}
+}
+
+func TestIfreqInet4Addr(t *testing.T) {
+	ifr := testIfreq(t)
+	in := net.IPv4(192, 0, 2, 1).To4()
+	if err := ifr.SetInet4Addr(in); err != nil {
+		t.Fatalf("failed to set ifreq IPv4 address: %v", err)
+	}
+
+	// Store fixed offset data (AF_INET, IPv4 address) within underlying
+	// sockaddr bytes. Everything else should be zeroed.
+	want := ifreqUnion{4: 192, 5: 0, 6: 2, 7: 1}
+	if isBigEndian {
+		want[0] = 0x00
+		want[1] = 0x02
+	} else {
+		want[0] = 0x02
+		want[1] = 0x00
+	}
+
+	if got := ifr.raw.Ifru; want != got {
+		t.Fatalf("unexpected ifreq sockaddr bytes:\n got: % #x\nwant: % #x", got, want)
+	}
+
+	got, err := ifr.Inet4Addr()
+	if err != nil {
+		t.Fatalf("failed to get ifreq IPv4 address: %v", err)
+	}
+	if !bytes.Equal(in, got) {
+		t.Fatalf("unexpected ifreq IPv4 address:\n got: % #x\nwant: % #x", got, in)
+	}
+
+	// Invalid input, wrong length.
+	if err := ifr.SetInet4Addr([]byte{0xff}); err == nil {
+		t.Fatal("expected an error setting invalid IPv4 address, but none occurred")
+	}
+
+	// Invalid output, AF_INET is only set by SetInet4Addr input.
+	ifr.SetUint32(0xffffffff)
+	if _, err := ifr.Inet4Addr(); err == nil {
+		t.Fatal("expected an error getting invalid IPv4 address, but none occurred")
 	}
 }
 
