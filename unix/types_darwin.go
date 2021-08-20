@@ -16,7 +16,7 @@ package unix
 
 /*
 #define __DARWIN_UNIX03 0
-#define KERNEL
+#define KERNEL 1
 #define _DARWIN_USE_64_BIT_INODE
 #include <dirent.h>
 #include <fcntl.h>
@@ -47,6 +47,7 @@ package unix
 #include <sys/un.h>
 #include <sys/utsname.h>
 #include <sys/wait.h>
+#include <sys/vsock.h>
 #include <net/bpf.h>
 #include <net/if.h>
 #include <net/if_dl.h>
@@ -153,6 +154,18 @@ type RawSockaddrAny C.struct_sockaddr_any
 
 type RawSockaddrCtl C.struct_sockaddr_ctl
 
+type RawSockaddrVM C.struct_sockaddr_vm
+
+type XVSockPCB C.struct_xvsockpcb
+
+type XSocket C.struct_xsocket
+
+type XSocket64 C.struct_xsocket64
+
+type XSockbuf C.struct_xsockbuf
+
+type XVSockPgen C.struct_xvsockpgen
+
 type _Socklen C.socklen_t
 
 type Xucred C.struct_xucred
@@ -186,6 +199,11 @@ const (
 	SizeofSockaddrUnix     = C.sizeof_struct_sockaddr_un
 	SizeofSockaddrDatalink = C.sizeof_struct_sockaddr_dl
 	SizeofSockaddrCtl      = C.sizeof_struct_sockaddr_ctl
+	SizeofSockaddrVM       = C.sizeof_struct_sockaddr_vm
+	SizeofXvsockpcb        = C.sizeof_struct_xvsockpcb
+	SizeofXSocket          = C.sizeof_struct_xsocket
+	SizeofXSockbuf         = C.sizeof_struct_xsockbuf
+	SizeofXVSockPgen       = C.sizeof_struct_xvsockpgen
 	SizeofXucred           = C.sizeof_struct_xucred
 	SizeofLinger           = C.sizeof_struct_linger
 	SizeofIovec            = C.sizeof_struct_iovec
