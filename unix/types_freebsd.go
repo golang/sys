@@ -141,6 +141,8 @@ type Timespec C.struct_timespec
 
 type Timeval C.struct_timeval
 
+type Time_t C.time_t
+
 // Processes
 
 type Rusage C.struct_rusage
