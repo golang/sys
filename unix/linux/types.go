@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+//go:build ignore
 // +build ignore
 
 /*
@@ -106,6 +107,7 @@ struct termios2 {
 #include <linux/if_pppox.h>
 #include <linux/if_xdp.h>
 #include <linux/keyctl.h>
+#include <linux/landlock.h>
 #include <linux/loop.h>
 #include <linux/lwtunnel.h>
 #include <linux/mpls_iptunnel.h>
@@ -3816,4 +3818,14 @@ const (
 	NFC_SDP_ATTR_UNSPEC               = C.NFC_SDP_ATTR_UNSPEC
 	NFC_SDP_ATTR_URI                  = C.NFC_SDP_ATTR_URI
 	NFC_SDP_ATTR_SAP                  = C.NFC_SDP_ATTR_SAP
+)
+
+// Landlock
+
+type LandlockRulesetAttr = C.struct_landlock_ruleset_attr
+
+type LandlockPathBeneathAttr = C.struct_landlock_path_beneath_attr
+
+const (
+	LANDLOCK_RULE_PATH_BENEATH = C.LANDLOCK_RULE_PATH_BENEATH
 )
