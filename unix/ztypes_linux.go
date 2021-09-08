@@ -3924,11 +3924,11 @@ const (
 	NFC_SDP_ATTR_SAP                  = 0x2
 )
 
-type LandlockRulesetAttr = struct {
+type LandlockRulesetAttr struct {
 	Access_fs uint64
 }
 
-type LandlockPathBeneathAttr = struct {
+type LandlockPathBeneathAttr struct {
 	Allowed_access uint64
 	Parent_fd      int32
 }

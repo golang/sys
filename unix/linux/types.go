@@ -3822,9 +3822,9 @@ const (
 
 // Landlock
 
-type LandlockRulesetAttr = C.struct_landlock_ruleset_attr
+type LandlockRulesetAttr C.struct_landlock_ruleset_attr
 
-type LandlockPathBeneathAttr = C.struct_landlock_path_beneath_attr
+type LandlockPathBeneathAttr C.struct_landlock_path_beneath_attr
 
 const (
 	LANDLOCK_RULE_PATH_BENEATH = C.LANDLOCK_RULE_PATH_BENEATH
