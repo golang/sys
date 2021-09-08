@@ -4145,3 +4145,16 @@ const (
 	IFLA_CAN_DATA_BITRATE_CONST   = 0xe
 	IFLA_CAN_BITRATE_MAX          = 0xf
 )
+
+type KCMAttach struct {
+	Fd     int32
+	Bpf_fd int32
+}
+
+type KCMUnattach struct {
+	Fd int32
+}
+
+type KCMClone struct {
+	Fd int32
+}

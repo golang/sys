@@ -108,6 +108,7 @@ struct termios2 {
 #include <linux/if_pppox.h>
 #include <linux/if_xdp.h>
 #include <linux/ipc.h>
+#include <linux/kcm.h>
 #include <linux/keyctl.h>
 #include <linux/landlock.h>
 #include <linux/loop.h>
@@ -4043,3 +4044,11 @@ const (
 	IFLA_CAN_DATA_BITRATE_CONST   = C.IFLA_CAN_DATA_BITRATE_CONST
 	IFLA_CAN_BITRATE_MAX          = C.IFLA_CAN_BITRATE_MAX
 )
+
+// Kernel connection multiplexor
+
+type KCMAttach C.struct_kcm_attach
+
+type KCMUnattach C.struct_kcm_unattach
+
+type KCMClone C.struct_kcm_clone
