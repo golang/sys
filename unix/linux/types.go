@@ -3829,3 +3829,9 @@ type LandlockPathBeneathAttr C.struct_landlock_path_beneath_attr
 const (
 	LANDLOCK_RULE_PATH_BENEATH = C.LANDLOCK_RULE_PATH_BENEATH
 )
+
+// pidfd flags.
+
+const (
+	PIDFD_NONBLOCK = C.O_NONBLOCK
+)
