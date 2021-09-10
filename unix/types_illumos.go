@@ -33,6 +33,8 @@ const (
 	I_STR     = C.I_STR
 	I_POP     = C.I_POP
 	I_PUSH    = C.I_PUSH
+	I_LINK    = C.I_LINK
+	I_UNLINK  = C.I_UNLINK
 	I_PLINK   = C.I_PLINK
 	I_PUNLINK = C.I_PUNLINK
 
