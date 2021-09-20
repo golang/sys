@@ -765,9 +765,11 @@ func TestProcessModules(t *testing.T) {
 	} else {
 		switch runtime.GOARCH {
 		case "amd64":
+			arch = 64
 		case "arm64":
 			arch = 64
 		case "386":
+			arch = 64
 		case "arm":
 			arch = 32
 		}
