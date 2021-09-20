@@ -701,3 +701,79 @@ func TestWinVerifyTrust(t *testing.T) {
 	}
 
 }
+
+func TestProcessModules(t *testing.T) {
+	process, err := windows.GetCurrentProcess()
+	if err != nil {
+		t.Fatalf("unable to get current process: %v", err)
+	}
+	// NB: Assume that we're always the first module. This technically isn't documented anywhere (that I could find), but seems to always hold.
+	var module windows.Handle
+	var cbNeeded uint32
+	err = windows.EnumProcessModules(process, &module, uint32(unsafe.Sizeof(module)), &cbNeeded)
+	if err != nil {
+		t.Fatalf("EnumProcessModules failed: %v", err)
+	}
+
+	var moduleEx windows.Handle
+	err = windows.EnumProcessModulesEx(process, &moduleEx, uint32(unsafe.Sizeof(moduleEx)), &cbNeeded, windows.LIST_MODULES_DEFAULT)
+	if err != nil {
+		t.Fatalf("EnumProcessModulesEx failed: %v", err)
+	}
+	if module != moduleEx {
+		t.Fatalf("module from EnumProcessModules does not match EnumProcessModulesEx: %v != %v", module, moduleEx)
+	}
+
+	exePath, err := os.Executable()
+	if err != nil {
+		t.Fatalf("unable to get current executable path: %v", err)
+	}
+
+	modulePathUTF16 := make([]uint16, len(exePath)+1)
+	err = windows.GetModuleFileNameEx(process, module, &modulePathUTF16[0], uint32(len(modulePathUTF16)))
+	if err != nil {
+		t.Fatalf("GetModuleFileNameEx failed: %v", err)
+	}
+
+	modulePath := windows.UTF16ToString(modulePathUTF16)
+	if modulePath != exePath {
+		t.Fatalf("module does not match executable for GetModuleFileNameEx: %s != %s", modulePath, exePath)
+	}
+
+	err = windows.GetModuleBaseName(process, module, &modulePathUTF16[0], uint32(len(modulePathUTF16)))
+	if err != nil {
+		t.Fatalf("GetModuleBaseName failed: %v", err)
+	}
+
+	modulePath = windows.UTF16ToString(modulePathUTF16)
+	baseExePath := filepath.Base(exePath)
+	if modulePath != baseExePath {
+		t.Fatalf("module does not match executable for GetModuleBaseName: %s != %s", modulePath, baseExePath)
+	}
+
+	var moduleInfo windows.ModuleInfo
+	err = windows.GetModuleInformation(process, module, &moduleInfo, uint32(unsafe.Sizeof(moduleInfo)))
+	if err != nil {
+		t.Fatalf("GetModuleInformation failed: %v", err)
+	}
+
+	peFile, err := pe.Open(exePath)
+	if err != nil {
+		t.Fatalf("unable to open current executable: %v", err)
+	}
+	defer peFile.Close()
+
+	var peSizeOfImage uint32
+	switch runtime.GOARCH {
+	case "amd64", "arm64":
+		peSizeOfImage = peFile.OptionalHeader.(*pe.OptionalHeader64).SizeOfImage
+	case "386", "arm":
+		peSizeOfImage = peFile.OptionalHeader.(*pe.OptionalHeader32).SizeOfImage
+	default:
+		t.Fatalf("unable to test GetModuleInformation on arch %v", runtime.GOARCH)
+	}
+
+	if moduleInfo.SizeOfImage != peSizeOfImage {
+		t.Fatalf("module size does not match executable: %v != %v", moduleInfo.SizeOfImage, peSizeOfImage)
+	}
+}
