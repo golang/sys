@@ -769,7 +769,7 @@ func TestProcessModules(t *testing.T) {
 		case "arm64":
 			arch = 64
 		case "386":
-			arch = 64
+			arch = 32
 		case "arm":
 			arch = 32
 		}
