@@ -712,78 +712,68 @@ func TestProcessModules(t *testing.T) {
 	var cbNeeded uint32
 	err = windows.EnumProcessModules(process, &module, uint32(unsafe.Sizeof(module)), &cbNeeded)
 	if err != nil {
-		t.Errorf("unable to call EnumProcessModules: %v", err)
+		t.Fatalf("EnumProcessModules failed: %v", err)
 	}
 
 	var moduleEx windows.Handle
 	err = windows.EnumProcessModulesEx(process, &moduleEx, uint32(unsafe.Sizeof(moduleEx)), &cbNeeded, windows.LIST_MODULES_DEFAULT)
 	if err != nil {
-		t.Errorf("unable to call EnumProcessModulesEx: %v", err)
+		t.Fatalf("EnumProcessModulesEx failed: %v", err)
 	}
 	if module != moduleEx {
-		t.Errorf("module from EnumProcessModules does not match EnumProcessModulesEx: %v != %v", module, moduleEx)
+		t.Fatalf("module from EnumProcessModules does not match EnumProcessModulesEx: %v != %v", module, moduleEx)
 	}
 
 	exePath, err := os.Executable()
 	if err != nil {
-		t.Errorf("unable to get current executable path: %v", err)
+		t.Fatalf("unable to get current executable path: %v", err)
 	}
 
-	modulePathUTF := make([]uint16, len(exePath)+1)
-	err = windows.GetModuleFileNameEx(process, module, &modulePathUTF[0], uint32(len(modulePathUTF)))
+	modulePathUTF16 := make([]uint16, len(exePath)+1)
+	err = windows.GetModuleFileNameEx(process, module, &modulePathUTF16[0], uint32(len(modulePathUTF16)))
 	if err != nil {
-		t.Errorf("unable to call GetModuleFileNameEx: %v", err)
+		t.Fatalf("GetModuleFileNameEx failed: %v", err)
 	}
 
-	modulePath := windows.UTF16ToString(modulePathUTF)
+	modulePath := windows.UTF16ToString(modulePathUTF16)
 	if modulePath != exePath {
-		t.Errorf("module does not match executable for GetModuleFileNameEx: %s != %s", modulePath, exePath)
+		t.Fatalf("module does not match executable for GetModuleFileNameEx: %s != %s", modulePath, exePath)
 	}
 
-	err = windows.GetModuleBaseName(process, module, &modulePathUTF[0], uint32(len(modulePathUTF)))
+	err = windows.GetModuleBaseName(process, module, &modulePathUTF16[0], uint32(len(modulePathUTF16)))
 	if err != nil {
-		t.Errorf("unable to call GetModuleBaseName: %v", err)
+		t.Fatalf("GetModuleBaseName failed: %v", err)
 	}
 
-	modulePath = windows.UTF16ToString(modulePathUTF)
+	modulePath = windows.UTF16ToString(modulePathUTF16)
 	baseExePath := filepath.Base(exePath)
 	if modulePath != baseExePath {
-		t.Errorf("module does not match executable for GetModuleBaseName: %s != %s", modulePath, baseExePath)
+		t.Fatalf("module does not match executable for GetModuleBaseName: %s != %s", modulePath, baseExePath)
 	}
 
 	var moduleInfo windows.ModuleInfo
 	err = windows.GetModuleInformation(process, module, &moduleInfo, uint32(unsafe.Sizeof(moduleInfo)))
 	if err != nil {
-		t.Errorf("unable to call GetModuleInformation: %v", err)
+		t.Fatalf("GetModuleInformation failed: %v", err)
 	}
 
-	var arch int
-	var size uint32
 	peFile, err := pe.Open(exePath)
 	if err != nil {
-		t.Errorf("unable to open current executable: %v", err)
-	} else {
-		switch runtime.GOARCH {
-		case "amd64":
-			arch = 64
-		case "arm64":
-			arch = 64
-		case "386":
-			arch = 32
-		case "arm":
-			arch = 32
-		}
+		t.Fatalf("unable to open current executable: %v", err)
+	}
+	defer peFile.Close()
 
-		if arch == 32 {
-			size = peFile.OptionalHeader.(pe.OptionalHeader32).SizeOfImage
-		} else if arch == 64 {
-			size = peFile.OptionalHeader.(pe.OptionalHeader64).SizeOfImage
-		} else {
-			t.Logf("unable to test GetModuleInformation on arch %v", runtime.GOARCH)
-		}
+	var peSizeOfImage uint32
+	switch runtime.GOARCH {
+	case "amd64", "arm64":
+		peSizeOfImage = peFile.OptionalHeader.(*pe.OptionalHeader64).SizeOfImage
+	case "386", "arm":
+		peSizeOfImage = peFile.OptionalHeader.(*pe.OptionalHeader32).SizeOfImage
+	default:
+		t.Fatalf("unable to test GetModuleInformation on arch %v", runtime.GOARCH)
 	}
 
-	if arch != 0 && moduleInfo.SizeOfImage != size {
-		t.Errorf("module size does not match executable: %v != %v", moduleInfo.SizeOfImage, size)
+	if moduleInfo.SizeOfImage != peSizeOfImage {
+		t.Fatalf("module size does not match executable: %v != %v", moduleInfo.SizeOfImage, peSizeOfImage)
 	}
 }
