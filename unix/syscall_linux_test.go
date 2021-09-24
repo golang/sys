@@ -117,6 +117,12 @@ func TestIoctlGetRTCWkAlrm(t *testing.T) {
 	defer f.Close()
 
 	v, err := unix.IoctlGetRTCWkAlrm(int(f.Fd()))
+
+	// Not all RTC drivers support wakeup alarms, and will return EINVAL in such cases.
+	if err == unix.EINVAL {
+		t.Skip("RTC_WKALM_RD ioctl not supported on this rtc, skipping test")
+	}
+
 	if err != nil {
 		t.Fatalf("failed to perform ioctl: %v", err)
 	}
