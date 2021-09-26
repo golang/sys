@@ -777,3 +777,115 @@ func TestProcessModules(t *testing.T) {
 		t.Fatalf("module size does not match executable: %v != %v", moduleInfo.SizeOfImage, peSizeOfImage)
 	}
 }
+
+func TestReadWriteProcessMemory(t *testing.T) {
+	testBuffer := []byte{0xBA, 0xAD, 0xF0, 0x0D}
+
+	process, err := windows.GetCurrentProcess()
+	if err != nil {
+		t.Fatalf("unable to get current process: %v", err)
+	}
+
+	buffer := make([]byte, len(testBuffer))
+	err = windows.ReadProcessMemory(process, uintptr(unsafe.Pointer(&testBuffer[0])), &buffer[0], uint32(len(buffer)), nil)
+	if err != nil {
+		t.Errorf("ReadProcessMemory failed: %v", err)
+	}
+	if !bytes.Equal(testBuffer, buffer) {
+		t.Errorf("bytes read does not match buffer: 0x%X != 0x%X", testBuffer, buffer)
+	}
+
+	buffer = []byte{0xDE, 0xAD, 0xBE, 0xEF}
+	err = windows.WriteProcessMemory(process, uintptr(unsafe.Pointer(&testBuffer[0])), &buffer[0], uint32(len(buffer)), nil)
+	if err != nil {
+		t.Errorf("WriteProcessMemory failed: %v", err)
+	}
+	if !bytes.Equal(testBuffer, buffer) {
+		t.Errorf("bytes written does not match buffer: 0x%X != 0x%X", testBuffer, buffer)
+	}
+}
+
+func TestVirtualProtect(t *testing.T) {
+	testBuffer := []byte{0xBA, 0xAD, 0xF0, 0x0D}
+
+	memBasicInfo := windows.MemoryBasicInformation{}
+
+	err := windows.VirtualQuery(uintptr(unsafe.Pointer(&testBuffer[0])), &memBasicInfo, unsafe.Sizeof(memBasicInfo))
+	if err != nil {
+		t.Fatalf("VirtualQuery failed: %v", err)
+	}
+
+	origProtect := memBasicInfo.Protect
+
+	var oldProtect uint32
+	var newProtect uint32 = windows.PAGE_EXECUTE_READWRITE
+	err = windows.VirtualProtect(uintptr(unsafe.Pointer(&testBuffer[0])), uintptr(len(testBuffer)), newProtect, &oldProtect) // NB: Golang does not like it if you remove permissions
+	if err != nil {
+		t.Fatalf("VirtualProtect failed: %v", err)
+	}
+
+	if origProtect != oldProtect {
+		t.Errorf("VirtualQuery Protect does not match oldProtect: 0x%X != 0x%X", origProtect, oldProtect)
+	}
+
+	err = windows.VirtualQuery(uintptr(unsafe.Pointer(&testBuffer[0])), &memBasicInfo, unsafe.Sizeof(memBasicInfo))
+	if err != nil {
+		t.Errorf("VirtualQuery failed: %v", err)
+	}
+
+	if memBasicInfo.Protect != newProtect {
+		t.Errorf("VirtualQuery Protect does not match newProtect: 0x%X != 0x%X", memBasicInfo.Protect, newProtect)
+	}
+
+	// Restore state
+	newProtect = oldProtect
+	err = windows.VirtualProtect(uintptr(unsafe.Pointer(&testBuffer[0])), uintptr(len(testBuffer)), newProtect, &oldProtect)
+	if err != nil {
+		t.Fatalf("VirtualProtect failed during restore: %v", err)
+	}
+}
+
+func TestVirtualProtectEx(t *testing.T) {
+	testBuffer := []byte{0xBA, 0xAD, 0xF0, 0x0D}
+
+	process, err := windows.GetCurrentProcess()
+	if err != nil {
+		t.Fatalf("unable to get current process: %v", err)
+	}
+
+	memBasicInfo := windows.MemoryBasicInformation{}
+
+	err = windows.VirtualQueryEx(process, uintptr(unsafe.Pointer(&testBuffer[0])), &memBasicInfo, unsafe.Sizeof(memBasicInfo))
+	if err != nil {
+		t.Fatalf("VirtualQueryEx failed: %v", err)
+	}
+
+	origProtect := memBasicInfo.Protect
+
+	var oldProtect uint32
+	var newProtect uint32 = windows.PAGE_EXECUTE_READWRITE
+	err = windows.VirtualProtectEx(process, uintptr(unsafe.Pointer(&testBuffer[0])), uintptr(len(testBuffer)), newProtect, &oldProtect) // NB: Golang does not like it if you remove permissions
+	if err != nil {
+		t.Fatalf("VirtualProtectEx failed: %v", err)
+	}
+
+	if origProtect != oldProtect {
+		t.Errorf("VirtualQueryEx Protect does not match oldProtect: 0x%X != 0x%X", origProtect, oldProtect)
+	}
+
+	err = windows.VirtualQueryEx(process, uintptr(unsafe.Pointer(&testBuffer[0])), &memBasicInfo, unsafe.Sizeof(memBasicInfo))
+	if err != nil {
+		t.Errorf("VirtualQueryEx failed: %v", err)
+	}
+
+	if memBasicInfo.Protect != newProtect {
+		t.Errorf("VirtualQueryEx Protect does not match newProtect: 0x%X != 0x%X", memBasicInfo.Protect, newProtect)
+	}
+
+	// Restore state
+	newProtect = oldProtect
+	err = windows.VirtualProtectEx(process, uintptr(unsafe.Pointer(&testBuffer[0])), uintptr(len(testBuffer)), newProtect, &oldProtect)
+	if err != nil {
+		t.Fatalf("VirtualProtectEx failed during restore: %v", err)
+	}
+}
