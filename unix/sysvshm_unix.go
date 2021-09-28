@@ -34,6 +34,7 @@ func SysvShmAttach(id int, addr uintptr, flag int) ([]byte, error) {
 	}
 
 	// Use unsafe to convert addr into a []byte.
+	// TODO: convert to unsafe.Slice once we can assume Go 1.17
 	var b []byte
 	hdr := (*unsafeheader.Slice)(unsafe.Pointer(&b))
 	hdr.Data = unsafe.Pointer(addr)
