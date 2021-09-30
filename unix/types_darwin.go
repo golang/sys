@@ -27,6 +27,7 @@ package unix
 #include <mach/mach.h>
 #include <mach/message.h>
 #include <sys/event.h>
+#include <sys/ipc.h>
 #include <sys/kern_control.h>
 #include <sys/mman.h>
 #include <sys/mount.h>
@@ -34,6 +35,7 @@ package unix
 #include <sys/ptrace.h>
 #include <sys/resource.h>
 #include <sys/select.h>
+#include <sys/shm.h>
 #include <sys/signal.h>
 #include <sys/socket.h>
 #include <sys/stat.h>
@@ -323,3 +325,26 @@ type Vmspace C.struct_vmspace
 type Pcred C.struct__pcred
 
 type Ucred C.struct__ucred
+
+// shm
+
+type SysvIpcPerm C.struct_ipc_perm
+type SysvShmDesc C.struct_shmid_ds
+
+const (
+	IPC_CREAT   = C.IPC_CREAT
+	IPC_EXCL    = C.IPC_EXCL
+	IPC_NOWAIT  = C.IPC_NOWAIT
+	IPC_PRIVATE = C.IPC_PRIVATE
+)
+
+const (
+	IPC_RMID = C.IPC_RMID
+	IPC_SET  = C.IPC_SET
+	IPC_STAT = C.IPC_STAT
+)
+
+const (
+	SHM_RDONLY = C.SHM_RDONLY
+	SHM_RND    = C.SHM_RND
+)
