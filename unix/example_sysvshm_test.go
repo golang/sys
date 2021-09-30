@@ -2,23 +2,18 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-//go:build (darwin && amd64) || linux
-// +build darwin,amd64 linux
+//go:build (darwin && amd64) || (linux && !android)
+// +build darwin,amd64 linux,!android
 
 package unix_test
 
 import (
 	"log"
-	"runtime"
 
 	"golang.org/x/sys/unix"
 )
 
 func ExampleSysvShmGet() {
-	// sysv shared memory isn't implemented on Android
-	if runtime.GOOS == "android" {
-		return
-	}
 
 	// create shared memory region of 1024 bytes
 	id, err := unix.SysvShmGet(unix.IPC_PRIVATE, 1024, unix.IPC_CREAT|unix.IPC_EXCL|0o600)

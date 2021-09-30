@@ -47,7 +47,7 @@ func SysvShmAttach(id int, addr uintptr, flag int) ([]byte, error) {
 //
 // It is not safe to use the slice after calling this function.
 func SysvShmDetach(data []byte) error {
-	if data == nil {
+	if len(data) == 0 {
 		return EINVAL
 	}
 
