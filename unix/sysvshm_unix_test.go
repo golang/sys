@@ -26,6 +26,11 @@ func TestSysvSharedMemory(t *testing.T) {
 		return
 	}
 
+	// The kernel may have been built without System V IPC support.
+	if err == unix.ENOSYS {
+		t.Skip("shmget not supported")
+	}
+
 	if err != nil {
 		t.Fatalf("SysvShmGet: %v", err)
 	}
