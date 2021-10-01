@@ -167,7 +167,7 @@ func TestFcntlFlock(t *testing.T) {
 // "-test.run=^TestPassFD$" and an environment variable used to signal
 // that the test should become the child process instead.
 func TestPassFD(t *testing.T) {
-	if (runtime.GOOS == "darwin" || runtime.GOOS == "ios") && runtime.GOARCH == "arm64" {
+	if runtime.GOOS == "ios" {
 		t.Skip("cannot exec subprocess on iOS, skipping test")
 	}
 
@@ -488,8 +488,7 @@ func TestDup(t *testing.T) {
 }
 
 func TestPoll(t *testing.T) {
-	if runtime.GOOS == "android" ||
-		((runtime.GOOS == "darwin" || runtime.GOOS == "ios") && runtime.GOARCH == "arm64") {
+	if runtime.GOOS == "android" || runtime.GOOS == "ios" {
 		t.Skip("mkfifo syscall is not available on android and iOS, skipping test")
 	}
 
