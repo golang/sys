@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-//go:build (darwin && amd64) || (linux && !android)
-// +build darwin,amd64 linux,!android
+//go:build (darwin && !ios) || (linux && !android)
+// +build darwin,!ios linux,!android
 
 package unix_test
 
@@ -14,7 +14,6 @@ import (
 )
 
 func ExampleSysvShmGet() {
-
 	// create shared memory region of 1024 bytes
 	id, err := unix.SysvShmGet(unix.IPC_PRIVATE, 1024, unix.IPC_CREAT|unix.IPC_EXCL|0o600)
 	if err != nil {
