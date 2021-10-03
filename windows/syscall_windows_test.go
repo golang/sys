@@ -787,7 +787,7 @@ func TestReadWriteProcessMemory(t *testing.T) {
 	}
 
 	buffer := make([]byte, len(testBuffer))
-	err = windows.ReadProcessMemory(process, uintptr(unsafe.Pointer(&testBuffer[0])), &buffer[0], uint32(len(buffer)), nil)
+	err = windows.ReadProcessMemory(process, uintptr(unsafe.Pointer(&testBuffer[0])), &buffer[0], uintptr(len(buffer)), nil)
 	if err != nil {
 		t.Errorf("ReadProcessMemory failed: %v", err)
 	}
@@ -796,7 +796,7 @@ func TestReadWriteProcessMemory(t *testing.T) {
 	}
 
 	buffer = []byte{0xDE, 0xAD, 0xBE, 0xEF}
-	err = windows.WriteProcessMemory(process, uintptr(unsafe.Pointer(&testBuffer[0])), &buffer[0], uint32(len(buffer)), nil)
+	err = windows.WriteProcessMemory(process, uintptr(unsafe.Pointer(&testBuffer[0])), &buffer[0], uintptr(len(buffer)), nil)
 	if err != nil {
 		t.Errorf("WriteProcessMemory failed: %v", err)
 	}
@@ -818,8 +818,8 @@ func TestVirtualProtect(t *testing.T) {
 	origProtect := memBasicInfo.Protect
 
 	var oldProtect uint32
-	var newProtect uint32 = windows.PAGE_EXECUTE_READWRITE
-	err = windows.VirtualProtect(uintptr(unsafe.Pointer(&testBuffer[0])), uintptr(len(testBuffer)), newProtect, &oldProtect) // NB: Golang does not like it if you remove permissions
+	var newProtect uint32 = windows.PAGE_EXECUTE_READWRITE // Binary will crash if you remove read-write permissions, so add execute instead.
+	err = windows.VirtualProtect(uintptr(unsafe.Pointer(&testBuffer[0])), uintptr(len(testBuffer)), newProtect, &oldProtect)
 	if err != nil {
 		t.Fatalf("VirtualProtect failed: %v", err)
 	}
@@ -863,8 +863,8 @@ func TestVirtualProtectEx(t *testing.T) {
 	origProtect := memBasicInfo.Protect
 
 	var oldProtect uint32
-	var newProtect uint32 = windows.PAGE_EXECUTE_READWRITE
-	err = windows.VirtualProtectEx(process, uintptr(unsafe.Pointer(&testBuffer[0])), uintptr(len(testBuffer)), newProtect, &oldProtect) // NB: Golang does not like it if you remove permissions
+	var newProtect uint32 = windows.PAGE_EXECUTE_READWRITE // Binary will crash if you remove read-write permissions, so add execute instead.
+	err = windows.VirtualProtectEx(process, uintptr(unsafe.Pointer(&testBuffer[0])), uintptr(len(testBuffer)), newProtect, &oldProtect)
 	if err != nil {
 		t.Fatalf("VirtualProtectEx failed: %v", err)
 	}
