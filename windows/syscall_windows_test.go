@@ -777,3 +777,30 @@ func TestProcessModules(t *testing.T) {
 		t.Fatalf("module size does not match executable: %v != %v", moduleInfo.SizeOfImage, peSizeOfImage)
 	}
 }
+
+func TestReadWriteProcessMemory(t *testing.T) {
+	testBuffer := []byte{0xBA, 0xAD, 0xF0, 0x0D}
+
+	process, err := windows.GetCurrentProcess()
+	if err != nil {
+		t.Fatalf("unable to get current process: %v", err)
+	}
+
+	buffer := make([]byte, len(testBuffer))
+	err = windows.ReadProcessMemory(process, uintptr(unsafe.Pointer(&testBuffer[0])), &buffer[0], uintptr(len(buffer)), nil)
+	if err != nil {
+		t.Errorf("ReadProcessMemory failed: %v", err)
+	}
+	if !bytes.Equal(testBuffer, buffer) {
+		t.Errorf("bytes read does not match buffer: 0x%X != 0x%X", testBuffer, buffer)
+	}
+
+	buffer = []byte{0xDE, 0xAD, 0xBE, 0xEF}
+	err = windows.WriteProcessMemory(process, uintptr(unsafe.Pointer(&testBuffer[0])), &buffer[0], uintptr(len(buffer)), nil)
+	if err != nil {
+		t.Errorf("WriteProcessMemory failed: %v", err)
+	}
+	if !bytes.Equal(testBuffer, buffer) {
+		t.Errorf("bytes written does not match buffer: 0x%X != 0x%X", testBuffer, buffer)
+	}
+}
