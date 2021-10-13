@@ -858,3 +858,77 @@ func TestSystemModuleVersions(t *testing.T) {
 			(fixedInfo.FileVersionLS>>0)&0xff)
 	}
 }
+
+type fileRenameInformation struct {
+	ReplaceIfExists uint32
+	RootDirectory   windows.Handle
+	FileNameLength  uint32
+	FileName        [1]uint16
+}
+
+func TestNtCreateFileAndNtSetInformationFile(t *testing.T) {
+	var iosb windows.IO_STATUS_BLOCK
+	var allocSize int64 = 0
+	// Open test directory with NtCreateFile.
+	testDirPath := t.TempDir()
+	objectName, err := windows.NewNTUnicodeString("\\??\\" + testDirPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	oa := &windows.OBJECT_ATTRIBUTES{
+		ObjectName: objectName,
+	}
+	oa.Length = uint32(unsafe.Sizeof(*oa))
+	var testDirHandle windows.Handle
+	err = windows.NtCreateFile(&testDirHandle, windows.FILE_GENERIC_READ|windows.FILE_GENERIC_WRITE, oa, &iosb,
+		&allocSize, 0, windows.FILE_SHARE_READ|windows.FILE_SHARE_WRITE|windows.FILE_SHARE_DELETE, windows.FILE_OPEN,
+		windows.FILE_DIRECTORY_FILE, 0, 0)
+	if err != nil {
+		t.Fatalf("NtCreateFile(%v) failed: %v", testDirPath, err)
+	}
+	defer windows.CloseHandle(testDirHandle)
+	// Create a file in test directory with NtCreateFile.
+	fileName := "filename"
+	filePath := filepath.Join(testDirPath, fileName)
+	objectName, err = windows.NewNTUnicodeString(fileName)
+	if err != nil {
+		t.Fatal(err)
+	}
+	oa.RootDirectory = testDirHandle
+	oa.ObjectName = objectName
+	var fileHandle windows.Handle
+	err = windows.NtCreateFile(&fileHandle, windows.FILE_GENERIC_READ|windows.FILE_GENERIC_WRITE|windows.DELETE, oa, &iosb,
+		&allocSize, 0, windows.FILE_SHARE_READ|windows.FILE_SHARE_WRITE|windows.FILE_SHARE_DELETE, windows.FILE_CREATE,
+		0, 0, 0)
+	if err != nil {
+		t.Fatalf("NtCreateFile(%v) failed: %v", filePath, err)
+	}
+	defer windows.CloseHandle(fileHandle)
+	_, err = os.Stat(filePath)
+	if err != nil {
+		t.Fatalf("cannot stat file created with NtCreatefile: %v", err)
+	}
+	// Rename file with NtSetInformationFile.
+	newName := "newname"
+	newPath := filepath.Join(testDirPath, newName)
+	newNameUTF16, err := windows.UTF16FromString(newName)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fileNameLen := len(newNameUTF16)*2 - 2
+	var dummyFileRenameInfo fileRenameInformation
+	bufferSize := int(unsafe.Offsetof(dummyFileRenameInfo.FileName)) + fileNameLen
+	buffer := make([]byte, bufferSize)
+	typedBufferPtr := (*fileRenameInformation)(unsafe.Pointer(&buffer[0]))
+	typedBufferPtr.ReplaceIfExists = windows.FILE_RENAME_REPLACE_IF_EXISTS | windows.FILE_RENAME_POSIX_SEMANTICS
+	typedBufferPtr.FileNameLength = uint32(fileNameLen)
+	copy((*[1 << 29]uint16)(unsafe.Pointer(&typedBufferPtr.FileName[0]))[:], newNameUTF16)
+	err = windows.NtSetInformationFile(fileHandle, &iosb, &buffer[0], uint32(bufferSize), windows.FileRenameInformation)
+	if err != nil {
+		t.Fatalf("NtSetInformationFile(%v) failed: %v", newPath, err)
+	}
+	_, err = os.Stat(newPath)
+	if err != nil {
+		t.Fatalf("cannot stat rename target %v: %v", newPath, err)
+	}
+}
