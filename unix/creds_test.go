@@ -195,3 +195,102 @@ func TestPktInfo(t *testing.T) {
 		})
 	}
 }
+
+func TestParseOrigDstAddr(t *testing.T) {
+	testcases := []struct {
+		network string
+		address *net.UDPAddr
+	}{
+		{"udp4", &net.UDPAddr{IP: net.IPv4(127, 0, 0, 1)}},
+		{"udp6", &net.UDPAddr{IP: net.IPv6loopback}},
+	}
+
+	for _, test := range testcases {
+		t.Run(test.network, func(t *testing.T) {
+			conn, err := net.ListenUDP(test.network, test.address)
+			if errors.Is(err, unix.EADDRNOTAVAIL) {
+				t.Skipf("%v is not available", test.address)
+			}
+			if err != nil {
+				t.Fatal("Listen:", err)
+			}
+			defer conn.Close()
+
+			raw, err := conn.SyscallConn()
+			if err != nil {
+				t.Fatal("SyscallConn:", err)
+			}
+
+			var opErr error
+			err = raw.Control(func(fd uintptr) {
+				switch test.network {
+				case "udp4":
+					opErr = unix.SetsockoptInt(int(fd), unix.SOL_IP, unix.IP_RECVORIGDSTADDR, 1)
+				case "udp6":
+					opErr = unix.SetsockoptInt(int(fd), unix.SOL_IPV6, unix.IPV6_RECVORIGDSTADDR, 1)
+				}
+			})
+			if err != nil {
+				t.Fatal("Control:", err)
+			}
+			if opErr != nil {
+				t.Fatal("Can't enable RECVORIGDSTADDR:", err)
+			}
+
+			msg := []byte{1}
+			addr := conn.LocalAddr().(*net.UDPAddr)
+			_, err = conn.WriteToUDP(msg, addr)
+			if err != nil {
+				t.Fatal("WriteToUDP:", err)
+			}
+
+			conn.SetReadDeadline(time.Now().Add(100 * time.Millisecond))
+			oob := make([]byte, unix.CmsgSpace(unix.SizeofSockaddrInet6))
+			_, oobn, _, _, err := conn.ReadMsgUDP(msg, oob)
+			if err != nil {
+				t.Fatal("ReadMsgUDP:", err)
+			}
+
+			scms, err := unix.ParseSocketControlMessage(oob[:oobn])
+			if err != nil {
+				t.Fatal("ParseSocketControlMessage:", err)
+			}
+
+			sa, err := unix.ParseOrigDstAddr(&scms[0])
+			if err != nil {
+				t.Fatal("ParseOrigDstAddr:", err)
+			}
+
+			switch test.network {
+			case "udp4":
+				sa4, ok := sa.(*unix.SockaddrInet4)
+				if !ok {
+					t.Fatalf("Got %T not *SockaddrInet4", sa)
+				}
+
+				lo := net.IPv4(127, 0, 0, 1)
+				if addr := net.IP(sa4.Addr[:]); !lo.Equal(addr) {
+					t.Errorf("Got address %v, want %v", addr, lo)
+				}
+
+				if sa4.Port != addr.Port {
+					t.Errorf("Got port %d, want %d", sa4.Port, addr.Port)
+				}
+
+			case "udp6":
+				sa6, ok := sa.(*unix.SockaddrInet6)
+				if !ok {
+					t.Fatalf("Got %T, want *SockaddrInet6", sa)
+				}
+
+				if addr := net.IP(sa6.Addr[:]); !net.IPv6loopback.Equal(addr) {
+					t.Errorf("Got address %v, want %v", addr, net.IPv6loopback)
+				}
+
+				if sa6.Port != addr.Port {
+					t.Errorf("Got port %d, want %d", sa6.Port, addr.Port)
+				}
+			}
+		})
+	}
+}
