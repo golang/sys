@@ -9,9 +9,11 @@ package unix_test
 
 import (
 	"bytes"
+	"errors"
 	"net"
 	"os"
 	"testing"
+	"time"
 
 	"golang.org/x/sys/unix"
 )
@@ -116,5 +118,80 @@ func TestSCMCredentials(t *testing.T) {
 		if *newUcred != ucred {
 			t.Fatalf("ParseUnixCredentials = %+v, want %+v", newUcred, ucred)
 		}
+	}
+}
+
+func TestPktInfo(t *testing.T) {
+	testcases := []struct {
+		network string
+		address *net.UDPAddr
+	}{
+		{"udp4", &net.UDPAddr{IP: net.ParseIP("127.0.0.1")}},
+		{"udp6", &net.UDPAddr{IP: net.ParseIP("::1")}},
+	}
+	for _, test := range testcases {
+		t.Run(test.network, func(t *testing.T) {
+			conn, err := net.ListenUDP(test.network, test.address)
+			if errors.Is(err, unix.EADDRNOTAVAIL) {
+				t.Skipf("%v is not available", test.address)
+			}
+			if err != nil {
+				t.Fatal("Listen:", err)
+			}
+			defer conn.Close()
+
+			var pktInfo []byte
+			var src net.IP
+			switch test.network {
+			case "udp4":
+				var info4 unix.Inet4Pktinfo
+				src = net.ParseIP("127.0.0.2").To4()
+				copy(info4.Spec_dst[:], src)
+				pktInfo = unix.PktInfo4(&info4)
+
+			case "udp6":
+				var info6 unix.Inet6Pktinfo
+				src = net.ParseIP("2001:0DB8::1")
+				copy(info6.Addr[:], src)
+				pktInfo = unix.PktInfo6(&info6)
+
+				raw, err := conn.SyscallConn()
+				if err != nil {
+					t.Fatal("SyscallConn:", err)
+				}
+				var opErr error
+				err = raw.Control(func(fd uintptr) {
+					opErr = unix.SetsockoptInt(int(fd), unix.SOL_IPV6, unix.IPV6_FREEBIND, 1)
+				})
+				if err != nil {
+					t.Fatal("Control:", err)
+				}
+				if errors.Is(opErr, unix.ENOPROTOOPT) {
+					// Happens on android-amd64-emu, maybe Android has disabled
+					// IPV6_FREEBIND?
+					t.Skip("IPV6_FREEBIND not supported")
+				}
+				if opErr != nil {
+					t.Fatal("Can't enable IPV6_FREEBIND:", opErr)
+				}
+			}
+
+			msg := []byte{1}
+			addr := conn.LocalAddr().(*net.UDPAddr)
+			_, _, err = conn.WriteMsgUDP(msg, pktInfo, addr)
+			if err != nil {
+				t.Fatal("WriteMsgUDP:", err)
+			}
+
+			conn.SetReadDeadline(time.Now().Add(100 * time.Millisecond))
+			_, _, _, remote, err := conn.ReadMsgUDP(msg, nil)
+			if err != nil {
+				t.Fatal("ReadMsgUDP:", err)
+			}
+
+			if !remote.IP.Equal(src) {
+				t.Errorf("Got packet from %v, want %v", remote.IP, src)
+			}
+		})
 	}
 }
