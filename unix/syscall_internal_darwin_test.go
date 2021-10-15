@@ -138,7 +138,7 @@ func TestSockaddrCtl_sockaddr(t *testing.T) {
 	}
 }
 
-func TestSockaddVM_sockaddr(t *testing.T) {
+func TestSockaddrVM_sockaddr(t *testing.T) {
 	tests := []struct {
 		name string
 		sa   *SockaddrVM
@@ -154,7 +154,7 @@ func TestSockaddVM_sockaddr(t *testing.T) {
 			},
 		},
 		{
-			name: "with CID and Port",
+			name: "with CID and port",
 			sa: &SockaddrVM{
 				CID:  VMADDR_CID_HOST,
 				Port: VMADDR_PORT_ANY,

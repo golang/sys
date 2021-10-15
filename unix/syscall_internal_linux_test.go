@@ -254,6 +254,23 @@ func Test_anyToSockaddr(t *testing.T) {
 			proto: makeProto(^0),
 		},
 		{
+			name: "AF_VSOCK emtpy",
+			rsa:  sockaddrVMToAny(RawSockaddrVM{}),
+			err:  EAFNOSUPPORT,
+		},
+		{
+			name: "AF_VSOCK Cid and Port",
+			rsa: sockaddrVMToAny(RawSockaddrVM{
+				Family: AF_VSOCK,
+				Cid:    VMADDR_CID_HOST,
+				Port:   VMADDR_PORT_ANY,
+			}),
+			sa: &SockaddrVM{
+				CID:  VMADDR_CID_HOST,
+				Port: VMADDR_PORT_ANY,
+			},
+		},
+		{
 			name: "AF_MAX EAFNOSUPPORT",
 			rsa: &RawSockaddrAny{
 				Addr: RawSockaddr{
@@ -788,6 +805,58 @@ func TestSockaddrNFCLLCP_sockaddr(t *testing.T) {
 	}
 }
 
+func TestSockaddrVM_sockaddr(t *testing.T) {
+	tests := []struct {
+		name string
+		sa   *SockaddrVM
+		raw  *RawSockaddrVM
+		err  error
+	}{
+		{
+			name: "empty",
+			sa:   &SockaddrVM{},
+			raw: &RawSockaddrVM{
+				Family: AF_VSOCK,
+			},
+		},
+		{
+			name: "with CID, port and flags",
+			sa: &SockaddrVM{
+				CID:   VMADDR_CID_HOST,
+				Port:  VMADDR_PORT_ANY,
+				Flags: VMADDR_FLAG_TO_HOST,
+			},
+			raw: &RawSockaddrVM{
+				Family: AF_VSOCK,
+				Port:   VMADDR_PORT_ANY,
+				Cid:    VMADDR_CID_HOST,
+				Flags:  VMADDR_FLAG_TO_HOST,
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			out, l, err := tt.sa.sockaddr()
+			if err != tt.err {
+				t.Fatalf("unexpected error: %v, want: %v", err, tt.err)
+			}
+
+			// Must be 0 on error or a fixed size otherwise.
+			if (tt.err != nil && l != 0) || (tt.raw != nil && l != SizeofSockaddrVM) {
+				t.Fatalf("unexpected Socklen: %d", l)
+			}
+
+			if out != nil {
+				raw := (*RawSockaddrVM)(out)
+				if !reflect.DeepEqual(raw, tt.raw) {
+					t.Fatalf("unexpected RawSockaddrVM:\n got: %#v\nwant: %#v", raw, tt.raw)
+				}
+			}
+		})
+	}
+}
+
 // These helpers explicitly copy the contents of in into out to produce
 // the correct sockaddr structure, without relying on unsafe casting to
 // a type of a larger size.
@@ -859,6 +928,15 @@ func sockaddrNFCLLCPToAny(in RawSockaddrNFCLLCP) *RawSockaddrAny {
 	copy(
 		(*(*[SizeofSockaddrAny]byte)(unsafe.Pointer(&out)))[:],
 		(*(*[SizeofSockaddrNFCLLCP]byte)(unsafe.Pointer(&in)))[:],
+	)
+	return &out
+}
+
+func sockaddrVMToAny(in RawSockaddrVM) *RawSockaddrAny {
+	var out RawSockaddrAny
+	copy(
+		(*(*[SizeofSockaddrAny]byte)(unsafe.Pointer(&out)))[:],
+		(*(*[SizeofSockaddrVM]byte)(unsafe.Pointer(&in)))[:],
 	)
 	return &out
 }
