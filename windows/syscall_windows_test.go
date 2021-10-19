@@ -20,6 +20,7 @@ import (
 	"testing"
 	"unsafe"
 
+	"golang.org/x/sys/internal/unsafeheader"
 	"golang.org/x/sys/windows"
 )
 
@@ -802,5 +803,58 @@ func TestReadWriteProcessMemory(t *testing.T) {
 	}
 	if !bytes.Equal(testBuffer, buffer) {
 		t.Errorf("bytes written does not match buffer: 0x%X != 0x%X", testBuffer, buffer)
+	}
+}
+
+func TestSystemModuleVersions(t *testing.T) {
+	var modules []windows.RTL_PROCESS_MODULE_INFORMATION
+	for bufferSize := uint32(128 * 1024); ; {
+		moduleBuffer := make([]byte, bufferSize)
+		err := windows.NtQuerySystemInformation(windows.SystemModuleInformation, unsafe.Pointer(&moduleBuffer[0]), bufferSize, &bufferSize)
+		switch err {
+		case windows.STATUS_INFO_LENGTH_MISMATCH:
+			continue
+		case nil:
+			break
+		default:
+			t.Error(err)
+			return
+		}
+		mods := (*windows.RTL_PROCESS_MODULES)(unsafe.Pointer(&moduleBuffer[0]))
+		hdr := (*unsafeheader.Slice)(unsafe.Pointer(&modules))
+		hdr.Data = unsafe.Pointer(&mods.Modules[0])
+		hdr.Len = int(mods.NumberOfModules)
+		hdr.Cap = int(mods.NumberOfModules)
+		break
+	}
+	for i := range modules {
+		moduleName := windows.ByteSliceToString(modules[i].FullPathName[modules[i].OffsetToFileName:])
+		driverPath := `\\?\GLOBALROOT` + windows.ByteSliceToString(modules[i].FullPathName[:])
+		var zero windows.Handle
+		infoSize, err := windows.GetFileVersionInfoSize(driverPath, &zero)
+		if err != nil {
+			if err != windows.ERROR_FILE_NOT_FOUND {
+				t.Error(err)
+			}
+			continue
+		}
+		versionInfo := make([]byte, infoSize)
+		err = windows.GetFileVersionInfo(driverPath, 0, infoSize, unsafe.Pointer(&versionInfo[0]))
+		if err != nil && err != windows.ERROR_FILE_NOT_FOUND {
+			t.Error(err)
+			continue
+		}
+		var fixedInfo *windows.VS_FIXEDFILEINFO
+		fixedInfoLen := uint32(unsafe.Sizeof(*fixedInfo))
+		err = windows.VerQueryValue(unsafe.Pointer(&versionInfo[0]), `\`, (unsafe.Pointer)(&fixedInfo), &fixedInfoLen)
+		if err != nil {
+			t.Error(err)
+			continue
+		}
+		t.Logf("%s: v%d.%d.%d.%d", moduleName,
+			(fixedInfo.FileVersionMS>>16)&0xff,
+			(fixedInfo.FileVersionMS>>0)&0xff,
+			(fixedInfo.FileVersionLS>>16)&0xff,
+			(fixedInfo.FileVersionLS>>0)&0xff)
 	}
 }
