@@ -74,6 +74,13 @@ struct sockaddr_any {
 	char pad[sizeof(union sockaddr_all) - sizeof(struct sockaddr)];
 };
 
+#if defined(__x86_64__)
+typedef struct stat64 stat_t;
+typedef struct statfs64 statfs_t;
+#else // __arm__
+typedef struct stat stat_t;
+typedef struct statfs statfs_t;
+#endif
 */
 import "C"
 
@@ -114,9 +121,9 @@ type _Gid_t C.gid_t
 
 // Files
 
-type Stat_t C.struct_stat64
+type Stat_t C.stat_t
 
-type Statfs_t C.struct_statfs64
+type Statfs_t C.statfs_t
 
 type Flock_t C.struct_flock
 
