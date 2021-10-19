@@ -21,6 +21,7 @@ package unix
 #include <dirent.h>
 #include <fcntl.h>
 #include <poll.h>
+#include <stdint.h>
 #include <signal.h>
 #include <termios.h>
 #include <unistd.h>
