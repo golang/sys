@@ -370,7 +370,9 @@ var (
 	procNtQuerySystemInformation                             = modntdll.NewProc("NtQuerySystemInformation")
 	procNtSetInformationProcess                              = modntdll.NewProc("NtSetInformationProcess")
 	procNtSetSystemInformation                               = modntdll.NewProc("NtSetSystemInformation")
+	procRtlAddFunctionTable                                  = modntdll.NewProc("RtlAddFunctionTable")
 	procRtlDefaultNpAcl                                      = modntdll.NewProc("RtlDefaultNpAcl")
+	procRtlDeleteFunctionTable                               = modntdll.NewProc("RtlDeleteFunctionTable")
 	procRtlDosPathNameToNtPathName_U_WithStatus              = modntdll.NewProc("RtlDosPathNameToNtPathName_U_WithStatus")
 	procRtlDosPathNameToRelativeNtPathName_U_WithStatus      = modntdll.NewProc("RtlDosPathNameToRelativeNtPathName_U_WithStatus")
 	procRtlGetCurrentPeb                                     = modntdll.NewProc("RtlGetCurrentPeb")
@@ -3200,11 +3202,23 @@ func NtSetSystemInformation(sysInfoClass int32, sysInfo unsafe.Pointer, sysInfoL
 	return
 }
 
+func RtlAddFunctionTable(functionTable *RUNTIME_FUNCTION, entryCount uint32, baseAddress uintptr) (ret bool) {
+	r0, _, _ := syscall.Syscall(procRtlAddFunctionTable.Addr(), 3, uintptr(unsafe.Pointer(functionTable)), uintptr(entryCount), uintptr(baseAddress))
+	ret = r0 != 0
+	return
+}
+
 func RtlDefaultNpAcl(acl **ACL) (ntstatus error) {
 	r0, _, _ := syscall.Syscall(procRtlDefaultNpAcl.Addr(), 1, uintptr(unsafe.Pointer(acl)), 0, 0)
 	if r0 != 0 {
 		ntstatus = NTStatus(r0)
 	}
+	return
+}
+
+func RtlDeleteFunctionTable(functionTable *RUNTIME_FUNCTION) (ret bool) {
+	r0, _, _ := syscall.Syscall(procRtlDeleteFunctionTable.Addr(), 1, uintptr(unsafe.Pointer(functionTable)), 0, 0)
+	ret = r0 != 0
 	return
 }
 

@@ -2366,6 +2366,12 @@ type LIST_ENTRY struct {
 	Blink *LIST_ENTRY
 }
 
+type RUNTIME_FUNCTION struct {
+	BeginAddress uint32
+	EndAddress   uint32
+	UnwindData   uint32
+}
+
 type LDR_DATA_TABLE_ENTRY struct {
 	reserved1          [2]uintptr
 	InMemoryOrderLinks LIST_ENTRY
