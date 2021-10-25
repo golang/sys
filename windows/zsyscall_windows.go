@@ -115,6 +115,7 @@ var (
 	procOpenThreadToken                                      = modadvapi32.NewProc("OpenThreadToken")
 	procQueryServiceConfig2W                                 = modadvapi32.NewProc("QueryServiceConfig2W")
 	procQueryServiceConfigW                                  = modadvapi32.NewProc("QueryServiceConfigW")
+	procQueryServiceDynamicInformation                       = modadvapi32.NewProc("QueryServiceDynamicInformation")
 	procQueryServiceLockStatusW                              = modadvapi32.NewProc("QueryServiceLockStatusW")
 	procQueryServiceStatus                                   = modadvapi32.NewProc("QueryServiceStatus")
 	procQueryServiceStatusEx                                 = modadvapi32.NewProc("QueryServiceStatusEx")
@@ -970,6 +971,18 @@ func QueryServiceConfig2(service Handle, infoLevel uint32, buff *byte, buffSize 
 
 func QueryServiceConfig(service Handle, serviceConfig *QUERY_SERVICE_CONFIG, bufSize uint32, bytesNeeded *uint32) (err error) {
 	r1, _, e1 := syscall.Syscall6(procQueryServiceConfigW.Addr(), 4, uintptr(service), uintptr(unsafe.Pointer(serviceConfig)), uintptr(bufSize), uintptr(unsafe.Pointer(bytesNeeded)), 0, 0)
+	if r1 == 0 {
+		err = errnoErr(e1)
+	}
+	return
+}
+
+func QueryServiceDynamicInformation(service Handle, infoLevel uint32, dynamicInfo unsafe.Pointer) (err error) {
+	err = procQueryServiceDynamicInformation.Find()
+	if err != nil {
+		return
+	}
+	r1, _, e1 := syscall.Syscall(procQueryServiceDynamicInformation.Addr(), 3, uintptr(service), uintptr(infoLevel), uintptr(dynamicInfo))
 	if r1 == 0 {
 		err = errnoErr(e1)
 	}
