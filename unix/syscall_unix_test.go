@@ -610,19 +610,16 @@ func TestGetwd(t *testing.T) {
 	switch runtime.GOOS {
 	case "android":
 		dirs = []string{"/", "/system/bin"}
-	case "darwin", "ios":
-		switch runtime.GOARCH {
-		case "arm64":
-			d1, err := ioutil.TempDir("", "d1")
-			if err != nil {
-				t.Fatalf("TempDir: %v", err)
-			}
-			d2, err := ioutil.TempDir("", "d2")
-			if err != nil {
-				t.Fatalf("TempDir: %v", err)
-			}
-			dirs = []string{d1, d2}
+	case "ios":
+		d1, err := ioutil.TempDir("", "d1")
+		if err != nil {
+			t.Fatalf("TempDir: %v", err)
 		}
+		d2, err := ioutil.TempDir("", "d2")
+		if err != nil {
+			t.Fatalf("TempDir: %v", err)
+		}
+		dirs = []string{d1, d2}
 	}
 	oldwd := os.Getenv("PWD")
 	for _, d := range dirs {
