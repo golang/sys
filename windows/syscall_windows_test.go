@@ -928,3 +928,77 @@ func TestNtCreateFileAndNtSetInformationFile(t *testing.T) {
 		t.Fatalf("cannot stat rename target %v: %v", newPath, err)
 	}
 }
+
+var deviceClassNetGUID = &windows.GUID{0x4d36e972, 0xe325, 0x11ce, [8]byte{0xbf, 0xc1, 0x08, 0x00, 0x2b, 0xe1, 0x03, 0x18}}
+var deviceInterfaceNetGUID = &windows.GUID{0xcac88484, 0x7515, 0x4c03, [8]byte{0x82, 0xe6, 0x71, 0xa8, 0x7a, 0xba, 0xc3, 0x61}}
+
+func TestListLoadedNetworkDevices(t *testing.T) {
+	devInfo, err := windows.SetupDiGetClassDevsEx(deviceClassNetGUID, "", 0, windows.DIGCF_PRESENT, 0, "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer devInfo.Close()
+	for i := 0; ; i++ {
+		devInfoData, err := devInfo.EnumDeviceInfo(i)
+		if err != nil {
+			if err == windows.ERROR_NO_MORE_ITEMS {
+				break
+			}
+			continue
+		}
+		friendlyName, err := devInfo.DeviceRegistryProperty(devInfoData, windows.SPDRP_DEVICEDESC)
+		if err != nil {
+			t.Fatal(err)
+		}
+		var status, problemCode uint32
+		err = windows.CM_Get_DevNode_Status(&status, &problemCode, devInfoData.DevInst, 0)
+		if err != nil || (status&windows.DN_DRIVER_LOADED|windows.DN_STARTED) != windows.DN_DRIVER_LOADED|windows.DN_STARTED {
+			continue
+		}
+		instanceId, err := devInfo.DeviceInstanceID(devInfoData)
+		if err != nil {
+			t.Fatal(err)
+		}
+		interfaces, err := windows.CM_Get_Device_Interface_List(instanceId, deviceInterfaceNetGUID, windows.CM_GET_DEVICE_INTERFACE_LIST_PRESENT)
+		if err != nil || len(interfaces) == 0 {
+			continue
+		}
+		t.Logf("%s - %s", friendlyName, interfaces[0])
+	}
+}
+
+func TestListWireGuardDrivers(t *testing.T) {
+	devInfo, err := windows.SetupDiCreateDeviceInfoListEx(deviceClassNetGUID, 0, "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer devInfo.Close()
+	devInfoData, err := devInfo.CreateDeviceInfo("WireGuard", deviceClassNetGUID, "", 0, windows.DICD_GENERATE_ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = devInfo.SetDeviceRegistryProperty(devInfoData, windows.SPDRP_HARDWAREID, []byte("W\x00i\x00r\x00e\x00G\x00u\x00a\x00r\x00d\x00\x00\x00\x00\x00"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = devInfo.BuildDriverInfoList(devInfoData, windows.SPDIT_COMPATDRIVER)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer devInfo.DestroyDriverInfoList(devInfoData, windows.SPDIT_COMPATDRIVER)
+	for i := 0; ; i++ {
+		drvInfoData, err := devInfo.EnumDriverInfo(devInfoData, windows.SPDIT_COMPATDRIVER, i)
+		if err != nil {
+			if err == windows.ERROR_NO_MORE_ITEMS {
+				break
+			}
+			continue
+		}
+		drvInfoDetailData, err := devInfo.DriverInfoDetail(devInfoData, drvInfoData)
+		if err != nil {
+			t.Error(err)
+			continue
+		}
+		t.Logf("%s - %s", drvInfoData.Description(), drvInfoDetailData.InfFileName())
+	}
+}
