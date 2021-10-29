@@ -922,7 +922,7 @@ func TestNtCreateFileAndNtSetInformationFile(t *testing.T) {
 	typedBufferPtr := (*fileRenameInformation)(unsafe.Pointer(&buffer[0]))
 	typedBufferPtr.ReplaceIfExists = windows.FILE_RENAME_REPLACE_IF_EXISTS | windows.FILE_RENAME_POSIX_SEMANTICS
 	typedBufferPtr.FileNameLength = uint32(fileNameLen)
-	copy((*[1 << 29]uint16)(unsafe.Pointer(&typedBufferPtr.FileName[0]))[:], newNameUTF16)
+	copy((*[windows.MAX_LONG_PATH]uint16)(unsafe.Pointer(&typedBufferPtr.FileName[0]))[:fileNameLen/2:fileNameLen/2], newNameUTF16)
 	err = windows.NtSetInformationFile(fileHandle, &iosb, &buffer[0], uint32(bufferSize), windows.FileRenameInformation)
 	if err != nil {
 		t.Fatalf("NtSetInformationFile(%v) failed: %v", newPath, err)
