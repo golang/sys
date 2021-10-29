@@ -63,6 +63,11 @@ func main() {
 		// the process creation time.
 		externProcStarttimeRegex := regexp.MustCompile(`P_un\s*\[\d+\]byte`)
 		b = externProcStarttimeRegex.ReplaceAll(b, []byte("P_starttime Timeval"))
+
+		// Convert [n]int8 to [n]byte in Eproc and ExternProc members to
+		// simplify conversion to string.
+		convertEprocRegex := regexp.MustCompile(`(P_comm|Wmesg|Login)(\s+)\[(\d+)\]int8`)
+		b = convertEprocRegex.ReplaceAll(b, []byte("$1$2[$3]byte"))
 	}
 
 	// Intentionally export __val fields in Fsid and Sigset_t
