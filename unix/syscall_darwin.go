@@ -447,8 +447,8 @@ func SysctlKinfoProc(name string, args ...int) (*KinfoProc, error) {
 	return &kinfo, nil
 }
 
-func SysctlKinfoProcSlice(name string) ([]KinfoProc, error) {
-	mib, err := sysctlmib(name)
+func SysctlKinfoProcSlice(name string, args ...int) ([]KinfoProc, error) {
+	mib, err := sysctlmib(name, args...)
 	if err != nil {
 		return nil, err
 	}

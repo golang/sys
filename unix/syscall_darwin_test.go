@@ -267,3 +267,28 @@ func TestSysctlKinfoProc(t *testing.T) {
 		t.Errorf("got pid %d, want %d", got, want)
 	}
 }
+
+func TestSysctlKinfoProcSlice(t *testing.T) {
+	kps, err := unix.SysctlKinfoProcSlice("kern.proc.all")
+	if err != nil {
+		t.Fatalf("SysctlKinfoProc: %v", err)
+	}
+	if len(kps) == 0 {
+		t.Errorf("SysctlKinfoProcSlice: expected at least one process")
+	}
+
+	uid := unix.Getuid()
+	kps, err = unix.SysctlKinfoProcSlice("kern.proc.uid", uid)
+	if err != nil {
+		t.Fatalf("SysctlKinfoProc: %v", err)
+	}
+	if len(kps) == 0 {
+		t.Errorf("SysctlKinfoProcSlice: expected at least one process")
+	}
+
+	for _, kp := range kps {
+		if got, want := int(kp.Eproc.Ucred.Uid), uid; got != want {
+			t.Errorf("process %d: got uid %d, want %d", kp.Proc.P_pid, got, want)
+		}
+	}
+}
