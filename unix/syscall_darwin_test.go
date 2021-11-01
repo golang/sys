@@ -256,3 +256,14 @@ func TestGetsockoptXucred(t *testing.T) {
 		}
 	}
 }
+
+func TestSysctlKinfoProc(t *testing.T) {
+	pid := unix.Getpid()
+	kp, err := unix.SysctlKinfoProc("kern.proc.pid", pid)
+	if err != nil {
+		t.Fatalf("SysctlKinfoProc: %v", err)
+	}
+	if got, want := int(kp.Proc.P_pid), pid; got != want {
+		t.Errorf("got pid %d, want %d", got, want)
+	}
+}
