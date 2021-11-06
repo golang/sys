@@ -720,10 +720,10 @@ func TestOpenByHandleAt(t *testing.T) {
 			if err != nil {
 				t.Fatalf("OpenByHandleAt: %v", err)
 			}
-			defer unix.Close(fd)
-
 			t.Logf("opened fd %v", fd)
 			f := os.NewFile(uintptr(fd), "")
+			defer f.Close()
+
 			slurp, err := ioutil.ReadAll(f)
 			if err != nil {
 				t.Fatal(err)
