@@ -10,6 +10,7 @@
 // the appropriate sources are ready, the program is run as:
 //     go run linux/mkall.go <linux_dir> <glibc_dir>
 
+//go:build ignore
 // +build ignore
 
 package main

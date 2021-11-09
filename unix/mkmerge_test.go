@@ -105,6 +105,7 @@ func TestMerge(t *testing.T) {
 
 // build directives for arch{{.}}
 
+//go:build goos && arch{{.}}
 // +build goos,arch{{.}}
 
 package main
@@ -190,6 +191,7 @@ const (
 
 // build directives for arch{{.}}
 
+//go:build goos && arch{{.}}
 // +build goos,arch{{.}}
 
 package main
