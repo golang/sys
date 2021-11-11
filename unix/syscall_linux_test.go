@@ -671,8 +671,22 @@ func TestClockNanosleep(t *testing.T) {
 			continue
 		} else if err != nil {
 			t.Errorf("ClockNanosleep(CLOCK_REALTIME, TIMER_ABSTIME, %#v (=%v), nil) = %v", &abs, until, err)
-		} else if slept := time.Since(start); slept < delay {
-			t.Errorf("ClockNanosleep(CLOCK_REALTIME, TIMER_ABSTIME, %#v (=%v), nil) slept only %v", &abs, until, slept)
+		} else {
+			// We asked for CLOCK_REALTIME, but we have no way to know whether it
+			// jumped backward after ClockNanosleep returned. Compare both ways,
+			// and only fail if both the monotonic and wall clocks agree that
+			// the elapsed sleep was too short.
+			//
+			// This can still theoretically fail spuriously: if the clock jumps
+			// forward during ClockNanosleep and then backward again before we can
+			// call time.Now, then we could end up with a time that is too short on
+			// both the monotonic scale (because of the forward jump) and the
+			// real-time scale (because of the backward jump. However, it seems
+			// unlikely that two such contrary jumps will ever occur in the time it
+			// takes to execute this test.
+			if now := time.Now(); now.Before(until) && now.Round(0).Before(until) {
+				t.Errorf("ClockNanosleep(CLOCK_REALTIME, TIMER_ABSTIME, %#v (=%v), nil) slept only until %v", &abs, until, now)
+			}
 		}
 		break
 	}
