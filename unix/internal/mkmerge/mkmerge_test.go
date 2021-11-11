@@ -2,12 +2,6 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-//go:build ignore
-// +build ignore
-
-// Test cases for mkmerge.go.
-// Usage:
-//     $ go test mkmerge.go mkmerge_test.go
 package main
 
 import (

@@ -572,7 +572,7 @@ func mergeFiles() error {
 
 	// Merge each of the four type of files
 	for _, ztyp := range []string{"zerrors", "zsyscall", "zsysnum", "ztypes"} {
-		cmd := makeCommand("go", "run", "mkmerge.go", "-out", fmt.Sprintf("%s_%s.go", ztyp, GOOS), fmt.Sprintf("%s_%s_*.go", ztyp, GOOS))
+		cmd := makeCommand("go", "run", "./internal/mkmerge", "-out", fmt.Sprintf("%s_%s.go", ztyp, GOOS), fmt.Sprintf("%s_%s_*.go", ztyp, GOOS))
 		err := cmd.Run()
 		if err != nil {
 			return fmt.Errorf("could not merge %s files: %w", ztyp, err)
