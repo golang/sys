@@ -562,10 +562,17 @@ func TestSelect(t *testing.T) {
 		break
 	}
 
-	// On some BSDs the actual timeout might also be slightly less than the requested.
-	// Add an acceptable margin to avoid flaky tests.
-	if took < dur*2/3 {
-		t.Errorf("Select: got %v timeout, expected at least %v", took, dur)
+	// On some platforms (e.g. NetBSD) the actual timeout might be arbitrarily
+	// less than requested. However, Linux in particular promises to only return
+	// early if a file descriptor becomes ready (not applicable here), or the call
+	// is interrupted by a signal handler (explicitly retried in the loop above),
+	// or the timeout expires.
+	if took < dur {
+		if runtime.GOOS == "linux" {
+			t.Errorf("Select: slept for %v, expected %v", took, dur)
+		} else {
+			t.Logf("Select: slept for %v, requested %v", took, dur)
+		}
 	}
 
 	rr, ww, err := os.Pipe()
