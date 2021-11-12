@@ -520,6 +520,23 @@ func TestPoll(t *testing.T) {
 		}
 		if n != 0 {
 			t.Errorf("Poll: wrong number of events: got %v, expected %v", n, 0)
+
+			// Identify which event(s) caused Poll to return.
+			for _, ev := range []struct {
+				name string
+				bits int16
+			}{
+				{"POLLIN", unix.POLLIN},
+				{"POLLPRI", unix.POLLPRI},
+				{"POLLOUT", unix.POLLOUT},
+				{"POLLERR", unix.POLLERR},
+				{"POLLHUP", unix.POLLHUP},
+				{"POLLNVAL", unix.POLLNVAL},
+			} {
+				if fds[0].Revents&ev.bits != 0 {
+					t.Logf("Poll: found event %s", ev.name)
+				}
+			}
 		}
 		break
 	}
