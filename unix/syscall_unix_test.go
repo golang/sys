@@ -522,20 +522,25 @@ func TestPoll(t *testing.T) {
 			t.Errorf("Poll: wrong number of events: got %v, expected %v", n, 0)
 
 			// Identify which event(s) caused Poll to return.
-			for _, ev := range []struct {
-				name string
-				bits int16
-			}{
-				{"POLLIN", unix.POLLIN},
-				{"POLLPRI", unix.POLLPRI},
-				{"POLLOUT", unix.POLLOUT},
-				{"POLLERR", unix.POLLERR},
-				{"POLLHUP", unix.POLLHUP},
-				{"POLLNVAL", unix.POLLNVAL},
-			} {
-				if fds[0].Revents&ev.bits != 0 {
-					t.Logf("Poll: found event %s", ev.name)
-				}
+			// We can't trivially use a table here because Revents
+			// isn't the same type on all systems.
+			if fds[0].Revents&unix.POLLIN != 0 {
+				t.Log("found POLLIN event")
+			}
+			if fds[0].Revents&unix.POLLPRI != 0 {
+				t.Log("found POLLPRI event")
+			}
+			if fds[0].Revents&unix.POLLOUT != 0 {
+				t.Log("found POLLOUT event")
+			}
+			if fds[0].Revents&unix.POLLERR != 0 {
+				t.Log("found POLLERR event")
+			}
+			if fds[0].Revents&unix.POLLHUP != 0 {
+				t.Log("found POLLHUP event")
+			}
+			if fds[0].Revents&unix.POLLNVAL != 0 {
+				t.Log("found POLLNVAL event")
 			}
 		}
 		break
