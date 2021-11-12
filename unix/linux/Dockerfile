@@ -53,5 +53,5 @@ RUN apt-get update && apt-get install -y \
 
 # Let the scripts know they are in the docker environment
 ENV GOLANG_SYS_BUILD docker
-WORKDIR /build
+WORKDIR /build/unix
 ENTRYPOINT ["go", "run", "linux/mkall.go", "/git/linux", "/git/glibc"]
