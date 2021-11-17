@@ -627,6 +627,8 @@ func TestCommandLineRecomposition(t *testing.T) {
 }
 
 func TestWinVerifyTrust(t *testing.T) {
+	t.Skip("skipping fragile test; see https://golang.org/issue/49266 and https://golang.org/issue/49651")
+
 	system32, err := windows.GetSystemDirectory()
 	if err != nil {
 		t.Errorf("unable to find system32 directory: %v", err)
