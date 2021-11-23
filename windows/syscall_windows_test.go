@@ -627,16 +627,10 @@ func TestCommandLineRecomposition(t *testing.T) {
 }
 
 func TestWinVerifyTrust(t *testing.T) {
-	t.Skip("skipping fragile test; see https://golang.org/issue/49266 and https://golang.org/issue/49651")
-
-	system32, err := windows.GetSystemDirectory()
+	evsignedfile := `.\testdata\ev-signed-file.exe`
+	evsignedfile16, err := windows.UTF16PtrFromString(evsignedfile)
 	if err != nil {
-		t.Errorf("unable to find system32 directory: %v", err)
-	}
-	ntoskrnl := filepath.Join(system32, "ntoskrnl.exe")
-	ntoskrnl16, err := windows.UTF16PtrFromString(ntoskrnl)
-	if err != nil {
-		t.Fatalf("unable to get utf16 of ntoskrnl.exe: %v", err)
+		t.Fatalf("unable to get utf16 of %s: %v", evsignedfile, err)
 	}
 	data := &windows.WinTrustData{
 		Size:             uint32(unsafe.Sizeof(windows.WinTrustData{})),
@@ -646,39 +640,39 @@ func TestWinVerifyTrust(t *testing.T) {
 		StateAction:      windows.WTD_STATEACTION_VERIFY,
 		FileOrCatalogOrBlobOrSgnrOrCert: unsafe.Pointer(&windows.WinTrustFileInfo{
 			Size:     uint32(unsafe.Sizeof(windows.WinTrustFileInfo{})),
-			FilePath: ntoskrnl16,
+			FilePath: evsignedfile16,
 		}),
 	}
 	verifyErr := windows.WinVerifyTrustEx(windows.InvalidHWND, &windows.WINTRUST_ACTION_GENERIC_VERIFY_V2, data)
 	data.StateAction = windows.WTD_STATEACTION_CLOSE
 	closeErr := windows.WinVerifyTrustEx(windows.InvalidHWND, &windows.WINTRUST_ACTION_GENERIC_VERIFY_V2, data)
 	if verifyErr != nil {
-		t.Errorf("ntoskrnl.exe did not verify: %v", verifyErr)
+		t.Errorf("%s did not verify: %v", evsignedfile, verifyErr)
 	}
 	if closeErr != nil {
 		t.Errorf("unable to free verification resources: %v", closeErr)
 	}
 
-	// Now that we've verified legitimate ntoskrnl.exe verifies, let's corrupt it and see if it correctly fails.
+	// Now that we've verified the legitimate file verifies, let's corrupt it and see if it correctly fails.
 
 	dir, err := ioutil.TempDir("", "go-build")
 	if err != nil {
 		t.Fatalf("failed to create temp directory: %v", err)
 	}
 	defer os.RemoveAll(dir)
-	corruptedNtoskrnl := filepath.Join(dir, "ntoskrnl.exe")
-	ntoskrnlBytes, err := ioutil.ReadFile(ntoskrnl)
+	corruptedEvsignedfile := filepath.Join(dir, "corrupted-file")
+	evsignedfileBytes, err := ioutil.ReadFile(evsignedfile)
 	if err != nil {
-		t.Fatalf("unable to read ntoskrnl.exe bytes: %v", err)
+		t.Fatalf("unable to read %s bytes: %v", evsignedfile, err)
 	}
-	if len(ntoskrnlBytes) > 0 {
-		ntoskrnlBytes[len(ntoskrnlBytes)/2-1]++
+	if len(evsignedfileBytes) > 0 {
+		evsignedfileBytes[len(evsignedfileBytes)/2-1]++
 	}
-	err = ioutil.WriteFile(corruptedNtoskrnl, ntoskrnlBytes, 0755)
+	err = ioutil.WriteFile(corruptedEvsignedfile, evsignedfileBytes, 0755)
 	if err != nil {
 		t.Fatalf("unable to write corrupted ntoskrnl.exe bytes: %v", err)
 	}
-	ntoskrnl16, err = windows.UTF16PtrFromString(corruptedNtoskrnl)
+	evsignedfile16, err = windows.UTF16PtrFromString(corruptedEvsignedfile)
 	if err != nil {
 		t.Fatalf("unable to get utf16 of ntoskrnl.exe: %v", err)
 	}
@@ -690,14 +684,14 @@ func TestWinVerifyTrust(t *testing.T) {
 		StateAction:      windows.WTD_STATEACTION_VERIFY,
 		FileOrCatalogOrBlobOrSgnrOrCert: unsafe.Pointer(&windows.WinTrustFileInfo{
 			Size:     uint32(unsafe.Sizeof(windows.WinTrustFileInfo{})),
-			FilePath: ntoskrnl16,
+			FilePath: evsignedfile16,
 		}),
 	}
 	verifyErr = windows.WinVerifyTrustEx(windows.InvalidHWND, &windows.WINTRUST_ACTION_GENERIC_VERIFY_V2, data)
 	data.StateAction = windows.WTD_STATEACTION_CLOSE
 	closeErr = windows.WinVerifyTrustEx(windows.InvalidHWND, &windows.WINTRUST_ACTION_GENERIC_VERIFY_V2, data)
 	if verifyErr != windows.Errno(windows.TRUST_E_BAD_DIGEST) {
-		t.Errorf("ntoskrnl.exe did not fail to verify as expected: %v", verifyErr)
+		t.Errorf("%s did not fail to verify as expected: %v", corruptedEvsignedfile, verifyErr)
 	}
 	if closeErr != nil {
 		t.Errorf("unable to free verification resources: %v", closeErr)
