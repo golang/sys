@@ -5,6 +5,7 @@
 package windows_test
 
 import (
+	"bufio"
 	"bytes"
 	"debug/pe"
 	"errors"
@@ -18,6 +19,7 @@ import (
 	"strings"
 	"syscall"
 	"testing"
+	"time"
 	"unsafe"
 
 	"golang.org/x/sys/internal/unsafeheader"
@@ -1000,5 +1002,58 @@ func TestListWireGuardDrivers(t *testing.T) {
 			continue
 		}
 		t.Logf("%s - %s", drvInfoData.Description(), drvInfoDetailData.InfFileName())
+	}
+}
+
+func TestProcThreadAttributeHandleList(t *testing.T) {
+	const sentinel = "the gopher dance"
+	system32, err := windows.GetSystemDirectory()
+	if err != nil {
+		t.Fatal(err)
+	}
+	executable16, err := windows.UTF16PtrFromString(filepath.Join(system32, "cmd.exe"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	args16, err := windows.UTF16PtrFromString(windows.ComposeCommandLine([]string{"/c", "echo " + sentinel}))
+	if err != nil {
+		t.Fatal(err)
+	}
+	attributeList, err := windows.NewProcThreadAttributeList(1)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer attributeList.Delete()
+	si := &windows.StartupInfoEx{
+		StartupInfo:             windows.StartupInfo{Cb: uint32(unsafe.Sizeof(windows.StartupInfoEx{}))},
+		ProcThreadAttributeList: attributeList.List(),
+	}
+	pipeR, pipeW, err := os.Pipe()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer pipeR.Close()
+	defer pipeW.Close()
+	func() {
+		// We allocate handles in a closure to provoke a UaF in the case of attributeList.Update being buggy.
+		handles := []windows.Handle{windows.Handle(pipeW.Fd())}
+		attributeList.Update(windows.PROC_THREAD_ATTRIBUTE_HANDLE_LIST, unsafe.Pointer(&handles[0]), uintptr(len(handles))*unsafe.Sizeof(handles[0]))
+		si.Flags |= windows.STARTF_USESTDHANDLES
+		si.StdOutput = handles[0]
+	}()
+	pi := new(windows.ProcessInformation)
+	err = windows.CreateProcess(executable16, args16, nil, nil, true, windows.CREATE_DEFAULT_ERROR_MODE|windows.CREATE_UNICODE_ENVIRONMENT|windows.EXTENDED_STARTUPINFO_PRESENT, nil, nil, &si.StartupInfo, pi)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer windows.CloseHandle(pi.Thread)
+	defer windows.CloseHandle(pi.Process)
+	pipeR.SetReadDeadline(time.Now().Add(time.Minute))
+	out, _, err := bufio.NewReader(pipeR).ReadLine()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(out) != sentinel {
+		t.Fatalf("got %q; want %q", out, sentinel)
 	}
 }
