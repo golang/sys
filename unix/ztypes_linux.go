@@ -3976,3 +3976,36 @@ type MountAttr struct {
 	Propagation uint64
 	Userns_fd   uint64
 }
+
+const (
+	WG_CMD_GET_DEVICE                      = 0x0
+	WG_CMD_SET_DEVICE                      = 0x1
+	WGDEVICE_F_REPLACE_PEERS               = 0x1
+	WGDEVICE_A_UNSPEC                      = 0x0
+	WGDEVICE_A_IFINDEX                     = 0x1
+	WGDEVICE_A_IFNAME                      = 0x2
+	WGDEVICE_A_PRIVATE_KEY                 = 0x3
+	WGDEVICE_A_PUBLIC_KEY                  = 0x4
+	WGDEVICE_A_FLAGS                       = 0x5
+	WGDEVICE_A_LISTEN_PORT                 = 0x6
+	WGDEVICE_A_FWMARK                      = 0x7
+	WGDEVICE_A_PEERS                       = 0x8
+	WGPEER_F_REMOVE_ME                     = 0x1
+	WGPEER_F_REPLACE_ALLOWEDIPS            = 0x2
+	WGPEER_F_UPDATE_ONLY                   = 0x4
+	WGPEER_A_UNSPEC                        = 0x0
+	WGPEER_A_PUBLIC_KEY                    = 0x1
+	WGPEER_A_PRESHARED_KEY                 = 0x2
+	WGPEER_A_FLAGS                         = 0x3
+	WGPEER_A_ENDPOINT                      = 0x4
+	WGPEER_A_PERSISTENT_KEEPALIVE_INTERVAL = 0x5
+	WGPEER_A_LAST_HANDSHAKE_TIME           = 0x6
+	WGPEER_A_RX_BYTES                      = 0x7
+	WGPEER_A_TX_BYTES                      = 0x8
+	WGPEER_A_ALLOWEDIPS                    = 0x9
+	WGPEER_A_PROTOCOL_VERSION              = 0xa
+	WGALLOWEDIP_A_UNSPEC                   = 0x0
+	WGALLOWEDIP_A_FAMILY                   = 0x1
+	WGALLOWEDIP_A_IPADDR                   = 0x2
+	WGALLOWEDIP_A_CIDR_MASK                = 0x3
+)
