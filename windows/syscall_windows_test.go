@@ -1040,6 +1040,8 @@ func TestProcThreadAttributeHandleList(t *testing.T) {
 		attributeList.Update(windows.PROC_THREAD_ATTRIBUTE_HANDLE_LIST, unsafe.Pointer(&handles[0]), uintptr(len(handles))*unsafe.Sizeof(handles[0]))
 		si.Flags |= windows.STARTF_USESTDHANDLES
 		si.StdOutput = handles[0]
+		// Go 1.16's pipe handles aren't inheritable, so mark it explicitly as such here.
+		windows.SetHandleInformation(handles[0], windows.HANDLE_FLAG_INHERIT, windows.HANDLE_FLAG_INHERIT)
 	}()
 	pi := new(windows.ProcessInformation)
 	err = windows.CreateProcess(executable16, args16, nil, nil, true, windows.CREATE_DEFAULT_ERROR_MODE|windows.CREATE_UNICODE_ENVIRONMENT|windows.EXTENDED_STARTUPINFO_PRESENT, nil, nil, &si.StartupInfo, pi)
