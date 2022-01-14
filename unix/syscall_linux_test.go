@@ -815,16 +815,35 @@ func TestEpoll(t *testing.T) {
 }
 
 func TestPrctlRetInt(t *testing.T) {
-	err := unix.Prctl(unix.PR_SET_NO_NEW_PRIVS, 1, 0, 0, 0)
-	if err != nil {
-		t.Skipf("Prctl: %v, skipping test", err)
+	skipc := make(chan bool, 1)
+	skip := func() {
+		skipc <- true
+		runtime.Goexit()
 	}
-	v, err := unix.PrctlRetInt(unix.PR_GET_NO_NEW_PRIVS, 0, 0, 0, 0)
-	if err != nil {
-		t.Fatalf("failed to perform prctl: %v", err)
-	}
-	if v != 1 {
-		t.Fatalf("unexpected return from prctl; got %v, expected %v", v, 1)
+
+	go func() {
+		// This test uses prctl to modify the calling thread, so run it on its own
+		// throwaway thread and do not unlock it when the goroutine exits.
+		runtime.LockOSThread()
+		defer close(skipc)
+
+		err := unix.Prctl(unix.PR_SET_NO_NEW_PRIVS, 1, 0, 0, 0)
+		if err != nil {
+			t.Logf("Prctl: %v, skipping test", err)
+			skip()
+		}
+
+		v, err := unix.PrctlRetInt(unix.PR_GET_NO_NEW_PRIVS, 0, 0, 0, 0)
+		if err != nil {
+			t.Errorf("failed to perform prctl: %v", err)
+		}
+		if v != 1 {
+			t.Errorf("unexpected return from prctl; got %v, expected %v", v, 1)
+		}
+	}()
+
+	if <-skipc {
+		t.SkipNow()
 	}
 }
 
