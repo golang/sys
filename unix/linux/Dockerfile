@@ -17,13 +17,13 @@ WORKDIR /git
 RUN git config --global advice.detachedHead false
 # Linux Kernel: Released 09 Jan 2022
 RUN git clone --branch v5.16 --depth 1 https://kernel.googlesource.com/pub/scm/linux/kernel/git/torvalds/linux
-# GNU C library: Released 02 Aug 2021
-RUN git clone --branch release/2.34/master --depth 1 https://sourceware.org/git/glibc.git
+# GNU C library: Released 03 Feb 2022
+RUN git clone --branch release/2.35/master --depth 1 https://sourceware.org/git/glibc.git
 
 # Get Go
-ENV GOLANG_VERSION 1.17.3
+ENV GOLANG_VERSION 1.17.6
 ENV GOLANG_DOWNLOAD_URL https://golang.org/dl/go$GOLANG_VERSION.linux-amd64.tar.gz
-ENV GOLANG_DOWNLOAD_SHA256 550f9845451c0c94be679faf116291e7807a8d78b43149f9506c1b15eb89008c
+ENV GOLANG_DOWNLOAD_SHA256 231654bbf2dab3d86c1619ce799e77b03d96f9b50770297c8f4dff8836fc8ca2
 
 RUN curl -fsSL "$GOLANG_DOWNLOAD_URL" -o golang.tar.gz \
     && echo "$GOLANG_DOWNLOAD_SHA256  golang.tar.gz" | sha256sum -c - \
