@@ -22,6 +22,7 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
+	"go/build/constraint"
 	"io"
 	"io/ioutil"
 	"os"
@@ -510,8 +511,90 @@ func (t *target) makeZSyscallFile() error {
 	}
 
 	args := append(t.mksyscallFlags(), "-tags", "linux,"+t.GoArch,
-		"syscall_linux.go", archSyscallFile)
+		"syscall_linux.go",
+		archSyscallFile,
+	)
+
+	files, err := t.archMksyscallFiles()
+	if err != nil {
+		return fmt.Errorf("failed to check GOARCH-specific mksyscall files: %v", err)
+	}
+	args = append(args, files...)
+
 	return t.commandFormatOutput("gofmt", zsyscallFile, "mksyscall", args...)
+}
+
+// archMksyscallFiles produces additional file arguments to mksyscall if the
+// build constraints in those files match those defined for target.
+func (t *target) archMksyscallFiles() ([]string, error) {
+	// These input files don't fit the typical GOOS/GOARCH file name conventions
+	// but are included conditionally in the arguments to mksyscall based on
+	// whether or not the target matches the build constraints defined in each
+	// file.
+	//
+	// TODO(mdlayher): it should be possible to generalize this approach to work
+	// over all of syscall_linux_* rather than hard-coding a few special files.
+	// Investigate this.
+	inputs := []string{
+		// GOARCH: all except arm* and riscv.
+		"syscall_linux_alarm.go",
+	}
+
+	var outputs []string
+	for _, in := range inputs {
+		ok, err := t.matchesMksyscallFile(in)
+		if err != nil {
+			return nil, fmt.Errorf("failed to parse file %q: %v", in, err)
+		}
+		if ok {
+			// Constraints match, use for this target's code generation.
+			outputs = append(outputs, in)
+		}
+	}
+
+	return outputs, nil
+}
+
+// matchesMksyscallFile reports whether the input file contains constraints
+// which match those defined for target.
+func (t *target) matchesMksyscallFile(file string) (bool, error) {
+	f, err := os.Open(file)
+	if err != nil {
+		return false, err
+	}
+	defer f.Close()
+
+	var (
+		expr  constraint.Expr
+		found bool
+	)
+
+	s := bufio.NewScanner(f)
+	for s.Scan() {
+		// Keep scanning until a valid constraint is found or we hit EOF.
+		//
+		// This only supports single-line constraints such as the //go:build
+		// convention used in Go 1.17+. Because the old //+build convention
+		// (which may have multiple lines of build tags) is being deprecated,
+		// we don't bother looking for multi-line constraints.
+		if expr, err = constraint.Parse(s.Text()); err == nil {
+			found = true
+			break
+		}
+	}
+	if err := s.Err(); err != nil {
+		return false, err
+	}
+	if !found {
+		return false, errors.New("no build constraints found")
+	}
+
+	// Do the defined constraints match target's GOOS/GOARCH?
+	ok := expr.Eval(func(tag string) bool {
+		return tag == GOOS || tag == t.GoArch
+	})
+
+	return ok, nil
 }
 
 // makes the zerrors_linux_$GOARCH.go file
