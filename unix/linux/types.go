@@ -459,6 +459,8 @@ type Timex C.struct_timex
 
 type ItimerSpec C.struct_itimerspec
 
+type Itimerval C.struct_itimerval
+
 const (
 	TIME_OK    = C.TIME_OK
 	TIME_INS   = C.TIME_INS
