@@ -3755,6 +3755,8 @@ const (
 	ETHTOOL_A_TUNNEL_INFO_MAX                 = C.ETHTOOL_A_TUNNEL_INFO_MAX
 )
 
+const SPEED_UNKNOWN = C.SPEED_UNKNOWN
+
 type EthtoolDrvinfo C.struct_ethtool_drvinfo
 
 type (
