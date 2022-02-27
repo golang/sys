@@ -3771,6 +3771,8 @@ const (
 	ETHTOOL_A_TUNNEL_INFO_MAX                 = 0x2
 )
 
+const SPEED_UNKNOWN = -0x1
+
 type EthtoolDrvinfo struct {
 	Cmd          uint32
 	Driver       [32]byte
