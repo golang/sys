@@ -14,7 +14,7 @@
 //     $ mkmerge -out zerrors_linux.go zerrors_linux_*.go
 //
 // mkmerge performs the merge in the following steps:
-//     1. Construct the set of common code that is idential in all
+//     1. Construct the set of common code that is identical in all
 //        architecture-specific files.
 //     2. Write this common code to the merged file.
 //     3. Remove the common code from all architecture-specific files.
