@@ -215,10 +215,9 @@ func Accept(fd int) (nfd int, sa Sockaddr, err error) {
 	return
 }
 
-func Recvmsg(fd int, p, oob []byte, flags int) (n, oobn int, recvflags int, from Sockaddr, err error) {
+func recvmsgRaw(fd int, p, oob []byte, flags int, rsa *RawSockaddrAny) (n, oobn int, recvflags int, err error) {
 	// Recvmsg not implemented on AIX
-	sa := new(SockaddrUnix)
-	return -1, -1, -1, sa, ENOSYS
+	return -1, -1, -1, ENOSYS
 }
 
 func sendmsgN(fd int, p, oob []byte, ptr unsafe.Pointer, salen _Socklen, flags int) (n int, err error) {
