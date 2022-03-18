@@ -15,11 +15,13 @@ import (
 	"io/ioutil"
 	"net"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"runtime"
 	"runtime/debug"
 	"strconv"
 	"strings"
+	"syscall"
 	"testing"
 	"time"
 	"unsafe"
@@ -215,6 +217,46 @@ func firstIPv4(t *testing.T, ifi *net.Interface) (net.IP, bool) {
 	}
 
 	return nil, false
+}
+
+func TestPidfd(t *testing.T) {
+	// Start a child process which will sleep for 1 hour; longer than the 10
+	// minute default Go test timeout.
+	cmd := exec.Command("sleep", "1h")
+	if err := cmd.Start(); err != nil {
+		t.Fatalf("failed to exec sleep: %v", err)
+	}
+
+	fd, err := unix.PidfdOpen(cmd.Process.Pid, 0)
+	if err != nil {
+		// GOARCH arm/arm64 and GOOS android builders do not support pidfds.
+		if errors.Is(err, unix.ENOSYS) {
+			t.Skipf("skipping, pidfd_open is not implemented: %v", err)
+		}
+
+		t.Fatalf("failed to open child pidfd: %v", err)
+	}
+	defer unix.Close(fd)
+
+	const want = unix.SIGHUP
+	if err := unix.PidfdSendSignal(fd, want, nil, 0); err != nil {
+		t.Fatalf("failed to signal child process: %v", err)
+	}
+
+	// Now verify that the child process received the expected signal.
+	var eerr *exec.ExitError
+	if err := cmd.Wait(); !errors.As(err, &eerr) {
+		t.Fatalf("child process terminated but did not return an exit error: %v", err)
+	}
+
+	ws, ok := eerr.Sys().(syscall.WaitStatus)
+	if !ok {
+		t.Fatalf("expected syscall.WaitStatus value, but got: %#T", eerr.Sys())
+	}
+
+	if got := ws.Signal(); got != want {
+		t.Fatalf("unexpected child exit signal, got: %s, want: %s", got, want)
+	}
 }
 
 func TestPpoll(t *testing.T) {

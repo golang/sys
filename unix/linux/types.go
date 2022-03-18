@@ -934,6 +934,8 @@ const _C__NSIG = C._NSIG
 
 type SignalfdSiginfo C.struct_signalfd_siginfo
 
+type Siginfo C.siginfo_t
+
 // Terminal handling
 
 type Termios C.termios_t
