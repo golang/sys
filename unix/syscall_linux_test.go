@@ -238,6 +238,11 @@ func TestPidfd(t *testing.T) {
 	}
 	defer unix.Close(fd)
 
+	// Child is running but not terminated.
+	if err := unix.Waitid(unix.P_PIDFD, fd, nil, unix.WEXITED|unix.WNOHANG, nil); err != nil {
+		t.Fatalf("failed to check for child exit: %v", err)
+	}
+
 	const want = unix.SIGHUP
 	if err := unix.PidfdSendSignal(fd, want, nil, 0); err != nil {
 		t.Fatalf("failed to signal child process: %v", err)
@@ -247,6 +252,10 @@ func TestPidfd(t *testing.T) {
 	var eerr *exec.ExitError
 	if err := cmd.Wait(); !errors.As(err, &eerr) {
 		t.Fatalf("child process terminated but did not return an exit error: %v", err)
+	}
+
+	if err := unix.Waitid(unix.P_PIDFD, fd, nil, unix.WEXITED, nil); !errors.Is(err, unix.ECHILD) {
+		t.Fatalf("expected ECHILD for final waitid, but got: %v", err)
 	}
 
 	ws, ok := eerr.Sys().(syscall.WaitStatus)
