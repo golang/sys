@@ -240,6 +240,10 @@ func TestPidfd(t *testing.T) {
 
 	// Child is running but not terminated.
 	if err := unix.Waitid(unix.P_PIDFD, fd, nil, unix.WEXITED|unix.WNOHANG, nil); err != nil {
+		if errors.Is(err, unix.EINVAL) {
+			t.Skip("skipping due to waitid EINVAL, see https://go.dev/issues/52014")
+		}
+
 		t.Fatalf("failed to check for child exit: %v", err)
 	}
 
