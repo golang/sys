@@ -21,9 +21,9 @@ RUN git clone --branch v5.16 --depth 1 https://kernel.googlesource.com/pub/scm/l
 RUN git clone --branch release/2.35/master --depth 1 https://sourceware.org/git/glibc.git
 
 # Get Go
-ENV GOLANG_VERSION 1.18rc1
+ENV GOLANG_VERSION 1.18
 ENV GOLANG_DOWNLOAD_URL https://golang.org/dl/go$GOLANG_VERSION.linux-amd64.tar.gz
-ENV GOLANG_DOWNLOAD_SHA256 9ea4e6adee711e06fa95546e1a9629b63de3aaae85fac9dc752fb533f3e5be23
+ENV GOLANG_DOWNLOAD_SHA256 e85278e98f57cdb150fe8409e6e5df5343ecb13cebf03a5d5ff12bd55a80264f
 
 RUN curl -fsSL "$GOLANG_DOWNLOAD_URL" -o golang.tar.gz \
     && echo "$GOLANG_DOWNLOAD_SHA256  golang.tar.gz" | sha256sum -c - \
