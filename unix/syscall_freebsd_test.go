@@ -221,14 +221,14 @@ func OpenatTest() {
 		panic(fmt.Sprintf("CapRightsIsSet failed: %s %#v", err, err))
 	}
 	if !b {
-		panic(fmt.Sprintf("Unexpected rights"))
+		panic("Unexpected rights")
 	}
 	b, err = unix.CapRightsIsSet(r, []uint64{unix.CAP_READ, unix.CAP_LOOKUP, unix.CAP_WRITE})
 	if err != nil {
 		panic(fmt.Sprintf("CapRightsIsSet failed: %s %#v", err, err))
 	}
 	if b {
-		panic(fmt.Sprintf("Unexpected rights (2)"))
+		panic("Unexpected rights (2)")
 	}
 
 	// Can no longer create a file

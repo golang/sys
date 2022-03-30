@@ -410,6 +410,10 @@ const (
 		}
 
 		got, err := filter(inFiles[0].src, commonSet.keepCommon)
+		if err != nil {
+			t.Fatal(err)
+		}
+
 		expected := []byte(mergedFile)
 
 		if !bytes.Equal(got, expected) {
