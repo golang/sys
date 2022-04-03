@@ -45,7 +45,7 @@ func archInit() {
 	switch runtime.GOOS {
 	case "freebsd":
 		readARM64Registers()
-	case "linux", "netbsd", "openbsd":
+	case "darwin", "linux", "netbsd", "openbsd":
 		doinit()
 	default:
 		// Many platforms don't seem to allow reading these registers.
