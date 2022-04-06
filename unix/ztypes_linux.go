@@ -3629,7 +3629,7 @@ const (
 	ETHTOOL_A_RINGS_RX_MINI                   = 0x7
 	ETHTOOL_A_RINGS_RX_JUMBO                  = 0x8
 	ETHTOOL_A_RINGS_TX                        = 0x9
-	ETHTOOL_A_RINGS_MAX                       = 0x9
+	ETHTOOL_A_RINGS_MAX                       = 0xa
 	ETHTOOL_A_CHANNELS_UNSPEC                 = 0x0
 	ETHTOOL_A_CHANNELS_HEADER                 = 0x1
 	ETHTOOL_A_CHANNELS_RX_MAX                 = 0x2
@@ -4314,7 +4314,7 @@ const (
 	NL80211_ATTR_MAC_HINT                                   = 0xc8
 	NL80211_ATTR_MAC_MASK                                   = 0xd7
 	NL80211_ATTR_MAX_AP_ASSOC_STA                           = 0xca
-	NL80211_ATTR_MAX                                        = 0x133
+	NL80211_ATTR_MAX                                        = 0x135
 	NL80211_ATTR_MAX_CRIT_PROT_DURATION                     = 0xb4
 	NL80211_ATTR_MAX_CSA_COUNTERS                           = 0xce
 	NL80211_ATTR_MAX_MATCH_SETS                             = 0x85
@@ -4655,7 +4655,7 @@ const (
 	NL80211_CMD_LEAVE_IBSS                                  = 0x2c
 	NL80211_CMD_LEAVE_MESH                                  = 0x45
 	NL80211_CMD_LEAVE_OCB                                   = 0x6d
-	NL80211_CMD_MAX                                         = 0x92
+	NL80211_CMD_MAX                                         = 0x93
 	NL80211_CMD_MICHAEL_MIC_FAILURE                         = 0x29
 	NL80211_CMD_NAN_MATCH                                   = 0x78
 	NL80211_CMD_NEW_BEACON                                  = 0xf
