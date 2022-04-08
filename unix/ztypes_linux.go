@@ -5542,3 +5542,40 @@ const (
 	NL80211_WPA_VERSION_2                                   = 0x2
 	NL80211_WPA_VERSION_3                                   = 0x4
 )
+
+const (
+	FRA_UNSPEC             = 0x0
+	FRA_DST                = 0x1
+	FRA_SRC                = 0x2
+	FRA_IIFNAME            = 0x3
+	FRA_GOTO               = 0x4
+	FRA_UNUSED2            = 0x5
+	FRA_PRIORITY           = 0x6
+	FRA_UNUSED3            = 0x7
+	FRA_UNUSED4            = 0x8
+	FRA_UNUSED5            = 0x9
+	FRA_FWMARK             = 0xa
+	FRA_FLOW               = 0xb
+	FRA_TUN_ID             = 0xc
+	FRA_SUPPRESS_IFGROUP   = 0xd
+	FRA_SUPPRESS_PREFIXLEN = 0xe
+	FRA_TABLE              = 0xf
+	FRA_FWMASK             = 0x10
+	FRA_OIFNAME            = 0x11
+	FRA_PAD                = 0x12
+	FRA_L3MDEV             = 0x13
+	FRA_UID_RANGE          = 0x14
+	FRA_PROTOCOL           = 0x15
+	FRA_IP_PROTO           = 0x16
+	FRA_SPORT_RANGE        = 0x17
+	FRA_DPORT_RANGE        = 0x18
+	FR_ACT_UNSPEC          = 0x0
+	FR_ACT_TO_TBL          = 0x1
+	FR_ACT_GOTO            = 0x2
+	FR_ACT_NOP             = 0x3
+	FR_ACT_RES3            = 0x4
+	FR_ACT_RES4            = 0x5
+	FR_ACT_BLACKHOLE       = 0x6
+	FR_ACT_UNREACHABLE     = 0x7
+	FR_ACT_PROHIBIT        = 0x8
+)
