@@ -20,6 +20,13 @@ RUN git clone --branch v5.17 --depth 1 https://kernel.googlesource.com/pub/scm/l
 # GNU C library: Released 03 Feb 2022
 RUN git clone --branch release/2.35/master --depth 1 https://sourceware.org/git/glibc.git
 
+# Only for loong64, add kernel and glibc patch
+RUN git clone https://github.com/loongson/golang-infra.git /git/loong64-patches \
+    && git config --global user.name "golang" && git config --global user.email "golang@localhost" \
+    && cd /git/loong64-patches && git checkout linux-v5.17 && cd /git/linux && git am /git/loong64-patches/*.patch \
+    && cd /git/loong64-patches && git checkout glibc-v2.35 && cd /git/glibc && git am /git/loong64-patches/*.patch \
+    && curl -fsSL https://git.savannah.gnu.org/cgit/config.git/plain/config.sub -o /git/glibc/scripts/config.sub
+
 # Get Go
 ENV GOLANG_VERSION 1.18
 ENV GOLANG_DOWNLOAD_URL https://golang.org/dl/go$GOLANG_VERSION.linux-amd64.tar.gz
@@ -50,6 +57,24 @@ RUN apt-get update && apt-get install -y \
         gcc-s390x-linux-gnu         gcc-sparc64-linux-gnu     \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
+
+# Only for loong64, add patch and build golang
+RUN git clone https://go.googlesource.com/go --branch go1.18 /git/go \
+    && cd /git/loong64-patches && git checkout go-v1.18 && cd /git/go && git am /git/loong64-patches/*.patch \
+    && rm -rf /git/loong64-patches && cd /git/go/src && ./make.bash
+
+ENV PATH /git/go/bin:$PATH
+
+# Only for loong64, getting tools of qemu-user and gcc-cross-compiler
+RUN apt-get update && apt-get install wget xz-utils -y && mkdir /loong64 && cd /loong64 \
+    && wget -q https://github.com/loongson/build-tools/releases/download/2021.12.21/qemu-loongarch-2022-4-01.tar.gz \
+    && tar xf qemu-loongarch-2022-4-01.tar.gz && cp ./4-1/new-world/qemu-loongarch64 /usr/bin/ \
+    && rm -rf qemu-loongarch-2022-4-01.tar.gz 4-1 \
+    && wget -q https://github.com/loongson/build-tools/releases/download/2021.12.21/loongarch64-clfs-2022-03-03-cross-tools-gcc-glibc.tar.xz \
+    && tar xf loongarch64-clfs-2022-03-03-cross-tools-gcc-glibc.tar.xz && mv cross-tools.gcc_glibc /usr/local/cross-tools-loong64 \
+    && rm -rf loongarch64-clfs-2022-03-03-cross-tools-gcc-glibc.tar.xz \
+    && ln -s /usr/local/cross-tools-loong64/bin/loongarch64-unknown-linux-gnu-gcc /usr/bin/loongarch64-linux-gnu-gcc \
+    && rm -rf /loong64
 
 # Let the scripts know they are in the docker environment
 ENV GOLANG_SYS_BUILD docker

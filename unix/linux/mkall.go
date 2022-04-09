@@ -84,6 +84,12 @@ var targets = []target{
 		Bits:      32,
 	},
 	{
+		GoArch:    "loong64",
+		LinuxArch: "loongarch",
+		GNUArch:   "loongarch64-linux-gnu",
+		Bits:      64,
+	},
+	{
 		GoArch:    "mips",
 		LinuxArch: "mips",
 		GNUArch:   "mips-linux-gnu",
