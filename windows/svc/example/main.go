@@ -12,7 +12,6 @@
 // stop / start / pause / continue any service, and how to
 // write to event log. It also shows how to use debug
 // facilities available in debug package.
-//
 package main
 
 import (
