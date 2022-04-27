@@ -777,6 +777,20 @@ func TestProcessModules(t *testing.T) {
 	}
 }
 
+func TestQueryWorkingSetEx(t *testing.T) {
+	var a int
+
+	process := windows.CurrentProcess()
+	pointers := []unsafe.Pointer{unsafe.Pointer(&a)}
+	blocks, err := windows.QueryWorkingSetEx(process, pointers)
+	if err != nil {
+		t.Fatalf("%+v", err)
+	}
+	if !blocks[0].Valid {
+		t.Errorf("memory location not valid")
+	}
+}
+
 func TestReadWriteProcessMemory(t *testing.T) {
 	testBuffer := []byte{0xBA, 0xAD, 0xF0, 0x0D}
 
