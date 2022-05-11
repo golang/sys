@@ -90,6 +90,7 @@ var darwinTests = [...]darwinTest{
 	{"mlock", libc_mlock_trampoline_addr},
 	{"mlockall", libc_mlockall_trampoline_addr},
 	{"mmap", libc_mmap_trampoline_addr},
+	{"mount", libc_mount_trampoline_addr},
 	{"mprotect", libc_mprotect_trampoline_addr},
 	{"msync", libc_msync_trampoline_addr},
 	{"munlock", libc_munlock_trampoline_addr},
