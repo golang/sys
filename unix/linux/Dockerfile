@@ -58,10 +58,9 @@ RUN apt-get update && apt-get install -y \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Only for loong64, add patch and build golang
-RUN git clone https://go.googlesource.com/go --branch go1.18 /git/go \
-    && cd /git/loong64-patches && git checkout go-v1.18 && cd /git/go && git am /git/loong64-patches/*.patch \
-    && rm -rf /git/loong64-patches && cd /git/go/src && ./make.bash
+# Only for loong64, build Go from master until 1.19 is released
+RUN git clone https://go.googlesource.com/go --branch master /git/go \
+    && cd /git/go/src && ./make.bash
 
 ENV PATH /git/go/bin:$PATH
 
