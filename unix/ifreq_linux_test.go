@@ -39,17 +39,6 @@ func TestIfreqSize(t *testing.T) {
 }
 
 func TestIfreqName(t *testing.T) {
-	// Invalid ifreq (no NULL terminator), so expect empty string.
-	var name [IFNAMSIZ]byte
-	for i := range name {
-		name[i] = 0xff
-	}
-
-	bad := &Ifreq{raw: ifreq{Ifrn: name}}
-	if got := bad.Name(); got != "" {
-		t.Fatalf("expected empty ifreq name, but got: %q", got)
-	}
-
 	// Valid ifreq, expect the hard-coded testIfreq name.
 	ifr := testIfreq(t)
 	if want, got := ifreqName, ifr.Name(); want != got {
