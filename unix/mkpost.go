@@ -101,9 +101,9 @@ func main() {
 	convertUtsnameRegex := regexp.MustCompile(`((Sys|Node|Domain)name|Release|Version|Machine)(\s+)\[(\d+)\]u?int8`)
 	b = convertUtsnameRegex.ReplaceAll(b, []byte("$1$3[$4]byte"))
 
-	// Convert [n]int8 to [n]byte in Statvfs_t members to simplify
+	// Convert [n]int8 to [n]byte in Statvfs_t and Statfs_t members to simplify
 	// conversion to string.
-	convertStatvfsRegex := regexp.MustCompile(`((Fstype|Mnton|Mntfrom)name)(\s+)\[(\d+)\]int8`)
+	convertStatvfsRegex := regexp.MustCompile(`(([Ff]stype|[Mm]nton|[Mm]ntfrom)name|mntfromspec)(\s+)\[(\d+)\]int8`)
 	b = convertStatvfsRegex.ReplaceAll(b, []byte("$1$3[$4]byte"))
 
 	// Convert []int8 to []byte in device mapper ioctl interface
