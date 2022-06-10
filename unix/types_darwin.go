@@ -200,30 +200,33 @@ type IPv6MTUInfo C.struct_ip6_mtuinfo
 
 type ICMPv6Filter C.struct_icmp6_filter
 
+type TCPConnectionInfo C.struct_tcp_connection_info
+
 const (
-	SizeofSockaddrInet4    = C.sizeof_struct_sockaddr_in
-	SizeofSockaddrInet6    = C.sizeof_struct_sockaddr_in6
-	SizeofSockaddrAny      = C.sizeof_struct_sockaddr_any
-	SizeofSockaddrUnix     = C.sizeof_struct_sockaddr_un
-	SizeofSockaddrDatalink = C.sizeof_struct_sockaddr_dl
-	SizeofSockaddrCtl      = C.sizeof_struct_sockaddr_ctl
-	SizeofSockaddrVM       = C.sizeof_struct_sockaddr_vm
-	SizeofXvsockpcb        = C.sizeof_struct_xvsockpcb
-	SizeofXSocket          = C.sizeof_struct_xsocket
-	SizeofXSockbuf         = C.sizeof_struct_xsockbuf
-	SizeofXVSockPgen       = C.sizeof_struct_xvsockpgen
-	SizeofXucred           = C.sizeof_struct_xucred
-	SizeofLinger           = C.sizeof_struct_linger
-	SizeofIovec            = C.sizeof_struct_iovec
-	SizeofIPMreq           = C.sizeof_struct_ip_mreq
-	SizeofIPMreqn          = C.sizeof_struct_ip_mreqn
-	SizeofIPv6Mreq         = C.sizeof_struct_ipv6_mreq
-	SizeofMsghdr           = C.sizeof_struct_msghdr
-	SizeofCmsghdr          = C.sizeof_struct_cmsghdr
-	SizeofInet4Pktinfo     = C.sizeof_struct_in_pktinfo
-	SizeofInet6Pktinfo     = C.sizeof_struct_in6_pktinfo
-	SizeofIPv6MTUInfo      = C.sizeof_struct_ip6_mtuinfo
-	SizeofICMPv6Filter     = C.sizeof_struct_icmp6_filter
+	SizeofSockaddrInet4     = C.sizeof_struct_sockaddr_in
+	SizeofSockaddrInet6     = C.sizeof_struct_sockaddr_in6
+	SizeofSockaddrAny       = C.sizeof_struct_sockaddr_any
+	SizeofSockaddrUnix      = C.sizeof_struct_sockaddr_un
+	SizeofSockaddrDatalink  = C.sizeof_struct_sockaddr_dl
+	SizeofSockaddrCtl       = C.sizeof_struct_sockaddr_ctl
+	SizeofSockaddrVM        = C.sizeof_struct_sockaddr_vm
+	SizeofXvsockpcb         = C.sizeof_struct_xvsockpcb
+	SizeofXSocket           = C.sizeof_struct_xsocket
+	SizeofXSockbuf          = C.sizeof_struct_xsockbuf
+	SizeofXVSockPgen        = C.sizeof_struct_xvsockpgen
+	SizeofXucred            = C.sizeof_struct_xucred
+	SizeofLinger            = C.sizeof_struct_linger
+	SizeofIovec             = C.sizeof_struct_iovec
+	SizeofIPMreq            = C.sizeof_struct_ip_mreq
+	SizeofIPMreqn           = C.sizeof_struct_ip_mreqn
+	SizeofIPv6Mreq          = C.sizeof_struct_ipv6_mreq
+	SizeofMsghdr            = C.sizeof_struct_msghdr
+	SizeofCmsghdr           = C.sizeof_struct_cmsghdr
+	SizeofInet4Pktinfo      = C.sizeof_struct_in_pktinfo
+	SizeofInet6Pktinfo      = C.sizeof_struct_in6_pktinfo
+	SizeofIPv6MTUInfo       = C.sizeof_struct_ip6_mtuinfo
+	SizeofICMPv6Filter      = C.sizeof_struct_icmp6_filter
+	SizeofTCPConnectionInfo = C.sizeof_struct_tcp_connection_info
 )
 
 // Ptrace requests
