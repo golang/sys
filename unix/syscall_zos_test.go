@@ -8,7 +8,6 @@
 package unix_test
 
 import (
-	"bytes"
 	"flag"
 	"fmt"
 	"io/ioutil"
@@ -608,14 +607,6 @@ func chtmpdir(t *testing.T) func() {
 }
 
 func TestMountUnmount(t *testing.T) {
-	b2s := func(arr []byte) string {
-		nulli := bytes.IndexByte(arr, 0)
-		if nulli == -1 {
-			return string(arr)
-		} else {
-			return string(arr[:nulli])
-		}
-	}
 	// use an available fs
 	var buffer struct {
 		header unix.W_Mnth
@@ -632,7 +623,7 @@ func TestMountUnmount(t *testing.T) {
 	var mountpoint string
 	var available bool = false
 	for i := 0; i < fsCount; i++ {
-		err = unix.Unmount(b2s(buffer.fsinfo[i].Mountpoint[:]), unix.MTM_RDWR)
+		err = unix.Unmount(unix.ByteSliceToString(buffer.fsinfo[i].Mountpoint[:]), unix.MTM_RDWR)
 		if err != nil {
 			// Unmount and Mount require elevated privilege
 			// If test is run without such permission, skip test
@@ -646,9 +637,9 @@ func TestMountUnmount(t *testing.T) {
 			}
 		} else {
 			available = true
-			fs = b2s(buffer.fsinfo[i].Fsname[:])
-			fstype = b2s(buffer.fsinfo[i].Fstname[:])
-			mountpoint = b2s(buffer.fsinfo[i].Mountpoint[:])
+			fs = unix.ByteSliceToString(buffer.fsinfo[i].Fsname[:])
+			fstype = unix.ByteSliceToString(buffer.fsinfo[i].Fstname[:])
+			mountpoint = unix.ByteSliceToString(buffer.fsinfo[i].Mountpoint[:])
 			t.Logf("using file system = %s; fstype = %s and mountpoint = %s\n", fs, fstype, mountpoint)
 			break
 		}
@@ -663,7 +654,7 @@ func TestMountUnmount(t *testing.T) {
 		t.Fatalf("W_Getmntent_A returns with error: %s", err.Error())
 	}
 	for i := 0; i < fsCount; i++ {
-		if b2s(buffer.fsinfo[i].Fsname[:]) == fs {
+		if unix.ByteSliceToString(buffer.fsinfo[i].Fsname[:]) == fs {
 			t.Fatalf("File system found after unmount")
 		}
 	}
@@ -679,7 +670,8 @@ func TestMountUnmount(t *testing.T) {
 	}
 	fsMounted := false
 	for i := 0; i < fsCount; i++ {
-		if b2s(buffer.fsinfo[i].Fsname[:]) == fs && b2s(buffer.fsinfo[i].Mountpoint[:]) == mountpoint {
+		if unix.ByteSliceToString(buffer.fsinfo[i].Fsname[:]) == fs &&
+			unix.ByteSliceToString(buffer.fsinfo[i].Mountpoint[:]) == mountpoint {
 			fsMounted = true
 		}
 	}
