@@ -15,15 +15,14 @@ RUN apt-get update && apt-get install -y  --no-install-recommends \
 # Get the git sources. If not cached, this takes O(5 minutes).
 WORKDIR /git
 RUN git config --global advice.detachedHead false
-# Linux Kernel: Released 20 Mar 2022
-RUN git clone --branch v5.17 --depth 1 https://kernel.googlesource.com/pub/scm/linux/kernel/git/torvalds/linux
+# Linux Kernel: Released 12 Jun 2022
+RUN git clone --branch v5.19-rc2 --depth 1 https://kernel.googlesource.com/pub/scm/linux/kernel/git/torvalds/linux
 # GNU C library: Released 03 Feb 2022
 RUN git clone --branch release/2.35/master --depth 1 https://sourceware.org/git/glibc.git
 
 # Only for loong64, add kernel and glibc patch
 RUN git clone https://github.com/loongson/golang-infra.git /git/loong64-patches \
     && git config --global user.name "golang" && git config --global user.email "golang@localhost" \
-    && cd /git/loong64-patches && git checkout linux-v5.17 && cd /git/linux && git am /git/loong64-patches/*.patch \
     && cd /git/loong64-patches && git checkout glibc-v2.35 && cd /git/glibc && git am /git/loong64-patches/*.patch \
     && curl -fsSL https://git.savannah.gnu.org/cgit/config.git/plain/config.sub -o /git/glibc/scripts/config.sub
 
