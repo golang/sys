@@ -16,8 +16,10 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"reflect"
 	"runtime"
 	"strconv"
+	"sync"
 	"syscall"
 	"testing"
 	"time"
@@ -951,6 +953,68 @@ func TestSend(t *testing.T) {
 		}
 	case <-time.After(2 * time.Second):
 		t.Fatal("Send: nothing received after 2 seconds")
+	}
+}
+
+func TestSendmsgBuffers(t *testing.T) {
+	if runtime.GOOS == "aix" {
+		t.Skipf("SendmsgBuffers not supported on %s", runtime.GOOS)
+	}
+
+	fds, err := unix.Socketpair(unix.AF_LOCAL, unix.SOCK_STREAM, 0)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer unix.Close(fds[0])
+	defer unix.Close(fds[1])
+
+	var wg sync.WaitGroup
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		bufs := [][]byte{
+			make([]byte, 5),
+			nil,
+			make([]byte, 5),
+		}
+		n, oobn, recvflags, _, err := unix.RecvmsgBuffers(fds[1], bufs, nil, 0)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if n != 10 {
+			t.Errorf("got %d bytes, want 10", n)
+		}
+		if oobn != 0 {
+			t.Errorf("got %d OOB bytes, want 0", oobn)
+		}
+		if recvflags != 0 {
+			t.Errorf("got flags %#x, want %#x", recvflags, 0)
+		}
+		want := [][]byte{
+			[]byte("01234"),
+			nil,
+			[]byte("56789"),
+		}
+		if !reflect.DeepEqual(bufs, want) {
+			t.Errorf("got data %q, want %q", bufs, want)
+		}
+	}()
+
+	defer wg.Wait()
+
+	bufs := [][]byte{
+		[]byte("012"),
+		[]byte("34"),
+		nil,
+		[]byte("5678"),
+		[]byte("9"),
+	}
+	n, err := unix.SendmsgBuffers(fds[0], bufs, nil, nil, 0)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if n != 10 {
+		t.Errorf("sent %d bytes, want 10", n)
 	}
 }
 
