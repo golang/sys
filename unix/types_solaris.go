@@ -74,6 +74,12 @@ struct sockaddr_any {
 	char pad[sizeof(union sockaddr_all) - sizeof(struct sockaddr)];
 };
 
+// go_iovec is used to get *byte as the base address for Iovec.
+struct goIovec {
+	void*  iov_base;
+	size_t iov_len;
+};
+
 */
 import "C"
 
@@ -150,7 +156,7 @@ type _Socklen C.socklen_t
 
 type Linger C.struct_linger
 
-type Iovec C.struct_iovec
+type Iovec C.struct_goIovec
 
 type IPMreq C.struct_ip_mreq
 
