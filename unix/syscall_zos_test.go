@@ -861,3 +861,55 @@ func TestSelect(t *testing.T) {
 		break
 	}
 }
+
+func TestReadDirent(t *testing.T) {
+	// Create temporary directory and files
+	tempDir, err := ioutil.TempDir("", "TestReadDirent")
+	if err != nil {
+		t.Fatalf("TempDir: %v", err)
+	}
+	defer os.RemoveAll(tempDir)
+	_, err = ioutil.TempFile(tempDir, "ReadDirent_test_file")
+	if err != nil {
+		t.Fatalf("TempFile: %v", err)
+	}
+	_, err = ioutil.TempFile(tempDir, "ReadDirent_test_file")
+	if err != nil {
+		t.Fatalf("TempFile: %v", err)
+	}
+
+	tempSubDir, err := ioutil.TempDir(tempDir, "ReadDirent_SubDir")
+	if err != nil {
+		t.Fatalf("TempDir: %v", err)
+	}
+	_, err = ioutil.TempFile(tempSubDir, "ReadDirent_subDir_test_file")
+	if err != nil {
+		t.Fatalf("TempFile: %v", err)
+	}
+
+	// Get fd of tempDir
+	dir, err := os.Open(tempDir)
+	if err != nil {
+		t.Fatalf("Open: %v", err)
+	}
+	fd := int(dir.Fd())
+
+	// Run Getdirentries
+	buf := make([]byte, 2048)
+	n, err := unix.ReadDirent(fd, buf)
+	if err != nil {
+		t.Fatalf("ReadDirent: %v", err)
+	}
+	if n == 0 {
+		t.Fatalf("ReadDirent: 0 bytes read")
+	}
+
+	names := make([]string, 0)
+	consumed, count, _ := unix.ParseDirent(buf, 100, names)
+	if consumed == 0 {
+		t.Fatalf("ParseDirent: consumed 0 bytes")
+	}
+	if count != 3 {
+		t.Fatalf("ParseDirent: only recorded %d entries, expected 3", count)
+	}
+}

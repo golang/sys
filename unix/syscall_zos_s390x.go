@@ -9,11 +9,14 @@ package unix
 
 import (
 	"bytes"
+	"fmt"
 	"runtime"
 	"sort"
 	"sync"
 	"syscall"
 	"unsafe"
+
+	"golang.org/x/sys/internal/unsafeheader"
 )
 
 const (
@@ -1820,4 +1823,132 @@ func Unmount(name string, mtm int) (err error) {
 		}
 	}
 	return err
+}
+
+func fdToPath(dirfd int) (path string, err error) {
+	var buffer [1024]byte
+	// w_ctrl()
+	ret := runtime.CallLeFuncByPtr(runtime.XplinkLibvec+0x1a2<<4,
+		[]uintptr{uintptr(dirfd), 17, 1024, uintptr(unsafe.Pointer(&buffer[0]))})
+	if ret == 0 {
+		zb := bytes.IndexByte(buffer[:], 0)
+		if zb == -1 {
+			zb = len(buffer)
+		}
+		// __e2a_l()
+		runtime.CallLeFuncByPtr(runtime.XplinkLibvec+0x6e3<<4,
+			[]uintptr{uintptr(unsafe.Pointer(&buffer[0])), uintptr(zb)})
+		return string(buffer[:zb]), nil
+	}
+	// __errno()
+	errno := int(*(*int32)(unsafe.Pointer(runtime.CallLeFuncByPtr(runtime.XplinkLibvec+0x156<<4,
+		[]uintptr{}))))
+	// __errno2()
+	errno2 := int(runtime.CallLeFuncByPtr(runtime.XplinkLibvec+0x157<<4,
+		[]uintptr{}))
+	// strerror_r()
+	ret = runtime.CallLeFuncByPtr(runtime.XplinkLibvec+0xb35<<4,
+		[]uintptr{uintptr(errno), uintptr(unsafe.Pointer(&buffer[0])), 1024})
+	if ret == 0 {
+		zb := bytes.IndexByte(buffer[:], 0)
+		if zb == -1 {
+			zb = len(buffer)
+		}
+		return "", fmt.Errorf("%s (errno2=0x%x)", buffer[:zb], errno2)
+	} else {
+		return "", fmt.Errorf("fdToPath errno %d (errno2=0x%x)", errno, errno2)
+	}
+}
+
+func Readdir_r(dir uintptr) (*Dirent, error) {
+	var ent Dirent
+	var res uintptr
+	// __readdir_r_a returns errno at the end of the directory stream, rather than 0.
+	// Therefore to avoid false positives we clear errno before calling it.
+
+	// TODO(neeilan): Commented this out to get sys/unix compiling on z/OS. Uncomment and fix. Error: "undefined: clearsyscall"
+	//clearsyscall.Errno() // TODO(mundaym): check pre-emption rules.
+
+	e, _, _ := syscall_syscall(SYS___READDIR_R_A, dir, uintptr(unsafe.Pointer(&ent)), uintptr(unsafe.Pointer(&res)))
+	var err error
+	if e != 0 {
+		err = errnoErr(Errno(e))
+	}
+	if res == 0 {
+		return nil, err
+	}
+	return &ent, err
+}
+
+func Getdirentries(fd int, buf []byte, basep *uintptr) (n int, err error) {
+	// Simulation of Getdirentries port from the Darwin implementation.
+	// COMMENTS FROM DARWIN:
+	// It's not the full required semantics, but should handle the case
+	// of calling Getdirentries or ReadDirent repeatedly.
+	// It won't handle assigning the results of lseek to *basep, or handle
+	// the directory being edited underfoot.
+
+	// Get path from fd to avoid unavailable call (fdopendir)
+	path, err := fdToPath(fd)
+	if err != nil {
+		return 0, err
+	}
+	d, err := Opendir(path)
+	if err != nil {
+		return 0, err
+	}
+	defer Closedir(d)
+
+	for {
+		entry, err := Readdir_r(d)
+		if err != nil {
+			return n, err
+		}
+		if entry == nil {
+			break
+		}
+
+		reclen := int(entry.Reclen)
+		if reclen > len(buf) {
+			// Not enough room. Return for now.
+			// The counter will let us know where we should start up again.
+			// Note: this strategy for suspending in the middle and
+			// restarting is O(n^2) in the length of the directory. Oh well.
+			break
+		}
+
+		// Copy entry into return buffer.
+		var s []byte
+		hdr := (*unsafeheader.Slice)(unsafe.Pointer(&s))
+		hdr.Data = unsafe.Pointer(entry)
+		hdr.Cap = reclen
+		hdr.Len = reclen
+		copy(buf, s)
+
+		buf = buf[reclen:]
+		n += reclen
+	}
+
+	return n, nil
+}
+
+func ReadDirent(fd int, buf []byte) (n int, err error) {
+	var base = (*uintptr)(unsafe.Pointer(new(uint64)))
+	return Getdirentries(fd, buf, base)
+}
+
+func direntIno(buf []byte) (uint64, bool) {
+	return readInt(buf, unsafe.Offsetof(Dirent{}.Ino), unsafe.Sizeof(Dirent{}.Ino))
+}
+
+func direntReclen(buf []byte) (uint64, bool) {
+	return readInt(buf, unsafe.Offsetof(Dirent{}.Reclen), unsafe.Sizeof(Dirent{}.Reclen))
+}
+
+func direntNamlen(buf []byte) (uint64, bool) {
+	reclen, ok := direntReclen(buf)
+	if !ok {
+		return 0, false
+	}
+	return reclen - uint64(unsafe.Offsetof(Dirent{}.Name)), true
 }
