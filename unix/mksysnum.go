@@ -144,9 +144,17 @@ func main() {
 				text += format(name, num, proto)
 			}
 		case "freebsd":
-			if t.Match(`^([0-9]+)\s+\S+\s+(?:(?:NO)?STD|COMPAT10)\s+({ \S+\s+(\w+).*)$`) {
+			if t.Match(`^([0-9]+)\s+\S+\s+(?:(?:NO)?STD)\s+({ \S+\s+(\w+).*)$`) {
 				num, proto := t.sub[1], t.sub[2]
 				name := fmt.Sprintf("SYS_%s", t.sub[3])
+				// remove whitespace around parens
+				proto = regexp.MustCompile(`\( `).ReplaceAllString(proto, "(")
+				proto = regexp.MustCompile(` \)`).ReplaceAllString(proto, ")")
+				// remove SAL 2.0 annotations
+				proto = regexp.MustCompile(`_In[^ ]*[_)] `).ReplaceAllString(proto, "")
+				proto = regexp.MustCompile(`_Out[^ ]*[_)] `).ReplaceAllString(proto, "")
+				// remove double spaces at the source
+				proto = regexp.MustCompile(`\s{2}`).ReplaceAllString(proto, " ")
 				text += format(name, num, proto)
 			}
 		case "openbsd":

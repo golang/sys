@@ -15,11 +15,6 @@ Input to cgo -godefs.  See README.md
 package unix
 
 /*
-#define	_WANT_FREEBSD11_STAT	1
-#define	_WANT_FREEBSD11_STATFS	1
-#define	_WANT_FREEBSD11_DIRENT	1
-#define	_WANT_FREEBSD11_KEVENT  1
-
 #include <dirent.h>
 #include <fcntl.h>
 #include <poll.h>
@@ -160,17 +155,11 @@ const (
 
 type Stat_t C.struct_stat
 
-type stat_freebsd11_t C.struct_freebsd11_stat
-
 type Statfs_t C.struct_statfs
-
-type statfs_freebsd11_t C.struct_freebsd11_statfs
 
 type Flock_t C.struct_flock
 
 type Dirent C.struct_dirent
-
-type dirent_freebsd11 C.struct_freebsd11_dirent
 
 type Fsid C.struct_fsid
 
@@ -249,43 +238,10 @@ const (
 )
 
 // Ptrace requests
-
 const (
-	PTRACE_ATTACH     = C.PT_ATTACH
-	PTRACE_CONT       = C.PT_CONTINUE
-	PTRACE_DETACH     = C.PT_DETACH
-	PTRACE_GETFPREGS  = C.PT_GETFPREGS
-	PTRACE_GETFSBASE  = C.PT_GETFSBASE
-	PTRACE_GETLWPLIST = C.PT_GETLWPLIST
-	PTRACE_GETNUMLWPS = C.PT_GETNUMLWPS
-	PTRACE_GETREGS    = C.PT_GETREGS
-	PTRACE_GETXSTATE  = C.PT_GETXSTATE
-	PTRACE_IO         = C.PT_IO
-	PTRACE_KILL       = C.PT_KILL
-	PTRACE_LWPEVENTS  = C.PT_LWP_EVENTS
-	PTRACE_LWPINFO    = C.PT_LWPINFO
-	PTRACE_SETFPREGS  = C.PT_SETFPREGS
-	PTRACE_SETREGS    = C.PT_SETREGS
-	PTRACE_SINGLESTEP = C.PT_STEP
-	PTRACE_TRACEME    = C.PT_TRACE_ME
-)
-
-const (
-	PIOD_READ_D  = C.PIOD_READ_D
-	PIOD_WRITE_D = C.PIOD_WRITE_D
-	PIOD_READ_I  = C.PIOD_READ_I
-	PIOD_WRITE_I = C.PIOD_WRITE_I
-)
-
-const (
-	PL_FLAG_BORN   = C.PL_FLAG_BORN
-	PL_FLAG_EXITED = C.PL_FLAG_EXITED
-	PL_FLAG_SI     = C.PL_FLAG_SI
-)
-
-const (
-	TRAP_BRKPT = C.TRAP_BRKPT
-	TRAP_TRACE = C.TRAP_TRACE
+	PTRACE_TRACEME = C.PT_TRACE_ME
+	PTRACE_CONT    = C.PT_CONTINUE
+	PTRACE_KILL    = C.PT_KILL
 )
 
 type PtraceLwpInfoStruct C.struct_ptrace_lwpinfo
@@ -298,11 +254,14 @@ type Reg C.struct_reg
 
 type FpReg C.struct_fpreg
 
+// FpExtendedPrecision is only defined for use in a member of FpReg on freebsd/arm.
+type FpExtendedPrecision C.struct_fp_extended_precision
+
 type PtraceIoDesc C.struct_ptrace_io_desc
 
 // Events (kqueue, kevent)
 
-type Kevent_t C.struct_kevent_freebsd11
+type Kevent_t C.struct_kevent
 
 // Select
 
