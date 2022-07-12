@@ -1709,9 +1709,25 @@ func (b PSAPI_WORKING_SET_EX_BLOCK) Valid() bool {
 	return (b & 1) == 1
 }
 
+// The number of processes that share this page. The maximum value of this member is 7.
+func (b PSAPI_WORKING_SET_EX_BLOCK) ShareCount() int {
+	return b.intField(1, 3)
+}
+
+// The memory protection attributes of the page. For a list of values, see
+// https://docs.microsoft.com/en-us/windows/win32/memory/memory-protection-constants
+func (b PSAPI_WORKING_SET_EX_BLOCK) Win32Protection() int {
+	return b.intField(4, 11)
+}
+
 // If this bit is 1, the page can be shared.
 func (b PSAPI_WORKING_SET_EX_BLOCK) Shared() bool {
 	return (b & (1 << 15)) == 1
+}
+
+// The NUMA node. The maximum value of this member is 63.
+func (b PSAPI_WORKING_SET_EX_BLOCK) Node() int {
+	return b.intField(16, 6)
 }
 
 // If this bit is 1, the virtual page is locked in physical memory.
@@ -1727,6 +1743,17 @@ func (b PSAPI_WORKING_SET_EX_BLOCK) LargePage() bool {
 // If this bit is 1, the page is has been reported as bad.
 func (b PSAPI_WORKING_SET_EX_BLOCK) Bad() bool {
 	return (b & (1 << 31)) == 1
+}
+
+// intField extracts an integer field in the PSAPI_WORKING_SET_EX_BLOCK union.
+func (b PSAPI_WORKING_SET_EX_BLOCK) intField(start, length int) int {
+	var mask PSAPI_WORKING_SET_EX_BLOCK
+	for pos := start; pos < start+length; pos++ {
+		mask |= (1 << pos)
+	}
+
+	masked := b & mask
+	return int(masked >> start)
 }
 
 // PSAPI_WORKING_SET_EX_INFORMATION contains extended working set information for a process.
