@@ -781,12 +781,17 @@ func TestQueryWorkingSetEx(t *testing.T) {
 	var a int
 
 	process := windows.CurrentProcess()
-	pointers := []unsafe.Pointer{unsafe.Pointer(&a)}
-	blocks, err := windows.QueryWorkingSetEx(process, pointers)
-	if err != nil {
+	information := windows.PSAPI_WORKING_SET_EX_INFORMATION{
+		VirtualAddress: windows.Pointer(unsafe.Pointer(&a)),
+	}
+	infos := []windows.PSAPI_WORKING_SET_EX_INFORMATION{information}
+
+	cb := uint32(uintptr(len(infos)) * unsafe.Sizeof(infos[0]))
+	if err := windows.QueryWorkingSetEx(process, uintptr(unsafe.Pointer(&infos[0])), cb); err != nil {
 		t.Fatalf("%+v", err)
 	}
-	if !blocks[0].Valid {
+
+	if !infos[0].VirtualAttributes.Valid() {
 		t.Errorf("memory location not valid")
 	}
 }

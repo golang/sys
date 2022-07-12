@@ -6,60 +6,6 @@
 
 package windows
 
-/*
-#include <stdbool.h>
-#include <windows.h>
-
-typedef union _PSAPI_WORKING_SET_EX_BLOCK {
-  ULONG_PTR Flags;
-  union {
-    struct {
-      ULONG_PTR Valid : 1;
-      ULONG_PTR ShareCount : 3;
-      ULONG_PTR Win32Protection : 11;
-      ULONG_PTR Shared : 1;
-      ULONG_PTR Node : 6;
-      ULONG_PTR Locked : 1;
-      ULONG_PTR LargePage : 1;
-      ULONG_PTR Reserved : 7;
-      ULONG_PTR Bad : 1;
-      ULONG_PTR ReservedUlong : 32;
-    };
-    struct {
-      ULONG_PTR Valid : 1;
-      ULONG_PTR Reserved0 : 14;
-      ULONG_PTR Shared : 1;
-      ULONG_PTR Reserved1 : 15;
-      ULONG_PTR Bad : 1;
-      ULONG_PTR ReservedUlong : 32;
-    } Invalid;
-  };
-} PSAPI_WORKING_SET_EX_BLOCK, *PPSAPI_WORKING_SET_EX_BLOCK;
-
-typedef struct {
-        bool Valid;
-        int ShareCount;
-        int Win32Protection;
-        bool Shared;
-        int Node;
-        bool Locked;
-        bool LargePage;
-        bool Bad;
-} PSAPIWorkingSetExBlock;
-
-void PSAPIWorkingSetExBlockUnion(PSAPI_WORKING_SET_EX_BLOCK b, PSAPIWorkingSetExBlock* cBlock) {
-        cBlock->Valid = b.Valid;
-        cBlock->ShareCount = b.ShareCount;
-        cBlock->Win32Protection = b.Win32Protection;
-        cBlock->Shared = b.Shared;
-        cBlock->Node = b.Node;
-        cBlock->Locked = b.Locked;
-        cBlock->LargePage = b.LargePage;
-        cBlock->Bad = b.Bad;
-}
-*/
-import "C"
-
 import (
 	errorspkg "errors"
 	"fmt"
@@ -471,7 +417,7 @@ func NewCallbackCDecl(fn interface{}) uintptr {
 //sys	GetModuleInformation(process Handle, module Handle, modinfo *ModuleInfo, cb uint32) (err error) = psapi.GetModuleInformation
 //sys	GetModuleFileNameEx(process Handle, module Handle, filename *uint16, size uint32) (err error) = psapi.GetModuleFileNameExW
 //sys	GetModuleBaseName(process Handle, module Handle, baseName *uint16, size uint32) (err error) = psapi.GetModuleBaseNameW
-//sys   queryWorkingSetEx(process Handle, pv *psapiWorkingSetExInformation, cb uintptr) (err error) = psapi.QueryWorkingSetEx
+//sys   QueryWorkingSetEx(process Handle, pv uintptr, cb uint32) (err error) = psapi.QueryWorkingSetEx
 
 // NT Native APIs
 //sys	rtlNtStatusToDosErrorNoTeb(ntstatus NTStatus) (ret syscall.Errno) = ntdll.RtlNtStatusToDosErrorNoTeb
@@ -1755,58 +1701,38 @@ func LoadResourceData(module, resInfo Handle) (data []byte, err error) {
 	return
 }
 
-type PSAPIWorkingSetExBlock struct {
-	Valid           bool
-	ShareCount      int
-	Win32Protection int
-	Shared          bool
-	Node            int
-	Locked          bool
-	LargePage       bool
-	Bad             bool
-	Raw             []byte
+// PSAPI_WORKING_SET_EX_BLOCK contains extended working set information for a page.
+type PSAPI_WORKING_SET_EX_BLOCK uint64
+
+// If this bit is 1, the subsequent members are valid; otherwise they should be ignored.
+func (b PSAPI_WORKING_SET_EX_BLOCK) Valid() bool {
+	return (b & 1) == 1
 }
 
-// typedef struct _PSAPI_WORKING_SET_EX_INFORMATION {
-//   PVOID                      VirtualAddress;
-//   PSAPI_WORKING_SET_EX_BLOCK VirtualAttributes;
-// } PSAPI_WORKING_SET_EX_INFORMATION, *PPSAPI_WORKING_SET_EX_INFORMATION;
-type psapiWorkingSetExInformation struct {
-	VirtualAddress    Pointer
-	VirtualAttributes C.PSAPI_WORKING_SET_EX_BLOCK
+// If this bit is 1, the page can be shared.
+func (b PSAPI_WORKING_SET_EX_BLOCK) Shared() bool {
+	return (b & (1 << 15)) == 1
 }
 
-func QueryWorkingSetEx(hProcess Handle, ptrs []unsafe.Pointer) ([]PSAPIWorkingSetExBlock, error) {
-	if len(ptrs) == 0 {
-		return nil, nil
-	}
-	infos := make([]psapiWorkingSetExInformation, len(ptrs))
-	for i, ptr := range ptrs {
-		infos[i].VirtualAddress = Pointer(ptr)
-	}
-	if err := queryWorkingSetEx(hProcess, &infos[0], uintptr(len(infos))*unsafe.Sizeof(infos[0])); err != nil {
-		return nil, err
-	}
+// If this bit is 1, the virtual page is locked in physical memory.
+func (b PSAPI_WORKING_SET_EX_BLOCK) Locked() bool {
+	return (b & (1 << 22)) == 1
+}
 
-	blocks := make([]PSAPIWorkingSetExBlock, 0, len(infos))
-	for _, info := range infos {
-		var cBlock C.PSAPIWorkingSetExBlock
-		C.PSAPIWorkingSetExBlockUnion(info.VirtualAttributes, &cBlock)
+// If this bit is 1, the page is a large page.
+func (b PSAPI_WORKING_SET_EX_BLOCK) LargePage() bool {
+	return (b & (1 << 23)) == 1
+}
 
-		var block PSAPIWorkingSetExBlock
-		block.Valid = bool(cBlock.Valid)
-		block.ShareCount = int(cBlock.ShareCount)
-		block.Win32Protection = int(cBlock.Win32Protection)
-		block.Shared = bool(cBlock.Shared)
-		block.Node = int(cBlock.Node)
-		block.Locked = bool(cBlock.Locked)
-		block.LargePage = bool(cBlock.LargePage)
-		block.Bad = bool(cBlock.Bad)
-		block.Raw = make([]byte, len(info.VirtualAttributes))
-		copy(block.Raw, info.VirtualAttributes[:])
+// If this bit is 1, the page is has been reported as bad.
+func (b PSAPI_WORKING_SET_EX_BLOCK) Bad() bool {
+	return (b & (1 << 31)) == 1
+}
 
-		blocks = append(blocks, block)
-	}
-
-	return blocks, nil
+// PSAPI_WORKING_SET_EX_INFORMATION contains extended working set information for a process.
+type PSAPI_WORKING_SET_EX_INFORMATION struct {
+	// The virtual address.
+	VirtualAddress Pointer
+	// A PSAPI_WORKING_SET_EX_BLOCK union that indicates the attributes of the page at VirtualAddress.
+	VirtualAttributes PSAPI_WORKING_SET_EX_BLOCK
 }

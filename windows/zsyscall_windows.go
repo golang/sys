@@ -3496,8 +3496,8 @@ func GetModuleInformation(process Handle, module Handle, modinfo *ModuleInfo, cb
 	return
 }
 
-func queryWorkingSetEx(process Handle, pv *psapiWorkingSetExInformation, cb uintptr) (err error) {
-	r1, _, e1 := syscall.Syscall(procQueryWorkingSetEx.Addr(), 3, uintptr(process), uintptr(unsafe.Pointer(pv)), uintptr(cb))
+func QueryWorkingSetEx(process Handle, pv uintptr, cb uint32) (err error) {
+	r1, _, e1 := syscall.Syscall(procQueryWorkingSetEx.Addr(), 3, uintptr(process), uintptr(pv), uintptr(cb))
 	if r1 == 0 {
 		err = errnoErr(e1)
 	}
