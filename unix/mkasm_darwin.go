@@ -6,7 +6,7 @@
 // +build ignore
 
 // mkasm_darwin.go generates assembly trampolines to call libSystem routines from Go.
-//This program must be run after mksyscall.go.
+// This program must be run after mksyscall.go.
 package main
 
 import (
