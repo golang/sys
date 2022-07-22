@@ -30,6 +30,7 @@ import (
 	"path/filepath"
 	"runtime"
 	"strings"
+	"sync"
 	"unicode"
 )
 
@@ -38,8 +39,6 @@ var LinuxDir string
 var GlibcDir string
 
 const TempDir = "/tmp"
-const IncludeDir = TempDir + "/include" // To hold our C headers
-const BuildDir = TempDir + "/build"     // To hold intermediate build files
 
 const GOOS = "linux"       // Only for Linux targets
 const BuildArch = "amd64"  // Must be built on this architecture
@@ -52,6 +51,9 @@ type target struct {
 	BigEndian  bool   // Default Little Endian
 	SignedChar bool   // Is -fsigned-char needed (default no)
 	Bits       int
+	env        []string
+	stderrBuf  bytes.Buffer
+	compiler   string
 }
 
 // List of all Linux targets supported by the go compiler. Currently, sparc64 is
@@ -193,14 +195,38 @@ func main() {
 	LinuxDir = os.Args[1]
 	GlibcDir = os.Args[2]
 
+	wg := sync.WaitGroup{}
 	for _, t := range targets {
-		fmt.Printf("----- GENERATING: %s -----\n", t.GoArch)
-		if err := t.generateFiles(); err != nil {
-			fmt.Printf("%v\n***** FAILURE:    %s *****\n\n", err, t.GoArch)
-		} else {
-			fmt.Printf("----- SUCCESS:    %s -----\n\n", t.GoArch)
+		fmt.Printf("arch %s: GENERATING\n", t.GoArch)
+		if err := t.setupEnvironment(); err != nil {
+			fmt.Printf("arch %s: could not setup environment: %v\n", t.GoArch, err)
+			break
 		}
+		includeDir := filepath.Join(TempDir, t.GoArch, "include")
+		// Make the include directory and fill it with headers
+		if err := os.MkdirAll(includeDir, os.ModePerm); err != nil {
+			fmt.Printf("arch %s: could not make directory: %v\n", t.GoArch, err)
+			break
+		}
+		// During header generation "/git/linux/scripts/basic/fixdep" is created by "basic/Makefile" for each
+		// instance of "make headers_install". This leads to a "text file is busy" error from any running
+		// "make headers_install" after the first one's target. Workaround is to serialize header generation
+		if err := t.makeHeaders(); err != nil {
+			fmt.Printf("arch %s: could not make header files: %v\n", t.GoArch, err)
+			break
+		}
+		wg.Add(1)
+		go func(t target) {
+			defer wg.Done()
+			fmt.Printf("arch %s: header files generated\n", t.GoArch)
+			if err := t.generateFiles(); err != nil {
+				fmt.Printf("%v\n***** FAILURE:    %s *****\n\n", err, t.GoArch)
+			} else {
+				fmt.Printf("arch %s: SUCCESS\n", t.GoArch)
+			}
+		}(t)
 	}
+	wg.Wait()
 
 	fmt.Printf("----- GENERATING: merging generated files -----\n")
 	if err := mergeFiles(); err != nil {
@@ -227,17 +253,29 @@ func main() {
 	}
 }
 
-// Makes an exec.Cmd with Stderr attached to os.Stderr
-func makeCommand(name string, args ...string) *exec.Cmd {
+func (t *target) printAndResetBuilder() {
+	if t.stderrBuf.Len() > 0 {
+		for _, l := range bytes.Split(t.stderrBuf.Bytes(), []byte{'\n'}) {
+			fmt.Printf("arch %s: stderr: %s\n", t.GoArch, l)
+		}
+		t.stderrBuf.Reset()
+	}
+}
+
+// Makes an exec.Cmd with Stderr attached to the target string Builder, and target environment
+func (t *target) makeCommand(name string, args ...string) *exec.Cmd {
 	cmd := exec.Command(name, args...)
-	cmd.Stderr = os.Stderr
+	cmd.Env = t.env
+	cmd.Stderr = &t.stderrBuf
 	return cmd
 }
 
 // Set GOARCH for target and build environments.
 func (t *target) setTargetBuildArch(cmd *exec.Cmd) {
 	// Set GOARCH_TARGET so command knows what GOARCH is..
-	cmd.Env = append(os.Environ(), "GOARCH_TARGET="+t.GoArch)
+	var env []string
+	env = append(env, t.env...)
+	cmd.Env = append(env, "GOARCH_TARGET="+t.GoArch)
 	// Set GOARCH to host arch for command, so it can run natively.
 	for i, s := range cmd.Env {
 		if strings.HasPrefix(s, "GOARCH=") {
@@ -249,22 +287,30 @@ func (t *target) setTargetBuildArch(cmd *exec.Cmd) {
 // Runs the command, pipes output to a formatter, pipes that to an output file.
 func (t *target) commandFormatOutput(formatter string, outputFile string,
 	name string, args ...string) (err error) {
-	mainCmd := makeCommand(name, args...)
+	mainCmd := t.makeCommand(name, args...)
 	if name == "mksyscall" {
 		args = append([]string{"run", "mksyscall.go"}, args...)
-		mainCmd = makeCommand("go", args...)
+		mainCmd = t.makeCommand("go", args...)
 		t.setTargetBuildArch(mainCmd)
 	} else if name == "mksysnum" {
 		args = append([]string{"run", "linux/mksysnum.go"}, args...)
-		mainCmd = makeCommand("go", args...)
+		mainCmd = t.makeCommand("go", args...)
 		t.setTargetBuildArch(mainCmd)
 	}
 
-	fmtCmd := makeCommand(formatter)
+	fmtCmd := t.makeCommand(formatter)
 	if formatter == "mkpost" {
-		fmtCmd = makeCommand("go", "run", "mkpost.go")
+		fmtCmd = t.makeCommand("go", "run", "mkpost.go")
 		t.setTargetBuildArch(fmtCmd)
+	} else if formatter == "gofmt2" {
+		fmtCmd = t.makeCommand("gofmt")
+		mainCmd.Dir = filepath.Join(TempDir, t.GoArch, "mkerrors")
+		if err = os.MkdirAll(mainCmd.Dir, os.ModePerm); err != nil {
+			return err
+		}
 	}
+
+	defer t.printAndResetBuilder()
 
 	// mainCmd | fmtCmd > outputFile
 	if fmtCmd.Stdin, err = mainCmd.StdoutPipe(); err != nil {
@@ -288,20 +334,19 @@ func (t *target) commandFormatOutput(formatter string, outputFile string,
 	return mainCmd.Run()
 }
 
-// Generates all the files for a Linux target
-func (t *target) generateFiles() error {
+func (t *target) setupEnvironment() error {
 	// Setup environment variables
-	os.Setenv("GOOS", GOOS)
-	os.Setenv("GOARCH", t.GoArch)
+	t.env = append(os.Environ(), fmt.Sprintf("%s=%s", "GOOS", GOOS))
+	t.env = append(t.env, fmt.Sprintf("%s=%s", "GOARCH", t.GoArch))
 
 	// Get appropriate compiler and emulator (unless on x86)
 	if t.LinuxArch != "x86" {
 		// Check/Setup cross compiler
-		compiler := t.GNUArch + "-gcc"
-		if _, err := exec.LookPath(compiler); err != nil {
+		t.compiler = t.GNUArch + "-gcc"
+		if _, err := exec.LookPath(t.compiler); err != nil {
 			return err
 		}
-		os.Setenv("CC", compiler)
+		t.env = append(t.env, fmt.Sprintf("%s=%s", "CC", t.compiler))
 
 		// Check/Setup emulator (usually first component of GNUArch)
 		qemuArchName := t.GNUArch[:strings.Index(t.GNUArch, "-")]
@@ -310,76 +355,74 @@ func (t *target) generateFiles() error {
 		}
 		// Fake uname for QEMU to allow running on Host kernel version < 4.15
 		if t.LinuxArch == "riscv" {
-			os.Setenv("QEMU_UNAME", "4.15")
+			t.env = append(t.env, fmt.Sprintf("%s=%s", "QEMU_UNAME", "4.15"))
 		}
-		os.Setenv("GORUN", "qemu-"+qemuArchName)
+		t.env = append(t.env, fmt.Sprintf("%s=%s", "GORUN", "qemu-"+qemuArchName))
 	} else {
-		os.Setenv("CC", "gcc")
+		t.compiler = "gcc"
+		t.env = append(t.env, fmt.Sprintf("%s=%s", "CC", "gcc"))
 	}
+	return nil
+}
 
-	// Make the include directory and fill it with headers
-	if err := os.MkdirAll(IncludeDir, os.ModePerm); err != nil {
-		return err
-	}
-	defer os.RemoveAll(IncludeDir)
-	if err := t.makeHeaders(); err != nil {
-		return fmt.Errorf("could not make header files: %v", err)
-	}
-	fmt.Println("header files generated")
-
+// Generates all the files for a Linux target
+func (t *target) generateFiles() error {
 	// Make each of the four files
 	if err := t.makeZSysnumFile(); err != nil {
 		return fmt.Errorf("could not make zsysnum file: %v", err)
 	}
-	fmt.Println("zsysnum file generated")
+	fmt.Printf("arch %s: zsysnum file generated\n", t.GoArch)
 
 	if err := t.makeZSyscallFile(); err != nil {
 		return fmt.Errorf("could not make zsyscall file: %v", err)
 	}
-	fmt.Println("zsyscall file generated")
+	fmt.Printf("arch %s: zsyscall file generated\n", t.GoArch)
 
 	if err := t.makeZTypesFile(); err != nil {
 		return fmt.Errorf("could not make ztypes file: %v", err)
 	}
-	fmt.Println("ztypes file generated")
+	fmt.Printf("arch %s: ztypes file generated\n", t.GoArch)
 
 	if err := t.makeZErrorsFile(); err != nil {
 		return fmt.Errorf("could not make zerrors file: %v", err)
 	}
-	fmt.Println("zerrors file generated")
+	fmt.Printf("arch %s: zerrors file generated\n", t.GoArch)
 
 	return nil
 }
 
 // Create the Linux, glibc and ABI (C compiler convention) headers in the include directory.
 func (t *target) makeHeaders() error {
+	defer t.printAndResetBuilder()
+
 	// Make the Linux headers we need for this architecture
-	linuxMake := makeCommand("make", "headers_install", "ARCH="+t.LinuxArch, "INSTALL_HDR_PATH="+TempDir)
+	linuxMake := t.makeCommand("make", "headers_install", "ARCH="+t.LinuxArch, "INSTALL_HDR_PATH="+filepath.Join(TempDir, t.GoArch))
 	linuxMake.Dir = LinuxDir
 	if err := linuxMake.Run(); err != nil {
 		return err
 	}
 
+	buildDir := filepath.Join(TempDir, t.GoArch, "build")
 	// A Temporary build directory for glibc
-	if err := os.MkdirAll(BuildDir, os.ModePerm); err != nil {
+	if err := os.MkdirAll(buildDir, os.ModePerm); err != nil {
 		return err
 	}
-	defer os.RemoveAll(BuildDir)
+	defer os.RemoveAll(buildDir)
 
 	// Make the glibc headers we need for this architecture
 	confScript := filepath.Join(GlibcDir, "configure")
-	glibcConf := makeCommand(confScript, "--prefix="+TempDir, "--host="+t.GNUArch, "--enable-kernel="+MinKernel)
-	glibcConf.Dir = BuildDir
+	glibcConf := t.makeCommand(confScript, "--prefix="+filepath.Join(TempDir, t.GoArch), "--host="+t.GNUArch, "--enable-kernel="+MinKernel)
+	glibcConf.Dir = buildDir
 	if err := glibcConf.Run(); err != nil {
 		return err
 	}
-	glibcMake := makeCommand("make", "install-headers")
-	glibcMake.Dir = BuildDir
+	glibcMake := t.makeCommand("make", "install-headers")
+	glibcMake.Dir = buildDir
 	if err := glibcMake.Run(); err != nil {
 		return err
 	}
 	// We only need an empty stubs file
-	stubsFile := filepath.Join(IncludeDir, "gnu/stubs.h")
+	stubsFile := filepath.Join(TempDir, t.GoArch, "include", "gnu", "stubs.h")
 	if file, err := os.Create(stubsFile); err != nil {
 		return err
 	} else {
@@ -396,19 +439,18 @@ func (t *target) makeHeaders() error {
 //
 // We generate C headers instead of a Go file, so as to enable references to the ABI from Cgo.
 func (t *target) makeABIHeaders() (err error) {
-	abiDir := filepath.Join(IncludeDir, "abi")
+	abiDir := filepath.Join(TempDir, t.GoArch, "include", "abi")
 	if err = os.Mkdir(abiDir, os.ModePerm); err != nil {
 		return err
 	}
 
-	cc := os.Getenv("CC")
-	if cc == "" {
+	if t.compiler == "" {
 		return errors.New("CC (compiler) env var not set")
 	}
 
 	// Build a sacrificial ELF file, to mine for C compiler behavior.
-	binPath := filepath.Join(TempDir, "tmp_abi.o")
-	bin, err := t.buildELF(cc, cCode, binPath)
+	binPath := filepath.Join(TempDir, t.GoArch, "tmp_abi.o")
+	bin, err := t.buildELF(t.compiler, cCode, binPath)
 	if err != nil {
 		return fmt.Errorf("cannot build ELF to analyze: %v", err)
 	}
@@ -436,9 +478,10 @@ func (t *target) makeABIHeaders() (err error) {
 func (t *target) buildELF(cc, src, path string) (*elf.File, error) {
 	// Compile the cCode source using the set compiler - we will need its .data section.
 	// Do not link the binary, so that we can find .data section offsets from the symbol values.
-	ccCmd := makeCommand(cc, "-o", path, "-gdwarf", "-x", "c", "-c", "-")
+	ccCmd := t.makeCommand(cc, "-o", path, "-gdwarf", "-x", "c", "-c", "-")
 	ccCmd.Stdin = strings.NewReader(src)
 	ccCmd.Stdout = os.Stdout
+	defer t.printAndResetBuilder()
 	if err := ccCmd.Run(); err != nil {
 		return nil, fmt.Errorf("compiler error: %v", err)
 	}
@@ -500,7 +543,7 @@ func (t *target) writeBitFieldMasks(bin *elf.File, out io.Writer) error {
 // makes the zsysnum_linux_$GOARCH.go file
 func (t *target) makeZSysnumFile() error {
 	zsysnumFile := fmt.Sprintf("zsysnum_linux_%s.go", t.GoArch)
-	unistdFile := filepath.Join(IncludeDir, "asm/unistd.h")
+	unistdFile := filepath.Join(TempDir, t.GoArch, "include", "asm", "unistd.h")
 
 	args := append(t.cFlags(), unistdFile)
 	return t.commandFormatOutput("gofmt", zsysnumFile, "mksysnum", args...)
@@ -606,15 +649,19 @@ func (t *target) matchesMksyscallFile(file string) (bool, error) {
 // makes the zerrors_linux_$GOARCH.go file
 func (t *target) makeZErrorsFile() error {
 	zerrorsFile := fmt.Sprintf("zerrors_linux_%s.go", t.GoArch)
-
-	return t.commandFormatOutput("gofmt", zerrorsFile, "./mkerrors.sh", t.cFlags()...)
+	return t.commandFormatOutput("gofmt2", zerrorsFile, "/"+filepath.Join("build", "unix", "mkerrors.sh"), t.cFlags()...)
 }
 
 // makes the ztypes_linux_$GOARCH.go file
 func (t *target) makeZTypesFile() error {
 	ztypesFile := fmt.Sprintf("ztypes_linux_%s.go", t.GoArch)
 
-	args := []string{"tool", "cgo", "-godefs", "--"}
+	cgoDir := filepath.Join(TempDir, t.GoArch, "cgo")
+	if err := os.MkdirAll(cgoDir, os.ModePerm); err != nil {
+		return err
+	}
+
+	args := []string{"tool", "cgo", "-godefs", "-objdir=" + cgoDir, "--"}
 	args = append(args, t.cFlags()...)
 	args = append(args, "linux/types.go")
 	return t.commandFormatOutput("mkpost", ztypesFile, "go", args...)
@@ -623,7 +670,7 @@ func (t *target) makeZTypesFile() error {
 // Flags that should be given to gcc and cgo for this target
 func (t *target) cFlags() []string {
 	// Compile statically to avoid cross-architecture dynamic linking.
-	flags := []string{"-Wall", "-Werror", "-static", "-I" + IncludeDir}
+	flags := []string{"-Wall", "-Werror", "-static", "-I" + filepath.Join(TempDir, t.GoArch, "include")}
 
 	// Architecture-specific flags
 	if t.SignedChar {
@@ -661,7 +708,8 @@ func mergeFiles() error {
 
 	// Merge each of the four type of files
 	for _, ztyp := range []string{"zerrors", "zsyscall", "zsysnum", "ztypes"} {
-		cmd := makeCommand("go", "run", "./internal/mkmerge", "-out", fmt.Sprintf("%s_%s.go", ztyp, GOOS), fmt.Sprintf("%s_%s_*.go", ztyp, GOOS))
+		cmd := exec.Command("go", "run", "./internal/mkmerge", "-out", fmt.Sprintf("%s_%s.go", ztyp, GOOS), fmt.Sprintf("%s_%s_*.go", ztyp, GOOS))
+		cmd.Stderr = os.Stderr
 		err := cmd.Run()
 		if err != nil {
 			return fmt.Errorf("could not merge %s files: %w", ztyp, err)
