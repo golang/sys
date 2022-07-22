@@ -58,7 +58,14 @@ func (d *Dirent) NameString() string {
 	if d == nil {
 		return ""
 	}
-	return string(d.Name[:d.Namlen])
+	var namlen int = 0
+	for i := 0; i < len(d.Name); i++ {
+		if d.Name[i] == 0 {
+			break
+		}
+		namlen++
+	}
+	return string(d.Name[:namlen])
 }
 
 func (sa *SockaddrInet4) sockaddr() (unsafe.Pointer, _Socklen, error) {
@@ -1860,14 +1867,11 @@ func fdToPath(dirfd int) (path string, err error) {
 	}
 }
 
-func Readdir_r(dir uintptr) (*Dirent, error) {
-	var ent Dirent
+func readdir_full(dir uintptr, path string) (*Dirent, error) {
+	var ent direntLE
 	var res uintptr
 	// __readdir_r_a returns errno at the end of the directory stream, rather than 0.
 	// Therefore to avoid false positives we clear errno before calling it.
-
-	// TODO(neeilan): Commented this out to get sys/unix compiling on z/OS. Uncomment and fix. Error: "undefined: clearsyscall"
-	//clearsyscall.Errno() // TODO(mundaym): check pre-emption rules.
 
 	e, _, _ := syscall_syscall(SYS___READDIR_R_A, dir, uintptr(unsafe.Pointer(&ent)), uintptr(unsafe.Pointer(&res)))
 	var err error
@@ -1877,7 +1881,24 @@ func Readdir_r(dir uintptr) (*Dirent, error) {
 	if res == 0 {
 		return nil, err
 	}
-	return &ent, err
+	var d Dirent
+	d.Ino = uint64(ent.Ino)
+	offset, err := Telldir(dir)
+	if err != nil {
+		return nil, err
+	}
+	d.Off = int64(offset)
+	d.Reclen = ent.Reclen
+	s := string(bytes.Split(ent.Name[:], []byte{0})[0])
+	var st Stat_t
+	path = path + "/" + s
+	err = Lstat(path, &st)
+	if err != nil {
+		return nil, err
+	}
+	d.Type = uint8(st.Mode >> 24)
+	copy(d.Name[:], s)
+	return &d, err
 }
 
 func Getdirentries(fd int, buf []byte, basep *uintptr) (n int, err error) {
@@ -1900,14 +1921,13 @@ func Getdirentries(fd int, buf []byte, basep *uintptr) (n int, err error) {
 	defer Closedir(d)
 
 	for {
-		entry, err := Readdir_r(d)
+		entry, err := readdir_full(d, path)
 		if err != nil {
 			return n, err
 		}
 		if entry == nil {
 			break
 		}
-
 		reclen := int(entry.Reclen)
 		if reclen > len(buf) {
 			// Not enough room. Return for now.

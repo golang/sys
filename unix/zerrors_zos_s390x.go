@@ -377,6 +377,15 @@ const (
 	S_IFSHARELIB                    = 0x00000010
 	S_IFMT                          = 0xFF000000
 	S_IFMST                         = 0x00FF0000
+        DT_BLK                          = 0x6
+        DT_CHR                          = 0x2
+        DT_DIR                          = 0x1
+        DT_FIFO                         = 0x4
+        DT_LNK                          = 0x5
+        DT_REG                          = 0x3
+        DT_SOCK                         = 0x7
+        DT_UNKNOWN                      = 0x0
+        DT_WHT                          = 0xe
 	TCP_KEEPALIVE                   = 0x8
 	TCP_NODELAY                     = 0x1
 	TCP_INFO                        = 0xb
