@@ -972,6 +972,32 @@ func (sa *SockaddrUnix) sockaddr() (unsafe.Pointer, int32, error) {
 	return unsafe.Pointer(&sa.raw), sl, nil
 }
 
+type RawSockaddrBth struct {
+	AddressFamily  [2]byte
+	BtAddr         [8]byte
+	ServiceClassId [16]byte
+	Port           [4]byte
+}
+
+type SockaddrBth struct {
+	BtAddr         uint64
+	ServiceClassId GUID
+	Port           uint32
+
+	raw RawSockaddrBth
+}
+
+func (sa *SockaddrBth) sockaddr() (unsafe.Pointer, int32, error) {
+	family := AF_BTH
+	sa.raw = RawSockaddrBth{
+		AddressFamily:  *(*[2]byte)(unsafe.Pointer(&family)),
+		BtAddr:         *(*[8]byte)(unsafe.Pointer(&sa.BtAddr)),
+		Port:           *(*[4]byte)(unsafe.Pointer(&sa.Port)),
+		ServiceClassId: *(*[16]byte)(unsafe.Pointer(&sa.ServiceClassId)),
+	}
+	return unsafe.Pointer(&sa.raw), int32(unsafe.Sizeof(sa.raw)), nil
+}
+
 func (rsa *RawSockaddrAny) Sockaddr() (Sockaddr, error) {
 	switch rsa.Addr.Family {
 	case AF_UNIX:
