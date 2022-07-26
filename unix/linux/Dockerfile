@@ -27,9 +27,9 @@ RUN git clone https://github.com/loongson/golang-infra.git /git/loong64-patches 
     && curl -fsSL https://git.savannah.gnu.org/cgit/config.git/plain/config.sub -o /git/glibc/scripts/config.sub
 
 # Get Go
-ENV GOLANG_VERSION 1.18
+ENV GOLANG_VERSION 1.19rc2
 ENV GOLANG_DOWNLOAD_URL https://golang.org/dl/go$GOLANG_VERSION.linux-amd64.tar.gz
-ENV GOLANG_DOWNLOAD_SHA256 e85278e98f57cdb150fe8409e6e5df5343ecb13cebf03a5d5ff12bd55a80264f
+ENV GOLANG_DOWNLOAD_SHA256 9130c6f8e87ce9bb4813533a68c3f17c82c7307caf8795d3c9427652b77f81aa
 
 RUN curl -fsSL "$GOLANG_DOWNLOAD_URL" -o golang.tar.gz \
     && echo "$GOLANG_DOWNLOAD_SHA256  golang.tar.gz" | sha256sum -c - \
@@ -56,12 +56,6 @@ RUN apt-get update && apt-get install -y \
         gcc-s390x-linux-gnu         gcc-sparc64-linux-gnu     \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
-
-# Only for loong64, build Go from master until 1.19 is released
-RUN git clone https://go.googlesource.com/go --branch master /git/go \
-    && cd /git/go/src && ./make.bash
-
-ENV PATH /git/go/bin:$PATH
 
 # Only for loong64, getting tools of qemu-user and gcc-cross-compiler
 RUN apt-get update && apt-get install wget xz-utils -y && mkdir /loong64 && cd /loong64 \
