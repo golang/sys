@@ -957,10 +957,6 @@ func TestSend(t *testing.T) {
 }
 
 func TestSendmsgBuffers(t *testing.T) {
-	if runtime.GOOS == "aix" {
-		t.Skipf("SendmsgBuffers not supported on %s", runtime.GOOS)
-	}
-
 	fds, err := unix.Socketpair(unix.AF_LOCAL, unix.SOCK_STREAM, 0)
 	if err != nil {
 		t.Fatal(err)
