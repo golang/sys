@@ -70,6 +70,32 @@ func main() {
 		b = convertEprocRegex.ReplaceAll(b, []byte("$1$2[$3]byte"))
 	}
 
+	if goos == "freebsd" {
+		// Inside PtraceLwpInfoStruct replace __Siginfo with __PtraceSiginfo,
+		// Create __PtraceSiginfo as a copy of __Siginfo where every *byte instance is replaced by uintptr
+		ptraceLwpInfoStruct := regexp.MustCompile(`(?s:type PtraceLwpInfoStruct struct \{.*?\})`)
+		b = ptraceLwpInfoStruct.ReplaceAllFunc(b, func(in []byte) []byte {
+			return bytes.ReplaceAll(in, []byte("__Siginfo"), []byte("__PtraceSiginfo"))
+		})
+
+		siginfoStruct := regexp.MustCompile(`(?s:type __Siginfo struct \{.*?\})`)
+		b = siginfoStruct.ReplaceAllFunc(b, func(in []byte) []byte {
+			out := append([]byte{}, in...)
+			out = append(out, '\n', '\n')
+			out = append(out,
+				bytes.ReplaceAll(
+					bytes.ReplaceAll(in, []byte("__Siginfo"), []byte("__PtraceSiginfo")),
+					[]byte("*byte"), []byte("uintptr"))...)
+			return out
+		})
+
+		// Inside PtraceIoDesc replace all *byte with uintptr
+		ptraceIoDescStruct := regexp.MustCompile(`(?s:type PtraceIoDesc struct \{.*?\})`)
+		b = ptraceIoDescStruct.ReplaceAllFunc(b, func(in []byte) []byte {
+			return bytes.ReplaceAll(in, []byte("*byte"), []byte("uintptr"))
+		})
+	}
+
 	// Intentionally export __val fields in Fsid and Sigset_t
 	valRegex := regexp.MustCompile(`type (Fsid|Sigset_t) struct {(\s+)X__(bits|val)(\s+\S+\s+)}`)
 	b = valRegex.ReplaceAll(b, []byte("type $1 struct {${2}Val$4}"))
