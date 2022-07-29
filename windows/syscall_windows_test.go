@@ -777,6 +777,25 @@ func TestProcessModules(t *testing.T) {
 	}
 }
 
+func TestQueryWorkingSetEx(t *testing.T) {
+	var a int
+
+	process := windows.CurrentProcess()
+	information := windows.PSAPI_WORKING_SET_EX_INFORMATION{
+		VirtualAddress: windows.Pointer(unsafe.Pointer(&a)),
+	}
+	infos := []windows.PSAPI_WORKING_SET_EX_INFORMATION{information}
+
+	cb := uint32(uintptr(len(infos)) * unsafe.Sizeof(infos[0]))
+	if err := windows.QueryWorkingSetEx(process, uintptr(unsafe.Pointer(&infos[0])), cb); err != nil {
+		t.Fatalf("%+v", err)
+	}
+
+	if !infos[0].VirtualAttributes.Valid() {
+		t.Errorf("memory location not valid")
+	}
+}
+
 func TestReadWriteProcessMemory(t *testing.T) {
 	testBuffer := []byte{0xBA, 0xAD, 0xF0, 0x0D}
 
