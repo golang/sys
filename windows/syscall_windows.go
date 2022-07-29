@@ -1712,42 +1712,47 @@ func LoadResourceData(module, resInfo Handle) (data []byte, err error) {
 // PSAPI_WORKING_SET_EX_BLOCK contains extended working set information for a page.
 type PSAPI_WORKING_SET_EX_BLOCK uint64
 
+// Valid returns the validity of this page.
 // If this bit is 1, the subsequent members are valid; otherwise they should be ignored.
 func (b PSAPI_WORKING_SET_EX_BLOCK) Valid() bool {
 	return (b & 1) == 1
 }
 
-// The number of processes that share this page. The maximum value of this member is 7.
+// ShareCount is the number of processes that share this page. The maximum value of this member is 7.
 func (b PSAPI_WORKING_SET_EX_BLOCK) ShareCount() uint64 {
 	return b.intField(1, 3)
 }
 
-// The memory protection attributes of the page. For a list of values, see
+// Win32Protection is the memory protection attributes of the page. For a list of values, see
 // https://docs.microsoft.com/en-us/windows/win32/memory/memory-protection-constants
 func (b PSAPI_WORKING_SET_EX_BLOCK) Win32Protection() uint64 {
 	return b.intField(4, 11)
 }
 
+// Shared returns the shared status of this page.
 // If this bit is 1, the page can be shared.
 func (b PSAPI_WORKING_SET_EX_BLOCK) Shared() bool {
 	return (b & (1 << 15)) == 1
 }
 
-// The NUMA node. The maximum value of this member is 63.
+// Node is the NUMA node. The maximum value of this member is 63.
 func (b PSAPI_WORKING_SET_EX_BLOCK) Node() uint64 {
 	return b.intField(16, 6)
 }
 
+// Locked returns the locked status of this page.
 // If this bit is 1, the virtual page is locked in physical memory.
 func (b PSAPI_WORKING_SET_EX_BLOCK) Locked() bool {
 	return (b & (1 << 22)) == 1
 }
 
+// LargePage returns the large page status of this page.
 // If this bit is 1, the page is a large page.
 func (b PSAPI_WORKING_SET_EX_BLOCK) LargePage() bool {
 	return (b & (1 << 23)) == 1
 }
 
+// Bad returns the bad status of this page.
 // If this bit is 1, the page is has been reported as bad.
 func (b PSAPI_WORKING_SET_EX_BLOCK) Bad() bool {
 	return (b & (1 << 31)) == 1
