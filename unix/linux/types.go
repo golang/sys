@@ -402,6 +402,10 @@ struct perf_event_attr_go {
 	__u32 aux_watermark;
 	__u16 sample_max_stack;
 	__u16 __reserved_2;
+	__u32 aux_sample_size;
+	__u32 __reserved_3;
+
+	__u64 sig_data;
 };
 
 // ustat is deprecated and glibc 2.28 removed ustat.h. Provide the type here for
