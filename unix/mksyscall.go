@@ -36,6 +36,7 @@ import (
 var (
 	b32       = flag.Bool("b32", false, "32bit big-endian")
 	l32       = flag.Bool("l32", false, "32bit little-endian")
+	libc      = flag.Bool("libc", false, "libc system calls")
 	plan9     = flag.Bool("plan9", false, "plan9")
 	openbsd   = flag.Bool("openbsd", false, "openbsd")
 	netbsd    = flag.Bool("netbsd", false, "netbsd")
@@ -43,6 +44,8 @@ var (
 	arm       = flag.Bool("arm", false, "arm") // 64-bit value should use (even, odd)-pair
 	tags      = flag.String("tags", "", "build tags")
 	filename  = flag.String("output", "", "output file name (standard output if omitted)")
+
+	libcPath = "libc.so"
 )
 
 // cmdLine returns this programs's commandline arguments
@@ -124,10 +127,11 @@ func main() {
 		endianness = "little-endian"
 	}
 
-	libc := false
 	if goos == "darwin" {
-		libc = true
+		libcPath = "/usr/lib/libSystem.B.dylib"
+		*libc = true
 	}
+
 	trampolines := map[string]bool{}
 
 	text := ""
@@ -210,7 +214,7 @@ func main() {
 					text += fmt.Sprintf(" else {\n\t\t_p%d = unsafe.Pointer(&_zero)\n\t}\n", n)
 					args = append(args, fmt.Sprintf("uintptr(_p%d)", n), fmt.Sprintf("uintptr(len(%s))", p.Name))
 					n++
-				} else if p.Type == "int64" && (*openbsd || *netbsd) {
+				} else if p.Type == "int64" && ((*openbsd && !*libc) || *netbsd) {
 					args = append(args, "0")
 					if endianness == "big-endian" {
 						args = append(args, fmt.Sprintf("uintptr(%s>>32)", p.Name), fmt.Sprintf("uintptr(%s)", p.Name))
@@ -285,10 +289,18 @@ func main() {
 			}
 
 			var libcFn string
-			if libc {
+			if *libc {
 				asm = "syscall_" + strings.ToLower(asm[:1]) + asm[1:] // internal syscall call
 				sysname = strings.TrimPrefix(sysname, "SYS_")         // remove SYS_
 				sysname = strings.ToLower(sysname)                    // lowercase
+				if *openbsd && *libc {
+					switch sysname {
+					case "__getcwd":
+						sysname = "getcwd"
+					case "__sysctl":
+						sysname = "sysctl"
+					}
+				}
 				libcFn = sysname
 				sysname = "libc_" + sysname + "_trampoline_addr"
 			}
@@ -360,14 +372,14 @@ func main() {
 			text += "\treturn\n"
 			text += "}\n\n"
 
-			if libc && !trampolines[libcFn] {
+			if *libc && !trampolines[libcFn] {
 				// some system calls share a trampoline, like read and readlen.
 				trampolines[libcFn] = true
 				// Declare assembly trampoline address.
 				text += fmt.Sprintf("var libc_%s_trampoline_addr uintptr\n\n", libcFn)
 				// Assembly trampoline calls the libc_* function, which this magic
 				// redirects to use the function from libSystem.
-				text += fmt.Sprintf("//go:cgo_import_dynamic libc_%s %s \"/usr/lib/libSystem.B.dylib\"\n", libcFn, libcFn)
+				text += fmt.Sprintf("//go:cgo_import_dynamic libc_%s %s %q\n", libcFn, libcFn, libcPath)
 				text += "\n"
 			}
 		}
