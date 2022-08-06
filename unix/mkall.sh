@@ -142,10 +142,10 @@ netbsd_arm64)
 	mktypes="GOARCH=$GOARCH go tool cgo -godefs"
 	;;
 openbsd_386)
+	mkasm="go run mkasm.go"
 	mkerrors="$mkerrors -m32"
-	mksyscall="go run mksyscall.go -l32 -openbsd"
+	mksyscall="go run mksyscall.go -l32 -openbsd -libc"
 	mksysctl="go run mksysctl_openbsd.go"
-	mksysnum="go run mksysnum.go 'https://cvsweb.openbsd.org/cgi-bin/cvsweb/~checkout~/src/sys/kern/syscalls.master'"
 	mktypes="GOARCH=$GOARCH go tool cgo -godefs"
 	;;
 openbsd_amd64)
