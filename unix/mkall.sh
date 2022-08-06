@@ -149,10 +149,10 @@ openbsd_386)
 	mktypes="GOARCH=$GOARCH go tool cgo -godefs"
 	;;
 openbsd_amd64)
+	mkasm="go run mkasm.go"
 	mkerrors="$mkerrors -m64"
-	mksyscall="go run mksyscall.go -openbsd"
+	mksyscall="go run mksyscall.go -openbsd -libc"
 	mksysctl="go run mksysctl_openbsd.go"
-	mksysnum="go run mksysnum.go 'https://cvsweb.openbsd.org/cgi-bin/cvsweb/~checkout~/src/sys/kern/syscalls.master'"
 	mktypes="GOARCH=$GOARCH go tool cgo -godefs"
 	;;
 openbsd_arm)
