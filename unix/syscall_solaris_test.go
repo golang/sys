@@ -9,7 +9,6 @@ package unix_test
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"runtime"
@@ -49,7 +48,7 @@ func TestSysconf(t *testing.T) {
 // Event Ports
 
 func TestBasicEventPort(t *testing.T) {
-	tmpfile, err := ioutil.TempFile("", "eventport")
+	tmpfile, err := os.CreateTemp("", "eventport")
 	if err != nil {
 		t.Fatalf("unable to create a tempfile: %v", err)
 	}
@@ -162,7 +161,7 @@ func TestEventPortFds(t *testing.T) {
 }
 
 func TestEventPortErrors(t *testing.T) {
-	tmpfile, err := ioutil.TempFile("", "eventport")
+	tmpfile, err := os.CreateTemp("", "eventport")
 	if err != nil {
 		t.Errorf("unable to create a tempfile: %v", err)
 	}
@@ -189,7 +188,7 @@ func TestEventPortErrors(t *testing.T) {
 	if err == nil {
 		t.Errorf("unexpected success dissociating unassociated fd")
 	}
-	events := make([]unix.PortEvent, 4, 4)
+	events := make([]unix.PortEvent, 4)
 	_, err = port.Get(events, 5, nil)
 	if err == nil {
 		t.Errorf("unexpected success calling Get with min greater than len of slice")
@@ -248,7 +247,7 @@ func TestPortEventSlices(t *testing.T) {
 	}
 	// Create, associate, and delete 6 files
 	for i := 0; i < 6; i++ {
-		tmpfile, err := ioutil.TempFile("", "eventport")
+		tmpfile, err := os.CreateTemp("", "eventport")
 		if err != nil {
 			t.Fatalf("unable to create tempfile: %v", err)
 		}
@@ -275,7 +274,7 @@ func TestPortEventSlices(t *testing.T) {
 	}
 	timeout := new(unix.Timespec)
 	timeout.Nsec = 1
-	events := make([]unix.PortEvent, 4, 4)
+	events := make([]unix.PortEvent, 4)
 	n, err = port.Get(events, 3, timeout)
 	if err != nil {
 		t.Errorf("Get failed: %v", err)
