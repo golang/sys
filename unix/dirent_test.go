@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-//go:build aix || darwin || dragonfly || freebsd || linux || netbsd || openbsd || solaris
-// +build aix darwin dragonfly freebsd linux netbsd openbsd solaris
+//go:build aix || darwin || dragonfly || freebsd || linux || netbsd || openbsd || solaris || zos
+// +build aix darwin dragonfly freebsd linux netbsd openbsd solaris zos
 
 package unix_test
 
@@ -45,6 +45,10 @@ func TestDirent(t *testing.T) {
 	}
 
 	buf := bytes.Repeat([]byte("DEADBEAF"), direntBufSize/8)
+	if runtime.GOOS == "zos" {
+		buf = bytes.Repeat([]byte("DEADBEAF"), (direntBufSize*2)/8)
+	}
+
 	fd, err := unix.Open(d, unix.O_RDONLY, 0)
 	if err != nil {
 		t.Fatalf("Open: %v", err)

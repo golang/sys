@@ -12,6 +12,7 @@ import (
 	"fmt"
 	"runtime"
 	"sort"
+	"strings"
 	"sync"
 	"syscall"
 	"unsafe"
@@ -58,14 +59,13 @@ func (d *Dirent) NameString() string {
 	if d == nil {
 		return ""
 	}
-	var namlen int = 0
-	for i := 0; i < len(d.Name); i++ {
-		if d.Name[i] == 0 {
-			break
-		}
-		namlen++
+	s := string(d.Name[:])
+	idx := strings.Index(s, string(rune(0)))
+	if idx == -1 {
+		return s
+	} else {
+		return s[:idx]
 	}
-	return string(d.Name[:namlen])
 }
 
 func (sa *SockaddrInet4) sockaddr() (unsafe.Pointer, _Socklen, error) {
@@ -1220,24 +1220,12 @@ func Opendir(name string) (uintptr, error) {
 // clearsyscall.Errno resets the errno value to 0.
 func clearErrno()
 
-func Readdir(dir uintptr) (*Dirent, error) {
-	var ent Dirent
-	var res uintptr
-	// __readdir_r_a returns errno at the end of the directory stream, rather than 0.
-	// Therefore to avoid false positives we clear errno before calling it.
-
-	// TODO(neeilan): Commented this out to get sys/unix compiling on z/OS. Uncomment and fix. Error: "undefined: clearsyscall"
-	//clearsyscall.Errno() // TODO(mundaym): check pre-emption rules.
-
-	e, _, _ := syscall_syscall(SYS___READDIR_R_A, dir, uintptr(unsafe.Pointer(&ent)), uintptr(unsafe.Pointer(&res)))
-	var err error
-	if e != 0 {
-		err = errnoErr(Errno(e))
+func Readdir_r(dirp uintptr, entry *direntLE, result **direntLE) (err error) {
+	r0, _, e1 := syscall_syscall(SYS___READDIR_R_A, dirp, uintptr(unsafe.Pointer(entry)), uintptr(unsafe.Pointer(result)))
+	if int64(r0) == -1 {
+		err = errnoErr(Errno(e1))
 	}
-	if res == 0 {
-		return nil, err
-	}
-	return &ent, err
+	return
 }
 
 func Closedir(dir uintptr) error {
@@ -1867,38 +1855,28 @@ func fdToPath(dirfd int) (path string, err error) {
 	}
 }
 
-func readdir_full(dir uintptr, path string) (*Dirent, error) {
-	var ent direntLE
-	var res uintptr
-	// __readdir_r_a returns errno at the end of the directory stream, rather than 0.
-	// Therefore to avoid false positives we clear errno before calling it.
-
-	e, _, _ := syscall_syscall(SYS___READDIR_R_A, dir, uintptr(unsafe.Pointer(&ent)), uintptr(unsafe.Pointer(&res)))
-	var err error
-	if e != 0 {
-		err = errnoErr(Errno(e))
-	}
-	if res == 0 {
-		return nil, err
-	}
+func direntLeToDirentUnix(dirent *direntLE, dir uintptr, path string) (Dirent, error) {
 	var d Dirent
-	d.Ino = uint64(ent.Ino)
+
+	d.Ino = uint64(dirent.Ino)
 	offset, err := Telldir(dir)
 	if err != nil {
-		return nil, err
+		return d, err
 	}
+
 	d.Off = int64(offset)
-	d.Reclen = ent.Reclen
-	s := string(bytes.Split(ent.Name[:], []byte{0})[0])
+	d.Reclen = dirent.Reclen
+	s := string(bytes.Split(dirent.Name[:], []byte{0})[0])
 	var st Stat_t
 	path = path + "/" + s
 	err = Lstat(path, &st)
 	if err != nil {
-		return nil, err
+		return d, err
 	}
+
 	d.Type = uint8(st.Mode >> 24)
 	copy(d.Name[:], s)
-	return &d, err
+	return d, err
 }
 
 func Getdirentries(fd int, buf []byte, basep *uintptr) (n int, err error) {
@@ -1908,6 +1886,11 @@ func Getdirentries(fd int, buf []byte, basep *uintptr) (n int, err error) {
 	// of calling Getdirentries or ReadDirent repeatedly.
 	// It won't handle assigning the results of lseek to *basep, or handle
 	// the directory being edited underfoot.
+
+	skip, err := Seek(fd, 0, 1 /* SEEK_CUR */)
+	if err != nil {
+		return 0, err
+	}
 
 	// Get path from fd to avoid unavailable call (fdopendir)
 	path, err := fdToPath(fd)
@@ -1920,14 +1903,29 @@ func Getdirentries(fd int, buf []byte, basep *uintptr) (n int, err error) {
 	}
 	defer Closedir(d)
 
+	var cnt int64
 	for {
-		entry, err := readdir_full(d, path)
-		if err != nil {
-			return n, err
+		var entryLE direntLE
+		var entrypLE *direntLE
+		e := Readdir_r(d, &entryLE, &entrypLE)
+		if e != nil {
+			return n, e
 		}
-		if entry == nil {
+		if entrypLE == nil {
 			break
 		}
+		if skip > 0 {
+			skip--
+			cnt++
+			continue
+		}
+
+		// Dirent on zos has a different structure
+		entry, e := direntLeToDirentUnix(&entryLE, d, path)
+		if e != nil {
+			return n, e
+		}
+
 		reclen := int(entry.Reclen)
 		if reclen > len(buf) {
 			// Not enough room. Return for now.
@@ -1940,13 +1938,20 @@ func Getdirentries(fd int, buf []byte, basep *uintptr) (n int, err error) {
 		// Copy entry into return buffer.
 		var s []byte
 		hdr := (*unsafeheader.Slice)(unsafe.Pointer(&s))
-		hdr.Data = unsafe.Pointer(entry)
+		hdr.Data = unsafe.Pointer(&entry)
 		hdr.Cap = reclen
 		hdr.Len = reclen
 		copy(buf, s)
 
 		buf = buf[reclen:]
 		n += reclen
+		cnt++
+	}
+	// Set the seek offset of the input fd to record
+	// how many files we've already returned.
+	_, err = Seek(fd, cnt, 0 /* SEEK_SET */)
+	if err != nil {
+		return n, err
 	}
 
 	return n, nil
