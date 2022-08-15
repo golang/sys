@@ -1078,3 +1078,52 @@ func TestProcThreadAttributeHandleList(t *testing.T) {
 		t.Fatalf("got %q; want %q", out, sentinel)
 	}
 }
+
+func TestWSALookupService(t *testing.T) {
+	var flags uint32 = windows.LUP_CONTAINERS
+	flags |= windows.LUP_RETURN_NAME
+	flags |= windows.LUP_RETURN_ADDR
+
+	var querySet windows.WSAQUERYSET
+	querySet.NameSpace = windows.NS_BTH
+	querySet.Size = uint32(unsafe.Sizeof(windows.WSAQUERYSET{}))
+
+	var handle windows.Handle
+	err := windows.WSALookupServiceBegin(&querySet, flags, &handle)
+	if err != nil {
+		if errors.Is(err, windows.WSASERVICE_NOT_FOUND) {
+			t.Skip("WSA Service not found, so skip this test")
+		}
+		t.Fatal(err)
+	}
+
+	defer windows.WSALookupServiceEnd(handle)
+
+	n := int32(unsafe.Sizeof(windows.WSAQUERYSET{}))
+	buf := make([]byte, n)
+items_loop:
+	for {
+		q := (*windows.WSAQUERYSET)(unsafe.Pointer(&buf[0]))
+		err := windows.WSALookupServiceNext(handle, flags, &n, q)
+		switch err {
+		case windows.WSA_E_NO_MORE, windows.WSAENOMORE:
+			// no more data available - break the loop
+			break items_loop
+		case windows.WSAEFAULT:
+			// buffer is too small - reallocate and try again
+			buf = make([]byte, n)
+		case nil:
+			// found a record - display the item and fetch next item
+			var addr string
+			for _, e := range q.SaBuffer.RemoteAddr.Sockaddr.Addr.Data {
+				if e != 0 {
+					addr += fmt.Sprintf("%x", e)
+				}
+			}
+			t.Logf("%s -> %s\n", windows.UTF16PtrToString(q.ServiceInstanceName), addr)
+
+		default:
+			t.Fatal(err)
+		}
+	}
+}
