@@ -1381,6 +1381,13 @@ func SetsockoptTCPRepairOpt(fd, level, opt int, o []TCPRepairOpt) (err error) {
 // KeyctlString calls keyctl commands which return a string.
 // These commands are KEYCTL_DESCRIBE and KEYCTL_GET_SECURITY.
 func KeyctlString(cmd int, id int) (string, error) {
+	// Other queries - particularly KEYCTL_READ - can either return zero-length data,
+	// or explicitly-sized buffers of binary data (which may include NULL bytes).
+	// This function misbehaves then (panics or truncates returns), so explicitly
+	// allow only the two cmds documented to return NUL-terminated (C-type) strings.
+	if cmd != unix.KEYCTL_DESCRIBE || cmd != unix.KEYCTL_GET_SECURITY {
+		return "", EINVAL
+	}
 	// We must loop as the string data may change in between the syscalls.
 	// We could allocate a large buffer here to reduce the chance that the
 	// syscall needs to be called twice; however, this is unnecessary as
