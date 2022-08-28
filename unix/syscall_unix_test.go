@@ -322,7 +322,7 @@ func passFDChild() {
 	}
 }
 
-// TestUnixRightsRoundtrip tests that UnixRights, ParseSocketControlMessage,
+// TestUnixRightsRoundtrip tests that UnixRights, ParseSocketControlMessage, ParseOneSocketControlMessage,
 // and ParseUnixRights are able to successfully round-trip lists of file descriptors.
 func TestUnixRightsRoundtrip(t *testing.T) {
 	testCases := [...][][]int{
@@ -350,6 +350,23 @@ func TestUnixRightsRoundtrip(t *testing.T) {
 		if len(scms) != len(testCase) {
 			t.Fatalf("expected %v SocketControlMessage; got scms = %#v", len(testCase), scms)
 		}
+
+		var c int
+		for len(b) > 0 {
+			hdr, data, remainder, err := unix.ParseOneSocketControlMessage(b)
+			if err != nil {
+				t.Fatalf("ParseOneSocketControlMessage: %v", err)
+			}
+			if scms[c].Header != hdr || !bytes.Equal(scms[c].Data, data) {
+				t.Fatal("expected SocketControlMessage header and data to match")
+			}
+			b = remainder
+			c++
+		}
+		if c != len(scms) {
+			t.Fatalf("expected %d SocketControlMessages; got %d", len(scms), c)
+		}
+
 		for i, scm := range scms {
 			gotFds, err := unix.ParseUnixRights(&scm)
 			if err != nil {
