@@ -23,7 +23,7 @@ func archPtrSize(arch string) int {
 	switch arch {
 	case "386", "arm":
 		return 4
-	case "amd64", "arm64", "mips64":
+	case "amd64", "arm64", "mips64", "riscv64":
 		return 8
 	default:
 		log.Fatalf("Unknown arch %q", arch)
