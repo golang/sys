@@ -35,7 +35,7 @@ func TimeToTimespec(t time.Time) (Timespec, error) {
 	// Currently all targets have either int32 or int64 for Timespec.Sec.
 	// If there were a new target with floating point type for it, we have
 	// to consider the rounding error.
-	if int64(ts.Sec) != sec {
+	if ts.Sec != sec {
 		return Timespec{}, ERANGE
 	}
 	return ts, nil
@@ -58,17 +58,17 @@ func NsecToTimeval(nsec int64) Timeval {
 
 // Unix returns the time stored in ts as seconds plus nanoseconds.
 func (ts *Timespec) Unix() (sec int64, nsec int64) {
-	return int64(ts.Sec), int64(ts.Nsec)
+	return ts.Sec, ts.Nsec
 }
 
 // Unix returns the time stored in tv as seconds plus nanoseconds.
 func (tv *Timeval) Unix() (sec int64, nsec int64) {
-	return int64(tv.Sec), int64(tv.Usec) * 1000
+	return tv.Sec, int64(tv.Usec) * 1000
 }
 
 // Nano returns the time stored in ts as nanoseconds.
 func (ts *Timespec) Nano() int64 {
-	return int64(ts.Sec)*1e9 + int64(ts.Nsec)
+	return int64(ts.Sec)*1e9 + ts.Nsec
 }
 
 // Nano returns the time stored in tv as nanoseconds.
