@@ -975,7 +975,8 @@ func TestSendmsgBuffers(t *testing.T) {
 		}
 		n, oobn, recvflags, _, err := unix.RecvmsgBuffers(fds[1], bufs, nil, 0)
 		if err != nil {
-			t.Fatal(err)
+			t.Error(err)
+			return
 		}
 		if n != 10 {
 			t.Errorf("got %d bytes, want 10", n)
