@@ -3213,3 +3213,12 @@ type ModuleInfo struct {
 }
 
 const ALL_PROCESSOR_GROUPS = 0xFFFF
+
+// Constants for GlobalAlloc flags.
+const (
+	GMEM_FIXED    = 0x0
+	GMEM_MOVEABLE = 0x2
+	GMEM_ZEROINIT = 0x40
+	GHND          = GMEM_MOVEABLE | GMEM_ZEROINIT
+	GPTR          = GMEM_FIXED | GMEM_ZEROINIT
+)

@@ -287,6 +287,8 @@ var (
 	procGetVolumePathNameW                                   = modkernel32.NewProc("GetVolumePathNameW")
 	procGetVolumePathNamesForVolumeNameW                     = modkernel32.NewProc("GetVolumePathNamesForVolumeNameW")
 	procGetWindowsDirectoryW                                 = modkernel32.NewProc("GetWindowsDirectoryW")
+	procGlobalAlloc                                          = modkernel32.NewProc("GlobalAlloc")
+	procGlobalFree                                           = modkernel32.NewProc("GlobalFree")
 	procInitializeProcThreadAttributeList                    = modkernel32.NewProc("InitializeProcThreadAttributeList")
 	procIsWow64Process                                       = modkernel32.NewProc("IsWow64Process")
 	procIsWow64Process2                                      = modkernel32.NewProc("IsWow64Process2")
@@ -2466,6 +2468,24 @@ func getWindowsDirectory(dir *uint16, dirLen uint32) (len uint32, err error) {
 	r0, _, e1 := syscall.Syscall(procGetWindowsDirectoryW.Addr(), 2, uintptr(unsafe.Pointer(dir)), uintptr(dirLen), 0)
 	len = uint32(r0)
 	if len == 0 {
+		err = errnoErr(e1)
+	}
+	return
+}
+
+func GlobalAlloc(flags uint32, length uint32) (ptr uintptr, err error) {
+	r0, _, e1 := syscall.Syscall(procGlobalAlloc.Addr(), 2, uintptr(flags), uintptr(length), 0)
+	ptr = uintptr(r0)
+	if ptr == 0 {
+		err = errnoErr(e1)
+	}
+	return
+}
+
+func GlobalFree(hmem Handle) (handle Handle, err error) {
+	r0, _, e1 := syscall.Syscall(procGlobalFree.Addr(), 1, uintptr(hmem), 0, 0)
+	handle = Handle(r0)
+	if handle != 0 {
 		err = errnoErr(e1)
 	}
 	return
