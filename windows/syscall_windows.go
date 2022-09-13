@@ -138,13 +138,7 @@ func UTF16PtrToString(p *uint16) string {
 		ptr = unsafe.Pointer(uintptr(ptr) + unsafe.Sizeof(*p))
 	}
 
-	var s []uint16
-	h := (*unsafeheader.Slice)(unsafe.Pointer(&s))
-	h.Data = unsafe.Pointer(p)
-	h.Len = n
-	h.Cap = n
-
-	return string(utf16.Decode(s))
+	return string(utf16.Decode(unsafe.Slice(p, n)))
 }
 
 func Getpagesize() int { return 4096 }
