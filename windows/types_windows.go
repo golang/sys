@@ -5,6 +5,7 @@
 package windows
 
 import (
+	"math"
 	"net"
 	"syscall"
 	"unsafe"
@@ -134,9 +135,9 @@ const (
 	DUPLICATE_CLOSE_SOURCE = 0x00000001
 	DUPLICATE_SAME_ACCESS  = 0x00000002
 
-	STD_INPUT_HANDLE  = -10 & (1<<32 - 1)
-	STD_OUTPUT_HANDLE = -11 & (1<<32 - 1)
-	STD_ERROR_HANDLE  = -12 & (1<<32 - 1)
+	STD_INPUT_HANDLE  = -10 & (math.MaxUint32)
+	STD_OUTPUT_HANDLE = -11 & (math.MaxUint32)
+	STD_ERROR_HANDLE  = -12 & (math.MaxUint32)
 
 	FILE_BEGIN   = 0
 	FILE_CURRENT = 1
