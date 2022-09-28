@@ -959,6 +959,12 @@ type Sigset_t C.sigset_t
 
 const _C__NSIG = C._NSIG
 
+const (
+	SIG_BLOCK   = C.SIG_BLOCK
+	SIG_UNBLOCK = C.SIG_UNBLOCK
+	SIG_SETMASK = C.SIG_SETMASK
+)
+
 type SignalfdSiginfo C.struct_signalfd_siginfo
 
 type Siginfo C.siginfo_t
