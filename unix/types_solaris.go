@@ -39,8 +39,10 @@ package unix
 #include <sys/select.h>
 #include <sys/signal.h>
 #include <sys/socket.h>
+#include <sys/sockio.h>
 #include <sys/stat.h>
 #include <sys/statvfs.h>
+#include <sys/stropts.h>
 #include <sys/time.h>
 #include <sys/times.h>
 #include <sys/types.h>
@@ -80,6 +82,12 @@ struct goIovec {
 	size_t iov_len;
 };
 
+// Solaris and the major illumos distributions ship a 3rd party tun/tap driver
+// from https://github.com/kaizawa/tuntap
+// It supports a pair of IOCTLs defined at
+// https://github.com/kaizawa/tuntap/blob/master/if_tun.h#L91-L93
+#define TUNNEWPPA	(('T'<<16) | 0x0001)
+#define TUNSETPPA	(('T'<<16) | 0x0002)
 */
 import "C"
 
@@ -306,3 +314,28 @@ const (
 	MOUNTEDOVER        = C.MOUNTEDOVER
 	FILE_EXCEPTION     = C.FILE_EXCEPTION
 )
+
+// STREAMS and Tun
+
+const (
+	TUNNEWPPA = C.TUNNEWPPA
+	TUNSETPPA = C.TUNSETPPA
+
+	// sys/stropts.h:
+	I_STR     = C.I_STR
+	I_POP     = C.I_POP
+	I_PUSH    = C.I_PUSH
+	I_LINK    = C.I_LINK
+	I_UNLINK  = C.I_UNLINK
+	I_PLINK   = C.I_PLINK
+	I_PUNLINK = C.I_PUNLINK
+
+	// sys/sockio.h:
+	IF_UNITSEL = C.IF_UNITSEL
+)
+
+type strbuf C.struct_strbuf
+
+type Strioctl C.struct_strioctl
+
+type Lifreq C.struct_lifreq
