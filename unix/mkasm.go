@@ -23,7 +23,7 @@ func archPtrSize(arch string) int {
 	switch arch {
 	case "386", "arm":
 		return 4
-	case "amd64", "arm64", "mips64", "riscv64":
+	case "amd64", "arm64", "mips64", "ppc64", "riscv64":
 		return 8
 	default:
 		log.Fatalf("Unknown arch %q", arch)
@@ -31,7 +31,7 @@ func archPtrSize(arch string) int {
 	}
 }
 
-func generateASMFile(arch string, inFileNames []string, outFileName string) map[string]bool {
+func generateASMFile(goos, arch string, inFileNames []string, outFileName string) map[string]bool {
 	trampolines := map[string]bool{}
 	var orderedTrampolines []string
 	for _, inFileName := range inFileNames {
@@ -62,7 +62,12 @@ func generateASMFile(arch string, inFileNames []string, outFileName string) map[
 	fmt.Fprintf(&out, "#include \"textflag.h\"\n")
 	for _, fn := range orderedTrampolines {
 		fmt.Fprintf(&out, "\nTEXT %s_trampoline<>(SB),NOSPLIT,$0-0\n", fn)
-		fmt.Fprintf(&out, "\tJMP\t%s(SB)\n\n", fn)
+		if goos == "openbsd" && arch == "ppc64" {
+			fmt.Fprintf(&out, "\tCALL\t%s(SB)\n", fn)
+			fmt.Fprintf(&out, "\tRET\n")
+		} else {
+			fmt.Fprintf(&out, "\tJMP\t%s(SB)\n", fn)
+		}
 		fmt.Fprintf(&out, "GLOBL\t·%s_trampoline_addr(SB), RODATA, $%d\n", fn, ptrSize)
 		fmt.Fprintf(&out, "DATA\t·%s_trampoline_addr(SB)/%d, $%s_trampoline<>(SB)\n", fn, ptrSize, fn)
 	}
@@ -127,7 +132,7 @@ func main() {
 		zsyscallArchFilename,
 	}
 
-	trampolines := generateASMFile(arch, inFileNames, zsyscallASMFileName)
+	trampolines := generateASMFile(goos, arch, inFileNames, zsyscallASMFileName)
 
 	if goos == "darwin" {
 		writeDarwinTest(trampolines, fmt.Sprintf("darwin_%s_test.go", arch), arch)
