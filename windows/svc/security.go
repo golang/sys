@@ -68,10 +68,9 @@ func IsAnInteractiveSession() (bool, error) {
 // as a Windows service.
 func IsWindowsService() (bool, error) {
 	// The below technique looks a bit hairy, but it's actually
-	// exactly what the .NET framework does for the similarly named function:
-	// https://github.com/dotnet/extensions/blob/f4066026ca06984b07e90e61a6390ac38152ba93/src/Hosting/WindowsServices/src/WindowsServiceHelpers.cs#L26-L31
-	// Specifically, it looks up whether the parent process has session ID zero
-	// and is called "services".
+	// exactly what the .NET runtime (>= 6.0.10) does for the similarly named function:
+	//  https://github.com/dotnet/runtime/blob/36bf84fc4a89209f4fdbc1fc201e81afd8be49b0/src/libraries/Microsoft.Extensions.Hosting.WindowsServices/src/WindowsServiceHelpers.cs#L20-L33
+	// Specifically, it looks up whether the parent process is called "services".
 
 	var currentProcess windows.PROCESS_BASIC_INFORMATION
 	infoSize := uint32(unsafe.Sizeof(currentProcess))
@@ -91,7 +90,7 @@ func IsWindowsService() (bool, error) {
 	}
 	for ; ; parentProcess = (*windows.SYSTEM_PROCESS_INFORMATION)(unsafe.Pointer(uintptr(unsafe.Pointer(parentProcess)) + uintptr(parentProcess.NextEntryOffset))) {
 		if parentProcess.UniqueProcessID == currentProcess.InheritedFromUniqueProcessId {
-			return parentProcess.SessionID == 0 && strings.EqualFold("services.exe", parentProcess.ImageName.String()), nil
+			return strings.EqualFold("services.exe", parentProcess.ImageName.String()), nil
 		}
 		if parentProcess.NextEntryOffset == 0 {
 			break
