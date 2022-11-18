@@ -17,6 +17,7 @@ import (
 	"testing"
 	"time"
 
+	"golang.org/x/sys/windows/svc"
 	"golang.org/x/sys/windows/svc/mgr"
 )
 
@@ -293,4 +294,46 @@ func TestMyService(t *testing.T) {
 	testRecoveryCommand(t, s, "") // delete recovery command
 
 	remove(t, s)
+}
+
+func TestListDependentServices(t *testing.T) {
+	m, err := mgr.Connect()
+	if err != nil {
+		if errno, ok := err.(syscall.Errno); ok && errno == syscall.ERROR_ACCESS_DENIED {
+			t.Skip("Skipping test: we don't have rights to manage services.")
+		}
+		t.Fatalf("SCM connection failed: %s", err)
+	}
+	defer m.Disconnect()
+
+	baseServiceName := "testservice1"
+	dependentServiceName := "testservice2"
+	install(t, m, baseServiceName, "", mgr.Config{})
+	baseService, err := m.OpenService(baseServiceName)
+	if err != nil {
+		t.Fatalf("OpenService failed: %v", err)
+	}
+	defer remove(t, baseService)
+	install(t, m, dependentServiceName, "", mgr.Config{Dependencies: []string{baseServiceName}})
+	dependentService, err := m.OpenService(dependentServiceName)
+	if err != nil {
+		t.Fatalf("OpenService failed: %v", err)
+	}
+	defer remove(t, dependentService)
+
+	// test that both the base service and dependent service list the correct dependencies
+	dependentServices, err := baseService.ListDependentServices(svc.AnyActivity)
+	if err != nil {
+		t.Fatalf("baseService.ListDependentServices failed: %v", err)
+	}
+	if len(dependentServices) != 1 || dependentServices[0] != dependentServiceName {
+		t.Errorf("Found %v, instead of expected contents %s", dependentServices, dependentServiceName)
+	}
+	dependentServices, err = dependentService.ListDependentServices(svc.AnyActivity)
+	if err != nil {
+		t.Fatalf("dependentService.ListDependentServices failed: %v", err)
+	}
+	if len(dependentServices) != 0 {
+		t.Errorf("Found %v, where no service should be listed", dependentService)
+	}
 }
