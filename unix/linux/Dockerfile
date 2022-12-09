@@ -27,9 +27,9 @@ RUN git clone https://github.com/loongson/golang-infra.git /git/loong64-patches 
     && curl -fsSL https://git.savannah.gnu.org/cgit/config.git/plain/config.sub -o /git/glibc/scripts/config.sub
 
 # Get Go
-ENV GOLANG_VERSION 1.19rc2
+ENV GOLANG_VERSION 1.20rc1
 ENV GOLANG_DOWNLOAD_URL https://golang.org/dl/go$GOLANG_VERSION.linux-amd64.tar.gz
-ENV GOLANG_DOWNLOAD_SHA256 9130c6f8e87ce9bb4813533a68c3f17c82c7307caf8795d3c9427652b77f81aa
+ENV GOLANG_DOWNLOAD_SHA256 4757fb32d7514145e43d4f37713f98d8cc0ecbbb5b1737accfc84be50e1e2e32
 
 RUN curl -fsSL "$GOLANG_DOWNLOAD_URL" -o golang.tar.gz \
     && echo "$GOLANG_DOWNLOAD_SHA256  golang.tar.gz" | sha256sum -c - \
