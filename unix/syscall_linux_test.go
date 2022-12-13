@@ -1099,3 +1099,36 @@ func TestIoctlFileDedupeRange(t *testing.T) {
 			dedupe.Info[1].Bytes_deduped, 0)
 	}
 }
+
+// TestPwritevOffsets tests golang.org/issues/57291 where
+// offs2lohi was shifting by the size of long in bytes, not bits.
+func TestPwritevOffsets(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "x.txt")
+
+	f, err := os.Create(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { f.Close() })
+
+	const (
+		off = 20
+	)
+	b := [][]byte{{byte(0)}}
+	n, err := unix.Pwritev(int(f.Fd()), b, off)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if n != len(b) {
+		t.Fatalf("expected to write %d, wrote %d", len(b), n)
+	}
+
+	info, err := f.Stat()
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := off + int64(len(b))
+	if info.Size() != want {
+		t.Fatalf("expected size to be %d, got %d", want, info.Size())
+	}
+}

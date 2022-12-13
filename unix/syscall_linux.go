@@ -1986,12 +1986,10 @@ func bytes2iovec(bs [][]byte) []Iovec {
 	return iovecs
 }
 
-// offs2lohi splits offs into its lower and upper unsigned long. On 64-bit
-// systems, hi will always be 0. On 32-bit systems, offs will be split in half.
-// preadv/pwritev chose this calling convention so they don't need to add a
-// padding-register for alignment on ARM.
+// offs2lohi splits offs into its low and high order bits.
 func offs2lohi(offs int64) (lo, hi uintptr) {
-	return uintptr(offs), uintptr(uint64(offs) >> SizeofLong)
+	const longBits = SizeofLong * 8
+	return uintptr(offs), uintptr(uint64(offs) >> longBits)
 }
 
 func Readv(fd int, iovs [][]byte) (n int, err error) {
