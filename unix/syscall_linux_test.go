@@ -1132,3 +1132,44 @@ func TestPwritevOffsets(t *testing.T) {
 		t.Fatalf("expected size to be %d, got %d", want, info.Size())
 	}
 }
+
+func TestReadvAllocate(t *testing.T) {
+	f, err := os.Create(filepath.Join(t.TempDir(), "test"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { f.Close() })
+
+	test := func(name string, fn func(fd int)) {
+		n := int(testing.AllocsPerRun(100, func() {
+			fn(int(f.Fd()))
+		}))
+		if n != 0 {
+			t.Errorf("%q got %d allocations, want 0", name, n)
+		}
+	}
+
+	iovs := make([][]byte, 8)
+	for i := range iovs {
+		iovs[i] = []byte{'A'}
+	}
+
+	test("Writev", func(fd int) {
+		unix.Writev(fd, iovs)
+	})
+	test("Pwritev", func(fd int) {
+		unix.Pwritev(fd, iovs, 0)
+	})
+	test("Pwritev2", func(fd int) {
+		unix.Pwritev2(fd, iovs, 0, 0)
+	})
+	test("Readv", func(fd int) {
+		unix.Readv(fd, iovs)
+	})
+	test("Preadv", func(fd int) {
+		unix.Preadv(fd, iovs, 0)
+	})
+	test("Preadv2", func(fd int) {
+		unix.Preadv2(fd, iovs, 0, 0)
+	})
+}
