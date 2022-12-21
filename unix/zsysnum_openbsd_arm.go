@@ -44,6 +44,7 @@ const (
 	SYS_CHFLAGS        = 34  // { int sys_chflags(const char *path, u_int flags); }
 	SYS_FCHFLAGS       = 35  // { int sys_fchflags(int fd, u_int flags); }
 	SYS_SYNC           = 36  // { void sys_sync(void); }
+	SYS_MSYSCALL       = 37  // { int sys_msyscall(void *addr, size_t len); }
 	SYS_STAT           = 38  // { int sys_stat(const char *path, struct stat *ub); }
 	SYS_GETPPID        = 39  // { pid_t sys_getppid(void); }
 	SYS_LSTAT          = 40  // { int sys_lstat(const char *path, struct stat *ub); }
@@ -83,7 +84,6 @@ const (
 	SYS_MADVISE        = 75  // { int sys_madvise(void *addr, size_t len, int behav); }
 	SYS_UTIMES         = 76  // { int sys_utimes(const char *path, const struct timeval *tptr); }
 	SYS_FUTIMES        = 77  // { int sys_futimes(int fd, const struct timeval *tptr); }
-	SYS_MINCORE        = 78  // { int sys_mincore(void *addr, size_t len, char *vec); }
 	SYS_GETGROUPS      = 79  // { int sys_getgroups(int gidsetsize, gid_t *gidset); }
 	SYS_SETGROUPS      = 80  // { int sys_setgroups(int gidsetsize, const gid_t *gidset); }
 	SYS_GETPGRP        = 81  // { int sys_getpgrp(void); }
@@ -119,6 +119,7 @@ const (
 	SYS_SIGSUSPEND     = 111 // { int sys_sigsuspend(int mask); }
 	SYS_SENDSYSLOG     = 112 // { int sys_sendsyslog(const char *buf, size_t nbyte, int flags); }
 	SYS_UNVEIL         = 114 // { int sys_unveil(const char *path, const char *permissions); }
+	SYS___REALPATH     = 115 // { int sys___realpath(const char *pathname, char *resolved); }
 	SYS_GETSOCKOPT     = 118 // { int sys_getsockopt(int s, int level, int name, void *val, socklen_t *avalsize); }
 	SYS_THRKILL        = 119 // { int sys_thrkill(pid_t tid, int signum, void *tcb); }
 	SYS_READV          = 120 // { ssize_t sys_readv(int fd, const struct iovec *iovp, int iovcnt); }
@@ -142,6 +143,7 @@ const (
 	SYS_QUOTACTL       = 148 // { int sys_quotactl(const char *path, int cmd, int uid, char *arg); }
 	SYS_NFSSVC         = 155 // { int sys_nfssvc(int flag, void *argp); }
 	SYS_GETFH          = 161 // { int sys_getfh(const char *fname, fhandle_t *fhp); }
+	SYS___TMPFD        = 164 // { int sys___tmpfd(int flags); }
 	SYS_SYSARCH        = 165 // { int sys_sysarch(int op, void *parms); }
 	SYS_PREAD          = 173 // { ssize_t sys_pread(int fd, void *buf, size_t nbyte, int pad, off_t offset); }
 	SYS_PWRITE         = 174 // { ssize_t sys_pwrite(int fd, const void *buf, size_t nbyte, int pad, off_t offset); }

@@ -123,6 +123,7 @@ var sysctlMib = []mibentry{
 	{"kern.ttycount", []_C_int{1, 57}},
 	{"kern.utc_offset", []_C_int{1, 88}},
 	{"kern.version", []_C_int{1, 4}},
+	{"kern.video", []_C_int{1, 89}},
 	{"kern.watchdog.auto", []_C_int{1, 64, 2}},
 	{"kern.watchdog.period", []_C_int{1, 64, 1}},
 	{"kern.witnesswatch", []_C_int{1, 53}},
