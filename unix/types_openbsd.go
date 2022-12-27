@@ -209,8 +209,6 @@ type RtMsghdr C.struct_rt_msghdr
 
 type RtMetrics C.struct_rt_metrics
 
-type Mclpool C.struct_mclpool
-
 // Berkeley packet filter
 
 const (
