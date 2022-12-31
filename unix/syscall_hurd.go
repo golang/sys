@@ -20,4 +20,3 @@ func ioctl(fd int, req uint, arg uintptr) (err error) {
 	}
 	return
 }
-

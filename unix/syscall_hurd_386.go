@@ -8,7 +8,7 @@
 package unix
 
 const (
-	TIOCGETA                       = 0x62251713
+	TIOCGETA = 0x62251713
 )
 
 type Winsize struct {
