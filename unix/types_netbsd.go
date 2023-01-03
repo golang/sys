@@ -41,6 +41,7 @@ package unix
 #include <sys/un.h>
 #include <sys/utsname.h>
 #include <sys/wait.h>
+#include <uvm/uvm_extern.h>
 #include <net/bpf.h>
 #include <net/if.h>
 #include <net/if_dl.h>
@@ -296,6 +297,12 @@ type Sysctlnode C.struct_sysctlnode
 // Uname
 
 type Utsname C.struct_utsname
+
+// Uvmexp
+
+const SizeofUvmexp = C.sizeof_struct_uvmexp_sysctl
+
+type Uvmexp C.struct_uvmexp_sysctl
 
 // Clockinfo
 
