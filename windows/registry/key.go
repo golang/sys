@@ -33,6 +33,14 @@ const (
 	// Registry key security and access rights.
 	// See https://msdn.microsoft.com/en-us/library/windows/desktop/ms724878.aspx
 	// for details.
+
+	// Standard access rights
+	DELETE       = 0x00010000
+	READ_CONTROL = 0x00020000
+	WRITE_DAC    = 0x00040000
+	WRITE_OWNER  = 0x00080000
+
+	// Specific access rights
 	ALL_ACCESS         = 0xf003f
 	CREATE_LINK        = 0x00020
 	CREATE_SUB_KEY     = 0x00004
