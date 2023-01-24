@@ -871,6 +871,22 @@ func (src *Source) Generate(w io.Writer) error {
 	return nil
 }
 
+func writeTempSourceFile(data []byte) (string, error) {
+	f, err := os.CreateTemp("", "mkwinsyscall-generated-*.go")
+	if err != nil {
+		return "", err
+	}
+	_, err = f.Write(data)
+	if closeErr := f.Close(); err == nil {
+		err = closeErr
+	}
+	if err != nil {
+		os.Remove(f.Name()) // best effort
+		return "", err
+	}
+	return f.Name(), nil
+}
+
 func usage() {
 	fmt.Fprintf(os.Stderr, "usage: mkwinsyscall [flags] [path ...]\n")
 	flag.PrintDefaults()
@@ -897,7 +913,12 @@ func main() {
 
 	data, err := format.Source(buf.Bytes())
 	if err != nil {
-		log.Fatal(err)
+		log.Printf("failed to format source: %v", err)
+		f, err := writeTempSourceFile(buf.Bytes())
+		if err != nil {
+			log.Fatalf("failed to write unformatted source to file: %v", err)
+		}
+		log.Fatalf("for diagnosis, wrote unformatted source to %v", f)
 	}
 	if *filename == "" {
 		_, err = os.Stdout.Write(data)
