@@ -58,14 +58,18 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Only for loong64, getting tools of qemu-user and gcc-cross-compiler
-RUN apt-get update && apt-get install wget xz-utils -y && mkdir /loong64 && cd /loong64 \
-    && wget -q https://github.com/loongson/build-tools/releases/download/2021.12.21/qemu-loongarch-2022-4-01.tar.gz \
-    && tar xf qemu-loongarch-2022-4-01.tar.gz && cp ./4-1/new-world/qemu-loongarch64 /usr/bin/ \
-    && rm -rf qemu-loongarch-2022-4-01.tar.gz 4-1 \
-    && wget -q https://github.com/loongson/build-tools/releases/download/2021.12.21/loongarch64-clfs-2022-03-03-cross-tools-gcc-glibc.tar.xz \
-    && tar xf loongarch64-clfs-2022-03-03-cross-tools-gcc-glibc.tar.xz && mv cross-tools.gcc_glibc /usr/local/cross-tools-loong64 \
-    && rm -rf loongarch64-clfs-2022-03-03-cross-tools-gcc-glibc.tar.xz \
-    && ln -s /usr/local/cross-tools-loong64/bin/loongarch64-unknown-linux-gnu-gcc /usr/bin/loongarch64-linux-gnu-gcc \
+ENV LOONG64_BASE_URL https://github.com/loongson/build-tools/releases/download/2022.09.06
+ENV LOONG64_GCC  loongarch64-clfs-6.3-cross-tools-gcc-glibc.tar.xz
+ENV LOONG64_QEMU qemu-loongarch64
+ENV LOONG64_GCC_DOWNLOAD_URL  $LOONG64_BASE_URL/$LOONG64_GCC
+ENV LOONG64_QEMU_DOWNLOAD_URL $LOONG64_BASE_URL/$LOONG64_QEMU
+
+RUN apt-get update && apt-get install xz-utils -y && mkdir /loong64 && cd /loong64 \
+    && curl -fsSL "$LOONG64_QEMU_DOWNLOAD_URL" -o /usr/bin/"$LOONG64_QEMU" \
+    && chmod +x /usr/bin/"$LOONG64_QEMU" \
+    && curl -fsSL "$LOONG64_GCC_DOWNLOAD_URL" -o "$LOONG64_GCC" \
+    && tar xf "$LOONG64_GCC" -C /usr/local/ \
+    && ln -s /usr/local/cross-tools/bin/loongarch64-unknown-linux-gnu-gcc /usr/bin/loongarch64-linux-gnu-gcc \
     && rm -rf /loong64
 
 # Let the scripts know they are in the docker environment
