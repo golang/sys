@@ -17,14 +17,8 @@ WORKDIR /git
 RUN git config --global advice.detachedHead false
 # Linux Kernel: Released 11 Dec 2022
 RUN git clone --branch v6.1 --depth 1 https://kernel.googlesource.com/pub/scm/linux/kernel/git/torvalds/linux
-# GNU C library: Released 03 Feb 2022
-RUN git clone --branch release/2.35/master --depth 1 https://sourceware.org/git/glibc.git
-
-# Only for loong64, add kernel and glibc patch
-RUN git clone https://github.com/loongson/golang-infra.git /git/loong64-patches \
-    && git config --global user.name "golang" && git config --global user.email "golang@localhost" \
-    && cd /git/loong64-patches && git checkout glibc-v2.35 && cd /git/glibc && git am /git/loong64-patches/*.patch \
-    && curl -fsSL https://git.savannah.gnu.org/cgit/config.git/plain/config.sub -o /git/glibc/scripts/config.sub
+# GNU C library: Released 30 Jul 2022
+RUN git clone --branch release/2.36/master --depth 1 https://sourceware.org/git/glibc.git
 
 # Get Go
 ENV GOLANG_VERSION 1.20rc2

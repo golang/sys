@@ -21,6 +21,7 @@ package unix
 #define _GNU_SOURCE
 
 #include <dirent.h>
+#include <fcntl.h>
 #include <poll.h>
 #include <sched.h>
 #include <signal.h>
@@ -50,6 +51,7 @@ package unix
 #include <sys/timerfd.h>
 #include <sys/times.h>
 #include <sys/timex.h>
+#include <sys/types.h>
 #include <sys/un.h>
 #include <sys/user.h>
 #include <sys/utsname.h>
@@ -156,7 +158,7 @@ struct termios2 {
 //	  struct (like st_atim) for consistency with the glibc fields.
 //	* The padding fields get different names to not break compatibility.
 //	* st_blocks is signed, again for compatibility.
-struct stat {
+typedef struct {
 	unsigned int		st_dev;
 	unsigned int		st_pad1[3]; // Reserved for st_dev expansion
 
@@ -183,18 +185,9 @@ struct stat {
 	unsigned int		st_pad4;
 
 	long			st_blocks;
-};
-
-// These are needed because we do not include fcntl.h or sys/types.h
-#include <linux/fcntl.h>
-#include <linux/fadvise.h>
-
+} my_stat;
 #else
-
-// Use the stat defined by glibc
-#include <fcntl.h>
-#include <sys/types.h>
-
+typedef struct stat my_stat;
 #endif
 
 // These are defined in linux/fcntl.h, but including it globally causes
@@ -510,7 +503,7 @@ type _Gid_t C.gid_t
 
 // Files
 
-type Stat_t C.struct_stat
+type Stat_t C.my_stat
 
 type StatxTimestamp C.struct_statx_timestamp
 

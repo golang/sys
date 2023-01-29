@@ -411,7 +411,16 @@ func (t *target) makeHeaders() error {
 
 	// Make the glibc headers we need for this architecture
 	confScript := filepath.Join(GlibcDir, "configure")
-	glibcConf := t.makeCommand(confScript, "--prefix="+filepath.Join(TempDir, t.GoArch), "--host="+t.GNUArch, "--enable-kernel="+MinKernel)
+	glibcArgs := []string{"--prefix=" + filepath.Join(TempDir, t.GoArch), "--host=" + t.GNUArch}
+	if t.LinuxArch == "loongarch" {
+		// The minimum version requirement of the Loongarch for the kernel in glibc
+		// is 5.19, if --enable-kernel is less than 5.19, glibc handles errors
+		glibcArgs = append(glibcArgs, "--enable-kernel=5.19.0")
+	} else {
+		glibcArgs = append(glibcArgs, "--enable-kernel="+MinKernel)
+	}
+	glibcConf := t.makeCommand(confScript, glibcArgs...)
+
 	glibcConf.Dir = buildDir
 	if err := glibcConf.Run(); err != nil {
 		return err
