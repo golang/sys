@@ -55,7 +55,7 @@ func goBuildTags() string {
 	return strings.ReplaceAll(*tags, ",", " && ")
 }
 
-// plusBuildTags returns build tags in the +build format.
+// buildTags returns build tags in the +build format.
 func buildTags() string {
 	return *tags
 }
