@@ -183,7 +183,9 @@ func TestEventPortErrors(t *testing.T) {
 	timeout.Nsec = 1
 	_, err = port.GetOne(timeout)
 	if err != unix.ETIME {
-		t.Errorf("unexpected lack of timeout")
+		// See https://go.dev/issue/58259
+		// Perhaps we sometimes get EINTR ???
+		t.Errorf("port.GetOne(%v) returned error %v, want %v", timeout, err, unix.ETIME)
 	}
 	err = port.DissociateFd(uintptr(0))
 	if err == nil {
