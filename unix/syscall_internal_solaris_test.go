@@ -28,6 +28,40 @@ func (e *EventPort) checkInternals(t *testing.T, fds, paths, cookies, pending in
 	}
 }
 
+// getOneRetry wraps EventPort.GetOne which in turn wraps a syscall that can be
+// interrupted causing us to receive EINTR.
+// To prevent our tests from flaking, we retry the syscall until it works
+// rather than get unexpected results in our tests.
+func getOneRetry(t *testing.T, p *EventPort, timeout *Timespec) (e *PortEvent, err error) {
+	t.Helper()
+	for {
+		e, err = p.GetOne(timeout)
+		if err != EINTR {
+			break
+		}
+	}
+	return e, err
+}
+
+// getRetry wraps EventPort.Get which in turn wraps a syscall that can be
+// interrupted causing us to receive EINTR.
+// To prevent our tests from flaking, we retry the syscall until it works
+// rather than get unexpected results in our tests.
+func getRetry(t *testing.T, p *EventPort, s []PortEvent, min int, timeout *Timespec) (n int, err error) {
+	t.Helper()
+	for {
+		n, err = p.Get(s, min, timeout)
+		if err != EINTR {
+			break
+		}
+		// If we did get EINTR, make sure we got 0 events
+		if n != 0 {
+			t.Fatalf("EventPort.Get returned events on EINTR.\ngot: %d\nexpected: 0", n)
+		}
+	}
+	return n, err
+}
+
 // Regression test for DissociatePath returning ENOENT
 // This test is intended to create a linear worst
 // case scenario of events being associated and
@@ -143,7 +177,7 @@ func TestEventPortDissociateAlreadyGone(t *testing.T) {
 	runtime.GC()
 
 	// Before the fix, this would cause a nil pointer exception
-	e, err := port.GetOne(nil)
+	e, err := getOneRetry(t, port, nil)
 	if err != nil {
 		t.Errorf("failed to get an event: %v", err)
 	}
@@ -152,7 +186,7 @@ func TestEventPortDissociateAlreadyGone(t *testing.T) {
 		t.Errorf(`expected "cookie1", got "%v"`, e.Cookie)
 	}
 	// Make sure that a cookie of the same value doesn't cause removal from the paths map incorrectly
-	e, err = port.GetOne(nil)
+	e, err = getOneRetry(t, port, nil)
 	if err != nil {
 		t.Errorf("failed to get an event: %v", err)
 	}
@@ -167,7 +201,7 @@ func TestEventPortDissociateAlreadyGone(t *testing.T) {
 	}
 	// Event has fired, but until processed it should still be in the map
 	port.checkInternals(t, 0, 1, 1, 1)
-	e, err = port.GetOne(nil)
+	e, err = getOneRetry(t, port, nil)
 	if err != nil {
 		t.Errorf("failed to get an event: %v", err)
 	}
@@ -221,12 +255,12 @@ func TestEventPortGetAfterClose(t *testing.T) {
 	port.paths = nil
 	port.cookies = nil
 	// Ensure that we get back reasonable errors rather than panic
-	_, err = port.GetOne(nil)
+	_, err = getOneRetry(t, port, nil)
 	if err == nil || err.Error() != "this EventPort is already closed" {
 		t.Errorf("didn't receive expected error of 'this EventPort is already closed'; got: %v", err)
 	}
 	events := make([]PortEvent, 2)
-	n, err = port.Get(events, 1, nil)
+	n, err = getRetry(t, port, events, 1, nil)
 	if n != 0 {
 		t.Errorf("expected to get back 0 events, got %d", n)
 	}
