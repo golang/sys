@@ -89,10 +89,12 @@ func main() {
 			return out
 		})
 
-		// Inside PtraceIoDesc replace all *byte with uintptr
+		// Inside PtraceIoDesc replace the Offs field, which refers to an address
+		// in the child process (not the Go parent), with a uintptr.
 		ptraceIoDescStruct := regexp.MustCompile(`(?s:type PtraceIoDesc struct \{.*?\})`)
+		addrField := regexp.MustCompile(`(\bOffs\s+)\*byte`)
 		b = ptraceIoDescStruct.ReplaceAllFunc(b, func(in []byte) []byte {
-			return bytes.ReplaceAll(in, []byte("*byte"), []byte("uintptr"))
+			return addrField.ReplaceAll(in, []byte(`${1}uintptr`))
 		})
 	}
 
