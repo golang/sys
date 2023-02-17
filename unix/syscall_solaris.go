@@ -547,9 +547,15 @@ func Minor(dev uint64) uint32 {
  */
 
 //sys	ioctlRet(fd int, req uint, arg uintptr) (ret int, err error) = libc.ioctl
+//sys	ioctlPtrRet(fd int, req uint, arg unsafe.Pointer) (ret int, err error) = libc.ioctl
 
 func ioctl(fd int, req uint, arg uintptr) (err error) {
 	_, err = ioctlRet(fd, req, arg)
+	return err
+}
+
+func ioctlPtr(fd int, req uint, arg unsafe.Pointer) (err error) {
+	_, err = ioctlPtrRet(fd, req, arg)
 	return err
 }
 

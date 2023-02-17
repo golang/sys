@@ -161,7 +161,8 @@ func Getfsstat(buf []Statfs_t, flags int) (n int, err error) {
 	return
 }
 
-//sys	ioctl(fd int, req uint, arg uintptr) (err error)
+//sys	ioctl(fd int, req uint, arg uintptr) (err error) = SYS_IOCTL
+//sys	ioctlPtr(fd int, req uint, arg unsafe.Pointer) (err error) = SYS_IOCTL
 
 //sys	sysctl(mib []_C_int, old *byte, oldlen *uintptr, new *byte, newlen uintptr) (err error) = SYS___SYSCTL
 
