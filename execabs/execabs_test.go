@@ -12,6 +12,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"runtime"
+	"strings"
 	"testing"
 )
 
@@ -87,7 +88,7 @@ func TestCommand(t *testing.T) {
 		expectedErr := fmt.Sprintf("execabs-test resolves to executable in current directory (.%c%s)", filepath.Separator, executable)
 		if err = cmd("execabs-test").Run(); err == nil {
 			t.Fatalf("Command.Run didn't fail when exec.LookPath returned a relative path")
-		} else if err.Error() != expectedErr {
+		} else if err.Error() != expectedErr && !isGo119ErrDot(err) {
 			t.Errorf("Command.Run returned unexpected error: want %q, got %q", expectedErr, err.Error())
 		}
 	}
@@ -128,5 +129,16 @@ func TestLookPath(t *testing.T) {
 		t.Fatalf("LookPath didn't fail when finding a non-relative path")
 	} else if err.Error() != expectedErr {
 		t.Errorf("LookPath returned unexpected error: want %q, got %q", expectedErr, err.Error())
+	}
+}
+
+// Issue #58606
+func TestDoesNotExist(t *testing.T) {
+	err := Command("this-executable-should-not-exist").Start()
+	if err == nil {
+		t.Fatal("command should have failed")
+	}
+	if strings.Contains(err.Error(), "resolves to executable in current directory") {
+		t.Errorf("error (%v) should not refer to current directory", err)
 	}
 }
