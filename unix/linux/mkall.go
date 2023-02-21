@@ -790,13 +790,13 @@ func generatePtraceRegSet(arch string) error {
 	fmt.Fprintf(buf, "// PtraceGetRegSet%s fetches the registers used by %s binaries.\n", uarch, arch)
 	fmt.Fprintf(buf, "func PtraceGetRegSet%s(pid, addr int, regsout *PtraceRegs%s) error {\n", uarch, uarch)
 	fmt.Fprintf(buf, "\tiovec := Iovec{(*byte)(unsafe.Pointer(regsout)), uint64(unsafe.Sizeof(*regsout))}\n")
-	fmt.Fprintf(buf, "\treturn ptrace(PTRACE_GETREGSET, pid, uintptr(addr), uintptr(unsafe.Pointer(&iovec)))\n")
+	fmt.Fprintf(buf, "\treturn ptracePtr(PTRACE_GETREGSET, pid, uintptr(addr), unsafe.Pointer(&iovec))\n")
 	fmt.Fprintf(buf, "}\n")
 	fmt.Fprintf(buf, "\n")
 	fmt.Fprintf(buf, "// PtraceSetRegSet%s sets the registers used by %s binaries.\n", uarch, arch)
 	fmt.Fprintf(buf, "func PtraceSetRegSet%s(pid, addr int, regs *PtraceRegs%s) error {\n", uarch, uarch)
 	fmt.Fprintf(buf, "\tiovec := Iovec{(*byte)(unsafe.Pointer(regs)), uint64(unsafe.Sizeof(*regs))}\n")
-	fmt.Fprintf(buf, "\treturn ptrace(PTRACE_SETREGSET, pid, uintptr(addr), uintptr(unsafe.Pointer(&iovec)))\n")
+	fmt.Fprintf(buf, "\treturn ptracePtr(PTRACE_SETREGSET, pid, uintptr(addr), unsafe.Pointer(&iovec))\n")
 	fmt.Fprintf(buf, "}\n")
 	if err := buf.Flush(); err != nil {
 		return err
@@ -834,12 +834,12 @@ func writeOnePtrace(w io.Writer, arch, def string) {
 	fmt.Fprintf(w, "\n")
 	fmt.Fprintf(w, "// PtraceGetRegs%s fetches the registers used by %s binaries.\n", uarch, arch)
 	fmt.Fprintf(w, "func PtraceGetRegs%s(pid int, regsout *PtraceRegs%s) error {\n", uarch, uarch)
-	fmt.Fprintf(w, "\treturn ptrace(PTRACE_GETREGS, pid, 0, uintptr(unsafe.Pointer(regsout)))\n")
+	fmt.Fprintf(w, "\treturn ptracePtr(PTRACE_GETREGS, pid, 0, unsafe.Pointer(regsout))\n")
 	fmt.Fprintf(w, "}\n")
 	fmt.Fprintf(w, "\n")
 	fmt.Fprintf(w, "// PtraceSetRegs%s sets the registers used by %s binaries.\n", uarch, arch)
 	fmt.Fprintf(w, "func PtraceSetRegs%s(pid int, regs *PtraceRegs%s) error {\n", uarch, uarch)
-	fmt.Fprintf(w, "\treturn ptrace(PTRACE_SETREGS, pid, 0, uintptr(unsafe.Pointer(regs)))\n")
+	fmt.Fprintf(w, "\treturn ptracePtr(PTRACE_SETREGS, pid, 0, unsafe.Pointer(regs))\n")
 	fmt.Fprintf(w, "}\n")
 }
 

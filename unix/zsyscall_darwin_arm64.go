@@ -2510,6 +2510,14 @@ func ptrace1(request int, pid int, addr uintptr, data uintptr) (err error) {
 	return
 }
 
+func ptrace1Ptr(request int, pid int, addr uintptr, data unsafe.Pointer) (err error) {
+	_, _, e1 := syscall_syscall6(libc_ptrace_trampoline_addr, uintptr(request), uintptr(pid), addr, uintptr(data), 0, 0)
+	if e1 != 0 {
+		err = errnoErr(e1)
+	}
+	return
+}
+
 var libc_ptrace_trampoline_addr uintptr
 
 //go:cgo_import_dynamic libc_ptrace ptrace "/usr/lib/libSystem.B.dylib"

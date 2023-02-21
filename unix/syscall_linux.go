@@ -1579,6 +1579,7 @@ func BindToDevice(fd int, device string) (err error) {
 }
 
 //sys	ptrace(request int, pid int, addr uintptr, data uintptr) (err error)
+//sys	ptracePtr(request int, pid int, addr uintptr, data unsafe.Pointer) (err error)
 
 func ptracePeek(req int, pid int, addr uintptr, out []byte) (count int, err error) {
 	// The peek requests are machine-size oriented, so we wrap it
@@ -1596,7 +1597,7 @@ func ptracePeek(req int, pid int, addr uintptr, out []byte) (count int, err erro
 	// boundary.
 	n := 0
 	if addr%SizeofPtr != 0 {
-		err = ptrace(req, pid, addr-addr%SizeofPtr, uintptr(unsafe.Pointer(&buf[0])))
+		err = ptracePtr(req, pid, addr-addr%SizeofPtr, unsafe.Pointer(&buf[0]))
 		if err != nil {
 			return 0, err
 		}
@@ -1608,7 +1609,7 @@ func ptracePeek(req int, pid int, addr uintptr, out []byte) (count int, err erro
 	for len(out) > 0 {
 		// We use an internal buffer to guarantee alignment.
 		// It's not documented if this is necessary, but we're paranoid.
-		err = ptrace(req, pid, addr+uintptr(n), uintptr(unsafe.Pointer(&buf[0])))
+		err = ptracePtr(req, pid, addr+uintptr(n), unsafe.Pointer(&buf[0]))
 		if err != nil {
 			return n, err
 		}
@@ -1640,7 +1641,7 @@ func ptracePoke(pokeReq int, peekReq int, pid int, addr uintptr, data []byte) (c
 	n := 0
 	if addr%SizeofPtr != 0 {
 		var buf [SizeofPtr]byte
-		err = ptrace(peekReq, pid, addr-addr%SizeofPtr, uintptr(unsafe.Pointer(&buf[0])))
+		err = ptracePtr(peekReq, pid, addr-addr%SizeofPtr, unsafe.Pointer(&buf[0]))
 		if err != nil {
 			return 0, err
 		}
@@ -1667,7 +1668,7 @@ func ptracePoke(pokeReq int, peekReq int, pid int, addr uintptr, data []byte) (c
 	// Trailing edge.
 	if len(data) > 0 {
 		var buf [SizeofPtr]byte
-		err = ptrace(peekReq, pid, addr+uintptr(n), uintptr(unsafe.Pointer(&buf[0])))
+		err = ptracePtr(peekReq, pid, addr+uintptr(n), unsafe.Pointer(&buf[0]))
 		if err != nil {
 			return n, err
 		}
@@ -1696,11 +1697,11 @@ func PtracePokeUser(pid int, addr uintptr, data []byte) (count int, err error) {
 }
 
 func PtraceGetRegs(pid int, regsout *PtraceRegs) (err error) {
-	return ptrace(PTRACE_GETREGS, pid, 0, uintptr(unsafe.Pointer(regsout)))
+	return ptracePtr(PTRACE_GETREGS, pid, 0, unsafe.Pointer(regsout))
 }
 
 func PtraceSetRegs(pid int, regs *PtraceRegs) (err error) {
-	return ptrace(PTRACE_SETREGS, pid, 0, uintptr(unsafe.Pointer(regs)))
+	return ptracePtr(PTRACE_SETREGS, pid, 0, unsafe.Pointer(regs))
 }
 
 func PtraceSetOptions(pid int, options int) (err error) {
@@ -1709,7 +1710,7 @@ func PtraceSetOptions(pid int, options int) (err error) {
 
 func PtraceGetEventMsg(pid int) (msg uint, err error) {
 	var data _C_long
-	err = ptrace(PTRACE_GETEVENTMSG, pid, 0, uintptr(unsafe.Pointer(&data)))
+	err = ptracePtr(PTRACE_GETEVENTMSG, pid, 0, unsafe.Pointer(&data))
 	msg = uint(data)
 	return
 }
