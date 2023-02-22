@@ -15,15 +15,15 @@ RUN apt-get update && apt-get install -y  --no-install-recommends \
 # Get the git sources. If not cached, this takes O(5 minutes).
 WORKDIR /git
 RUN git config --global advice.detachedHead false
-# Linux Kernel: Released 11 Dec 2022
-RUN git clone --branch v6.1 --depth 1 https://kernel.googlesource.com/pub/scm/linux/kernel/git/torvalds/linux
-# GNU C library: Released 30 Jul 2022
-RUN git clone --branch release/2.36/master --depth 1 https://sourceware.org/git/glibc.git
+# Linux Kernel: Released 19 Feb 2023
+RUN git clone --branch v6.2 --depth 1 https://kernel.googlesource.com/pub/scm/linux/kernel/git/torvalds/linux
+# GNU C library: Released 1 Feb 2022
+RUN git clone --branch release/2.37/master --depth 1 https://sourceware.org/git/glibc.git
 
 # Get Go
-ENV GOLANG_VERSION 1.20rc2
+ENV GOLANG_VERSION 1.20.1
 ENV GOLANG_DOWNLOAD_URL https://golang.org/dl/go$GOLANG_VERSION.linux-amd64.tar.gz
-ENV GOLANG_DOWNLOAD_SHA256 9ba01a3be1a682b89f5bfc62f9fba0e7d6990a5b7018f6c7aaa56ad65ed96a0e
+ENV GOLANG_DOWNLOAD_SHA256 000a5b1fca4f75895f78befeb2eecf10bfff3c428597f3f1e69133b63b911b02
 
 RUN curl -fsSL "$GOLANG_DOWNLOAD_URL" -o golang.tar.gz \
     && echo "$GOLANG_DOWNLOAD_SHA256  golang.tar.gz" | sha256sum -c - \

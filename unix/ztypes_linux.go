@@ -1939,7 +1939,11 @@ const (
 	NFT_MSG_GETOBJ                    = 0x13
 	NFT_MSG_DELOBJ                    = 0x14
 	NFT_MSG_GETOBJ_RESET              = 0x15
-	NFT_MSG_MAX                       = 0x19
+	NFT_MSG_NEWFLOWTABLE              = 0x16
+	NFT_MSG_GETFLOWTABLE              = 0x17
+	NFT_MSG_DELFLOWTABLE              = 0x18
+	NFT_MSG_GETRULE_RESET             = 0x19
+	NFT_MSG_MAX                       = 0x1a
 	NFTA_LIST_UNSPEC                  = 0x0
 	NFTA_LIST_ELEM                    = 0x1
 	NFTA_HOOK_UNSPEC                  = 0x0
@@ -2443,9 +2447,11 @@ const (
 	SOF_TIMESTAMPING_OPT_STATS    = 0x1000
 	SOF_TIMESTAMPING_OPT_PKTINFO  = 0x2000
 	SOF_TIMESTAMPING_OPT_TX_SWHW  = 0x4000
+	SOF_TIMESTAMPING_BIND_PHC     = 0x8000
+	SOF_TIMESTAMPING_OPT_ID_TCP   = 0x10000
 
-	SOF_TIMESTAMPING_LAST = 0x8000
-	SOF_TIMESTAMPING_MASK = 0xffff
+	SOF_TIMESTAMPING_LAST = 0x10000
+	SOF_TIMESTAMPING_MASK = 0x1ffff
 
 	SCM_TSTAMP_SND   = 0x0
 	SCM_TSTAMP_SCHED = 0x1
@@ -3265,7 +3271,7 @@ const (
 	DEVLINK_ATTR_LINECARD_SUPPORTED_TYPES              = 0xae
 	DEVLINK_ATTR_NESTED_DEVLINK                        = 0xaf
 	DEVLINK_ATTR_SELFTESTS                             = 0xb0
-	DEVLINK_ATTR_MAX                                   = 0xb0
+	DEVLINK_ATTR_MAX                                   = 0xb3
 	DEVLINK_DPIPE_FIELD_MAPPING_TYPE_NONE              = 0x0
 	DEVLINK_DPIPE_FIELD_MAPPING_TYPE_IFINDEX           = 0x1
 	DEVLINK_DPIPE_MATCH_TYPE_FIELD_EXACT               = 0x0
@@ -3281,7 +3287,8 @@ const (
 	DEVLINK_PORT_FUNCTION_ATTR_HW_ADDR                 = 0x1
 	DEVLINK_PORT_FN_ATTR_STATE                         = 0x2
 	DEVLINK_PORT_FN_ATTR_OPSTATE                       = 0x3
-	DEVLINK_PORT_FUNCTION_ATTR_MAX                     = 0x3
+	DEVLINK_PORT_FN_ATTR_CAPS                          = 0x4
+	DEVLINK_PORT_FUNCTION_ATTR_MAX                     = 0x4
 )
 
 type FsverityDigest struct {
@@ -3572,7 +3579,8 @@ const (
 	ETHTOOL_MSG_MODULE_SET                    = 0x23
 	ETHTOOL_MSG_PSE_GET                       = 0x24
 	ETHTOOL_MSG_PSE_SET                       = 0x25
-	ETHTOOL_MSG_USER_MAX                      = 0x25
+	ETHTOOL_MSG_RSS_GET                       = 0x26
+	ETHTOOL_MSG_USER_MAX                      = 0x26
 	ETHTOOL_MSG_KERNEL_NONE                   = 0x0
 	ETHTOOL_MSG_STRSET_GET_REPLY              = 0x1
 	ETHTOOL_MSG_LINKINFO_GET_REPLY            = 0x2
@@ -3611,7 +3619,8 @@ const (
 	ETHTOOL_MSG_MODULE_GET_REPLY              = 0x23
 	ETHTOOL_MSG_MODULE_NTF                    = 0x24
 	ETHTOOL_MSG_PSE_GET_REPLY                 = 0x25
-	ETHTOOL_MSG_KERNEL_MAX                    = 0x25
+	ETHTOOL_MSG_RSS_GET_REPLY                 = 0x26
+	ETHTOOL_MSG_KERNEL_MAX                    = 0x26
 	ETHTOOL_A_HEADER_UNSPEC                   = 0x0
 	ETHTOOL_A_HEADER_DEV_INDEX                = 0x1
 	ETHTOOL_A_HEADER_DEV_NAME                 = 0x2
@@ -3679,7 +3688,8 @@ const (
 	ETHTOOL_A_LINKSTATE_SQI_MAX               = 0x4
 	ETHTOOL_A_LINKSTATE_EXT_STATE             = 0x5
 	ETHTOOL_A_LINKSTATE_EXT_SUBSTATE          = 0x6
-	ETHTOOL_A_LINKSTATE_MAX                   = 0x6
+	ETHTOOL_A_LINKSTATE_EXT_DOWN_CNT          = 0x7
+	ETHTOOL_A_LINKSTATE_MAX                   = 0x7
 	ETHTOOL_A_DEBUG_UNSPEC                    = 0x0
 	ETHTOOL_A_DEBUG_HEADER                    = 0x1
 	ETHTOOL_A_DEBUG_MSGMASK                   = 0x2
@@ -4409,7 +4419,7 @@ const (
 	NL80211_ATTR_MAC_HINT                                   = 0xc8
 	NL80211_ATTR_MAC_MASK                                   = 0xd7
 	NL80211_ATTR_MAX_AP_ASSOC_STA                           = 0xca
-	NL80211_ATTR_MAX                                        = 0x140
+	NL80211_ATTR_MAX                                        = 0x141
 	NL80211_ATTR_MAX_CRIT_PROT_DURATION                     = 0xb4
 	NL80211_ATTR_MAX_CSA_COUNTERS                           = 0xce
 	NL80211_ATTR_MAX_MATCH_SETS                             = 0x85
@@ -4552,6 +4562,7 @@ const (
 	NL80211_ATTR_SUPPORT_MESH_AUTH                          = 0x73
 	NL80211_ATTR_SURVEY_INFO                                = 0x54
 	NL80211_ATTR_SURVEY_RADIO_STATS                         = 0xda
+	NL80211_ATTR_TD_BITMAP                                  = 0x141
 	NL80211_ATTR_TDLS_ACTION                                = 0x88
 	NL80211_ATTR_TDLS_DIALOG_TOKEN                          = 0x89
 	NL80211_ATTR_TDLS_EXTERNAL_SETUP                        = 0x8c
