@@ -254,7 +254,7 @@ func Sendfile(outfd int, infd int, offset *int64, count int) (written int, err e
 }
 
 //sys	ptrace(request int, pid int, addr uintptr, data int) (err error)
-//sys	ptracePtr(request int, pid int, addr unsafe.Pointer, data int) (err error)
+//sys	ptracePtr(request int, pid int, addr unsafe.Pointer, data int) (err error) = SYS_PTRACE
 
 func PtraceAttach(pid int) (err error) {
 	return ptrace(PT_ATTACH, pid, 0, 0)
