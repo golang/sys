@@ -325,6 +325,18 @@ func PtraceSingleStep(pid int) (err error) {
 	return ptrace(PT_STEP, pid, 1, 0)
 }
 
+func Dup3(oldfd, newfd, flags int) error {
+	if oldfd == newfd || flags&^O_CLOEXEC != 0 {
+		return EINVAL
+	}
+	how := F_DUP2FD
+	if flags&O_CLOEXEC != 0 {
+		how = F_DUP2FD_CLOEXEC
+	}
+	_, err := fcntl(oldfd, how, newfd)
+	return err
+}
+
 /*
  * Exposed directly
  */
