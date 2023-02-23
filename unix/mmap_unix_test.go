@@ -15,11 +15,21 @@ import (
 )
 
 func TestMmap(t *testing.T) {
-	b, err := unix.Mmap(-1, 0, unix.Getpagesize(), unix.PROT_NONE, unix.MAP_ANON|unix.MAP_PRIVATE)
+	mmapProt := unix.PROT_NONE
+	mprotectProt := unix.PROT_READ | unix.PROT_WRITE
+	// On NetBSD PAX mprotect prohibits setting protection bits
+	// missing from the original mmap call unless explicitly
+	// requested with PROT_MPROTECT.
+	if runtime.GOOS == "netbsd" {
+		// PROT_MPROTECT(x) is defined as ((x) << 3):
+		// https://github.com/NetBSD/src/blob/aba449a55bf91b44bc68f542edd9afa341962b89/sys/sys/mman.h#L73
+		mmapProt = mprotectProt << 3
+	}
+	b, err := unix.Mmap(-1, 0, unix.Getpagesize(), mmapProt, unix.MAP_ANON|unix.MAP_PRIVATE)
 	if err != nil {
 		t.Fatalf("Mmap: %v", err)
 	}
-	if err := unix.Mprotect(b, unix.PROT_READ|unix.PROT_WRITE); err != nil {
+	if err := unix.Mprotect(b, mprotectProt); err != nil {
 		t.Fatalf("Mprotect: %v", err)
 	}
 
