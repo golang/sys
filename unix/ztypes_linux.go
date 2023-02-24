@@ -456,36 +456,60 @@ type Ucred struct {
 }
 
 type TCPInfo struct {
-	State          uint8
-	Ca_state       uint8
-	Retransmits    uint8
-	Probes         uint8
-	Backoff        uint8
-	Options        uint8
-	Rto            uint32
-	Ato            uint32
-	Snd_mss        uint32
-	Rcv_mss        uint32
-	Unacked        uint32
-	Sacked         uint32
-	Lost           uint32
-	Retrans        uint32
-	Fackets        uint32
-	Last_data_sent uint32
-	Last_ack_sent  uint32
-	Last_data_recv uint32
-	Last_ack_recv  uint32
-	Pmtu           uint32
-	Rcv_ssthresh   uint32
-	Rtt            uint32
-	Rttvar         uint32
-	Snd_ssthresh   uint32
-	Snd_cwnd       uint32
-	Advmss         uint32
-	Reordering     uint32
-	Rcv_rtt        uint32
-	Rcv_space      uint32
-	Total_retrans  uint32
+	State           uint8
+	Ca_state        uint8
+	Retransmits     uint8
+	Probes          uint8
+	Backoff         uint8
+	Options         uint8
+	Rto             uint32
+	Ato             uint32
+	Snd_mss         uint32
+	Rcv_mss         uint32
+	Unacked         uint32
+	Sacked          uint32
+	Lost            uint32
+	Retrans         uint32
+	Fackets         uint32
+	Last_data_sent  uint32
+	Last_ack_sent   uint32
+	Last_data_recv  uint32
+	Last_ack_recv   uint32
+	Pmtu            uint32
+	Rcv_ssthresh    uint32
+	Rtt             uint32
+	Rttvar          uint32
+	Snd_ssthresh    uint32
+	Snd_cwnd        uint32
+	Advmss          uint32
+	Reordering      uint32
+	Rcv_rtt         uint32
+	Rcv_space       uint32
+	Total_retrans   uint32
+	Pacing_rate     uint64
+	Max_pacing_rate uint64
+	Bytes_acked     uint64
+	Bytes_received  uint64
+	Segs_out        uint32
+	Segs_in         uint32
+	Notsent_bytes   uint32
+	Min_rtt         uint32
+	Data_segs_in    uint32
+	Data_segs_out   uint32
+	Delivery_rate   uint64
+	Busy_time       uint64
+	Rwnd_limited    uint64
+	Sndbuf_limited  uint64
+	Delivered       uint32
+	Delivered_ce    uint32
+	Bytes_sent      uint64
+	Bytes_retrans   uint64
+	Dsack_dups      uint32
+	Reord_seen      uint32
+	Rcv_ooopack     uint32
+	Snd_wnd         uint32
+	Rcv_wnd         uint32
+	Rehash          uint32
 }
 
 type CanFilter struct {
@@ -528,7 +552,7 @@ const (
 	SizeofIPv6MTUInfo       = 0x20
 	SizeofICMPv6Filter      = 0x20
 	SizeofUcred             = 0xc
-	SizeofTCPInfo           = 0x68
+	SizeofTCPInfo           = 0xf0
 	SizeofCanFilter         = 0x8
 	SizeofTCPRepairOpt      = 0x8
 )
@@ -1239,7 +1263,7 @@ type TCPMD5Sig struct {
 	Flags     uint8
 	Prefixlen uint8
 	Keylen    uint16
-	_         uint32
+	Ifindex   int32
 	Key       [80]uint8
 }
 

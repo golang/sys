@@ -11,6 +11,7 @@ Input to cgo -godefs.  See README.md
 
 // +godefs map struct_in_addr [4]byte /* in_addr */
 // +godefs map struct_in6_addr [16]byte /* in6_addr */
+// +godefs map struct___kernel_sockaddr_storage SockaddrStorage
 
 package unix
 
@@ -31,7 +32,7 @@ package unix
 #include <utime.h>
 
 #include <netinet/in.h>
-#include <netinet/tcp.h>
+#include <linux/tcp.h>
 
 #include <sys/epoll.h>
 #include <sys/inotify.h>
