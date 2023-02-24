@@ -217,7 +217,7 @@ func main() {
 				}
 			}
 
-			if funct != "fcntl" && funct != "FcntlInt" && funct != "readlen" && funct != "writelen" {
+			if funct != "fcntl" && funct != "FcntlInt" && funct != "readlen" && funct != "writelen" && funct != "ioctlPtr" {
 				if sysname == "select" {
 					// select is a keyword of Go. Its name is
 					// changed to c_select.

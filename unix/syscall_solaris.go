@@ -560,14 +560,12 @@ func ioctlPtr(fd int, req uint, arg unsafe.Pointer) (err error) {
 }
 
 func IoctlSetTermio(fd int, req uint, value *Termio) error {
-	err := ioctl(fd, req, uintptr(unsafe.Pointer(value)))
-	runtime.KeepAlive(value)
-	return err
+	return ioctlPtr(fd, req, unsafe.Pointer(value))
 }
 
 func IoctlGetTermio(fd int, req uint) (*Termio, error) {
 	var value Termio
-	err := ioctl(fd, req, uintptr(unsafe.Pointer(&value)))
+	err := ioctlPtr(fd, req, unsafe.Pointer(&value))
 	return &value, err
 }
 
@@ -1090,7 +1088,7 @@ func IoctlSetIntRetInt(fd int, req uint, arg int) (int, error) {
 func IoctlSetString(fd int, req uint, val string) error {
 	bs := make([]byte, len(val)+1)
 	copy(bs[:len(bs)-1], val)
-	err := ioctl(fd, req, uintptr(unsafe.Pointer(&bs[0])))
+	err := ioctlPtr(fd, req, unsafe.Pointer(&bs[0]))
 	runtime.KeepAlive(&bs[0])
 	return err
 }
@@ -1124,7 +1122,7 @@ func (l *Lifreq) GetLifruUint() uint {
 }
 
 func IoctlLifreq(fd int, req uint, l *Lifreq) error {
-	return ioctl(fd, req, uintptr(unsafe.Pointer(l)))
+	return ioctlPtr(fd, req, unsafe.Pointer(l))
 }
 
 // Strioctl Helpers
@@ -1135,5 +1133,5 @@ func (s *Strioctl) SetInt(i int) {
 }
 
 func IoctlSetStrioctlRetInt(fd int, req uint, s *Strioctl) (int, error) {
-	return ioctlRet(fd, req, uintptr(unsafe.Pointer(s)))
+	return ioctlPtrRet(fd, req, unsafe.Pointer(s))
 }

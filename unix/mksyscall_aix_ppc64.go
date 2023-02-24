@@ -190,7 +190,7 @@ func main() {
 			}
 
 			onlyCommon := false
-			if funct == "readlen" || funct == "writelen" || funct == "FcntlInt" || funct == "FcntlFlock" {
+			if funct == "readlen" || funct == "writelen" || funct == "FcntlInt" || funct == "FcntlFlock" || funct == "ioctlPtr" {
 				// This function call another syscall which is already implemented.
 				// Therefore, the gc and gccgo part must not be generated.
 				onlyCommon = true

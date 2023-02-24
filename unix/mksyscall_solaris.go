@@ -162,12 +162,14 @@ func main() {
 
 			sysname = strings.ToLower(sysname) // All libc functions are lowercase.
 
-			// Runtime import of function to allow cross-platform builds.
-			dynimports += fmt.Sprintf("//go:cgo_import_dynamic libc_%s %s \"%s.so\"\n", sysname, sysname, modname)
-			// Link symbol to proc address variable.
-			linknames += fmt.Sprintf("//go:linkname %s libc_%s\n", sysvarname, sysname)
-			// Library proc address variable.
-			vars = append(vars, sysvarname)
+			if funct != "ioctlPtrRet" {
+				// Runtime import of function to allow cross-platform builds.
+				dynimports += fmt.Sprintf("//go:cgo_import_dynamic libc_%s %s \"%s.so\"\n", sysname, sysname, modname)
+				// Link symbol to proc address variable.
+				linknames += fmt.Sprintf("//go:linkname %s libc_%s\n", sysvarname, sysname)
+				// Library proc address variable.
+				vars = append(vars, sysvarname)
+			}
 
 			// Go function header.
 			outlist := strings.Join(out, ", ")
