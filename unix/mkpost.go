@@ -110,6 +110,15 @@ func main() {
 	icmpV6Regex := regexp.MustCompile(`type (ICMPv6Filter) struct {(\s+)X__icmp6_filt(\s+\S+\s+)}`)
 	b = icmpV6Regex.ReplaceAll(b, []byte("type $1 struct {${2}Filt$3}"))
 
+	// Intentionally export address storage field in SockaddrStorage convert it to [N]byte.
+	convertSockaddrStorageData := regexp.MustCompile(`(X__ss_padding)\s+\[(\d+)\]u?int8`)
+	sockaddrStorageType := regexp.MustCompile(`type SockaddrStorage struct {[^}]*}`)
+	sockaddrStorageStructs := sockaddrStorageType.FindAll(b, -1)
+	for _, s := range sockaddrStorageStructs {
+		newNames := convertSockaddrStorageData.ReplaceAll(s, []byte("Data [$2]byte"))
+		b = bytes.Replace(b, s, newNames, 1)
+	}
+
 	// If we have empty Ptrace structs, we should delete them. Only s390x emits
 	// nonempty Ptrace structs.
 	ptraceRexexp := regexp.MustCompile(`type Ptrace((Psw|Fpregs|Per) struct {\s*})`)

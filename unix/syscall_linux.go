@@ -1364,6 +1364,10 @@ func SetsockoptTCPRepairOpt(fd, level, opt int, o []TCPRepairOpt) (err error) {
 	return setsockopt(fd, level, opt, unsafe.Pointer(&o[0]), uintptr(SizeofTCPRepairOpt*len(o)))
 }
 
+func SetsockoptTCPMD5Sig(fd, level, opt int, s *TCPMD5Sig) error {
+	return setsockopt(fd, level, opt, unsafe.Pointer(s), unsafe.Sizeof(*s))
+}
+
 // Keyctl Commands (http://man7.org/linux/man-pages/man2/keyctl.2.html)
 
 // KeyctlInt calls keyctl commands in which each argument is an int.
