@@ -1067,6 +1067,7 @@ const (
 	PerfBitCommExec                      = CBitFieldMaskBit24
 	PerfBitUseClockID                    = CBitFieldMaskBit25
 	PerfBitContextSwitch                 = CBitFieldMaskBit26
+	PerfBitWriteBackward                 = CBitFieldMaskBit27
 )
 
 const (
