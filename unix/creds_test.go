@@ -132,7 +132,7 @@ func TestPktInfo(t *testing.T) {
 	for _, test := range testcases {
 		t.Run(test.network, func(t *testing.T) {
 			conn, err := net.ListenUDP(test.network, test.address)
-			if errors.Is(err, unix.EADDRNOTAVAIL) {
+			if errors.Is(err, unix.EADDRNOTAVAIL) || errors.Is(err, unix.EAFNOSUPPORT) {
 				t.Skipf("%v is not available", test.address)
 			}
 			if err != nil {
@@ -208,7 +208,7 @@ func TestParseOrigDstAddr(t *testing.T) {
 	for _, test := range testcases {
 		t.Run(test.network, func(t *testing.T) {
 			conn, err := net.ListenUDP(test.network, test.address)
-			if errors.Is(err, unix.EADDRNOTAVAIL) {
+			if errors.Is(err, unix.EADDRNOTAVAIL) || errors.Is(err, unix.EAFNOSUPPORT) {
 				t.Skipf("%v is not available", test.address)
 			}
 			if err != nil {
