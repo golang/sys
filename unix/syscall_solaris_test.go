@@ -405,17 +405,13 @@ func TestLifreqGetMTU(t *testing.T) {
 	if err != nil {
 		t.Fatalf("could not open udp socket: %v", err)
 	}
-	// SIOCGLIFMTU is negative which confuses the compiler if used inline:
-	// Using "unix.IoctlLifreq(ip_fd, unix.SIOCGLIFMTU, &l)" results in
-	// "constant -1065850502 overflows uint"
-	reqnum := int(unix.SIOCGLIFMTU)
 	var l unix.Lifreq
 	for link, mtu := range tc {
 		err = l.SetName(link)
 		if err != nil {
 			t.Fatalf("Lifreq.SetName(%q) failed: %v", link, err)
 		}
-		if err = unix.IoctlLifreq(ip_fd, uint(reqnum), &l); err != nil {
+		if err = unix.IoctlLifreq(ip_fd, unix.SIOCGLIFMTU, &l); err != nil {
 			t.Fatalf("unable to SIOCGLIFMTU: %v", err)
 		}
 		m := l.GetLifruUint()
