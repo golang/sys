@@ -129,7 +129,6 @@ var darwinTests = [...]darwinTest{
 	{"setprivexec", libc_setprivexec_trampoline_addr},
 	{"setregid", libc_setregid_trampoline_addr},
 	{"setreuid", libc_setreuid_trampoline_addr},
-	{"setrlimit", libc_setrlimit_trampoline_addr},
 	{"setsid", libc_setsid_trampoline_addr},
 	{"setsockopt", libc_setsockopt_trampoline_addr},
 	{"settimeofday", libc_settimeofday_trampoline_addr},
