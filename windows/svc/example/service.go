@@ -19,9 +19,9 @@ import (
 
 var elog debug.Log
 
-type myservice struct{}
+type exampleService struct{}
 
-func (m *myservice) Execute(args []string, r <-chan svc.ChangeRequest, changes chan<- svc.Status) (ssec bool, errno uint32) {
+func (m *exampleService) Execute(args []string, r <-chan svc.ChangeRequest, changes chan<- svc.Status) (ssec bool, errno uint32) {
 	const cmdsAccepted = svc.AcceptStop | svc.AcceptShutdown | svc.AcceptPauseAndContinue
 	changes <- svc.Status{State: svc.StartPending}
 	fasttick := time.Tick(500 * time.Millisecond)
@@ -79,7 +79,7 @@ func runService(name string, isDebug bool) {
 	if isDebug {
 		run = debug.Run
 	}
-	err = run(name, &myservice{})
+	err = run(name, &exampleService{})
 	if err != nil {
 		elog.Error(1, fmt.Sprintf("%s service failed: %v", name, err))
 		return

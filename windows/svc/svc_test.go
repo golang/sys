@@ -77,11 +77,15 @@ func stopAndDeleteIfInstalled(t *testing.T, m *mgr.Mgr, name string) {
 }
 
 func TestExample(t *testing.T) {
-	if testing.Short() && os.Getenv("GO_BUILDER_NAME") != "" {
-		t.Skip("skipping test in short mode - it modifies system services")
+	if os.Getenv("GO_BUILDER_NAME") == "" {
+		// Don't install services on arbitrary users' machines.
+		t.Skip("skipping test that modifies system services: GO_BUILDER_NAME not set")
+	}
+	if testing.Short() {
+		t.Skip("skipping test in short mode that modifies system services")
 	}
 
-	const name = "myservice"
+	const name = "svctestservice"
 
 	m, err := mgr.Connect()
 	if err != nil {
@@ -103,7 +107,7 @@ func TestExample(t *testing.T) {
 
 	stopAndDeleteIfInstalled(t, m, name)
 
-	s, err := m.CreateService(name, exepath, mgr.Config{DisplayName: "my service"}, "is", "auto-started")
+	s, err := m.CreateService(name, exepath, mgr.Config{DisplayName: "x-sys svc test service"}, "-name", name)
 	if err != nil {
 		t.Fatalf("CreateService(%s) failed: %v", name, err)
 	}
@@ -141,7 +145,7 @@ func TestExample(t *testing.T) {
 		t.Fatalf("Delete failed: %s", err)
 	}
 
-	out, err := exec.Command("wevtutil.exe", "qe", "Application", "/q:*[System[Provider[@Name='myservice']]]", "/rd:true", "/c:10").CombinedOutput()
+	out, err := exec.Command("wevtutil.exe", "qe", "Application", "/q:*[System[Provider[@Name='"+name+"']]]", "/rd:true", "/c:10").CombinedOutput()
 	if err != nil {
 		t.Fatalf("wevtutil failed: %v\n%v", err, string(out))
 	}
@@ -149,7 +153,7 @@ func TestExample(t *testing.T) {
 	// Test context passing (see servicemain in sys_386.s and sys_amd64.s).
 	want += "-123456"
 	if !strings.Contains(string(out), want) {
-		t.Errorf("%q string does not contain %q", string(out), want)
+		t.Errorf("%q string does not contain %q", out, want)
 	}
 }
 

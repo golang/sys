@@ -227,25 +227,26 @@ func remove(t *testing.T, s *mgr.Service) {
 }
 
 func TestMyService(t *testing.T) {
+	if os.Getenv("GO_BUILDER_NAME") == "" {
+		// Don't install services on arbitrary users' machines.
+		t.Skip("skipping test that modifies system services: GO_BUILDER_NAME not set")
+	}
 	if testing.Short() {
-		t.Skip("skipping test in short mode - it modifies system services")
+		t.Skip("skipping test in short mode that modifies system services")
 	}
 
-	const name = "mymgrservice"
+	const name = "mgrtestservice"
 
 	m, err := mgr.Connect()
 	if err != nil {
-		if errno, ok := err.(syscall.Errno); ok && errno == syscall.ERROR_ACCESS_DENIED {
-			t.Skip("Skipping test: we don't have rights to manage services.")
-		}
 		t.Fatalf("SCM connection failed: %s", err)
 	}
 	defer m.Disconnect()
 
 	c := mgr.Config{
 		StartType:    mgr.StartDisabled,
-		DisplayName:  "my service",
-		Description:  "my service is just a test",
+		DisplayName:  "x-sys mgr test service",
+		Description:  "x-sys mgr test service is just a test",
 		Dependencies: []string{"LanmanServer", "W32Time"},
 	}
 
@@ -288,14 +289,14 @@ func TestMyService(t *testing.T) {
 	if err != nil {
 		t.Fatalf("ListServices failed: %v", err)
 	}
-	var myserviceIsInstalled bool
+	var serviceIsInstalled bool
 	for _, sn := range svcnames {
 		if sn == name {
-			myserviceIsInstalled = true
+			serviceIsInstalled = true
 			break
 		}
 	}
-	if !myserviceIsInstalled {
+	if !serviceIsInstalled {
 		t.Errorf("ListServices failed to find %q service", name)
 	}
 
