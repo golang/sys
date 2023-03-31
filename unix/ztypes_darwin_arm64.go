@@ -610,6 +610,7 @@ const (
 	AT_REMOVEDIR        = 0x80
 	AT_SYMLINK_FOLLOW   = 0x40
 	AT_SYMLINK_NOFOLLOW = 0x20
+	AT_EACCESS          = 0x10
 )
 
 type PollFd struct {
