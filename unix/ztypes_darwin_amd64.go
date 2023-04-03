@@ -151,6 +151,16 @@ type Dirent struct {
 	_       [3]byte
 }
 
+type Attrlist struct {
+	Bitmapcount uint16
+	Reserved    uint16
+	Commonattr  uint32
+	Volattr     uint32
+	Dirattr     uint32
+	Fileattr    uint32
+	Forkattr    uint32
+}
+
 const (
 	PathMax = 0x400
 )

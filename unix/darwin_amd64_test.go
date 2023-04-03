@@ -119,6 +119,7 @@ var darwinTests = [...]darwinTest{
 	{"sendfile", libc_sendfile_trampoline_addr},
 	{"sendmsg", libc_sendmsg_trampoline_addr},
 	{"sendto", libc_sendto_trampoline_addr},
+	{"setattrlist", libc_setattrlist_trampoline_addr},
 	{"setegid", libc_setegid_trampoline_addr},
 	{"seteuid", libc_seteuid_trampoline_addr},
 	{"setgid", libc_setgid_trampoline_addr},
