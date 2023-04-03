@@ -613,6 +613,7 @@ func SysctlKinfoProcSlice(name string, args ...int) ([]KinfoProc, error) {
 //sys	Rmdir(path string) (err error)
 //sys	Seek(fd int, offset int64, whence int) (newoffset int64, err error) = SYS_LSEEK
 //sys	Select(nfd int, r *FdSet, w *FdSet, e *FdSet, timeout *Timeval) (n int, err error)
+//sys	Setattrlist(path string, attrlist *Attrlist, attrBuf []byte, options int) (err error)
 //sys	Setegid(egid int) (err error)
 //sysnb	Seteuid(euid int) (err error)
 //sysnb	Setgid(gid int) (err error)
@@ -675,7 +676,6 @@ func SysctlKinfoProcSlice(name string, args ...int) ([]KinfoProc, error) {
 // Kqueue_from_portset_np
 // Kqueue_portset
 // Getattrlist
-// Setattrlist
 // Getdirentriesattr
 // Searchfs
 // Delete

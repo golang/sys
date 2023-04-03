@@ -140,6 +140,8 @@ type Fsid C.struct_fsid
 
 type Dirent C.struct_dirent
 
+type Attrlist C.struct_attrlist
+
 // File system limits
 
 const (
