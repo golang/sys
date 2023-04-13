@@ -24,7 +24,10 @@ import (
 
 func main() {
 	// Get the OS and architecture (using GOARCH_TARGET if it exists)
-	goos := os.Getenv("GOOS")
+	goos := os.Getenv("GOOS_TARGET")
+	if goos == "" {
+		goos = os.Getenv("GOOS")
+	}
 	goarch := os.Getenv("GOARCH_TARGET")
 	if goarch == "" {
 		goarch = os.Getenv("GOARCH")
