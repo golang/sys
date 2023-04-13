@@ -101,6 +101,17 @@ func main() {
 		})
 	}
 
+	if goos == "solaris" {
+		// Convert *int8 to *byte in Iovec.Base like on every other platform.
+		convertIovecBase := regexp.MustCompile(`Base\s+\*int8`)
+		iovecType := regexp.MustCompile(`type Iovec struct {[^}]*}`)
+		iovecStructs := iovecType.FindAll(b, -1)
+		for _, s := range iovecStructs {
+			newNames := convertIovecBase.ReplaceAll(s, []byte("Base *byte"))
+			b = bytes.Replace(b, s, newNames, 1)
+		}
+	}
+
 	// Intentionally export __val fields in Fsid and Sigset_t
 	valRegex := regexp.MustCompile(`type (Fsid|Sigset_t) struct {(\s+)X__(bits|val)(\s+\S+\s+)}`)
 	b = valRegex.ReplaceAll(b, []byte("type $1 struct {${2}Val$4}"))

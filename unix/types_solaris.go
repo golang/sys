@@ -76,12 +76,6 @@ struct sockaddr_any {
 	char pad[sizeof(union sockaddr_all) - sizeof(struct sockaddr)];
 };
 
-// go_iovec is used to get *byte as the base address for Iovec.
-struct goIovec {
-	void*  iov_base;
-	size_t iov_len;
-};
-
 // Solaris and the major illumos distributions ship a 3rd party tun/tap driver
 // from https://github.com/kaizawa/tuntap
 // It supports a pair of IOCTLs defined at
@@ -164,7 +158,7 @@ type _Socklen C.socklen_t
 
 type Linger C.struct_linger
 
-type Iovec C.struct_goIovec
+type Iovec C.struct_iovec
 
 type IPMreq C.struct_ip_mreq
 
