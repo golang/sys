@@ -209,6 +209,16 @@ func testRecoveryCommand(t *testing.T, s *mgr.Service, should string) {
 	}
 }
 
+func testControl(t *testing.T, s *mgr.Service, c svc.Cmd, expectedErr error, expectedStatus svc.Status) {
+	status, err := s.Control(c)
+	if err != expectedErr {
+		t.Fatalf("Unexpected return from s.Control: %v (expected %v)", err, expectedErr)
+	}
+	if expectedStatus != status {
+		t.Fatalf("Unexpected status from s.Control: %+v (expected %+v)", status, expectedStatus)
+	}
+}
+
 func remove(t *testing.T, s *mgr.Service) {
 	err := s.Delete()
 	if err != nil {
@@ -300,13 +310,7 @@ func TestMyService(t *testing.T) {
 	expectedStatus := svc.Status{
 		State: svc.Stopped,
 	}
-	status, err := s.Control(svc.Stop)
-	if err != windows.ERROR_SERVICE_NOT_ACTIVE {
-		t.Fatalf("Unexpected return from s.Control: %v (expected %v)", err, windows.ERROR_SERVICE_NOT_ACTIVE)
-	}
-	if expectedStatus != status {
-		t.Fatalf("Unexpected status from s.Control: %+v (expected %+v)", status, expectedStatus)
-	}
+	testControl(t, s, svc.Stop, windows.ERROR_SERVICE_NOT_ACTIVE, expectedStatus)
 
 	remove(t, s)
 }
