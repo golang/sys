@@ -17,6 +17,7 @@ import (
 	"testing"
 	"time"
 
+	"golang.org/x/sys/windows"
 	"golang.org/x/sys/windows/svc"
 	"golang.org/x/sys/windows/svc/mgr"
 )
@@ -109,7 +110,7 @@ func testRecoveryActions(t *testing.T, s *mgr.Service, should []mgr.RecoveryActi
 	if len(should) != len(is) {
 		t.Errorf("recovery action mismatch: contains %v actions, but should have %v", len(is), len(should))
 	}
-	for i, _ := range is {
+	for i := range is {
 		if should[i].Type != is[i].Type {
 			t.Errorf("recovery action mismatch: Type is %v, but should have %v", is[i].Type, should[i].Type)
 		}
@@ -131,19 +132,19 @@ func testResetPeriod(t *testing.T, s *mgr.Service, should uint32) {
 
 func testSetRecoveryActions(t *testing.T, s *mgr.Service) {
 	r := []mgr.RecoveryAction{
-		mgr.RecoveryAction{
+		{
 			Type:  mgr.NoAction,
 			Delay: 60000 * time.Millisecond,
 		},
-		mgr.RecoveryAction{
+		{
 			Type:  mgr.ServiceRestart,
 			Delay: 4 * time.Minute,
 		},
-		mgr.RecoveryAction{
+		{
 			Type:  mgr.ServiceRestart,
 			Delay: time.Minute,
 		},
-		mgr.RecoveryAction{
+		{
 			Type:  mgr.RunCommand,
 			Delay: 4000 * time.Millisecond,
 		},
@@ -251,6 +252,9 @@ func TestMyService(t *testing.T) {
 		t.Fatalf("service %s is not installed", name)
 	}
 	defer s.Close()
+	defer func() {
+		_ = s.Delete()
+	}()
 
 	c.BinaryPathName = exepath
 	c = testConfig(t, s, c)
@@ -292,6 +296,17 @@ func TestMyService(t *testing.T) {
 	testRebootMessage(t, s, "") // delete reboot message
 	testRecoveryCommand(t, s, fmt.Sprintf("sc query %s", name))
 	testRecoveryCommand(t, s, "") // delete recovery command
+
+	expectedStatus := svc.Status{
+		State: svc.Stopped,
+	}
+	status, err := s.Control(svc.Stop)
+	if err != windows.ERROR_SERVICE_NOT_ACTIVE {
+		t.Fatalf("Unexpected return from s.Control: %v (expected %v)", err, windows.ERROR_SERVICE_NOT_ACTIVE)
+	}
+	if expectedStatus != status {
+		t.Fatalf("Unexpected status from s.Control: %+v (expected %+v)", status, expectedStatus)
+	}
 
 	remove(t, s)
 }
