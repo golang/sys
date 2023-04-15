@@ -49,13 +49,16 @@ func (s *Service) Start(args ...string) error {
 func (s *Service) Control(c svc.Cmd) (svc.Status, error) {
 	var t windows.SERVICE_STATUS
 	err := windows.ControlService(s.Handle, uint32(c), &t)
-	if err != nil {
+	if err != nil &&
+		err != windows.ERROR_INVALID_SERVICE_CONTROL &&
+		err != windows.ERROR_SERVICE_CANNOT_ACCEPT_CTRL &&
+		err != windows.ERROR_SERVICE_NOT_ACTIVE {
 		return svc.Status{}, err
 	}
 	return svc.Status{
 		State:   svc.State(t.CurrentState),
 		Accepts: svc.Accepted(t.ControlsAccepted),
-	}, nil
+	}, err
 }
 
 // Query returns current status of service s.
