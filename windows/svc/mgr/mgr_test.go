@@ -109,7 +109,7 @@ func testRecoveryActions(t *testing.T, s *mgr.Service, should []mgr.RecoveryActi
 	if len(should) != len(is) {
 		t.Errorf("recovery action mismatch: contains %v actions, but should have %v", len(is), len(should))
 	}
-	for i, _ := range is {
+	for i := range is {
 		if should[i].Type != is[i].Type {
 			t.Errorf("recovery action mismatch: Type is %v, but should have %v", is[i].Type, should[i].Type)
 		}
@@ -131,19 +131,19 @@ func testResetPeriod(t *testing.T, s *mgr.Service, should uint32) {
 
 func testSetRecoveryActions(t *testing.T, s *mgr.Service) {
 	r := []mgr.RecoveryAction{
-		mgr.RecoveryAction{
+		{
 			Type:  mgr.NoAction,
 			Delay: 60000 * time.Millisecond,
 		},
-		mgr.RecoveryAction{
+		{
 			Type:  mgr.ServiceRestart,
 			Delay: 4 * time.Minute,
 		},
-		mgr.RecoveryAction{
+		{
 			Type:  mgr.ServiceRestart,
 			Delay: time.Minute,
 		},
-		mgr.RecoveryAction{
+		{
 			Type:  mgr.RunCommand,
 			Delay: 4000 * time.Millisecond,
 		},
@@ -205,6 +205,57 @@ func testRecoveryCommand(t *testing.T, s *mgr.Service, should string) {
 	}
 	if should != is {
 		t.Errorf("recovery command mismatch: command is %q, but should have %q", is, should)
+	}
+}
+
+func testRecoveryActionsOnNonCrashFailures(t *testing.T, s *mgr.Service, should bool) {
+	err := s.SetRecoveryActionsOnNonCrashFailures(should)
+	if err != nil {
+		t.Fatalf("SetRecoveryActionsOnNonCrashFailures failed: %v", err)
+	}
+	is, err := s.RecoveryActionsOnNonCrashFailures()
+	if err != nil {
+		t.Fatalf("RecoveryActionsOnNonCrashFailures failed: %v", err)
+	}
+	if should != is {
+		t.Errorf("RecoveryActionsOnNonCrashFailures mismatch: flag is %v, but should have %v", is, should)
+	}
+}
+
+func testMultipleRecoverySettings(t *testing.T, s *mgr.Service, rebootMsgShould, recoveryCmdShould string, actionsFlagShould bool) {
+	err := s.SetRebootMessage(rebootMsgShould)
+	if err != nil {
+		t.Fatalf("SetRebootMessage failed: %v", err)
+	}
+	err = s.SetRecoveryActionsOnNonCrashFailures(actionsFlagShould)
+	if err != nil {
+		t.Fatalf("SetRecoveryActionsOnNonCrashFailures failed: %v", err)
+	}
+	err = s.SetRecoveryCommand(recoveryCmdShould)
+	if err != nil {
+		t.Fatalf("SetRecoveryCommand failed: %v", err)
+	}
+
+	rebootMsgIs, err := s.RebootMessage()
+	if err != nil {
+		t.Fatalf("RebootMessage failed: %v", err)
+	}
+	if rebootMsgShould != rebootMsgIs {
+		t.Errorf("reboot message mismatch: message is %q, but should have %q", rebootMsgIs, rebootMsgShould)
+	}
+	recoveryCommandIs, err := s.RecoveryCommand()
+	if err != nil {
+		t.Fatalf("RecoveryCommand failed: %v", err)
+	}
+	if recoveryCmdShould != recoveryCommandIs {
+		t.Errorf("recovery command mismatch: command is %q, but should have %q", recoveryCommandIs, recoveryCmdShould)
+	}
+	actionsFlagIs, err := s.RecoveryActionsOnNonCrashFailures()
+	if err != nil {
+		t.Fatalf("RecoveryActionsOnNonCrashFailures failed: %v", err)
+	}
+	if actionsFlagShould != actionsFlagIs {
+		t.Errorf("RecoveryActionsOnNonCrashFailures mismatch: flag is %v, but should have %v", actionsFlagIs, actionsFlagShould)
 	}
 }
 
@@ -292,6 +343,9 @@ func TestMyService(t *testing.T) {
 	testRebootMessage(t, s, "") // delete reboot message
 	testRecoveryCommand(t, s, fmt.Sprintf("sc query %s", name))
 	testRecoveryCommand(t, s, "") // delete recovery command
+	testRecoveryActionsOnNonCrashFailures(t, s, true)
+	testRecoveryActionsOnNonCrashFailures(t, s, false)
+	testMultipleRecoverySettings(t, s, fmt.Sprintf("%s failed", name), fmt.Sprintf("sc query %s", name), true)
 
 	remove(t, s)
 }
