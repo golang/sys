@@ -48,8 +48,8 @@ func (s *Service) Start(args ...string) error {
 // Control sends state change request c to the service s. It returns the most
 // recent status the service reported to the service control manager, and an
 // error if the state change request was not accepted.
-// Note that the service status is only populated if the status change request
-// succeeded, or if it failed with error ERROR_INVALID_SERVICE_CONTROL,
+// Note that the returned service status is only set if the status change
+// request succeeded, or if it failed with error ERROR_INVALID_SERVICE_CONTROL,
 // ERROR_SERVICE_CANNOT_ACCEPT_CTRL, or ERROR_SERVICE_NOT_ACTIVE.
 func (s *Service) Control(c svc.Cmd) (svc.Status, error) {
 	var t windows.SERVICE_STATUS
