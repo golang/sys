@@ -262,9 +262,7 @@ func TestMyService(t *testing.T) {
 		t.Fatalf("service %s is not installed", name)
 	}
 	defer s.Close()
-	defer func() {
-		_ = s.Delete()
-	}()
+	defer s.Delete()
 
 	c.BinaryPathName = exepath
 	c = testConfig(t, s, c)
