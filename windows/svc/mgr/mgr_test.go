@@ -17,6 +17,7 @@ import (
 	"testing"
 	"time"
 
+	"golang.org/x/sys/windows"
 	"golang.org/x/sys/windows/svc"
 	"golang.org/x/sys/windows/svc/mgr"
 )
@@ -259,6 +260,16 @@ func testMultipleRecoverySettings(t *testing.T, s *mgr.Service, rebootMsgShould,
 	}
 }
 
+func testControl(t *testing.T, s *mgr.Service, c svc.Cmd, expectedErr error, expectedStatus svc.Status) {
+	status, err := s.Control(c)
+	if err != expectedErr {
+		t.Fatalf("Unexpected return from s.Control: %v (expected %v)", err, expectedErr)
+	}
+	if expectedStatus != status {
+		t.Fatalf("Unexpected status from s.Control: %+v (expected %+v)", status, expectedStatus)
+	}
+}
+
 func remove(t *testing.T, s *mgr.Service) {
 	err := s.Delete()
 	if err != nil {
@@ -302,6 +313,7 @@ func TestMyService(t *testing.T) {
 		t.Fatalf("service %s is not installed", name)
 	}
 	defer s.Close()
+	defer s.Delete()
 
 	c.BinaryPathName = exepath
 	c = testConfig(t, s, c)
@@ -346,6 +358,11 @@ func TestMyService(t *testing.T) {
 	testRecoveryActionsOnNonCrashFailures(t, s, true)
 	testRecoveryActionsOnNonCrashFailures(t, s, false)
 	testMultipleRecoverySettings(t, s, fmt.Sprintf("%s failed", name), fmt.Sprintf("sc query %s", name), true)
+
+	expectedStatus := svc.Status{
+		State: svc.Stopped,
+	}
+	testControl(t, s, svc.Stop, windows.ERROR_SERVICE_NOT_ACTIVE, expectedStatus)
 
 	remove(t, s)
 }

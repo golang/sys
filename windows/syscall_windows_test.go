@@ -626,6 +626,22 @@ func TestCommandLineRecomposition(t *testing.T) {
 			continue
 		}
 	}
+
+	// check that windows.DecomposeCommandLine returns error for strings with NUL
+	testsWithNUL := []string{
+		"\x00abcd",
+		"ab\x00cd",
+		"abcd\x00",
+		"\x00abcd\x00",
+		"\x00ab\x00cd\x00",
+		"\x00\x00\x00",
+	}
+	for _, test := range testsWithNUL {
+		_, err := windows.DecomposeCommandLine(test)
+		if err == nil {
+			t.Errorf("Failed to return error while decomposing %#q string with NUL inside", test)
+		}
+	}
 }
 
 func TestWinVerifyTrust(t *testing.T) {

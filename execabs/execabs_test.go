@@ -21,7 +21,7 @@ import (
 // Copied from internal/testenv.HasExec
 func hasExec() bool {
 	switch runtime.GOOS {
-	case "js", "ios":
+	case "wasip1", "js", "ios":
 		return false
 	}
 	return true
