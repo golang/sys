@@ -717,6 +717,28 @@ func TestWinVerifyTrust(t *testing.T) {
 
 }
 
+func TestEnumProcesses(t *testing.T) {
+	var (
+		pids    [2]uint32
+		outSize uint32
+	)
+	err := windows.EnumProcesses(pids[:], &outSize)
+	if err != nil {
+		t.Fatalf("unable to enumerate processes: %v", err)
+	}
+
+	// Regression check for go.dev/issue/60223
+	if outSize != 8 {
+		t.Errorf("unexpected bytes returned: %d", outSize)
+	}
+	// Most likely, this should be [0, 4].
+	// 0 is the system idle pseudo-process. 4 is the initial system process ID.
+	// This test expects that at least one of the PIDs is not 0.
+	if pids[0] == 0 && pids[1] == 0 {
+		t.Errorf("all PIDs are 0")
+	}
+}
+
 func TestProcessModules(t *testing.T) {
 	process, err := windows.GetCurrentProcess()
 	if err != nil {
