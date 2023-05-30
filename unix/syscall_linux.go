@@ -2420,6 +2420,21 @@ func PthreadSigmask(how int, set, oldset *Sigset_t) error {
 	return rtSigprocmask(how, set, oldset, _C__NSIG/8)
 }
 
+//sysnb	getresuid(ruid *_C_int, euid *_C_int, suid *_C_int)
+//sysnb	getresgid(rgid *_C_int, egid *_C_int, sgid *_C_int)
+
+func Getresuid() (ruid, euid, suid int) {
+	var r, e, s _C_int
+	getresuid(&r, &e, &s)
+	return int(r), int(e), int(s)
+}
+
+func Getresgid() (rgid, egid, sgid int) {
+	var r, e, s _C_int
+	getresgid(&r, &e, &s)
+	return int(r), int(e), int(s)
+}
+
 /*
  * Unimplemented
  */
