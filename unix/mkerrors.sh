@@ -741,7 +741,11 @@ main(void)
 		e = errors[i].num;
 		if(i > 0 && errors[i-1].num == e)
 			continue;
+#ifdef __OpenBSD__
+		strlcpy(buf, strerror(e), sizeof(buf));
+#else
 		strcpy(buf, strerror(e));
+#endif /* __OpenBSD __*/
 		// lowercase first letter: Bad -> bad, but STREAM -> STREAM.
 		if(A <= buf[0] && buf[0] <= Z && a <= buf[1] && buf[1] <= z)
 			buf[0] += a - A;
@@ -760,7 +764,11 @@ main(void)
 		e = signals[i].num;
 		if(i > 0 && signals[i-1].num == e)
 			continue;
+#ifdef __OpenBSD__
+		strlcpy(buf, strsignal(e), sizeof(buf));
+#else
 		strcpy(buf, strsignal(e));
+#endif /* __OpenBSD __*/
 		// lowercase first letter: Bad -> bad, but STREAM -> STREAM.
 		if(A <= buf[0] && buf[0] <= Z && a <= buf[1] && buf[1] <= z)
 			buf[0] += a - A;
