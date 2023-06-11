@@ -2124,6 +2124,7 @@ func writevRacedetect(iovecs []Iovec, n int) {
 
 // mmap varies by architecture; see syscall_linux_*.go.
 //sys	munmap(addr uintptr, length uintptr) (err error)
+//sys	mremap(oldaddr uintptr, oldlength uintptr, newlength uintptr, flags int, newaddr uintptr) (xaddr uintptr, err error)
 
 var mapper = &mmapper{
 	active: make(map[*byte][]byte),
@@ -2139,7 +2140,6 @@ func Munmap(b []byte) (err error) {
 	return mapper.Munmap(b)
 }
 
-//sys   Mremap(oldaddr uintptr, oldsize uintptr, newsize uintptr, flag int, newaddr uintptr) (ret uintptr, err error) = SYS_MREMAP
 //sys	Madvise(b []byte, advice int) (err error)
 //sys	Mprotect(b []byte, prot int) (err error)
 //sys	Mlock(b []byte) (err error)
