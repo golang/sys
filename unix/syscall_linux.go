@@ -2139,6 +2139,7 @@ func Munmap(b []byte) (err error) {
 	return mapper.Munmap(b)
 }
 
+//sys   Mremap(oldaddr uintptr, oldsize uintptr, newsize uintptr, flag int, newaddr uintptr) (ret uintptr, err error) = SYS_MREMAP
 //sys	Madvise(b []byte, advice int) (err error)
 //sys	Mprotect(b []byte, prot int) (err error)
 //sys	Mlock(b []byte) (err error)
@@ -2487,7 +2488,6 @@ func Getresgid() (rgid, egid, sgid int) {
 // MqTimedreceive
 // MqTimedsend
 // MqUnlink
-// Mremap
 // Msgctl
 // Msgget
 // Msgrcv
