@@ -12,7 +12,6 @@
 package unix
 
 import (
-	"debug/elf"
 	"encoding/binary"
 	"strconv"
 	"syscall"
@@ -1700,18 +1699,23 @@ func PtracePokeUser(pid int, addr uintptr, data []byte) (count int, err error) {
 	return ptracePoke(PTRACE_POKEUSR, PTRACE_PEEKUSR, pid, addr, data)
 }
 
+// elfNT_PRSTATUS is a copy of the debug/elf.NT_PRSTATUS constant so
+// x/sys/unix doesn't need to depend on debug/elf and thus
+// compress/zlib, debug/dwarf, and other packages.
+const elfNT_PRSTATUS = 1
+
 func PtraceGetRegs(pid int, regsout *PtraceRegs) (err error) {
 	var iov Iovec
 	iov.Base = (*byte)(unsafe.Pointer(regsout))
 	iov.SetLen(int(unsafe.Sizeof(*regsout)))
-	return ptracePtr(PTRACE_GETREGSET, pid, uintptr(elf.NT_PRSTATUS), unsafe.Pointer(&iov))
+	return ptracePtr(PTRACE_GETREGSET, pid, uintptr(elfNT_PRSTATUS), unsafe.Pointer(&iov))
 }
 
 func PtraceSetRegs(pid int, regs *PtraceRegs) (err error) {
 	var iov Iovec
 	iov.Base = (*byte)(unsafe.Pointer(regs))
 	iov.SetLen(int(unsafe.Sizeof(*regs)))
-	return ptracePtr(PTRACE_SETREGSET, pid, uintptr(elf.NT_PRSTATUS), unsafe.Pointer(&iov))
+	return ptracePtr(PTRACE_SETREGSET, pid, uintptr(elfNT_PRSTATUS), unsafe.Pointer(&iov))
 }
 
 func PtraceSetOptions(pid int, options int) (err error) {
