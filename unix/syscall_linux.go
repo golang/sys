@@ -2141,12 +2141,8 @@ func Munmap(b []byte) (err error) {
 	return mapper.Munmap(b)
 }
 
-func Mremap(oldData []byte, newData []byte, flags int) (data []byte, err error) {
-	return mapper.Mremap(oldData, newData, flags)
-}
-
-func Mremap2(oldData []byte, newLength int, flags int) (data []byte, err error) {
-	return mapper.Mremap2(oldData, newLength, flags)
+func Mremap(oldData []byte, newLength int, flags int) (data []byte, err error) {
+	return mapper.Mremap(oldData, newLength, flags)
 }
 
 //sys	Madvise(b []byte, advice int) (err error)

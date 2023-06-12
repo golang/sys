@@ -148,33 +148,7 @@ func (m *mmapper) Munmap(data []byte) (err error) {
 	return nil
 }
 
-func (m *mmapper) Mremap(oldData []byte, newData []byte, flags int) (data []byte, err error) {
-	if len(oldData) == 0 || len(oldData) != cap(oldData) || len(newData) == 0 || len(newData) != cap(newData) {
-		return nil, EINVAL
-	}
-	flags |= MREMAP_MAYMOVE | MREMAP_FIXED
-
-	pOld := &oldData[cap(oldData)-1]
-	m.Lock()
-	defer m.Unlock()
-	bOld := m.active[pOld]
-	if bOld == nil || &bOld[0] != &oldData[0] {
-		return nil, EINVAL
-	}
-	newAddr, errno := m.mremap(uintptr(unsafe.Pointer(&bOld[0])), uintptr(len(bOld)), uintptr(len(newData)), flags, uintptr(unsafe.Pointer(&newData[0])))
-	if errno != nil {
-		return nil, errno
-	}
-	bNew := unsafe.Slice((*byte)(unsafe.Pointer(newAddr)), len(newData))
-	pNew := &bNew[cap(bNew)-1]
-	m.active[pNew] = bNew
-	if flags&MREMAP_DONTUNMAP == 0 {
-		delete(m.active, pOld)
-	}
-	return bNew, nil
-}
-
-func (m *mmapper) Mremap2(oldData []byte, newLength int, flags int) (data []byte, err error) {
+func (m *mmapper) Mremap(oldData []byte, newLength int, flags int) (data []byte, err error) {
 	if newLength <= 0 || len(oldData) == 0 || len(oldData) != cap(oldData) {
 		return nil, EINVAL
 	}
