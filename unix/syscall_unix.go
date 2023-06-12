@@ -152,6 +152,7 @@ func (m *mmapper) Mremap(oldData []byte, newData []byte, flags int) (data []byte
 	if len(oldData) == 0 || len(oldData) != cap(oldData) || len(newData) == 0 || len(newData) != cap(newData) {
 		return nil, EINVAL
 	}
+	flags |= MREMAP_MAYMOVE | MREMAP_FIXED
 
 	pOld := &oldData[cap(oldData)-1]
 	m.Lock()
