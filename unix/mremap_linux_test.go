@@ -27,5 +27,15 @@ func TestMremap2(t *testing.T) {
 		t.Fatalf("Msync: %v", err)
 	}
 
-	newB, err := unix.Mremap2(b, unix.Getpagesize())
+	bNew, err := unix.Mremap2(b, unix.Getpagesize(), unix.MREMAP_MAYMOVE)
+	if err != nil {
+		t.Fatalf("Mremap2: %v", err)
+	}
+
+	if bNew[0] != 42 {
+		t.Fatal("first element value was changed")
+	}
+	if len(bNew) != unix.Getpagesize() {
+		t.Fatal("first ")
+	}
 }

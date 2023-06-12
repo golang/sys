@@ -167,7 +167,9 @@ func (m *mmapper) Mremap(oldData []byte, newData []byte, flags int) (data []byte
 	bNew := unsafe.Slice((*byte)(unsafe.Pointer(newAddr)), len(newData))
 	pNew := &bNew[cap(bNew)-1]
 	m.active[pNew] = bNew
-	delete(m.active, pOld)
+	if flags&MREMAP_DONTUNMAP == 0 {
+		delete(m.active, pOld)
+	}
 	return bNew, nil
 }
 
@@ -190,7 +192,9 @@ func (m *mmapper) Mremap2(oldData []byte, newLength int, flags int) (data []byte
 	bNew := unsafe.Slice((*byte)(unsafe.Pointer(newAddr)), newLength)
 	pNew := &bNew[cap(bNew)-1]
 	m.active[pNew] = bNew
-	delete(m.active, pOld)
+	if flags&MREMAP_DONTUNMAP == 0 {
+		delete(m.active, pOld)
+	}
 	return bNew, nil
 }
 
