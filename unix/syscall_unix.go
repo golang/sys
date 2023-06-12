@@ -101,6 +101,7 @@ type mmapper struct {
 	active map[*byte][]byte // active mappings; key is last byte in mapping
 	mmap   func(addr, length uintptr, prot, flags, fd int, offset int64) (uintptr, error)
 	munmap func(addr uintptr, length uintptr) error
+	mremap func(oldaddr uintptr, oldlength uintptr, newlength uintptr, flags int, newaddr uintptr) (xaddr uintptr, err error)
 }
 
 func (m *mmapper) Mmap(fd int, offset int64, length int, prot int, flags int) (data []byte, err error) {
@@ -145,6 +146,52 @@ func (m *mmapper) Munmap(data []byte) (err error) {
 	}
 	delete(m.active, p)
 	return nil
+}
+
+func (m *mmapper) Mremap(oldData []byte, newData []byte, flags int) (data []byte, err error) {
+	if len(oldData) == 0 || len(oldData) != cap(oldData) || len(newData) == 0 || len(newData) != cap(newData) {
+		return nil, EINVAL
+	}
+
+	pOld := &oldData[cap(oldData)-1]
+	m.Lock()
+	defer m.Unlock()
+	bOld := m.active[pOld]
+	if bOld == nil || &bOld[0] != &oldData[0] {
+		return nil, EINVAL
+	}
+	newAddr, errno := m.mremap(uintptr(unsafe.Pointer(&bOld[0])), uintptr(len(bOld)), uintptr(len(newData)), flags, uintptr(unsafe.Pointer(&newData[0])))
+	if errno != nil {
+		return nil, errno
+	}
+	bNew := unsafe.Slice((*byte)(unsafe.Pointer(newAddr)), len(newData))
+	pNew := &bNew[cap(bNew)-1]
+	m.active[pNew] = bNew
+	delete(m.active, pOld)
+	return bNew, nil
+}
+
+func (m *mmapper) Mremap2(oldData []byte, newLength int, flags int) (data []byte, err error) {
+	if newLength <= 0 || len(oldData) == 0 || len(oldData) != cap(oldData) {
+		return nil, EINVAL
+	}
+
+	pOld := &oldData[cap(oldData)-1]
+	m.Lock()
+	defer m.Unlock()
+	bOld := m.active[pOld]
+	if bOld == nil || &bOld[0] != &oldData[0] {
+		return nil, EINVAL
+	}
+	newAddr, errno := m.mremap(uintptr(unsafe.Pointer(&bOld[0])), uintptr(len(bOld)), uintptr(newLength), flags, 0)
+	if errno != nil {
+		return nil, errno
+	}
+	bNew := unsafe.Slice((*byte)(unsafe.Pointer(newAddr)), newLength)
+	pNew := &bNew[cap(bNew)-1]
+	m.active[pNew] = bNew
+	delete(m.active, pOld)
+	return bNew, nil
 }
 
 func Read(fd int, p []byte) (n int, err error) {

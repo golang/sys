@@ -1873,7 +1873,7 @@ func mremap(oldaddr uintptr, oldlength uintptr, newlength uintptr, flags int, ne
 	xaddr = uintptr(r0)
 	if e1 != 0 {
 		err = errnoErr(e1)
-		}
+	}
 	return
 }
 

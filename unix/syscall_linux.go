@@ -2130,6 +2130,7 @@ var mapper = &mmapper{
 	active: make(map[*byte][]byte),
 	mmap:   mmap,
 	munmap: munmap,
+	mremap: mremap,
 }
 
 func Mmap(fd int, offset int64, length int, prot int, flags int) (data []byte, err error) {
@@ -2138,6 +2139,14 @@ func Mmap(fd int, offset int64, length int, prot int, flags int) (data []byte, e
 
 func Munmap(b []byte) (err error) {
 	return mapper.Munmap(b)
+}
+
+func Mremap(oldData []byte, newData []byte, flags int) (data []byte, err error) {
+	return mapper.Mremap(oldData, newData, flags)
+}
+
+func Mremap2(oldData []byte, newLength int, flags int) (data []byte, err error) {
+	return mapper.Mremap2(oldData, newLength, flags)
 }
 
 //sys	Madvise(b []byte, advice int) (err error)
