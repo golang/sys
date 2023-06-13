@@ -2126,10 +2126,12 @@ func writevRacedetect(iovecs []Iovec, n int) {
 //sys	munmap(addr uintptr, length uintptr) (err error)
 //sys	mremap(oldaddr uintptr, oldlength uintptr, newlength uintptr, flags int, newaddr uintptr) (xaddr uintptr, err error)
 
-var mapper = &mmapper{
-	active: make(map[*byte][]byte),
-	mmap:   mmap,
-	munmap: munmap,
+var mapper = &mremapMmapper{
+	mmapper: mmapper{
+		active: make(map[*byte][]byte),
+		mmap:   mmap,
+		munmap: munmap,
+	},
 	mremap: mremap,
 }
 
