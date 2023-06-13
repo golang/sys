@@ -32,9 +32,9 @@ func (m *mremapMmapper) Mremap(oldData []byte, newLength int, flags int) (data [
 	}
 	bNew := unsafe.Slice((*byte)(unsafe.Pointer(newAddr)), newLength)
 	pNew := &bNew[cap(bNew)-1]
-	m.active[pNew] = bNew
 	if flags&MREMAP_DONTUNMAP == 0 {
 		delete(m.active, pOld)
 	}
+	m.active[pNew] = bNew
 	return bNew, nil
 }
