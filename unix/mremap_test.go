@@ -28,7 +28,7 @@ func TestMremap(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Mremap2: %v", err)
 	}
-	b[unix.Getpagesize()+1] = 84
+	bNew[unix.Getpagesize()+1] = 84
 
 	if bNew[0] != 42 {
 		t.Fatal("first element value was changed")
