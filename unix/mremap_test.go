@@ -8,12 +8,13 @@
 package unix_test
 
 import (
-	"golang.org/x/sys/unix"
 	"testing"
+
+	"golang.org/x/sys/unix"
 )
 
 func TestMremap(t *testing.T) {
-	b, err := unix.Mmap(-1, 0, unix.Getpagesize()*2, unix.PROT_NONE, unix.MAP_ANON|unix.MAP_PRIVATE)
+	b, err := unix.Mmap(-1, 0, unix.Getpagesize(), unix.PROT_NONE, unix.MAP_ANON|unix.MAP_PRIVATE)
 	if err != nil {
 		t.Fatalf("Mmap: %v", err)
 	}
@@ -22,22 +23,23 @@ func TestMremap(t *testing.T) {
 	}
 
 	b[0] = 42
-	if err := unix.Msync(b, unix.MS_SYNC); err != nil {
-		t.Fatalf("Msync: %v", err)
-	}
 
-	bNew, err := unix.Mremap(b, unix.Getpagesize(), unix.MREMAP_MAYMOVE)
+	bNew, err := unix.Mremap(b, unix.Getpagesize()*2, unix.MREMAP_MAYMOVE)
 	if err != nil {
 		t.Fatalf("Mremap2: %v", err)
 	}
+	b[unix.Getpagesize()+1] = 84
 
 	if bNew[0] != 42 {
 		t.Fatal("first element value was changed")
 	}
-	if len(bNew) != unix.Getpagesize() {
+	if bNew[unix.Getpagesize()+1] != 84 {
+		t.Fatalf("element value in new memory space wasn't changed")
+	}
+	if len(bNew) != unix.Getpagesize()*2 {
 		t.Fatal("new memory len not equal to specified len")
 	}
-	if cap(bNew) != unix.Getpagesize() {
+	if cap(bNew) != unix.Getpagesize()*2 {
 		t.Fatal("new memory cap not equal to specified len")
 	}
 }
