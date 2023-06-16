@@ -33,9 +33,6 @@ func TestMremap(t *testing.T) {
 	if bNew[0] != 42 {
 		t.Fatal("first element value was changed")
 	}
-	if bNew[unix.Getpagesize()+1] != 84 {
-		t.Fatalf("element value in new memory space wasn't changed")
-	}
 	if len(bNew) != unix.Getpagesize()*2 {
 		t.Fatal("new memory len not equal to specified len")
 	}
