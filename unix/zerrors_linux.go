@@ -1904,6 +1904,9 @@ const (
 	MOUNT_ATTR_SIZE_VER0                        = 0x20
 	MOUNT_ATTR_STRICTATIME                      = 0x20
 	MOUNT_ATTR__ATIME                           = 0x70
+	MREMAP_DONTUNMAP                            = 0x4
+	MREMAP_FIXED                                = 0x2
+	MREMAP_MAYMOVE                              = 0x1
 	MSDOS_SUPER_MAGIC                           = 0x4d44
 	MSG_BATCH                                   = 0x40000
 	MSG_CMSG_CLOEXEC                            = 0x40000000
