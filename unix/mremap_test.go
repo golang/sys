@@ -28,7 +28,7 @@ func TestMremap(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Mremap2: %v", err)
 	}
-	bNew[unix.Getpagesize()+1] = 84
+	bNew[unix.Getpagesize()+1] = 84 // checks
 
 	if bNew[0] != 42 {
 		t.Fatal("first element value was changed")
@@ -41,5 +41,10 @@ func TestMremap(t *testing.T) {
 	}
 	if cap(bNew) != unix.Getpagesize()*2 {
 		t.Fatal("new memory cap not equal to specified len")
+	}
+
+	_, err = unix.Mremap(b, unix.Getpagesize(), unix.MREMAP_FIXED)
+	if err != unix.EINVAL {
+		t.Fatalf("unix.MREMAP_FIXED should be forbidden")
 	}
 }
