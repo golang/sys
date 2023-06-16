@@ -15,7 +15,7 @@ type mremapMmapper struct {
 }
 
 func (m *mremapMmapper) Mremap(oldData []byte, newLength int, flags int) (data []byte, err error) {
-	if newLength <= 0 || len(oldData) == 0 || len(oldData) != cap(oldData) || flags&MREMAP_FIXED == 1 {
+	if newLength <= 0 || len(oldData) == 0 || len(oldData) != cap(oldData) || flags&MREMAP_FIXED != 0 {
 		return nil, EINVAL
 	}
 
