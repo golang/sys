@@ -34,6 +34,11 @@ like func declarations if //sys is replaced by func, but:
   - If the function name ends in a "?", then the function not existing is non-
     fatal, and an error will be returned instead of panicking.
 
+  - By default, the extension used for the dll is '.dll'. If the dll name needs to
+    end with a custom extension, it can be specified at the end of //sys declaration, like
+    //sys LoadLibrary(libname string) (handle uint32, err error) = LoadLibraryA [ext=drv]
+    This will cause the generated code to have 'LoadLibraryA.drv' instead of 'LoadLibraryA.dll'
+
 Usage:
 
 	mkwinsyscall [flags] [path ...]
@@ -359,13 +364,14 @@ func (r *Rets) SetErrorCode() string {
 
 // Fn describes syscall function.
 type Fn struct {
-	Name        string
-	Params      []*Param
-	Rets        *Rets
-	PrintTrace  bool
-	dllname     string
-	dllfuncname string
-	src         string
+	Name         string
+	Params       []*Param
+	Rets         *Rets
+	PrintTrace   bool
+	dllname      string
+	dllExtension string
+	dllfuncname  string
+	src          string
 	// TODO: get rid of this field and just use parameter index instead
 	curTmpVarIdx int // insure tmp variables have uniq names
 }
@@ -471,6 +477,13 @@ func newFn(s string) (*Fn, error) {
 	if found {
 		f.Rets.FailCond = body
 	}
+	// custom dll extension
+	prefix, body, _, found = extractSection(s, '[', ']')
+	if found {
+		ext := strings.Replace(strings.ReplaceAll(body, " ", ""), "ext=", "", 1)
+		f.dllExtension = trim(ext)
+		s = prefix
+	}
 	// dll and dll function names
 	s = trim(s)
 	if s == "" {
@@ -499,9 +512,12 @@ func newFn(s string) (*Fn, error) {
 // DLLName returns DLL name for function f.
 func (f *Fn) DLLName() string {
 	if f.dllname == "" {
-		return "kernel32"
+		return "kernel32.dll"
 	}
-	return f.dllname
+	if f.dllExtension != "" {
+		return f.dllname + "." + f.dllExtension
+	}
+	return f.dllname + ".dll"
 }
 
 // DLLVar returns a valid Go identifier that represents DLLName.
@@ -849,7 +865,7 @@ func (src *Source) Generate(w io.Writer) error {
 		"packagename": packagename,
 		"syscalldot":  syscalldot,
 		"newlazydll": func(dll string) string {
-			arg := "\"" + dll + ".dll\""
+			arg := "\"" + dll + "\""
 			if !*systemDLL {
 				return syscalldot() + "NewLazyDLL(" + arg + ")"
 			}
