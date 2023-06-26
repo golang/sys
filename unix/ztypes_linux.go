@@ -3799,7 +3799,7 @@ const (
 	ETHTOOL_A_RINGS_TCP_DATA_SPLIT            = 0xb
 	ETHTOOL_A_RINGS_CQE_SIZE                  = 0xc
 	ETHTOOL_A_RINGS_TX_PUSH                   = 0xd
-	ETHTOOL_A_RINGS_MAX                       = 0xe
+	ETHTOOL_A_RINGS_MAX                       = 0x10
 	ETHTOOL_A_CHANNELS_UNSPEC                 = 0x0
 	ETHTOOL_A_CHANNELS_HEADER                 = 0x1
 	ETHTOOL_A_CHANNELS_RX_MAX                 = 0x2
@@ -4494,7 +4494,7 @@ const (
 	NL80211_ATTR_MAC_HINT                                   = 0xc8
 	NL80211_ATTR_MAC_MASK                                   = 0xd7
 	NL80211_ATTR_MAX_AP_ASSOC_STA                           = 0xca
-	NL80211_ATTR_MAX                                        = 0x142
+	NL80211_ATTR_MAX                                        = 0x145
 	NL80211_ATTR_MAX_CRIT_PROT_DURATION                     = 0xb4
 	NL80211_ATTR_MAX_CSA_COUNTERS                           = 0xce
 	NL80211_ATTR_MAX_MATCH_SETS                             = 0x85
@@ -4723,7 +4723,7 @@ const (
 	NL80211_BAND_ATTR_HT_CAPA                               = 0x4
 	NL80211_BAND_ATTR_HT_MCS_SET                            = 0x3
 	NL80211_BAND_ATTR_IFTYPE_DATA                           = 0x9
-	NL80211_BAND_ATTR_MAX                                   = 0xb
+	NL80211_BAND_ATTR_MAX                                   = 0xd
 	NL80211_BAND_ATTR_RATES                                 = 0x2
 	NL80211_BAND_ATTR_VHT_CAPA                              = 0x8
 	NL80211_BAND_ATTR_VHT_MCS_SET                           = 0x7
@@ -4864,7 +4864,7 @@ const (
 	NL80211_CMD_LEAVE_IBSS                                  = 0x2c
 	NL80211_CMD_LEAVE_MESH                                  = 0x45
 	NL80211_CMD_LEAVE_OCB                                   = 0x6d
-	NL80211_CMD_MAX                                         = 0x98
+	NL80211_CMD_MAX                                         = 0x99
 	NL80211_CMD_MICHAEL_MIC_FAILURE                         = 0x29
 	NL80211_CMD_MODIFY_LINK_STA                             = 0x97
 	NL80211_CMD_NAN_MATCH                                   = 0x78
