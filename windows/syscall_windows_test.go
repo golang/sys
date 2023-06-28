@@ -888,22 +888,21 @@ func TestSystemModuleVersions(t *testing.T) {
 		var zero windows.Handle
 		infoSize, err := windows.GetFileVersionInfoSize(driverPath, &zero)
 		if err != nil {
-			if err != windows.ERROR_FILE_NOT_FOUND {
-				t.Error(err)
+			if err != windows.ERROR_FILE_NOT_FOUND && err != windows.ERROR_RESOURCE_TYPE_NOT_FOUND {
+				t.Errorf("%v: %v", moduleName, err)
 			}
 			continue
 		}
 		versionInfo := make([]byte, infoSize)
-		err = windows.GetFileVersionInfo(driverPath, 0, infoSize, unsafe.Pointer(&versionInfo[0]))
-		if err != nil && err != windows.ERROR_FILE_NOT_FOUND {
-			t.Error(err)
+		if err = windows.GetFileVersionInfo(driverPath, 0, infoSize, unsafe.Pointer(&versionInfo[0])); err != nil {
+			t.Errorf("%v: %v", moduleName, err)
 			continue
 		}
 		var fixedInfo *windows.VS_FIXEDFILEINFO
 		fixedInfoLen := uint32(unsafe.Sizeof(*fixedInfo))
 		err = windows.VerQueryValue(unsafe.Pointer(&versionInfo[0]), `\`, (unsafe.Pointer)(&fixedInfo), &fixedInfoLen)
 		if err != nil {
-			t.Error(err)
+			t.Errorf("%v: %v", moduleName, err)
 			continue
 		}
 		t.Logf("%s: v%d.%d.%d.%d", moduleName,
