@@ -2125,28 +2125,6 @@ func writevRacedetect(iovecs []Iovec, n int) {
 // mmap varies by architecture; see syscall_linux_*.go.
 //sys	munmap(addr uintptr, length uintptr) (err error)
 //sys	mremap(oldaddr uintptr, oldlength uintptr, newlength uintptr, flags int, newaddr uintptr) (xaddr uintptr, err error)
-
-var mapper = &mremapMmapper{
-	mmapper: mmapper{
-		active: make(map[*byte][]byte),
-		mmap:   mmap,
-		munmap: munmap,
-	},
-	mremap: mremap,
-}
-
-func Mmap(fd int, offset int64, length int, prot int, flags int) (data []byte, err error) {
-	return mapper.Mmap(fd, offset, length, prot, flags)
-}
-
-func Munmap(b []byte) (err error) {
-	return mapper.Munmap(b)
-}
-
-func Mremap(oldData []byte, newLength int, flags int) (data []byte, err error) {
-	return mapper.Mremap(oldData, newLength, flags)
-}
-
 //sys	Madvise(b []byte, advice int) (err error)
 //sys	Mprotect(b []byte, prot int) (err error)
 //sys	Mlock(b []byte) (err error)
@@ -2154,6 +2132,12 @@ func Mremap(oldData []byte, newLength int, flags int) (data []byte, err error) {
 //sys	Msync(b []byte, flags int) (err error)
 //sys	Munlock(b []byte) (err error)
 //sys	Munlockall() (err error)
+
+const (
+	mremapFixed     = MREMAP_FIXED
+	mremapDontunmap = MREMAP_DONTUNMAP
+	mremapMaymove   = MREMAP_MAYMOVE
+)
 
 // Vmsplice splices user pages from a slice of Iovecs into a pipe specified by fd,
 // using the specified flags.

@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-//go:build linux
-// +build linux
+//go:build linux || netbsd
+// +build linux netbsd
 
 package unix_test
 
@@ -24,7 +24,7 @@ func TestMremap(t *testing.T) {
 
 	b[0] = 42
 
-	bNew, err := unix.Mremap(b, unix.Getpagesize()*2, unix.MREMAP_MAYMOVE)
+	bNew, err := unix.Mremap(b, unix.Getpagesize()*2, unix.MremapMaymove)
 	if err != nil {
 		t.Fatalf("Mremap2: %v", err)
 	}
@@ -40,8 +40,8 @@ func TestMremap(t *testing.T) {
 		t.Fatal("new memory cap not equal to specified len")
 	}
 
-	_, err = unix.Mremap(b, unix.Getpagesize(), unix.MREMAP_FIXED)
+	_, err = unix.Mremap(b, unix.Getpagesize(), unix.MremapFixed)
 	if err != unix.EINVAL {
-		t.Fatalf("unix.MREMAP_FIXED should be forbidden")
+		t.Fatalf("remapping to a fixed address; got %v, want %v", err, unix.EINVAL)
 	}
 }
