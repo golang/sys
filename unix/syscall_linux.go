@@ -1885,7 +1885,7 @@ func Getpgrp() (pid int) {
 //sys	PerfEventOpen(attr *PerfEventAttr, pid int, cpu int, groupFd int, flags int) (fd int, err error)
 //sys	PivotRoot(newroot string, putold string) (err error) = SYS_PIVOT_ROOT
 //sys	Prctl(option int, arg2 uintptr, arg3 uintptr, arg4 uintptr, arg5 uintptr) (err error)
-//sys	Pselect(nfd int, r *FdSet, w *FdSet, e *FdSet, timeout *Timespec, sigmask *Sigset_t) (n int, err error) = SYS_PSELECT6
+//sys	pselect6(nfd int, r *FdSet, w *FdSet, e *FdSet, timeout *Timespec, sigmask *pselect6Sigset_t) (n int, err error)
 //sys	read(fd int, p []byte) (n int, err error)
 //sys	Removexattr(path string, attr string) (err error)
 //sys	Renameat2(olddirfd int, oldpath string, newdirfd int, newpath string, flags uint) (err error)
@@ -2436,6 +2436,36 @@ func Getresgid() (rgid, egid, sgid int) {
 	var r, e, s _C_int
 	getresgid(&r, &e, &s)
 	return int(r), int(e), int(s)
+}
+
+func Pselect(nfd int, r *FdSet, w *FdSet, e *FdSet, timeout *Timespec, sigmask *Sigset_t) (n int, err error) {
+	// Per https://man7.org/linux/man-pages/man2/select.2.html#NOTES,
+	// The Linux pselect6() system call modifies its timeout argument.
+	// [Not modifying the argument] is the behavior required by POSIX.1-2001.
+	var mutableTimeout *Timespec
+	if timeout != nil {
+		mutableTimeout = new(Timespec)
+		*mutableTimeout = *timeout
+	}
+
+	// The final argument of the pselect6() system call is not a
+	// sigset_t * pointer, but is instead a structure
+	var kernelMask *pselect6Sigset_t
+	if sigmask != nil {
+		wordBits := 32 << (^uintptr(0) >> 63)
+		sigsetWords := (_C__NSIG - 1 + wordBits - 1) / (wordBits)
+
+		// A sigset stores one bit per signal,
+		// offset by 1 (because signal 0 does not exist).
+		// So the number of words needed is ⌈__C_NSIG - 1 / wordBits⌉.
+		sigsetBytes := sigsetWords * (wordBits / 8)
+		kernelMask = &pselect6Sigset_t{
+			ss:    sigmask,
+			ssLen: uintptr(sigsetBytes),
+		}
+	}
+
+	return pselect6(nfd, r, w, e, mutableTimeout, kernelMask)
 }
 
 /*
