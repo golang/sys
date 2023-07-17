@@ -2459,10 +2459,10 @@ func Pselect(nfd int, r *FdSet, w *FdSet, e *FdSet, timeout *Timespec, sigmask *
 		// So the number of words needed is ⌈__C_NSIG - 1 / wordBits⌉.
 		sigsetWords := (_C__NSIG - 1 + wordBits - 1) / (wordBits)
 
-		sigsetBytes := sigsetWords * (wordBits / 8)
+		sigsetBytes := uintptr(sigsetWords * (wordBits / 8))
 		kernelMask = &sigset_argpack{
 			ss:    sigmask,
-			ssLen: uintptr(sigsetBytes),
+			ssLen: sigsetBytes,
 		}
 	}
 
