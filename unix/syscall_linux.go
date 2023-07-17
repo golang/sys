@@ -1885,7 +1885,7 @@ func Getpgrp() (pid int) {
 //sys	PerfEventOpen(attr *PerfEventAttr, pid int, cpu int, groupFd int, flags int) (fd int, err error)
 //sys	PivotRoot(newroot string, putold string) (err error) = SYS_PIVOT_ROOT
 //sys	Prctl(option int, arg2 uintptr, arg3 uintptr, arg4 uintptr, arg5 uintptr) (err error)
-//sys	pselect6(nfd int, r *FdSet, w *FdSet, e *FdSet, timeout *Timespec, sigmask *pselect6Sigset_t) (n int, err error)
+//sys	pselect6(nfd int, r *FdSet, w *FdSet, e *FdSet, timeout *Timespec, sigmask *sigset_argpack) (n int, err error)
 //sys	read(fd int, p []byte) (n int, err error)
 //sys	Removexattr(path string, attr string) (err error)
 //sys	Renameat2(olddirfd int, oldpath string, newdirfd int, newpath string, flags uint) (err error)
@@ -2450,16 +2450,17 @@ func Pselect(nfd int, r *FdSet, w *FdSet, e *FdSet, timeout *Timespec, sigmask *
 
 	// The final argument of the pselect6() system call is not a
 	// sigset_t * pointer, but is instead a structure
-	var kernelMask *pselect6Sigset_t
+	var kernelMask *sigset_argpack
 	if sigmask != nil {
-		wordBits := 32 << (^uintptr(0) >> 63)
-		sigsetWords := (_C__NSIG - 1 + wordBits - 1) / (wordBits)
+		wordBits := 32 << (^uintptr(0) >> 63) // see math.intSize
 
 		// A sigset stores one bit per signal,
 		// offset by 1 (because signal 0 does not exist).
 		// So the number of words needed is ⌈__C_NSIG - 1 / wordBits⌉.
+		sigsetWords := (_C__NSIG - 1 + wordBits - 1) / (wordBits)
+
 		sigsetBytes := sigsetWords * (wordBits / 8)
-		kernelMask = &pselect6Sigset_t{
+		kernelMask = &sigset_argpack{
 			ss:    sigmask,
 			ssLen: uintptr(sigsetBytes),
 		}

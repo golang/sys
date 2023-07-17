@@ -866,7 +866,7 @@ const (
 	POLLNVAL = 0x20
 )
 
-type pselect6Sigset_t struct {
+type sigset_argpack struct {
 	ss    *Sigset_t
 	ssLen uintptr
 }
