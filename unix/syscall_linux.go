@@ -2438,6 +2438,8 @@ func Getresgid() (rgid, egid, sgid int) {
 	return int(r), int(e), int(s)
 }
 
+// Pselect is a wrapper around the Linux pselect6 system call.
+// This version does not modify the timeout argument.
 func Pselect(nfd int, r *FdSet, w *FdSet, e *FdSet, timeout *Timespec, sigmask *Sigset_t) (n int, err error) {
 	// Per https://man7.org/linux/man-pages/man2/select.2.html#NOTES,
 	// The Linux pselect6() system call modifies its timeout argument.
