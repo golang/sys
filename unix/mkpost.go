@@ -112,6 +112,12 @@ func main() {
 		}
 	}
 
+	if goos == "linux" && goarch != "riscv64" {
+		// The RISCV_HWPROBE_ constants are only defined on Linux for riscv64
+		hwprobeConstRexexp := regexp.MustCompile(`const\s+\(\s+RISCV_HWPROBE_[^\)]+\)`)
+		b = hwprobeConstRexexp.ReplaceAll(b, nil)
+	}
+
 	// Intentionally export __val fields in Fsid and Sigset_t
 	valRegex := regexp.MustCompile(`type (Fsid|Sigset_t) struct {(\s+)X__(bits|val)(\s+\S+\s+)}`)
 	b = valRegex.ReplaceAll(b, []byte("type $1 struct {${2}Val$4}"))
@@ -137,6 +143,11 @@ func main() {
 	// nonempty Ptrace structs.
 	ptraceRexexp := regexp.MustCompile(`type Ptrace((Psw|Fpregs|Per) struct {\s*})`)
 	b = ptraceRexexp.ReplaceAll(b, nil)
+
+	// If we have an empty RISCVHWProbePairs struct, we should delete it. Only riscv64 emits
+	// nonempty RISCVHWProbePairs structs.
+	hwprobeRexexp := regexp.MustCompile(`type RISCVHWProbePairs struct {\s*}`)
+	b = hwprobeRexexp.ReplaceAll(b, nil)
 
 	// Replace the control_regs union with a blank identifier for now.
 	controlRegsRegex := regexp.MustCompile(`(Control_regs)\s+\[0\]uint64`)

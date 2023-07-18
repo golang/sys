@@ -13,6 +13,7 @@ import (
 	"os"
 	"os/exec"
 	"regexp"
+	"sort"
 	"strconv"
 	"strings"
 )
@@ -36,15 +37,15 @@ func plusBuildTags() string {
 	return fmt.Sprintf("%s,%s", goarch, goos)
 }
 
-func format(name string, num int, offset int) string {
+func format(name string, num int, offset int) (int, string) {
 	if num > 999 {
 		// ignore deprecated syscalls that are no longer implemented
 		// https://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/tree/include/uapi/asm-generic/unistd.h?id=refs/heads/master#n716
-		return ""
+		return 0, ""
 	}
 	name = strings.ToUpper(name)
 	num = num + offset
-	return fmt.Sprintf("	SYS_%s = %d;\n", name, num)
+	return num, fmt.Sprintf("	SYS_%s = %d;\n", name, num)
 }
 
 func checkErr(err error) {
@@ -67,6 +68,36 @@ func (r *re) Match(exp string) bool {
 		return true
 	}
 	return false
+}
+
+// syscallNum holds the syscall number and the string
+// we will write to the generated file.
+type syscallNum struct {
+	num         int
+	declaration string
+}
+
+// syscallNums is a slice of syscallNum sorted by the syscall number in ascending order.
+type syscallNums []syscallNum
+
+// addSyscallNum adds the syscall declaration to syscallNums.
+func (nums *syscallNums) addSyscallNum(num int, declaration string) {
+	if declaration == "" {
+		return
+	}
+	if len(*nums) == 0 || (*nums)[len(*nums)-1].num <= num {
+		// This is the most common case as the syscall declarations output by the preprocessor
+		// are almost always sorted.
+		*nums = append(*nums, syscallNum{num, declaration})
+		return
+	}
+	i := sort.Search(len(*nums), func(i int) bool { return (*nums)[i].num >= num })
+
+	// Maintain the ordering in the preprocessor output when we have multiple definitions with
+	// the same value. i cannot be > len(nums) - 1 as nums[len(nums)-1].num > num.
+	for ; (*nums)[i].num == num; i++ {
+	}
+	*nums = append((*nums)[:i], append([]syscallNum{{num, declaration}}, (*nums)[i:]...)...)
 }
 
 func main() {
@@ -100,11 +131,23 @@ func main() {
 		fmt.Fprintf(os.Stderr, "can't run %s", cc)
 		os.Exit(1)
 	}
-	text := ""
 	s := bufio.NewScanner(strings.NewReader(string(cmd)))
-	var offset, prev int
+	var offset, prev, asOffset int
+	var nums syscallNums
 	for s.Scan() {
 		t := re{str: s.Text()}
+
+		// The generated zsysnum_linux_*.go files for some platforms (arm64, loong64, riscv64)
+		// treat SYS_ARCH_SPECIFIC_SYSCALL as if it's a syscall which it isn't.  It's an offset.
+		// However, as this constant is already part of the public API we leave it in place.
+		// Lines of type SYS_ARCH_SPECIFIC_SYSCALL = 244 are thus processed twice, once to extract
+		// the offset and once to add the constant.
+
+		if t.Match(`^#define __NR_arch_specific_syscall\s+([0-9]+)`) {
+			// riscv: extract arch specific offset
+			asOffset, _ = strconv.Atoi(t.sub[1]) // Make asOffset=0 if empty or non-numeric
+		}
+
 		if t.Match(`^#define __NR_Linux\s+([0-9]+)`) {
 			// mips/mips64: extract offset
 			offset, _ = strconv.Atoi(t.sub[1]) // Make offset=0 if empty or non-numeric
@@ -118,24 +161,32 @@ func main() {
 		} else if t.Match(`^#define __NR_(\w+)\s+([0-9]+)`) {
 			prev, err = strconv.Atoi(t.sub[2])
 			checkErr(err)
-			text += format(t.sub[1], prev, offset)
+			nums.addSyscallNum(format(t.sub[1], prev, offset))
 		} else if t.Match(`^#define __NR3264_(\w+)\s+([0-9]+)`) {
 			prev, err = strconv.Atoi(t.sub[2])
 			checkErr(err)
-			text += format(t.sub[1], prev, offset)
+			nums.addSyscallNum(format(t.sub[1], prev, offset))
 		} else if t.Match(`^#define __NR_(\w+)\s+\(\w+\+\s*([0-9]+)\)`) {
 			r2, err := strconv.Atoi(t.sub[2])
 			checkErr(err)
-			text += format(t.sub[1], prev+r2, offset)
+			nums.addSyscallNum(format(t.sub[1], prev+r2, offset))
 		} else if t.Match(`^#define __NR_(\w+)\s+\(__NR_(?:SYSCALL_BASE|Linux) \+ ([0-9]+)`) {
 			r2, err := strconv.Atoi(t.sub[2])
 			checkErr(err)
-			text += format(t.sub[1], r2, offset)
+			nums.addSyscallNum(format(t.sub[1], r2, offset))
+		} else if asOffset != 0 && t.Match(`^#define __NR_(\w+)\s+\(__NR_arch_specific_syscall \+ ([0-9]+)`) {
+			r2, err := strconv.Atoi(t.sub[2])
+			checkErr(err)
+			nums.addSyscallNum(format(t.sub[1], r2, asOffset))
 		}
 	}
 	err = s.Err()
 	checkErr(err)
-	fmt.Printf(template, cmdLine(), goBuildTags(), plusBuildTags(), text)
+	var text strings.Builder
+	for _, num := range nums {
+		text.WriteString(num.declaration)
+	}
+	fmt.Printf(template, cmdLine(), goBuildTags(), plusBuildTags(), text.String())
 }
 
 const template = `// %s

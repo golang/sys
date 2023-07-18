@@ -177,3 +177,14 @@ func KexecFileLoad(kernelFd int, initrdFd int, cmdline string, flags int) error 
 	}
 	return kexecFileLoad(kernelFd, initrdFd, cmdlineLen, cmdline, flags)
 }
+
+//sys	riscvHWProbe(pairs []RISCVHWProbePairs, cpuCount uintptr, cpus *CPUSet, flags uint) (err error)
+
+func RISCVHWProbe(pairs []RISCVHWProbePairs, set *CPUSet, flags uint) (err error) {
+	var setSize uintptr
+
+	if set != nil {
+		setSize = uintptr(unsafe.Sizeof(*set))
+	}
+	return riscvHWProbe(pairs, setSize, set, flags)
+}
