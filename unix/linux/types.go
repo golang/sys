@@ -968,6 +968,10 @@ const (
 )
 
 type Sigset_t C.sigset_t
+type sigset_argpack struct {
+	ss    *Sigset_t
+	ssLen uintptr // Size (in bytes) of object pointed to by ss.
+}
 
 const _C__NSIG = C._NSIG
 
