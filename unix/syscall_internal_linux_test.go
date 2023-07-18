@@ -254,7 +254,7 @@ func Test_anyToSockaddr(t *testing.T) {
 			proto: makeProto(^0),
 		},
 		{
-			name: "AF_VSOCK emtpy",
+			name: "AF_VSOCK empty",
 			rsa:  sockaddrVMToAny(RawSockaddrVM{}),
 			err:  EAFNOSUPPORT,
 		},

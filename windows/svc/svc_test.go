@@ -163,7 +163,7 @@ func TestIsAnInteractiveSession(t *testing.T) {
 		t.Fatal(err)
 	}
 	if !isInteractive {
-		t.Error("IsAnInteractiveSession retuns false when running interactively.")
+		t.Error("IsAnInteractiveSession returns false when running interactively.")
 	}
 }
 
@@ -173,7 +173,7 @@ func TestIsWindowsService(t *testing.T) {
 		t.Fatal(err)
 	}
 	if isSvc {
-		t.Error("IsWindowsService retuns true when not running in a service.")
+		t.Error("IsWindowsService returns true when not running in a service.")
 	}
 }
 
@@ -206,7 +206,7 @@ func TestIsWindowsServiceWhenParentExits(t *testing.T) {
 			msg = err.Error()
 		}
 		if isSvc {
-			msg = "IsWindowsService retuns true when not running in a service."
+			msg = "IsWindowsService returns true when not running in a service."
 		}
 		err = ioutil.WriteFile(dumpPath, []byte(msg), 0644)
 		if err != nil {
@@ -235,12 +235,12 @@ func TestIsWindowsServiceWhenParentExits(t *testing.T) {
 			}
 			time.Sleep(100 * time.Millisecond)
 			if i > 10 {
-				t.Fatal("timed out waiting for child ouput file to be created.")
+				t.Fatal("timed out waiting for child output file to be created.")
 			}
 		}
 		childOutput, err := ioutil.ReadFile(childDumpPath)
 		if err != nil {
-			t.Fatalf("reading child ouput failed: %v", err)
+			t.Fatalf("reading child output failed: %v", err)
 		}
 		if got, want := string(childOutput), ""; got != want {
 			t.Fatalf("child output: want %q, got %q", want, got)

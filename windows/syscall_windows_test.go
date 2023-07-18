@@ -226,7 +226,7 @@ func TestKnownFolderPath(t *testing.T) {
 func TestRtlGetVersion(t *testing.T) {
 	version := windows.RtlGetVersion()
 	major, minor, build := windows.RtlGetNtVersionNumbers()
-	// Go is not explictly added to the application compatibility database, so
+	// Go is not explicitly added to the application compatibility database, so
 	// these two functions should return the same thing.
 	if version.MajorVersion != major || version.MinorVersion != minor || version.BuildNumber != build {
 		t.Fatalf("%d.%d.%d != %d.%d.%d", version.MajorVersion, version.MinorVersion, version.BuildNumber, major, minor, build)

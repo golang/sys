@@ -18,7 +18,7 @@ func Test_anyToSockaddr_darwin(t *testing.T) {
 		err  error
 	}{
 		{
-			name: "AF_SYSTEM emtpy",
+			name: "AF_SYSTEM empty",
 			rsa:  sockaddrCtlToAny(RawSockaddrCtl{}),
 			err:  EAFNOSUPPORT,
 		},
@@ -51,7 +51,7 @@ func Test_anyToSockaddr_darwin(t *testing.T) {
 			},
 		},
 		{
-			name: "AF_VSOCK emtpy",
+			name: "AF_VSOCK empty",
 			rsa:  sockaddrVMToAny(RawSockaddrVM{}),
 			err:  EAFNOSUPPORT,
 		},
