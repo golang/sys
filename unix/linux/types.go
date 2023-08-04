@@ -138,6 +138,11 @@ struct termios2 {
 #include <linux/random.h>
 #include <linux/rtc.h>
 #include <linux/rtnetlink.h>
+// This is to avoid a conflict of struct sched_param being defined by
+// both the kernel and the glibc (sched.h) headers.
+#define sched_param kernel_sched_param
+#include <linux/sched/types.h>
+#undef kernel_sched_param
 #include <linux/shm.h>
 #include <linux/socket.h>
 #include <linux/stat.h>
@@ -5796,3 +5801,7 @@ const (
 	RISCV_HWPROBE_MISALIGNED_UNSUPPORTED = C.RISCV_HWPROBE_MISALIGNED_UNSUPPORTED
 	RISCV_HWPROBE_MISALIGNED_MASK        = C.RISCV_HWPROBE_MISALIGNED_MASK
 )
+
+type SchedAttr C.struct_sched_attr
+
+const SizeofSchedAttr = C.sizeof_struct_sched_attr
