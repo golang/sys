@@ -1164,3 +1164,12 @@ items_loop:
 		}
 	}
 }
+
+func TestTimePeriod(t *testing.T) {
+	if err := windows.TimeBeginPeriod(1); err != nil {
+		t.Fatal(err)
+	}
+	if err := windows.TimeEndPeriod(1); err != nil {
+		t.Fatal(err)
+	}
+}
