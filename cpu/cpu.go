@@ -54,6 +54,10 @@ var X86 struct {
 	HasAVX512VBMI2      bool // Advanced vector extension 512 Vector Byte Manipulation Instructions 2
 	HasAVX512BITALG     bool // Advanced vector extension 512 Bit Algorithms
 	HasAVX512BF16       bool // Advanced vector extension 512 BFloat16 Instructions
+	HasAMX              bool // Advanced Matrix Extension
+	HasAMXTile          bool // Advanced Matrix Extension Tile instructions
+	HasAMXInt8          bool // Advanced Matrix Extension Int8 instructions
+	HasAMXBF16          bool // Advanced Matrix Extension BFloat16 instructions
 	HasBMI1             bool // Bit manipulation instruction set 1
 	HasBMI2             bool // Bit manipulation instruction set 2
 	HasCX16             bool // Compare and exchange 16 Bytes

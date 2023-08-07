@@ -37,6 +37,10 @@ func initOptions() {
 		{Name: "avx512vbmi2", Feature: &X86.HasAVX512VBMI2},
 		{Name: "avx512bitalg", Feature: &X86.HasAVX512BITALG},
 		{Name: "avx512bf16", Feature: &X86.HasAVX512BF16},
+		{Name: "amx", Feature: &X86.HasAMX},
+		{Name: "amxtile", Feature: &X86.HasAMXTile},
+		{Name: "amxint8", Feature: &X86.HasAMXInt8},
+		{Name: "amxbf16", Feature: &X86.HasAMXBF16},
 		{Name: "bmi1", Feature: &X86.HasBMI1},
 		{Name: "bmi2", Feature: &X86.HasBMI2},
 		{Name: "cx16", Feature: &X86.HasCX16},
@@ -137,6 +141,13 @@ func archInit() {
 
 		eax71, _, _, _ := cpuid(7, 1)
 		X86.HasAVX512BF16 = isSet(5, eax71)
+	}
+
+	X86.HasAMX = isSet(24, edx7)
+	if X86.HasAMX {
+		X86.HasAMXTile = true
+		X86.HasAMXInt8 = isSet(25, edx7)
+		X86.HasAMXBF16 = isSet(22, edx7)
 	}
 }
 
