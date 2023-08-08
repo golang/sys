@@ -693,10 +693,10 @@ type SockaddrALG struct {
 
 func (sa *SockaddrALG) sockaddr() (unsafe.Pointer, _Socklen, error) {
 	// Leave room for NUL byte terminator.
-	if len(sa.Type) > 13 {
+	if len(sa.Type) > len(sa.raw.Type)-1 {
 		return nil, 0, EINVAL
 	}
-	if len(sa.Name) > 63 {
+	if len(sa.Name) > len(sa.raw.Name)-1 {
 		return nil, 0, EINVAL
 	}
 
@@ -704,17 +704,8 @@ func (sa *SockaddrALG) sockaddr() (unsafe.Pointer, _Socklen, error) {
 	sa.raw.Feat = sa.Feature
 	sa.raw.Mask = sa.Mask
 
-	typ, err := ByteSliceFromString(sa.Type)
-	if err != nil {
-		return nil, 0, err
-	}
-	name, err := ByteSliceFromString(sa.Name)
-	if err != nil {
-		return nil, 0, err
-	}
-
-	copy(sa.raw.Type[:], typ)
-	copy(sa.raw.Name[:], name)
+	copy(sa.raw.Type[:], sa.Type)
+	copy(sa.raw.Name[:], sa.Name)
 
 	return unsafe.Pointer(&sa.raw), SizeofSockaddrALG, nil
 }
