@@ -37,7 +37,6 @@ func initOptions() {
 		{Name: "avx512vbmi2", Feature: &X86.HasAVX512VBMI2},
 		{Name: "avx512bitalg", Feature: &X86.HasAVX512BITALG},
 		{Name: "avx512bf16", Feature: &X86.HasAVX512BF16},
-		{Name: "amx", Feature: &X86.HasAMX},
 		{Name: "amxtile", Feature: &X86.HasAMXTile},
 		{Name: "amxint8", Feature: &X86.HasAMXInt8},
 		{Name: "amxbf16", Feature: &X86.HasAMXBF16},
