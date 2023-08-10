@@ -143,12 +143,9 @@ func archInit() {
 		X86.HasAVX512BF16 = isSet(5, eax71)
 	}
 
-	X86.HasAMX = isSet(24, edx7)
-	if X86.HasAMX {
-		X86.HasAMXTile = true
-		X86.HasAMXInt8 = isSet(25, edx7)
-		X86.HasAMXBF16 = isSet(22, edx7)
-	}
+	X86.HasAMXTile = isSet(24, edx7)
+	X86.HasAMXInt8 = isSet(25, edx7)
+	X86.HasAMXBF16 = isSet(22, edx7)
 }
 
 func isSet(bitpos uint, value uint32) bool {
