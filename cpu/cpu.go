@@ -38,7 +38,7 @@ var X86 struct {
 	HasAVX512F          bool // Advanced vector extension 512 Foundation Instructions
 	HasAVX512CD         bool // Advanced vector extension 512 Conflict Detection Instructions
 	HasAVX512ER         bool // Advanced vector extension 512 Exponential and Reciprocal Instructions
-	HasAVX512PF         bool // Advanced vector extension 512 Prefetch Instructions Instructions
+	HasAVX512PF         bool // Advanced vector extension 512 Prefetch Instructions
 	HasAVX512VL         bool // Advanced vector extension 512 Vector Length Extensions
 	HasAVX512BW         bool // Advanced vector extension 512 Byte and Word Instructions
 	HasAVX512DQ         bool // Advanced vector extension 512 Doubleword and Quadword Instructions
