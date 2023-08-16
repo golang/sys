@@ -1173,3 +1173,12 @@ func TestTimePeriod(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+
+func TestGetStartupInfo(t *testing.T) {
+	var si windows.StartupInfo
+	err := windows.GetStartupInfo(&si)
+	if err != nil {
+		// see https://go.dev/issue/31316
+		t.Fatalf("GetStartupInfo: got error %v, want nil", err)
+	}
+}
