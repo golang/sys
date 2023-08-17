@@ -21,9 +21,9 @@ RUN git clone --branch v6.4 --depth 1 https://kernel.googlesource.com/pub/scm/li
 RUN git clone --branch release/2.37/master --depth 1 https://sourceware.org/git/glibc.git
 
 # Get Go
-ENV GOLANG_VERSION 1.21rc2
+ENV GOLANG_VERSION 1.21.0
 ENV GOLANG_DOWNLOAD_URL https://golang.org/dl/go$GOLANG_VERSION.linux-amd64.tar.gz
-ENV GOLANG_DOWNLOAD_SHA256 8fe90332727c606019e80a7368e23f5e65ad59520e45ee4010692f15572e45c6
+ENV GOLANG_DOWNLOAD_SHA256 d0398903a16ba2232b389fb31032ddf57cac34efda306a0eebac34f0965a0742
 
 RUN curl -fsSL "$GOLANG_DOWNLOAD_URL" -o golang.tar.gz \
     && echo "$GOLANG_DOWNLOAD_SHA256  golang.tar.gz" | sha256sum -c - \
@@ -52,8 +52,8 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Only for loong64, getting tools of qemu-user and gcc-cross-compiler
-ENV LOONG64_BASE_URL https://github.com/loongson/build-tools/releases/download/2022.09.06
-ENV LOONG64_GCC  loongarch64-clfs-6.3-cross-tools-gcc-glibc.tar.xz
+ENV LOONG64_BASE_URL https://github.com/loongson/build-tools/releases/download/2023.08.08
+ENV LOONG64_GCC  CLFS-loongarch64-8.1-x86_64-cross-tools-gcc-glibc.tar.xz
 ENV LOONG64_QEMU qemu-loongarch64
 ENV LOONG64_GCC_DOWNLOAD_URL  $LOONG64_BASE_URL/$LOONG64_GCC
 ENV LOONG64_QEMU_DOWNLOAD_URL $LOONG64_BASE_URL/$LOONG64_QEMU
