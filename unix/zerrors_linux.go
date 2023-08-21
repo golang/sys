@@ -1333,6 +1333,7 @@ const (
 	F_OFD_SETLK                                 = 0x25
 	F_OFD_SETLKW                                = 0x26
 	F_OK                                        = 0x0
+	F_SEAL_EXEC                                 = 0x20
 	F_SEAL_FUTURE_WRITE                         = 0x10
 	F_SEAL_GROW                                 = 0x4
 	F_SEAL_SEAL                                 = 0x1
