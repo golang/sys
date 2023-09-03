@@ -182,7 +182,7 @@ func TestIsWindowsServiceWhenParentExits(t *testing.T) {
 		// in parent process
 
 		// Start the child and exit quickly.
-		child := exec.Command(os.Args[0], "-test.run=TestIsWindowsServiceWhenParentExits")
+		child := exec.Command(os.Args[0], "-test.run=^TestIsWindowsServiceWhenParentExits$")
 		child.Env = append(os.Environ(), "GO_WANT_HELPER_PROCESS=child")
 		err := child.Start()
 		if err != nil {
@@ -221,7 +221,7 @@ func TestIsWindowsServiceWhenParentExits(t *testing.T) {
 	for i := 0; i < 10; i++ {
 		childDumpPath := filepath.Join(t.TempDir(), "issvc.txt")
 
-		parent := exec.Command(os.Args[0], "-test.run=TestIsWindowsServiceWhenParentExits")
+		parent := exec.Command(os.Args[0], "-test.run=^TestIsWindowsServiceWhenParentExits$")
 		parent.Env = append(os.Environ(),
 			"GO_WANT_HELPER_PROCESS=parent",
 			"GO_WANT_HELPER_PROCESS_FILE="+childDumpPath)

@@ -757,7 +757,7 @@ func TestFlock(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Flock: %s", err.Error())
 		}
-		cmd := exec.Command(os.Args[0], "-test.run=TestFlock", f.Name())
+		cmd := exec.Command(os.Args[0], "-test.run=^TestFlock$", f.Name())
 		cmd.Env = append(os.Environ(), "GO_WANT_HELPER_PROCESS=1")
 		out, err := cmd.CombinedOutput()
 		if len(out) > 0 || err != nil {
