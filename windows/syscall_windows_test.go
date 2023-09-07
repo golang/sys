@@ -22,7 +22,6 @@ import (
 	"time"
 	"unsafe"
 
-	"golang.org/x/sys/internal/unsafeheader"
 	"golang.org/x/sys/windows"
 )
 
@@ -865,10 +864,7 @@ func TestSystemModuleVersions(t *testing.T) {
 			return
 		}
 		mods := (*windows.RTL_PROCESS_MODULES)(unsafe.Pointer(&moduleBuffer[0]))
-		hdr := (*unsafeheader.Slice)(unsafe.Pointer(&modules))
-		hdr.Data = unsafe.Pointer(&mods.Modules[0])
-		hdr.Len = int(mods.NumberOfModules)
-		hdr.Cap = int(mods.NumberOfModules)
+		modules = unsafe.Slice(&mods.Modules[0], int(mods.NumberOfModules))
 		break
 	}
 	for i := range modules {
