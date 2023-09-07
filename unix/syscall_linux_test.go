@@ -12,7 +12,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net"
 	"os"
 	"os/exec"
@@ -810,7 +810,7 @@ func TestOpenByHandleAt(t *testing.T) {
 			f := os.NewFile(uintptr(fd), "")
 			defer f.Close()
 
-			slurp, err := ioutil.ReadAll(f)
+			slurp, err := io.ReadAll(f)
 			if err != nil {
 				t.Fatal(err)
 			}

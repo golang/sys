@@ -14,7 +14,6 @@ package unix_test
 import (
 	"flag"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -92,7 +91,7 @@ func init() {
 			os.Exit(0)
 		},
 		func() error {
-			files, err := ioutil.ReadDir(".")
+			files, err := os.ReadDir(".")
 			if err != nil {
 				return err
 			}

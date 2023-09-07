@@ -6,7 +6,6 @@ package unix_test
 
 import (
 	"bytes"
-	"io/ioutil"
 	"net"
 	"os"
 	"path/filepath"
@@ -51,7 +50,7 @@ func TestClonefile(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	clonedData, err := ioutil.ReadFile(clonedName)
+	clonedData, err := os.ReadFile(clonedName)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -72,7 +71,7 @@ func TestClonefileatWithCwd(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	clonedData, err := ioutil.ReadFile(clonedName)
+	clonedData, err := os.ReadFile(clonedName)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -116,7 +115,7 @@ func TestClonefileatWithRelativePaths(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	clonedData, err := ioutil.ReadFile(dstFile.Name())
+	clonedData, err := os.ReadFile(dstFile.Name())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -149,7 +148,7 @@ func TestFclonefileat(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	clonedData, err := ioutil.ReadFile(dstFile.Name())
+	clonedData, err := os.ReadFile(dstFile.Name())
 	if err != nil {
 		t.Fatal(err)
 	}

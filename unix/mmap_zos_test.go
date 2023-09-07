@@ -12,7 +12,6 @@ package unix_test
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"testing"
@@ -63,7 +62,7 @@ func TestMmap(t *testing.T) {
 	}
 
 	// Read file from FS to ensure flag flipped after msync
-	buf, err := ioutil.ReadFile(filename)
+	buf, err := os.ReadFile(filename)
 	if err != nil {
 		t.Fatalf("Could not read mmapped file from disc for test: %v", err)
 	}

@@ -10,7 +10,7 @@ package unix_test
 import (
 	"flag"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net"
 	"os"
 	"os/exec"
@@ -258,7 +258,7 @@ func TestPassFD(t *testing.T) {
 	f := os.NewFile(uintptr(gotFds[0]), "fd-from-child")
 	defer f.Close()
 
-	got, err := ioutil.ReadAll(f)
+	got, err := io.ReadAll(f)
 	want := "Hello from child process!\n"
 	if string(got) != want {
 		t.Errorf("child process ReadAll: %q, %v; want %q", got, err, want)
@@ -628,7 +628,7 @@ func TestChroot(t *testing.T) {
 		t.Fatalf("Chroot: %s", err.Error())
 	}
 	// check if tempDir contains test file
-	files, err := ioutil.ReadDir("/")
+	files, err := os.ReadDir("/")
 	if err != nil {
 		t.Fatalf("ReadDir: %s", err.Error())
 	}

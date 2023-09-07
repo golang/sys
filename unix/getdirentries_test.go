@@ -9,7 +9,6 @@ package unix_test
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"sort"
@@ -39,9 +38,9 @@ func testGetdirentries(t *testing.T, count int) {
 
 	// Make files in the temp directory
 	for _, name := range names {
-		err := ioutil.WriteFile(filepath.Join(d, name), []byte("data"), 0)
+		err := os.WriteFile(filepath.Join(d, name), []byte("data"), 0)
 		if err != nil {
-			t.Fatalf("WriteFile: %v", err)
+			t.Fatal(err)
 		}
 	}
 

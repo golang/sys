@@ -9,7 +9,6 @@ package svc_test
 
 import (
 	"fmt"
-	"io/ioutil"
 	"math/rand"
 	"os"
 	"os/exec"
@@ -202,7 +201,7 @@ func TestIsWindowsServiceWhenParentExits(t *testing.T) {
 		if isSvc {
 			msg = "IsWindowsService returns true when not running in a service."
 		}
-		err = ioutil.WriteFile(dumpPath, []byte(msg), 0644)
+		err = os.WriteFile(dumpPath, []byte(msg), 0644)
 		if err != nil {
 			// We cannot report this error. But main test will notice
 			// that we did not create dump file.
@@ -232,7 +231,7 @@ func TestIsWindowsServiceWhenParentExits(t *testing.T) {
 				t.Fatal("timed out waiting for child output file to be created.")
 			}
 		}
-		childOutput, err := ioutil.ReadFile(childDumpPath)
+		childOutput, err := os.ReadFile(childDumpPath)
 		if err != nil {
 			t.Fatalf("reading child output failed: %v", err)
 		}

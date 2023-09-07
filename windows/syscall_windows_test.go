@@ -10,7 +10,6 @@ import (
 	"debug/pe"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"math/rand"
 	"os"
 	"path/filepath"
@@ -667,14 +666,14 @@ func TestWinVerifyTrust(t *testing.T) {
 	// Now that we've verified the legitimate file verifies, let's corrupt it and see if it correctly fails.
 
 	corruptedEvsignedfile := filepath.Join(t.TempDir(), "corrupted-file")
-	evsignedfileBytes, err := ioutil.ReadFile(evsignedfile)
+	evsignedfileBytes, err := os.ReadFile(evsignedfile)
 	if err != nil {
 		t.Fatalf("unable to read %s bytes: %v", evsignedfile, err)
 	}
 	if len(evsignedfileBytes) > 0 {
 		evsignedfileBytes[len(evsignedfileBytes)/2-1]++
 	}
-	err = ioutil.WriteFile(corruptedEvsignedfile, evsignedfileBytes, 0755)
+	err = os.WriteFile(corruptedEvsignedfile, evsignedfileBytes, 0755)
 	if err != nil {
 		t.Fatalf("unable to write corrupted ntoskrnl.exe bytes: %v", err)
 	}
