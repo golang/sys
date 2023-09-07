@@ -58,16 +58,12 @@ func TestCommand(t *testing.T) {
 		func(s string) *Cmd { return Command(s) },
 		func(s string) *Cmd { return CommandContext(context.Background(), s) },
 	} {
-		tmpDir, err := ioutil.TempDir("", "execabs-test")
-		if err != nil {
-			t.Fatalf("ioutil.TempDir failed: %s", err)
-		}
-		defer os.RemoveAll(tmpDir)
+		tmpDir := t.TempDir()
 		executable := "execabs-test"
 		if runtime.GOOS == "windows" {
 			executable += ".exe"
 		}
-		if err = ioutil.WriteFile(filepath.Join(tmpDir, executable), []byte{1, 2, 3}, 0111); err != nil {
+		if err := ioutil.WriteFile(filepath.Join(tmpDir, executable), []byte{1, 2, 3}, 0111); err != nil {
 			t.Fatalf("ioutil.WriteFile failed: %s", err)
 		}
 		cwd, err := os.Getwd()
@@ -97,16 +93,12 @@ func TestCommand(t *testing.T) {
 func TestLookPath(t *testing.T) {
 	mustHaveExec(t)
 
-	tmpDir, err := ioutil.TempDir("", "execabs-test")
-	if err != nil {
-		t.Fatalf("ioutil.TempDir failed: %s", err)
-	}
-	defer os.RemoveAll(tmpDir)
+	tmpDir := t.TempDir()
 	executable := "execabs-test"
 	if runtime.GOOS == "windows" {
 		executable += ".exe"
 	}
-	if err = ioutil.WriteFile(filepath.Join(tmpDir, executable), []byte{1, 2, 3}, 0111); err != nil {
+	if err := ioutil.WriteFile(filepath.Join(tmpDir, executable), []byte{1, 2, 3}, 0111); err != nil {
 		t.Fatalf("ioutil.WriteFile failed: %s", err)
 	}
 	cwd, err := os.Getwd()

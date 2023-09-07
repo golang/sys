@@ -10,7 +10,6 @@ package unix_test
 import (
 	"flag"
 	"fmt"
-	"io/ioutil"
 	"net"
 	"os"
 	"os/exec"
@@ -34,10 +33,8 @@ func TestSysctlUint64(t *testing.T) {
 // corresponding to the given key.
 
 type testProc struct {
-	fn      func()                    // should always exit instead of returning
-	arg     func(t *testing.T) string // generate argument for test
-	cleanup func(arg string) error    // for instance, delete coredumps from testing pledge
-	success bool                      // whether zero-exit means success or failure
+	fn      func() // should always exit instead of returning
+	success bool   // whether zero-exit means success or failure
 }
 
 var (
@@ -71,16 +68,7 @@ func testCmd(procName string, procArg string) (*exec.Cmd, error) {
 // a testProc with a key.
 func ExitsCorrectly(t *testing.T, procName string) {
 	s := testProcs[procName]
-	arg := "-"
-	if s.arg != nil {
-		arg = s.arg(t)
-	}
-	c, err := testCmd(procName, arg)
-	defer func(arg string) {
-		if err := s.cleanup(arg); err != nil {
-			t.Fatalf("Failed to run cleanup for %s %s %#v", procName, err, err)
-		}
-	}(arg)
+	c, err := testCmd(procName, t.TempDir())
 	if err != nil {
 		t.Fatalf("Failed to construct command for %s", procName)
 	}
@@ -134,27 +122,9 @@ func CapEnterTest() {
 	os.Exit(0)
 }
 
-func makeTempDir(t *testing.T) string {
-	d, err := ioutil.TempDir("", "go_openat_test")
-	if err != nil {
-		t.Fatalf("TempDir failed: %s", err)
-	}
-	return d
-}
-
-func removeTempDir(arg string) error {
-	err := os.RemoveAll(arg)
-	if err != nil && err.(*os.PathError).Err == unix.ENOENT {
-		return nil
-	}
-	return err
-}
-
 func init() {
 	testProcs["cap_enter"] = testProc{
 		CapEnterTest,
-		makeTempDir,
-		removeTempDir,
 		true,
 	}
 }
@@ -252,8 +222,6 @@ func OpenatTest() {
 func init() {
 	testProcs["openat"] = testProc{
 		OpenatTest,
-		makeTempDir,
-		removeTempDir,
 		true,
 	}
 }

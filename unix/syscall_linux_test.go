@@ -986,13 +986,7 @@ func TestOpenat2(t *testing.T) {
 	}
 
 	// prepare
-	tempDir, err := ioutil.TempDir("", t.Name())
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer os.RemoveAll(tempDir)
-
-	subdir := filepath.Join(tempDir, "dir")
+	subdir := filepath.Join(t.TempDir(), "dir")
 	if err := os.Mkdir(subdir, 0755); err != nil {
 		t.Fatal(err)
 	}

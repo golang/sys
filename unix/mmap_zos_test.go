@@ -21,14 +21,16 @@ import (
 )
 
 func TestMmap(t *testing.T) {
-	tmpdir := mktmpdir(t)
-	filename := filepath.Join(filepath.Join(tmpdir, "testdata"), "memmapped_file")
+	tmpdir := filepath.Join(t.TempDir(), "testdata")
+	if err := os.Mkdir(tmpdir, 0700); err != nil {
+		t.Fatal(err)
+	}
+	filename := filepath.Join(tmpdir, "memmapped_file")
 	destination, err := os.Create(filename)
 	if err != nil {
 		t.Fatal("os.Create:", err)
 		return
 	}
-	defer os.RemoveAll(tmpdir)
 
 	fmt.Fprintf(destination, "%s\n", "0 <- Flipped between 0 and 1 when test runs successfully")
 	fmt.Fprintf(destination, "%s\n", "//Do not change contents - mmap test relies on this")
@@ -72,16 +74,4 @@ func TestMmap(t *testing.T) {
 	if err := unix.Munmap(b); err != nil {
 		t.Fatalf("Munmap: %v", err)
 	}
-}
-
-func mktmpdir(t *testing.T) string {
-	tmpdir, err := ioutil.TempDir("", "memmapped_file")
-	if err != nil {
-		t.Fatal("mktmpdir:", err)
-	}
-	if err := os.Mkdir(filepath.Join(tmpdir, "testdata"), 0700); err != nil {
-		os.RemoveAll(tmpdir)
-		t.Fatal("mktmpdir:", err)
-	}
-	return tmpdir
 }

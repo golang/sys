@@ -27,13 +27,7 @@ import (
 )
 
 func TestWin32finddata(t *testing.T) {
-	dir, err := ioutil.TempDir("", "go-build")
-	if err != nil {
-		t.Fatalf("failed to create temp directory: %v", err)
-	}
-	defer os.RemoveAll(dir)
-
-	path := filepath.Join(dir, "long_name.and_extension")
+	path := filepath.Join(t.TempDir(), "long_name.and_extension")
 	f, err := os.Create(path)
 	if err != nil {
 		t.Fatalf("failed to create %v: %v", path, err)
@@ -673,12 +667,7 @@ func TestWinVerifyTrust(t *testing.T) {
 
 	// Now that we've verified the legitimate file verifies, let's corrupt it and see if it correctly fails.
 
-	dir, err := ioutil.TempDir("", "go-build")
-	if err != nil {
-		t.Fatalf("failed to create temp directory: %v", err)
-	}
-	defer os.RemoveAll(dir)
-	corruptedEvsignedfile := filepath.Join(dir, "corrupted-file")
+	corruptedEvsignedfile := filepath.Join(t.TempDir(), "corrupted-file")
 	evsignedfileBytes, err := ioutil.ReadFile(evsignedfile)
 	if err != nil {
 		t.Fatalf("unable to read %s bytes: %v", evsignedfile, err)

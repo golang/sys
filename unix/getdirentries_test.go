@@ -30,11 +30,8 @@ func testGetdirentries(t *testing.T, count int) {
 	if count > 100 && testing.Short() && os.Getenv("GO_BUILDER_NAME") == "" {
 		t.Skip("skipping in -short mode")
 	}
-	d, err := ioutil.TempDir("", "getdirentries-test")
-	if err != nil {
-		t.Fatalf("Tempdir: %v", err)
-	}
-	defer os.RemoveAll(d)
+	d := t.TempDir()
+
 	var names []string
 	for i := 0; i < count; i++ {
 		names = append(names, fmt.Sprintf("file%03d", i))

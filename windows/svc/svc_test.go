@@ -93,13 +93,7 @@ func TestExample(t *testing.T) {
 	}
 	defer m.Disconnect()
 
-	dir, err := ioutil.TempDir("", "svc")
-	if err != nil {
-		t.Fatalf("failed to create temp directory: %v", err)
-	}
-	defer os.RemoveAll(dir)
-
-	exepath := filepath.Join(dir, "a.exe")
+	exepath := filepath.Join(t.TempDir(), "a.exe")
 	o, err := exec.Command("go", "build", "-o", exepath, "golang.org/x/sys/windows/svc/example").CombinedOutput()
 	if err != nil {
 		t.Fatalf("failed to build service program: %v\n%v", err, string(o))

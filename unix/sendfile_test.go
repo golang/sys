@@ -19,14 +19,9 @@ import (
 
 func TestSendfile(t *testing.T) {
 	// Set up source data file.
-	tempDir, err := ioutil.TempDir("", "TestSendfile")
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer os.RemoveAll(tempDir)
-	name := filepath.Join(tempDir, "source")
+	name := filepath.Join(t.TempDir(), "source")
 	const contents = "contents"
-	err = ioutil.WriteFile(name, []byte(contents), 0666)
+	err := ioutil.WriteFile(name, []byte(contents), 0666)
 	if err != nil {
 		t.Fatal(err)
 	}

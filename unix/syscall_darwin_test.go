@@ -99,17 +99,8 @@ func TestClonefileatWithCwd(t *testing.T) {
 }
 
 func TestClonefileatWithRelativePaths(t *testing.T) {
-	srcDir, err := ioutil.TempDir("", "src")
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer os.RemoveAll(srcDir)
-
-	dstDir, err := ioutil.TempDir("", "dest")
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer os.RemoveAll(dstDir)
+	srcDir := t.TempDir()
+	dstDir := t.TempDir()
 
 	srcFd, err := unix.Open(srcDir, unix.O_RDONLY|unix.O_DIRECTORY, 0)
 	if err != nil {

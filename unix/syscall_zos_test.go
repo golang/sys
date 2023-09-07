@@ -143,12 +143,11 @@ func TestFcntlInt(t *testing.T) {
 // TestFcntlFlock tests whether the file locking structure matches
 // the calling convention of each kernel.
 func TestFcntlFlock(t *testing.T) {
-	name := filepath.Join(os.TempDir(), "TestFcntlFlock")
+	name := filepath.Join(t.TempDir(), "TestFcntlFlock")
 	fd, err := unix.Open(name, unix.O_CREAT|unix.O_RDWR|unix.O_CLOEXEC, 0)
 	if err != nil {
 		t.Fatalf("Open failed: %v", err)
 	}
-	defer unix.Unlink(name)
 	defer unix.Close(fd)
 	flock := unix.Flock_t{
 		Type:  unix.F_RDLCK,
@@ -197,12 +196,6 @@ func TestPassFD(t *testing.T) {
 		}
 	}
 
-	tempDir, err := ioutil.TempDir("", "TestPassFD")
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer os.RemoveAll(tempDir)
-
 	fds, err := unix.Socketpair(unix.AF_LOCAL, unix.SOCK_STREAM, 0)
 	if err != nil {
 		t.Fatalf("Socketpair: %v", err)
@@ -212,7 +205,7 @@ func TestPassFD(t *testing.T) {
 	defer writeFile.Close()
 	defer readFile.Close()
 
-	cmd := exec.Command(os.Args[0], "-test.run=^TestPassFD$", "--", tempDir)
+	cmd := exec.Command(os.Args[0], "-test.run=^TestPassFD$", "--", t.TempDir())
 	cmd.Env = []string{"GO_WANT_HELPER_PROCESS=1"}
 	if lp := os.Getenv("LD_LIBRARY_PATH"); lp != "" {
 		cmd.Env = append(cmd.Env, "LD_LIBRARY_PATH="+lp)
@@ -493,15 +486,7 @@ func TestGetwd(t *testing.T) {
 	case "darwin":
 		switch runtime.GOARCH {
 		case "arm64":
-			d1, err := ioutil.TempDir("", "d1")
-			if err != nil {
-				t.Fatalf("TempDir: %v", err)
-			}
-			d2, err := ioutil.TempDir("", "d2")
-			if err != nil {
-				t.Fatalf("TempDir: %v", err)
-			}
-			dirs = []string{d1, d2}
+			dirs = []string{t.TempDir(), t.TempDir()}
 		}
 	}
 	oldwd := os.Getenv("PWD")
@@ -629,11 +614,7 @@ func TestMountUnmount(t *testing.T) {
 
 func TestChroot(t *testing.T) {
 	// create temp dir and tempfile 1
-	tempDir, err := ioutil.TempDir("", "TestChroot")
-	if err != nil {
-		t.Fatalf("TempDir: %s", err.Error())
-	}
-	defer os.RemoveAll(tempDir)
+	tempDir := t.TempDir()
 	f, err := ioutil.TempFile(tempDir, "chroot_test_file")
 	if err != nil {
 		t.Fatalf("TempFile: %s", err.Error())
@@ -686,12 +667,7 @@ func TestFlock(t *testing.T) {
 		}
 	} else {
 		// create temp dir and tempfile 1
-		tempDir, err := ioutil.TempDir("", "TestFlock")
-		if err != nil {
-			t.Fatalf("TempDir: %s", err.Error())
-		}
-		defer os.RemoveAll(tempDir)
-		f, err := ioutil.TempFile(tempDir, "flock_test_file")
+		f, err := ioutil.TempFile(t.TempDir(), "flock_test_file")
 		if err != nil {
 			t.Fatalf("TempFile: %s", err.Error())
 		}
