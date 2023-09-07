@@ -31,39 +31,25 @@ func stringsFromByteSlice(buf []byte) []string {
 	return result
 }
 
-func createTestFile(t *testing.T, dir string) (f *os.File, cleanup func() error) {
-	file, err := ioutil.TempFile(dir, t.Name())
+func createTestFile(t *testing.T) string {
+	filename := filepath.Join(t.TempDir(), t.Name())
+	err := os.WriteFile(filename, testData, 0600)
 	if err != nil {
 		t.Fatal(err)
 	}
-
-	_, err = file.Write(testData)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	err = file.Close()
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	return file, func() error {
-		return os.Remove(file.Name())
-	}
+	return filename
 }
 
 func TestClonefile(t *testing.T) {
-	file, cleanup := createTestFile(t, "")
-	defer cleanup()
+	fileName := createTestFile(t)
 
-	clonedName := file.Name() + "-cloned"
-	err := unix.Clonefile(file.Name(), clonedName, 0)
+	clonedName := fileName + "-cloned"
+	err := unix.Clonefile(fileName, clonedName, 0)
 	if err == unix.ENOSYS || err == unix.ENOTSUP {
 		t.Skip("clonefile is not available or supported, skipping test")
 	} else if err != nil {
 		t.Fatal(err)
 	}
-	defer os.Remove(clonedName)
 
 	clonedData, err := ioutil.ReadFile(clonedName)
 	if err != nil {
@@ -76,17 +62,15 @@ func TestClonefile(t *testing.T) {
 }
 
 func TestClonefileatWithCwd(t *testing.T) {
-	file, cleanup := createTestFile(t, "")
-	defer cleanup()
+	fileName := createTestFile(t)
 
-	clonedName := file.Name() + "-cloned"
-	err := unix.Clonefileat(unix.AT_FDCWD, file.Name(), unix.AT_FDCWD, clonedName, 0)
+	clonedName := fileName + "-cloned"
+	err := unix.Clonefileat(unix.AT_FDCWD, fileName, unix.AT_FDCWD, clonedName, 0)
 	if err == unix.ENOSYS || err == unix.ENOTSUP {
 		t.Skip("clonefileat is not available or supported, skipping test")
 	} else if err != nil {
 		t.Fatal(err)
 	}
-	defer os.Remove(clonedName)
 
 	clonedData, err := ioutil.ReadFile(clonedName)
 	if err != nil {
@@ -99,25 +83,22 @@ func TestClonefileatWithCwd(t *testing.T) {
 }
 
 func TestClonefileatWithRelativePaths(t *testing.T) {
-	srcDir := t.TempDir()
-	dstDir := t.TempDir()
-
+	srcFileName := createTestFile(t)
+	srcDir := filepath.Dir(srcFileName)
 	srcFd, err := unix.Open(srcDir, unix.O_RDONLY|unix.O_DIRECTORY, 0)
 	if err != nil {
 		t.Fatal(err)
 	}
 	defer unix.Close(srcFd)
 
+	dstDir := t.TempDir()
 	dstFd, err := unix.Open(dstDir, unix.O_RDONLY|unix.O_DIRECTORY, 0)
 	if err != nil {
 		t.Fatal(err)
 	}
 	defer unix.Close(dstFd)
 
-	srcFile, cleanup := createTestFile(t, srcDir)
-	defer cleanup()
-
-	dstFile, err := ioutil.TempFile(dstDir, "TestClonefileat")
+	dstFile, err := os.Create(filepath.Join(dstDir, "TestClonefileat"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -126,7 +107,7 @@ func TestClonefileatWithRelativePaths(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	src := filepath.Base(srcFile.Name())
+	src := filepath.Base(srcFileName)
 	dst := filepath.Base(dstFile.Name())
 	err = unix.Clonefileat(srcFd, src, dstFd, dst, 0)
 	if err == unix.ENOSYS || err == unix.ENOTSUP {
@@ -146,16 +127,16 @@ func TestClonefileatWithRelativePaths(t *testing.T) {
 }
 
 func TestFclonefileat(t *testing.T) {
-	file, cleanup := createTestFile(t, "")
-	defer cleanup()
+	fileName := createTestFile(t)
+	dir := filepath.Dir(fileName)
 
-	fd, err := unix.Open(file.Name(), unix.O_RDONLY, 0)
+	fd, err := unix.Open(fileName, unix.O_RDONLY, 0)
 	if err != nil {
 		t.Fatal(err)
 	}
 	defer unix.Close(fd)
 
-	dstFile, err := ioutil.TempFile("", "TestFclonefileat")
+	dstFile, err := os.Create(filepath.Join(dir, "dst"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -179,11 +160,10 @@ func TestFclonefileat(t *testing.T) {
 }
 
 func TestFcntlFstore(t *testing.T) {
-	f, err := ioutil.TempFile("", t.Name())
+	f, err := os.CreateTemp(t.TempDir(), t.Name())
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer os.Remove(f.Name())
 	defer f.Close()
 
 	fstore := &unix.Fstore_t{

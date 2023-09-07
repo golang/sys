@@ -688,11 +688,10 @@ func TestFaccessat(t *testing.T) {
 }
 
 func TestSyncFileRange(t *testing.T) {
-	file, err := ioutil.TempFile("", "TestSyncFileRange")
+	file, err := os.Create(filepath.Join(t.TempDir(), t.Name()))
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer os.Remove(file.Name())
 	defer file.Close()
 
 	err = unix.SyncFileRange(int(file.Fd()), 0, 0, 0)
@@ -1024,12 +1023,12 @@ func TestOpenat2(t *testing.T) {
 }
 
 func TestIoctlFileDedupeRange(t *testing.T) {
-	f1, err := ioutil.TempFile("", t.Name())
+	dir := t.TempDir()
+	f1, err := os.Create(filepath.Join(dir, "f1"))
 	if err != nil {
 		t.Fatal(err)
 	}
 	defer f1.Close()
-	defer os.Remove(f1.Name())
 
 	// Test deduplication with two blocks of zeros
 	data := make([]byte, 4096)
@@ -1041,12 +1040,11 @@ func TestIoctlFileDedupeRange(t *testing.T) {
 		}
 	}
 
-	f2, err := ioutil.TempFile("", t.Name())
+	f2, err := os.Create(filepath.Join(dir, "f2"))
 	if err != nil {
 		t.Fatal(err)
 	}
 	defer f2.Close()
-	defer os.Remove(f2.Name())
 
 	for i := 0; i < 2; i += 1 {
 		// Make the 2nd block different

@@ -124,11 +124,10 @@ func TestSignalNum(t *testing.T) {
 
 func TestFcntlInt(t *testing.T) {
 	t.Parallel()
-	file, err := ioutil.TempFile("", "TestFnctlInt")
+	file, err := os.Create(filepath.Join(t.TempDir(), "TestFnctlInt"))
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer os.Remove(file.Name())
 	defer file.Close()
 	f := file.Fd()
 	flags, err := unix.FcntlInt(f, unix.F_GETFD, 0)
@@ -291,9 +290,9 @@ func passFDChild() {
 	// We make it in tempDir, which our parent will clean up.
 	flag.Parse()
 	tempDir := flag.Arg(0)
-	f, err := ioutil.TempFile(tempDir, "")
+	f, err := os.Create(filepath.Join(tempDir, "file"))
 	if err != nil {
-		fmt.Printf("TempFile: %v", err)
+		fmt.Println(err)
 		return
 	}
 
@@ -424,11 +423,10 @@ func TestSetsockoptString(t *testing.T) {
 }
 
 func TestDup(t *testing.T) {
-	file, err := ioutil.TempFile("", "TestDup")
+	file, err := os.Create(filepath.Join(t.TempDir(), "TestDup"))
 	if err != nil {
-		t.Fatalf("Tempfile failed: %v", err)
+		t.Fatal(err)
 	}
-	defer os.Remove(file.Name())
 	defer file.Close()
 	f := int(file.Fd())
 
@@ -615,9 +613,9 @@ func TestMountUnmount(t *testing.T) {
 func TestChroot(t *testing.T) {
 	// create temp dir and tempfile 1
 	tempDir := t.TempDir()
-	f, err := ioutil.TempFile(tempDir, "chroot_test_file")
+	f, err := os.Create(filepath.Join(tempDir, "chroot_test_file"))
 	if err != nil {
-		t.Fatalf("TempFile: %s", err.Error())
+		t.Fatal(err)
 	}
 	// chroot temp dir
 	err = unix.Chroot(tempDir)
@@ -667,9 +665,9 @@ func TestFlock(t *testing.T) {
 		}
 	} else {
 		// create temp dir and tempfile 1
-		f, err := ioutil.TempFile(t.TempDir(), "flock_test_file")
+		f, err := os.Create(filepath.Join(t.TempDir(), "flock_test_file"))
 		if err != nil {
-			t.Fatalf("TempFile: %s", err.Error())
+			t.Fatal(err)
 		}
 		fd := int(f.Fd())
 

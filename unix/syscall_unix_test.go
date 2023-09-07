@@ -126,11 +126,10 @@ func TestSignalNum(t *testing.T) {
 
 func TestFcntlInt(t *testing.T) {
 	t.Parallel()
-	file, err := ioutil.TempFile("", "TestFcntlInt")
+	file, err := os.Create(filepath.Join(t.TempDir(), t.Name()))
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer os.Remove(file.Name())
 	defer file.Close()
 	f := file.Fd()
 	flags, err := unix.FcntlInt(f, unix.F_GETFD, 0)
@@ -293,9 +292,9 @@ func passFDChild() {
 	// We make it in tempDir, which our parent will clean up.
 	flag.Parse()
 	tempDir := flag.Arg(0)
-	f, err := ioutil.TempFile(tempDir, "")
+	f, err := os.Create(filepath.Join(tempDir, "file"))
 	if err != nil {
-		fmt.Printf("TempFile: %v", err)
+		fmt.Println(err)
 		return
 	}
 
@@ -452,11 +451,10 @@ func TestSetsockoptString(t *testing.T) {
 }
 
 func TestDup(t *testing.T) {
-	file, err := ioutil.TempFile("", "TestDup")
+	file, err := os.Create(filepath.Join(t.TempDir(), t.Name()))
 	if err != nil {
-		t.Fatalf("Tempfile failed: %v", err)
+		t.Fatal(err)
 	}
-	defer os.Remove(file.Name())
 	defer file.Close()
 	f := int(file.Fd())
 

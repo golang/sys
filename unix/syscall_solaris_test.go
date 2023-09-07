@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"runtime"
 	"strings"
 	"testing"
@@ -83,12 +84,12 @@ func TestSysconf(t *testing.T) {
 // Event Ports
 
 func TestBasicEventPort(t *testing.T) {
-	tmpfile, err := os.CreateTemp("", "eventport")
+	tmpfile, err := os.Create(filepath.Join(t.TempDir(), "eventport"))
 	if err != nil {
-		t.Fatalf("unable to create a tempfile: %v", err)
+		t.Fatal(err)
 	}
+	defer tmpfile.Close()
 	path := tmpfile.Name()
-	defer os.Remove(path)
 
 	stat, err := os.Stat(path)
 	if err != nil {
