@@ -277,9 +277,8 @@ func TestPpoll(t *testing.T) {
 		t.Skip("mkfifo syscall is not available on android, skipping test")
 	}
 
-	defer chtmpdir(t)()
-	f, cleanup := mktmpfifo(t)
-	defer cleanup()
+	chtmpdir(t)
+	f := mktmpfifo(t)
 
 	const timeout = 100 * time.Millisecond
 
@@ -335,7 +334,7 @@ func TestTime(t *testing.T) {
 }
 
 func TestUtime(t *testing.T) {
-	defer chtmpdir(t)()
+	chtmpdir(t)
 
 	touch(t, "file1")
 
@@ -548,7 +547,7 @@ func TestStatx(t *testing.T) {
 		t.Fatalf("Statx: %v", err)
 	}
 
-	defer chtmpdir(t)()
+	chtmpdir(t)
 	touch(t, "file1")
 
 	var st unix.Stat_t
@@ -636,7 +635,7 @@ func stringsFromByteSlice(buf []byte) []string {
 }
 
 func TestFaccessat(t *testing.T) {
-	defer chtmpdir(t)()
+	chtmpdir(t)
 	touch(t, "file1")
 
 	err := unix.Faccessat(unix.AT_FDCWD, "file1", unix.R_OK, 0)

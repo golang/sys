@@ -502,9 +502,8 @@ func TestPoll(t *testing.T) {
 		t.Skip("mkfifo syscall is not available on android and iOS, skipping test")
 	}
 
-	defer chtmpdir(t)()
-	f, cleanup := mktmpfifo(t)
-	defer cleanup()
+	chtmpdir(t)
+	f := mktmpfifo(t)
 
 	const timeout = 100
 
@@ -710,7 +709,7 @@ func compareStat_t(t *testing.T, otherStat string, st1, st2 *unix.Stat_t) {
 }
 
 func TestFstatat(t *testing.T) {
-	defer chtmpdir(t)()
+	chtmpdir(t)
 
 	touch(t, "file1")
 
@@ -747,7 +746,7 @@ func TestFstatat(t *testing.T) {
 }
 
 func TestFchmodat(t *testing.T) {
-	defer chtmpdir(t)()
+	chtmpdir(t)
 
 	touch(t, "file1")
 	err := os.Symlink("file1", "symlink1")
@@ -857,7 +856,7 @@ func TestPipe(t *testing.T) {
 }
 
 func TestRenameat(t *testing.T) {
-	defer chtmpdir(t)()
+	chtmpdir(t)
 
 	from, to := "renamefrom", "renameto"
 
@@ -880,7 +879,7 @@ func TestRenameat(t *testing.T) {
 }
 
 func TestUtimesNanoAt(t *testing.T) {
-	defer chtmpdir(t)()
+	chtmpdir(t)
 
 	symlink := "symlink1"
 	os.Remove(symlink)
@@ -1111,8 +1110,9 @@ func TestRecvmsgControl(t *testing.T) {
 	defer unix.Close(cfds[0])
 }
 
-// mktmpfifo creates a temporary FIFO and provides a cleanup function.
-func mktmpfifo(t *testing.T) (*os.File, func()) {
+// mktmpfifo creates a temporary FIFO and sets up a cleanup function.
+func mktmpfifo(t *testing.T) *os.File {
+	t.Helper()
 	err := unix.Mkfifo("fifo", 0666)
 	if err != nil {
 		t.Fatalf("mktmpfifo: failed to create FIFO: %v", err)
@@ -1121,18 +1121,20 @@ func mktmpfifo(t *testing.T) (*os.File, func()) {
 	f, err := os.OpenFile("fifo", os.O_RDWR, 0666)
 	if err != nil {
 		os.Remove("fifo")
-		t.Fatalf("mktmpfifo: failed to open FIFO: %v", err)
+		t.Fatal(err)
 	}
-
-	return f, func() {
+	t.Cleanup(func() {
 		f.Close()
 		os.Remove("fifo")
-	}
+	})
+
+	return f
 }
 
 // utilities taken from os/os_test.go
 
 func touch(t *testing.T, name string) {
+	t.Helper()
 	f, err := os.Create(name)
 	if err != nil {
 		t.Fatal(err)
@@ -1143,18 +1145,19 @@ func touch(t *testing.T, name string) {
 }
 
 // chtmpdir changes the working directory to a new temporary directory and
-// provides a cleanup function. Used when PWD is read-only.
-func chtmpdir(t *testing.T) func() {
+// sets up a cleanup function. Used when PWD is read-only.
+func chtmpdir(t *testing.T) {
+	t.Helper()
 	oldwd, err := os.Getwd()
 	if err != nil {
-		t.Fatalf("chtmpdir: %v", err)
+		t.Fatal(err)
 	}
 	if err := os.Chdir(t.TempDir()); err != nil {
-		t.Fatalf("chtmpdir: %v", err)
+		t.Fatal(err)
 	}
-	return func() {
+	t.Cleanup(func() {
 		if err := os.Chdir(oldwd); err != nil {
-			t.Fatalf("chtmpdir: %v", err)
+			t.Fatal(err)
 		}
-	}
+	})
 }

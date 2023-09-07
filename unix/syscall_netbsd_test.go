@@ -42,7 +42,7 @@ func TestIoctlPtmget(t *testing.T) {
 }
 
 func TestStatvfs(t *testing.T) {
-	defer chtmpdir(t)()
+	chtmpdir(t)
 	touch(t, "file1")
 
 	var statvfs1, statvfs2 unix.Statvfs_t

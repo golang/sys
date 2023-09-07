@@ -18,7 +18,7 @@ import (
 )
 
 func TestXattr(t *testing.T) {
-	defer chtmpdir(t)()
+	chtmpdir(t)
 
 	f := "xattr1"
 	touch(t, f)

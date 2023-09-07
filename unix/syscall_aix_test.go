@@ -60,7 +60,7 @@ func TestTime(t *testing.T) {
 }
 
 func TestUtime(t *testing.T) {
-	defer chtmpdir(t)()
+	chtmpdir(t)
 
 	touch(t, "file1")
 
