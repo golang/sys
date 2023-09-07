@@ -32,7 +32,6 @@ import (
 	"go/parser"
 	"go/token"
 	"io"
-	"io/ioutil"
 	"log"
 	"os"
 	"path"
@@ -433,7 +432,7 @@ func merge(mergedFile string, archFiles ...string) error {
 	// Read architecture files
 	var inSrc []srcFile
 	for _, file := range archFiles {
-		src, err := ioutil.ReadFile(file)
+		src, err := os.ReadFile(file)
 		if err != nil {
 			return fmt.Errorf("cannot read archfile %s: %w", file, err)
 		}
@@ -485,7 +484,7 @@ func merge(mergedFile string, archFiles ...string) error {
 		if err != nil {
 			return err
 		}
-		err = ioutil.WriteFile(inFile.name, src, 0644)
+		err = os.WriteFile(inFile.name, src, 0644)
 		if err != nil {
 			return err
 		}

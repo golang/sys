@@ -24,7 +24,6 @@ import (
 	"fmt"
 	"go/build/constraint"
 	"io"
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -810,7 +809,7 @@ func generatePtraceRegSet(arch string) error {
 // ptraceDef returns the definition of PtraceRegs for arch.
 func ptraceDef(arch string) (string, error) {
 	filename := fmt.Sprintf("ztypes_linux_%s.go", arch)
-	data, err := ioutil.ReadFile(filename)
+	data, err := os.ReadFile(filename)
 	if err != nil {
 		return "", fmt.Errorf("reading %s: %v", filename, err)
 	}

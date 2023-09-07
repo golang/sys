@@ -12,7 +12,6 @@ package main
 import (
 	"bytes"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 	"sort"
@@ -35,7 +34,7 @@ func generateASMFile(goos, arch string, inFileNames []string, outFileName string
 	trampolines := map[string]bool{}
 	var orderedTrampolines []string
 	for _, inFileName := range inFileNames {
-		in, err := ioutil.ReadFile(inFileName)
+		in, err := os.ReadFile(inFileName)
 		if err != nil {
 			log.Fatalf("Failed to read file: %v", err)
 		}
@@ -72,7 +71,7 @@ func generateASMFile(goos, arch string, inFileNames []string, outFileName string
 		fmt.Fprintf(&out, "DATA\t·%s_trampoline_addr(SB)/%d, $%s_trampoline<>(SB)\n", fn, ptrSize, fn)
 	}
 
-	if err := ioutil.WriteFile(outFileName, out.Bytes(), 0644); err != nil {
+	if err := os.WriteFile(outFileName, out.Bytes(), 0644); err != nil {
 		log.Fatalf("Failed to write assembly file %q: %v", outFileName, err)
 	}
 
@@ -110,7 +109,7 @@ func writeDarwinTest(trampolines map[string]bool, fileName, arch string) {
 	out.Reset()
 	fmt.Fprintf(&out, darwinTestTemplate, strings.Join(os.Args[1:], " "), arch, lines)
 
-	if err := ioutil.WriteFile(fileName, out.Bytes(), 0644); err != nil {
+	if err := os.WriteFile(fileName, out.Bytes(), 0644); err != nil {
 		log.Fatalf("Failed to write test file %q: %v", fileName, err)
 	}
 }

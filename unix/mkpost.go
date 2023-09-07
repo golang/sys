@@ -16,7 +16,7 @@ import (
 	"bytes"
 	"fmt"
 	"go/format"
-	"io/ioutil"
+	"io"
 	"log"
 	"os"
 	"regexp"
@@ -41,7 +41,7 @@ func main() {
 		}
 	}
 
-	b, err := ioutil.ReadAll(os.Stdin)
+	b, err := io.ReadAll(os.Stdin)
 	if err != nil {
 		log.Fatal(err)
 	}
