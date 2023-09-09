@@ -13,7 +13,6 @@ import (
 	"net"
 	"os"
 	"os/exec"
-	"path"
 	"path/filepath"
 	"runtime"
 	"testing"
@@ -102,7 +101,7 @@ const testfile = "gocapmodetest"
 const testfile2 = testfile + "2"
 
 func CapEnterTest() {
-	_, err := os.OpenFile(path.Join(procArg, testfile), os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0666)
+	_, err := os.OpenFile(filepath.Join(procArg, testfile), os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
 		panic(fmt.Sprintf("OpenFile: %s", err))
 	}
@@ -112,7 +111,7 @@ func CapEnterTest() {
 		panic(fmt.Sprintf("CapEnter: %s", err))
 	}
 
-	_, err = os.OpenFile(path.Join(procArg, testfile2), os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0666)
+	_, err = os.OpenFile(filepath.Join(procArg, testfile2), os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0666)
 	if err == nil {
 		panic("OpenFile works!")
 	}

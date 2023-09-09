@@ -9,7 +9,7 @@ import (
 	"io/ioutil"
 	"net"
 	"os"
-	"path"
+	"path/filepath"
 	"testing"
 
 	"golang.org/x/sys/unix"
@@ -126,8 +126,8 @@ func TestClonefileatWithRelativePaths(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	src := path.Base(srcFile.Name())
-	dst := path.Base(dstFile.Name())
+	src := filepath.Base(srcFile.Name())
+	dst := filepath.Base(dstFile.Name())
 	err = unix.Clonefileat(srcFd, src, dstFd, dst, 0)
 	if err == unix.ENOSYS || err == unix.ENOTSUP {
 		t.Skip("clonefileat is not available or supported, skipping test")
