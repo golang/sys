@@ -10,6 +10,7 @@ package unix_test
 import (
 	"bufio"
 	"bytes"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"io"
@@ -1181,4 +1182,43 @@ func TestReadvAllocate(t *testing.T) {
 	test("Preadv2", func(fd int) {
 		unix.Preadv2(fd, iovs, 0, 0)
 	})
+}
+
+func TestSockaddrALG(t *testing.T) {
+	// Open a socket to perform SHA1 hashing.
+	fd, err := unix.Socket(unix.AF_ALG, unix.SOCK_SEQPACKET, 0)
+	if err != nil {
+		t.Skip("socket(AF_ALG):", err)
+	}
+	defer unix.Close(fd)
+	addr := &unix.SockaddrALG{Type: "hash", Name: "sha1"}
+	if err := unix.Bind(fd, addr); err != nil {
+		t.Fatal("bind:", err)
+	}
+	// Need to call accept(2) with the second and third arguments as 0,
+	// which is not possible via unix.Accept, thus the use of unix.Syscall.
+	hashfd, _, errno := unix.Syscall6(unix.SYS_ACCEPT4, uintptr(fd), 0, 0, 0, 0, 0)
+	if errno != 0 {
+		t.Fatal("accept:", errno)
+	}
+
+	hash := os.NewFile(hashfd, "sha1")
+	defer hash.Close()
+
+	// Hash an input string and read the results.
+	const (
+		input = "Hello, world."
+		exp   = "2ae01472317d1935a84797ec1983ae243fc6aa28"
+	)
+	if _, err := hash.WriteString(input); err != nil {
+		t.Fatal(err)
+	}
+	b := make([]byte, 20)
+	if _, err := hash.Read(b); err != nil {
+		t.Fatal(err)
+	}
+	got := hex.EncodeToString(b)
+	if got != exp {
+		t.Fatalf("got: %q, want: %q", got, exp)
+	}
 }
