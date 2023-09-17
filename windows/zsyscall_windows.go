@@ -188,6 +188,7 @@ var (
 	procCancelIo                                             = modkernel32.NewProc("CancelIo")
 	procCancelIoEx                                           = modkernel32.NewProc("CancelIoEx")
 	procCloseHandle                                          = modkernel32.NewProc("CloseHandle")
+	procClosePseudoConsole                                   = modkernel32.NewProc("ClosePseudoConsole")
 	procConnectNamedPipe                                     = modkernel32.NewProc("ConnectNamedPipe")
 	procCreateDirectoryW                                     = modkernel32.NewProc("CreateDirectoryW")
 	procCreateEventExW                                       = modkernel32.NewProc("CreateEventExW")
@@ -202,6 +203,7 @@ var (
 	procCreateNamedPipeW                                     = modkernel32.NewProc("CreateNamedPipeW")
 	procCreatePipe                                           = modkernel32.NewProc("CreatePipe")
 	procCreateProcessW                                       = modkernel32.NewProc("CreateProcessW")
+	procCreatePseudoConsole                                  = modkernel32.NewProc("CreatePseudoConsole")
 	procCreateSymbolicLinkW                                  = modkernel32.NewProc("CreateSymbolicLinkW")
 	procCreateToolhelp32Snapshot                             = modkernel32.NewProc("CreateToolhelp32Snapshot")
 	procDefineDosDeviceW                                     = modkernel32.NewProc("DefineDosDeviceW")
@@ -328,6 +330,7 @@ var (
 	procReleaseMutex                                         = modkernel32.NewProc("ReleaseMutex")
 	procRemoveDirectoryW                                     = modkernel32.NewProc("RemoveDirectoryW")
 	procResetEvent                                           = modkernel32.NewProc("ResetEvent")
+	procResizePseudoConsole                                  = modkernel32.NewProc("ResizePseudoConsole")
 	procResumeThread                                         = modkernel32.NewProc("ResumeThread")
 	procSetCommTimeouts                                      = modkernel32.NewProc("SetCommTimeouts")
 	procSetConsoleCursorPosition                             = modkernel32.NewProc("SetConsoleCursorPosition")
@@ -1633,6 +1636,11 @@ func CloseHandle(handle Handle) (err error) {
 	return
 }
 
+func ClosePseudoConsole(console Handle) {
+	syscall.Syscall(procClosePseudoConsole.Addr(), 1, uintptr(console), 0, 0)
+	return
+}
+
 func ConnectNamedPipe(pipe Handle, overlapped *Overlapped) (err error) {
 	r1, _, e1 := syscall.Syscall(procConnectNamedPipe.Addr(), 2, uintptr(pipe), uintptr(unsafe.Pointer(overlapped)), 0)
 	if r1 == 0 {
@@ -1758,6 +1766,14 @@ func CreateProcess(appName *uint16, commandLine *uint16, procSecurity *SecurityA
 	r1, _, e1 := syscall.Syscall12(procCreateProcessW.Addr(), 10, uintptr(unsafe.Pointer(appName)), uintptr(unsafe.Pointer(commandLine)), uintptr(unsafe.Pointer(procSecurity)), uintptr(unsafe.Pointer(threadSecurity)), uintptr(_p0), uintptr(creationFlags), uintptr(unsafe.Pointer(env)), uintptr(unsafe.Pointer(currentDir)), uintptr(unsafe.Pointer(startupInfo)), uintptr(unsafe.Pointer(outProcInfo)), 0, 0)
 	if r1 == 0 {
 		err = errnoErr(e1)
+	}
+	return
+}
+
+func createPseudoConsole(size uint32, in Handle, out Handle, flags uint32, pconsole *Handle) (hr error) {
+	r0, _, _ := syscall.Syscall6(procCreatePseudoConsole.Addr(), 5, uintptr(size), uintptr(in), uintptr(out), uintptr(flags), uintptr(unsafe.Pointer(pconsole)), 0)
+	if r0 != 0 {
+		hr = syscall.Errno(r0)
 	}
 	return
 }
@@ -2858,6 +2874,14 @@ func ResetEvent(event Handle) (err error) {
 	r1, _, e1 := syscall.Syscall(procResetEvent.Addr(), 1, uintptr(event), 0, 0)
 	if r1 == 0 {
 		err = errnoErr(e1)
+	}
+	return
+}
+
+func resizePseudoConsole(pconsole Handle, size uint32) (hr error) {
+	r0, _, _ := syscall.Syscall(procResizePseudoConsole.Addr(), 2, uintptr(pconsole), uintptr(size), 0)
+	if r0 != 0 {
+		hr = syscall.Errno(r0)
 	}
 	return
 }
