@@ -10,7 +10,6 @@ import (
 	"debug/pe"
 	"errors"
 	"fmt"
-	"math/rand"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -19,6 +18,7 @@ import (
 	"syscall"
 	"testing"
 	"time"
+	"unicode/utf8"
 	"unsafe"
 
 	"golang.org/x/sys/windows"
@@ -562,78 +562,143 @@ func TestResourceExtraction(t *testing.T) {
 	}
 }
 
-func TestCommandLineRecomposition(t *testing.T) {
-	const (
-		maxCharsPerArg  = 35
-		maxArgsPerTrial = 80
-		doubleQuoteProb = 4
-		singleQuoteProb = 1
-		backSlashProb   = 3
-		spaceProb       = 1
-		trials          = 1000
-	)
-	randString := func(l int) []rune {
-		s := make([]rune, l)
-		for i := range s {
-			s[i] = rand.Int31()
+func FuzzComposeCommandLine(f *testing.F) {
+	f.Add(`C:\foo.exe /bar /baz "-bag qux"`)
+	f.Add(`"C:\Program Files\Go\bin\go.exe" env`)
+	f.Add(`C:\"Program Files"\Go\bin\go.exe env`)
+	f.Add(`C:\"Program Files"\Go\bin\go.exe env`)
+	f.Add(`C:\"Pro"gram Files\Go\bin\go.exe env`)
+	f.Add(``)
+	f.Add(` `)
+	f.Add(`W\"0`)
+	f.Add("\"\f")
+	f.Add("\f")
+	f.Add("\x16")
+	f.Add(`"" ` + strings.Repeat("a", 8193))
+	f.Add(strings.Repeat(`"" `, 8193))
+
+	f.Add("\x00abcd")
+	f.Add("ab\x00cd")
+	f.Add("abcd\x00")
+	f.Add("\x00abcd\x00")
+	f.Add("\x00ab\x00cd\x00")
+	f.Add("\x00\x00\x00")
+	f.Add("\x16\x00\x16")
+	f.Add(`C:\Program Files\Go\bin\go.exe` + "\x00env")
+	f.Add(`"C:\Program Files\Go\bin\go.exe"` + "\x00env")
+	f.Add(`C:\"Program Files"\Go\bin\go.exe` + "\x00env")
+	f.Add(`C:\"Pro"gram Files\Go\bin\go.exe` + "\x00env")
+	f.Add("\x00" + strings.Repeat("a", 8192))
+	f.Add(strings.Repeat("\x00"+strings.Repeat("a", 8192), 4))
+
+	f.Fuzz(func(t *testing.T, s string) {
+		// DecomposeCommandLine is the “control” for our experiment:
+		// if it returns a particular list of arguments, then we know
+		// it must be possible to create an input string that produces
+		// exactly those arguments.
+		//
+		// However, DecomposeCommandLine returns an error if the string
+		// contains a NUL byte. In that case, we will fall back to
+		// strings.Split, and be a bit more permissive about the results.
+		args, err := windows.DecomposeCommandLine(s)
+		argsFromSplit := false
+
+		if err == nil {
+			if testing.Verbose() {
+				t.Logf("DecomposeCommandLine(%#q) = %#q", s, args)
+			}
+		} else {
+			t.Logf("DecomposeCommandLine: %v", err)
+			if !strings.Contains(s, "\x00") {
+				// The documentation for CommandLineToArgv takes for granted that
+				// the first argument is a valid file path, and doesn't describe any
+				// specific behavior for malformed arguments. Empirically it seems to
+				// tolerate anything we throw at it, but if we discover cases where it
+				// actually returns an error we might need to relax this check.
+				t.Fatal("(error unexpected)")
+			}
+
+			// Since DecomposeCommandLine can't handle this string,
+			// interpret it as the raw arguments to ComposeCommandLine.
+			args = strings.Split(s, "\x00")
+			argsFromSplit = true
+			for i, arg := range args {
+				if !utf8.ValidString(arg) {
+					// We need to encode the arguments as UTF-16 to pass them to
+					// CommandLineToArgvW, so skip inputs that are not valid: they might
+					// have one or more runes converted to replacement characters.
+					t.Skipf("skipping: input %d is not valid UTF-8", i)
+				}
+				if len(arg) > 8192 {
+					// CommandLineToArgvW seems to truncate each argument after 8192
+					// UTF-16 code units, although this behavior is not documented. Since
+					// it isn't documented, we shouldn't rely on it one way or the other,
+					// so skip the input to tell the fuzzer to try a different approach.
+					enc, _ := windows.UTF16FromString(arg)
+					if len(enc) > 8192 {
+						t.Skipf("skipping: input %d encodes to more than 8192 UTF-16 code units", i)
+					}
+				}
+			}
+			if testing.Verbose() {
+				t.Logf("using input: %#q", args)
+			}
 		}
-		return s
-	}
-	mungeString := func(s []rune, char rune, timesInTen int) {
-		if timesInTen < rand.Intn(10)+1 || len(s) == 0 {
-			return
-		}
-		s[rand.Intn(len(s))] = char
-	}
-	argStorage := make([]string, maxArgsPerTrial+1)
-	for i := 0; i < trials; i++ {
-		args := argStorage[:rand.Intn(maxArgsPerTrial)+2]
-		args[0] = "valid-filename-for-arg0"
-		for j := 1; j < len(args); j++ {
-			arg := randString(rand.Intn(maxCharsPerArg + 1))
-			mungeString(arg, '"', doubleQuoteProb)
-			mungeString(arg, '\'', singleQuoteProb)
-			mungeString(arg, '\\', backSlashProb)
-			mungeString(arg, ' ', spaceProb)
-			args[j] = string(arg)
-		}
+
+		// It's ok if we compose a different command line than what was read.
+		// Just check that we are able to compose something that round-trips
+		// to the same results as the original.
 		commandLine := windows.ComposeCommandLine(args)
-		decomposedArgs, err := windows.DecomposeCommandLine(commandLine)
+		t.Logf("ComposeCommandLine(_) = %#q", commandLine)
+
+		got, err := windows.DecomposeCommandLine(commandLine)
 		if err != nil {
-			t.Errorf("Unable to decompose %#q made from %v: %v", commandLine, args, err)
-			continue
+			t.Fatalf("DecomposeCommandLine: unexpected error: %v", err)
 		}
-		if len(decomposedArgs) != len(args) {
-			t.Errorf("Incorrect decomposition length from %v to %#q to %v", args, commandLine, decomposedArgs)
-			continue
+		if testing.Verbose() {
+			t.Logf("DecomposeCommandLine(_) = %#q", got)
 		}
-		badMatches := make([]int, 0, len(args))
+
+		var badMatches []int
 		for i := range args {
-			if args[i] != decomposedArgs[i] {
+			if i >= len(got) {
+				badMatches = append(badMatches, i)
+				continue
+			}
+			want := args[i]
+			if got[i] != want {
+				if i == 0 && argsFromSplit {
+					// It is possible that args[0] cannot be encoded exactly, because
+					// CommandLineToArgvW doesn't unescape that argument in the same way
+					// as the others: since the first argument is assumed to be the name
+					// of the program itself, we only have the option of quoted or not.
+					//
+					// If args[0] contains a space or control character, we must quote it
+					// to avoid it being split into multiple arguments.
+					// If args[0] already starts with a quote character, we have no way
+					// to indicate that that character is part of the literal argument.
+					// In either case, if the string already contains a quote character
+					// we must avoid misinterpriting that character as the end of the
+					// quoted argument string.
+					//
+					// Unfortunately, ComposeCommandLine does not return an error, so we
+					// can't report existing quote characters as errors.
+					// Instead, we strip out the problematic quote characters from the
+					// argument, and quote the remainder.
+					// For paths like C:\"Program Files"\Go\bin\go.exe that is arguably
+					// what the caller intended anyway, and for other strings it seems
+					// less harmful than corrupting the subsequent arguments.
+					if got[i] == strings.ReplaceAll(want, `"`, ``) {
+						continue
+					}
+				}
 				badMatches = append(badMatches, i)
 			}
 		}
 		if len(badMatches) != 0 {
-			t.Errorf("Incorrect decomposition at indices %v from %v to %#q to %v", badMatches, args, commandLine, decomposedArgs)
-			continue
+			t.Errorf("Incorrect decomposition at indices: %v", badMatches)
 		}
-	}
-
-	// check that windows.DecomposeCommandLine returns error for strings with NUL
-	testsWithNUL := []string{
-		"\x00abcd",
-		"ab\x00cd",
-		"abcd\x00",
-		"\x00abcd\x00",
-		"\x00ab\x00cd\x00",
-		"\x00\x00\x00",
-	}
-	for _, test := range testsWithNUL {
-		_, err := windows.DecomposeCommandLine(test)
-		if err == nil {
-			t.Errorf("Failed to return error while decomposing %#q string with NUL inside", test)
-		}
-	}
+	})
 }
 
 func TestWinVerifyTrust(t *testing.T) {
