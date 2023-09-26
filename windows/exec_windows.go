@@ -153,20 +153,33 @@ func DecomposeCommandLine(commandLine string) ([]string, error) {
 		return nil, errorspkg.New("string with NUL passed to DecomposeCommandLine")
 	}
 	var argc int32
-	argv8192, err := CommandLineToArgv(&utf16CommandLine[0], &argc)
+	argv, err := commandLineToArgv(&utf16CommandLine[0], &argc)
 	if err != nil {
 		return nil, err
 	}
-	defer LocalFree(Handle(unsafe.Pointer(argv8192)))
+	defer LocalFree(Handle(unsafe.Pointer(argv)))
 
 	var args []string
-	// Note: CommandLineToArgv hard-codes an incorrect return type
-	// (see https://go.dev/issue/63236).
-	// We use an unsafe.Pointer conversion here to work around it.
-	for _, p := range unsafe.Slice((**uint16)(unsafe.Pointer(argv8192)), argc) {
+	for _, p := range unsafe.Slice(argv, argc) {
 		args = append(args, UTF16PtrToString(p))
 	}
 	return args, nil
+}
+
+// CommandLineToArgv parses a Unicode command line string and sets
+// argc to the number of parsed arguments.
+//
+// The returned memory should be freed using a single call to LocalFree.
+//
+// Note that although the return type of CommandLineToArgv indicates 8192
+// entries of up to 8192 characters each, the actual count of parsed arguments
+// may exceed 8192, and the documentation for CommandLineToArgvW does not mention
+// any bound on the lengths of the individual argument strings.
+// (See https://go.dev/issue/63236.)
+func CommandLineToArgv(cmd *uint16, argc *int32) (argv *[8192]*[8192]uint16, err error) {
+	argp, err := commandLineToArgv(cmd, argc)
+	argv = (*[8192]*[8192]uint16)(unsafe.Pointer(argp))
+	return argv, err
 }
 
 func CloseOnExec(fd Handle) {
