@@ -589,6 +589,7 @@ func FuzzComposeCommandLine(f *testing.F) {
 	f.Add(`C:\"Program Files"\Go\bin\go.exe` + "\x00env")
 	f.Add(`C:\"Pro"gram Files\Go\bin\go.exe` + "\x00env")
 	f.Add("\x00" + strings.Repeat("a", 8192))
+	f.Add("\x00" + strings.Repeat("a", 8193))
 	f.Add(strings.Repeat("\x00"+strings.Repeat("a", 8192), 4))
 
 	f.Fuzz(func(t *testing.T, s string) {
@@ -628,16 +629,6 @@ func FuzzComposeCommandLine(f *testing.F) {
 					// CommandLineToArgvW, so skip inputs that are not valid: they might
 					// have one or more runes converted to replacement characters.
 					t.Skipf("skipping: input %d is not valid UTF-8", i)
-				}
-				if len(arg) > 8192 {
-					// CommandLineToArgvW seems to truncate each argument after 8192
-					// UTF-16 code units, although this behavior is not documented. Since
-					// it isn't documented, we shouldn't rely on it one way or the other,
-					// so skip the input to tell the fuzzer to try a different approach.
-					enc, _ := windows.UTF16FromString(arg)
-					if len(enc) > 8192 {
-						t.Skipf("skipping: input %d encodes to more than 8192 UTF-16 code units", i)
-					}
 				}
 			}
 			if testing.Verbose() {
