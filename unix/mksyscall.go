@@ -373,7 +373,7 @@ func main() {
 			text += "}\n\n"
 
 			if *libc && !trampolines[libcFn] {
-				// some system calls share a trampoline, like read and readlen.
+				// Some system calls share a trampoline.
 				trampolines[libcFn] = true
 				// Declare assembly trampoline address.
 				text += fmt.Sprintf("var libc_%s_trampoline_addr uintptr\n\n", libcFn)

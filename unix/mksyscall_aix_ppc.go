@@ -217,7 +217,7 @@ func main() {
 				}
 			}
 
-			if funct != "fcntl" && funct != "FcntlInt" && funct != "readlen" && funct != "writelen" && funct != "ioctlPtr" {
+			if funct != "fcntl" && funct != "FcntlInt" && funct != "ioctlPtr" {
 				if sysname == "select" {
 					// select is a keyword of Go. Its name is
 					// changed to c_select.
@@ -296,9 +296,7 @@ func main() {
 				} else if p.Type == "unsafe.Pointer" {
 					args = append(args, fmt.Sprintf("C.uintptr_t(uintptr(%s))", p.Name))
 				} else if p.Type == "int" {
-					if (argN == 2) && ((funct == "readlen") || (funct == "writelen")) {
-						args = append(args, fmt.Sprintf("C.size_t(%s)", p.Name))
-					} else if argN == 0 && funct == "fcntl" {
+					if argN == 0 && funct == "fcntl" {
 						args = append(args, fmt.Sprintf("C.uintptr_t(%s)", p.Name))
 					} else if (argN == 2) && ((funct == "fcntl") || (funct == "FcntlInt")) {
 						args = append(args, fmt.Sprintf("C.uintptr_t(%s)", p.Name))
