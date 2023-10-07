@@ -5883,3 +5883,15 @@ type SchedAttr struct {
 }
 
 const SizeofSchedAttr = 0x38
+
+type Cachestat struct {
+	Cache            uint64
+	Dirty            uint64
+	Writeback        uint64
+	Evicted          uint64
+	Recently_evicted uint64
+}
+type CachestatRange struct {
+	Off uint64
+	Len uint64
+}
