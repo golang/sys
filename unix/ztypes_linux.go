@@ -5884,7 +5884,7 @@ type SchedAttr struct {
 
 const SizeofSchedAttr = 0x38
 
-type CachestatArgpack struct {
+type Cachestat_t struct {
 	Cache            uint64
 	Dirty            uint64
 	Writeback        uint64

@@ -5828,5 +5828,5 @@ type SchedAttr C.struct_sched_attr
 
 const SizeofSchedAttr = C.sizeof_struct_sched_attr
 
-type CachestatArgpack C.struct_cachestat
+type Cachestat_t C.struct_cachestat
 type CachestatRange C.struct_cachestat_range
