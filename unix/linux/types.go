@@ -461,6 +461,20 @@ struct my_can_bittiming_const {
 
 struct riscv_hwprobe {};
 #endif
+
+// copied from /usr/include/uapi/linux/mman.h
+struct cachestat_range {
+	__u64 off;
+	__u64 len;
+};
+
+struct cachestat {
+	__u64 nr_cache;
+	__u64 nr_dirty;
+	__u64 nr_writeback;
+	__u64 nr_evicted;
+	__u64 nr_recently_evicted;
+};
 */
 import "C"
 
@@ -5813,3 +5827,6 @@ const (
 type SchedAttr C.struct_sched_attr
 
 const SizeofSchedAttr = C.sizeof_struct_sched_attr
+
+type Cachestat_t C.struct_cachestat
+type CachestatRange C.struct_cachestat_range
