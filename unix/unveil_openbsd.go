@@ -15,8 +15,7 @@ import (
 // Note that the special case of blocking further
 // unveil calls is handled by UnveilBlock.
 func Unveil(path string, flags string) error {
-	err := supportsUnveil()
-	if err != nil {
+	if err := supportsUnveil(); err != nil {
 		return err
 	}
 	pathPtr, err := syscall.BytePtrFromString(path)
@@ -37,8 +36,7 @@ func Unveil(path string, flags string) error {
 // UnveilBlock blocks future unveil calls.
 // For more information see unveil(2).
 func UnveilBlock() error {
-	err := supportsUnveil()
-	if err != nil {
+	if err := supportsUnveil(); err != nil {
 		return err
 	}
 	// Both pointers must be nil.
@@ -60,8 +58,7 @@ func supportsUnveil() error {
 
 	// unveil is not available before 6.4
 	if maj < 6 || (maj == 6 && min <= 3) {
-		return fmt.Errorf("cannot call Unveil on OpenBSD %d.%d", maj,
-			min)
+		return fmt.Errorf("cannot call Unveil on OpenBSD %d.%d", maj, min)
 	}
 
 	return nil

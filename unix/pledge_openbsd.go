@@ -20,8 +20,7 @@ import (
 //
 // For more information see pledge(2).
 func Pledge(promises, execpromises string) error {
-	err := pledgeAvailable()
-	if err != nil {
+	if err := pledgeAvailable(); err != nil {
 		return err
 	}
 
@@ -50,8 +49,7 @@ func Pledge(promises, execpromises string) error {
 //
 // For more information see pledge(2).
 func PledgePromises(promises string) error {
-	err := pledgeAvailable()
-	if err != nil {
+	if err := pledgeAvailable(); err != nil {
 		return err
 	}
 
@@ -78,8 +76,7 @@ func PledgePromises(promises string) error {
 //
 // For more information see pledge(2).
 func PledgeExecpromises(execpromises string) error {
-	err := pledgeAvailable()
-	if err != nil {
+	if err := pledgeAvailable(); err != nil {
 		return err
 	}
 
@@ -133,8 +130,7 @@ func pledgeAvailable() error {
 
 	// Require OpenBSD 6.4 as a minimum.
 	if maj < 6 || (maj == 6 && min <= 3) {
-		return fmt.Errorf("cannot call Pledge on OpenBSD %d.%d", maj,
-			min)
+		return fmt.Errorf("cannot call Pledge on OpenBSD %d.%d", maj, min)
 	}
 
 	return nil
