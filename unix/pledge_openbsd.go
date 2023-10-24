@@ -34,9 +34,8 @@ func Pledge(promises, execpromises string) error {
 	if err != nil {
 		return err
 	}
-	expr := unsafe.Pointer(exptr)
 
-	_, _, e := syscall.Syscall(SYS_PLEDGE, uintptr(unsafe.Pointer(pptr)), uintptr(expr), 0)
+	_, _, e := syscall.Syscall(SYS_PLEDGE, uintptr(unsafe.Pointer(pptr)), uintptr(unsafe.Pointer(exptr)), 0)
 	if e != 0 {
 		return e
 	}
