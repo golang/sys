@@ -35,7 +35,8 @@ func Pledge(promises, execpromises string) error {
 		return err
 	}
 
-	_, _, e := syscall.Syscall(SYS_PLEDGE, uintptr(unsafe.Pointer(pptr)), uintptr(unsafe.Pointer(exptr)), 0)
+	_, _, e := syscall.Syscall(SYS_PLEDGE, uintptr(unsafe.Pointer(pptr)),
+		uintptr(unsafe.Pointer(exptr)), 0)
 	if e != 0 {
 		return e
 	}
@@ -62,7 +63,8 @@ func PledgePromises(promises string) error {
 		return err
 	}
 
-	_, _, e := syscall.Syscall(SYS_PLEDGE, uintptr(unsafe.Pointer(pptr)), uintptr(expr), 0)
+	_, _, e := syscall.Syscall(SYS_PLEDGE, uintptr(unsafe.Pointer(pptr)),
+		uintptr(expr), 0)
 	if e != 0 {
 		return e
 	}
@@ -89,7 +91,8 @@ func PledgeExecpromises(execpromises string) error {
 		return err
 	}
 
-	_, _, e := syscall.Syscall(SYS_PLEDGE, uintptr(pptr), uintptr(unsafe.Pointer(exptr)), 0)
+	_, _, e := syscall.Syscall(SYS_PLEDGE, uintptr(pptr),
+		uintptr(unsafe.Pointer(exptr)), 0)
 	if e != 0 {
 		return e
 	}
@@ -130,7 +133,8 @@ func pledgeAvailable() error {
 
 	// Require OpenBSD 6.4 as a minimum.
 	if maj < 6 || (maj == 6 && min <= 3) {
-		return fmt.Errorf("cannot call Pledge on OpenBSD %d.%d", maj, min)
+		return fmt.Errorf("cannot call Pledge on OpenBSD %d.%d", maj,
+			min)
 	}
 
 	return nil

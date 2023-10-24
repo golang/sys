@@ -60,7 +60,8 @@ func supportsUnveil() error {
 
 	// unveil is not available before 6.4
 	if maj < 6 || (maj == 6 && min <= 3) {
-		return fmt.Errorf("cannot call Unveil on OpenBSD %d.%d", maj, min)
+		return fmt.Errorf("cannot call Unveil on OpenBSD %d.%d", maj,
+			min)
 	}
 
 	return nil
