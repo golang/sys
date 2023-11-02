@@ -672,3 +672,13 @@ TEXT libc_utimensat_trampoline<>(SB),NOSPLIT,$0-0
 	JMP	libc_utimensat(SB)
 GLOBL	·libc_utimensat_trampoline_addr(SB), RODATA, $4
 DATA	·libc_utimensat_trampoline_addr(SB)/4, $libc_utimensat_trampoline<>(SB)
+
+TEXT libc_pledge_trampoline<>(SB),NOSPLIT,$0-0
+	JMP	libc_pledge(SB)
+GLOBL	·libc_pledge_trampoline_addr(SB), RODATA, $4
+DATA	·libc_pledge_trampoline_addr(SB)/4, $libc_pledge_trampoline<>(SB)
+
+TEXT libc_unveil_trampoline<>(SB),NOSPLIT,$0-0
+	JMP	libc_unveil(SB)
+GLOBL	·libc_unveil_trampoline_addr(SB), RODATA, $4
+DATA	·libc_unveil_trampoline_addr(SB)/4, $libc_unveil_trampoline<>(SB)

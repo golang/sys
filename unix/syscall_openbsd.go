@@ -327,3 +327,5 @@ func Uname(uname *Utsname) error {
 //sys	mmap(addr uintptr, length uintptr, prot int, flag int, fd int, pos int64) (ret uintptr, err error)
 //sys	munmap(addr uintptr, length uintptr) (err error)
 //sys	utimensat(dirfd int, path string, times *[2]Timespec, flags int) (err error)
+//sys	pledge(promises *byte, execpromises *byte) (err error)
+//sys	unveil(path *byte, flags *byte) (err error)

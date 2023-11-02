@@ -4,11 +4,7 @@
 
 package unix
 
-import (
-	"fmt"
-	"syscall"
-	"unsafe"
-)
+import "fmt"
 
 // Unveil implements the unveil syscall.
 // For more information see unveil(2).
@@ -18,19 +14,15 @@ func Unveil(path string, flags string) error {
 	if err := supportsUnveil(); err != nil {
 		return err
 	}
-	pathPtr, err := syscall.BytePtrFromString(path)
+	pathPtr, err := BytePtrFromString(path)
 	if err != nil {
 		return err
 	}
-	flagsPtr, err := syscall.BytePtrFromString(flags)
+	flagsPtr, err := BytePtrFromString(flags)
 	if err != nil {
 		return err
 	}
-	_, _, e := syscall.Syscall(SYS_UNVEIL, uintptr(unsafe.Pointer(pathPtr)), uintptr(unsafe.Pointer(flagsPtr)), 0)
-	if e != 0 {
-		return e
-	}
-	return nil
+	return unveil(pathPtr, flagsPtr)
 }
 
 // UnveilBlock blocks future unveil calls.
@@ -39,13 +31,7 @@ func UnveilBlock() error {
 	if err := supportsUnveil(); err != nil {
 		return err
 	}
-	// Both pointers must be nil.
-	var pathUnsafe, flagsUnsafe unsafe.Pointer
-	_, _, e := syscall.Syscall(SYS_UNVEIL, uintptr(pathUnsafe), uintptr(flagsUnsafe), 0)
-	if e != 0 {
-		return e
-	}
-	return nil
+	return unveil(nil, nil)
 }
 
 // supportsUnveil checks for availability of the unveil(2) system call based
