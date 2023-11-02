@@ -10,8 +10,6 @@ import "fmt"
 // For more information see unveil(2).
 // Note that the special case of blocking further
 // unveil calls is handled by UnveilBlock.
-//
-// Unveil requires OpenBSD 6.4 or later.
 func Unveil(path string, flags string) error {
 	if err := supportsUnveil(); err != nil {
 		return err
@@ -29,8 +27,6 @@ func Unveil(path string, flags string) error {
 
 // UnveilBlock blocks future unveil calls.
 // For more information see unveil(2).
-//
-// Unveil requires OpenBSD 6.4 or later.
 func UnveilBlock() error {
 	if err := supportsUnveil(); err != nil {
 		return err
