@@ -57,9 +57,6 @@ func PledgePromises(promises string) error {
 //
 // This changes the execpromises and leaves the promises untouched.
 //
-// The pledge syscall does not accept execpromises on OpenBSD releases
-// before 6.3.
-//
 // For more information see pledge(2).
 func PledgeExecpromises(execpromises string) error {
 	if err := pledgeAvailable(); err != nil {
