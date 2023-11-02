@@ -417,6 +417,14 @@ func (t *target) makeHeaders() error {
 	} else {
 		glibcArgs = append(glibcArgs, "--enable-kernel="+MinKernel)
 	}
+
+	if t.LinuxArch == "arm64" {
+		// glibc 2.38 requires libmvec to be disabled explicitly in aarch64
+		// since the compiler does not have SVE ACLE.
+		// See https://sourceware.org/pipermail/libc-alpha/2023-May/147829.html
+		glibcArgs = append(glibcArgs, "--disable-mathvec")
+	}
+
 	glibcConf := t.makeCommand(confScript, glibcArgs...)
 
 	glibcConf.Dir = buildDir

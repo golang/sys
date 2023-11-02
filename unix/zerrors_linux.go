@@ -1627,6 +1627,7 @@ const (
 	IP_FREEBIND                                 = 0xf
 	IP_HDRINCL                                  = 0x3
 	IP_IPSEC_POLICY                             = 0x10
+	IP_LOCAL_PORT_RANGE                         = 0x33
 	IP_MAXPACKET                                = 0xffff
 	IP_MAX_MEMBERSHIPS                          = 0x14
 	IP_MF                                       = 0x2000
