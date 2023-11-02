@@ -806,3 +806,15 @@ TEXT libc_utimensat_trampoline<>(SB),NOSPLIT,$0-0
 	RET
 GLOBL	·libc_utimensat_trampoline_addr(SB), RODATA, $8
 DATA	·libc_utimensat_trampoline_addr(SB)/8, $libc_utimensat_trampoline<>(SB)
+
+TEXT libc_pledge_trampoline<>(SB),NOSPLIT,$0-0
+	CALL	libc_pledge(SB)
+	RET
+GLOBL	·libc_pledge_trampoline_addr(SB), RODATA, $8
+DATA	·libc_pledge_trampoline_addr(SB)/8, $libc_pledge_trampoline<>(SB)
+
+TEXT libc_unveil_trampoline<>(SB),NOSPLIT,$0-0
+	CALL	libc_unveil(SB)
+	RET
+GLOBL	·libc_unveil_trampoline_addr(SB), RODATA, $8
+DATA	·libc_unveil_trampoline_addr(SB)/8, $libc_unveil_trampoline<>(SB)
