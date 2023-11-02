@@ -8,8 +8,6 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
-	"syscall"
-	"unsafe"
 )
 
 // Pledge implements the pledge syscall.
@@ -24,23 +22,17 @@ func Pledge(promises, execpromises string) error {
 		return err
 	}
 
-	pptr, err := syscall.BytePtrFromString(promises)
+	pptr, err := BytePtrFromString(promises)
 	if err != nil {
 		return err
 	}
 
-	exptr, err := syscall.BytePtrFromString(execpromises)
+	exptr, err := BytePtrFromString(execpromises)
 	if err != nil {
 		return err
 	}
 
-	_, _, e := syscall.Syscall(SYS_PLEDGE, uintptr(unsafe.Pointer(pptr)),
-		uintptr(unsafe.Pointer(exptr)), 0)
-	if e != 0 {
-		return e
-	}
-
-	return nil
+	return pledge(pptr, exptr)
 }
 
 // PledgePromises implements the pledge syscall.
@@ -53,26 +45,20 @@ func PledgePromises(promises string) error {
 		return err
 	}
 
-	// This variable holds the execpromises and is always nil.
-	var expr unsafe.Pointer
-
-	pptr, err := syscall.BytePtrFromString(promises)
+	pptr, err := BytePtrFromString(promises)
 	if err != nil {
 		return err
 	}
 
-	_, _, e := syscall.Syscall(SYS_PLEDGE, uintptr(unsafe.Pointer(pptr)),
-		uintptr(expr), 0)
-	if e != 0 {
-		return e
-	}
-
-	return nil
+	return pledge(pptr, nil)
 }
 
 // PledgeExecpromises implements the pledge syscall.
 //
 // This changes the execpromises and leaves the promises untouched.
+//
+// The pledge syscall does not accept execpromises on OpenBSD releases
+// before 6.3.
 //
 // For more information see pledge(2).
 func PledgeExecpromises(execpromises string) error {
@@ -80,21 +66,12 @@ func PledgeExecpromises(execpromises string) error {
 		return err
 	}
 
-	// This variable holds the promises and is always nil.
-	var pptr unsafe.Pointer
-
-	exptr, err := syscall.BytePtrFromString(execpromises)
+	exptr, err := BytePtrFromString(execpromises)
 	if err != nil {
 		return err
 	}
 
-	_, _, e := syscall.Syscall(SYS_PLEDGE, uintptr(pptr),
-		uintptr(unsafe.Pointer(exptr)), 0)
-	if e != 0 {
-		return e
-	}
-
-	return nil
+	return pledge(nil, exptr)
 }
 
 // majmin returns major and minor version number for an OpenBSD system.
