@@ -3027,6 +3027,7 @@ const (
 
 type LoopInfo C.struct_loop_info
 type LoopInfo64 C.struct_loop_info64
+type LoopConfig C.struct_loop_config
 
 // AF_TIPC
 
