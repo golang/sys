@@ -2707,6 +2707,7 @@ const (
 	BPF_PROG_TYPE_LSM                          = C.BPF_PROG_TYPE_LSM
 	BPF_PROG_TYPE_SK_LOOKUP                    = C.BPF_PROG_TYPE_SK_LOOKUP
 	BPF_PROG_TYPE_SYSCALL                      = C.BPF_PROG_TYPE_SYSCALL
+	BPF_PROG_TYPE_NETFILTER                    = C.BPF_PROG_TYPE_NETFILTER
 	BPF_CGROUP_INET_INGRESS                    = C.BPF_CGROUP_INET_INGRESS
 	BPF_CGROUP_INET_EGRESS                     = C.BPF_CGROUP_INET_EGRESS
 	BPF_CGROUP_INET_SOCK_CREATE                = C.BPF_CGROUP_INET_SOCK_CREATE
@@ -2751,6 +2752,11 @@ const (
 	BPF_PERF_EVENT                             = C.BPF_PERF_EVENT
 	BPF_TRACE_KPROBE_MULTI                     = C.BPF_TRACE_KPROBE_MULTI
 	BPF_LSM_CGROUP                             = C.BPF_LSM_CGROUP
+	BPF_STRUCT_OPS                             = C.BPF_STRUCT_OPS
+	BPF_NETFILTER                              = C.BPF_NETFILTER
+	BPF_TCX_INGRESS                            = C.BPF_TCX_INGRESS
+	BPF_TCX_EGRESS                             = C.BPF_TCX_EGRESS
+	BPF_TRACE_UPROBE_MULTI                     = C.BPF_TRACE_UPROBE_MULTI
 	BPF_LINK_TYPE_UNSPEC                       = C.BPF_LINK_TYPE_UNSPEC
 	BPF_LINK_TYPE_RAW_TRACEPOINT               = C.BPF_LINK_TYPE_RAW_TRACEPOINT
 	BPF_LINK_TYPE_TRACING                      = C.BPF_LINK_TYPE_TRACING
@@ -2761,6 +2767,18 @@ const (
 	BPF_LINK_TYPE_PERF_EVENT                   = C.BPF_LINK_TYPE_PERF_EVENT
 	BPF_LINK_TYPE_KPROBE_MULTI                 = C.BPF_LINK_TYPE_KPROBE_MULTI
 	BPF_LINK_TYPE_STRUCT_OPS                   = C.BPF_LINK_TYPE_STRUCT_OPS
+	BPF_LINK_TYPE_NETFILTER                    = C.BPF_LINK_TYPE_NETFILTER
+	BPF_LINK_TYPE_TCX                          = C.BPF_LINK_TYPE_TCX
+	BPF_LINK_TYPE_UPROBE_MULTI                 = C.BPF_LINK_TYPE_UPROBE_MULTI
+	BPF_PERF_EVENT_UNSPEC                      = C.BPF_PERF_EVENT_UNSPEC
+	BPF_PERF_EVENT_UPROBE                      = C.BPF_PERF_EVENT_UPROBE
+	BPF_PERF_EVENT_URETPROBE                   = C.BPF_PERF_EVENT_URETPROBE
+	BPF_PERF_EVENT_KPROBE                      = C.BPF_PERF_EVENT_KPROBE
+	BPF_PERF_EVENT_KRETPROBE                   = C.BPF_PERF_EVENT_KRETPROBE
+	BPF_PERF_EVENT_TRACEPOINT                  = C.BPF_PERF_EVENT_TRACEPOINT
+	BPF_PERF_EVENT_EVENT                       = C.BPF_PERF_EVENT_EVENT
+	BPF_F_KPROBE_MULTI_RETURN                  = C.BPF_F_KPROBE_MULTI_RETURN
+	BPF_F_UPROBE_MULTI_RETURN                  = C.BPF_F_UPROBE_MULTI_RETURN
 	BPF_ANY                                    = C.BPF_ANY
 	BPF_NOEXIST                                = C.BPF_NOEXIST
 	BPF_EXIST                                  = C.BPF_EXIST
@@ -2778,6 +2796,8 @@ const (
 	BPF_F_MMAPABLE                             = C.BPF_F_MMAPABLE
 	BPF_F_PRESERVE_ELEMS                       = C.BPF_F_PRESERVE_ELEMS
 	BPF_F_INNER_MAP                            = C.BPF_F_INNER_MAP
+	BPF_F_LINK                                 = C.BPF_F_LINK
+	BPF_F_PATH_FD                              = C.BPF_F_PATH_FD
 	BPF_STATS_RUN_TIME                         = C.BPF_STATS_RUN_TIME
 	BPF_STACK_BUILD_ID_EMPTY                   = C.BPF_STACK_BUILD_ID_EMPTY
 	BPF_STACK_BUILD_ID_VALID                   = C.BPF_STACK_BUILD_ID_VALID
@@ -2798,6 +2818,7 @@ const (
 	BPF_F_ZERO_CSUM_TX                         = C.BPF_F_ZERO_CSUM_TX
 	BPF_F_DONT_FRAGMENT                        = C.BPF_F_DONT_FRAGMENT
 	BPF_F_SEQ_NUMBER                           = C.BPF_F_SEQ_NUMBER
+	BPF_F_NO_TUNNEL_KEY                        = C.BPF_F_NO_TUNNEL_KEY
 	BPF_F_TUNINFO_FLAGS                        = C.BPF_F_TUNINFO_FLAGS
 	BPF_F_INDEX_MASK                           = C.BPF_F_INDEX_MASK
 	BPF_F_CURRENT_CPU                          = C.BPF_F_CURRENT_CPU
@@ -2814,6 +2835,8 @@ const (
 	BPF_F_ADJ_ROOM_ENCAP_L4_UDP                = C.BPF_F_ADJ_ROOM_ENCAP_L4_UDP
 	BPF_F_ADJ_ROOM_NO_CSUM_RESET               = C.BPF_F_ADJ_ROOM_NO_CSUM_RESET
 	BPF_F_ADJ_ROOM_ENCAP_L2_ETH                = C.BPF_F_ADJ_ROOM_ENCAP_L2_ETH
+	BPF_F_ADJ_ROOM_DECAP_L3_IPV4               = C.BPF_F_ADJ_ROOM_DECAP_L3_IPV4
+	BPF_F_ADJ_ROOM_DECAP_L3_IPV6               = C.BPF_F_ADJ_ROOM_DECAP_L3_IPV6
 	BPF_ADJ_ROOM_ENCAP_L2_MASK                 = C.BPF_ADJ_ROOM_ENCAP_L2_MASK
 	BPF_ADJ_ROOM_ENCAP_L2_SHIFT                = C.BPF_ADJ_ROOM_ENCAP_L2_SHIFT
 	BPF_F_SYSCTL_BASE_NAME                     = C.BPF_F_SYSCTL_BASE_NAME
@@ -2902,6 +2925,8 @@ const (
 	BPF_DEVCG_DEV_CHAR                         = C.BPF_DEVCG_DEV_CHAR
 	BPF_FIB_LOOKUP_DIRECT                      = C.BPF_FIB_LOOKUP_DIRECT
 	BPF_FIB_LOOKUP_OUTPUT                      = C.BPF_FIB_LOOKUP_OUTPUT
+	BPF_FIB_LOOKUP_SKIP_NEIGH                  = C.BPF_FIB_LOOKUP_SKIP_NEIGH
+	BPF_FIB_LOOKUP_TBID                        = C.BPF_FIB_LOOKUP_TBID
 	BPF_FIB_LKUP_RET_SUCCESS                   = C.BPF_FIB_LKUP_RET_SUCCESS
 	BPF_FIB_LKUP_RET_BLACKHOLE                 = C.BPF_FIB_LKUP_RET_BLACKHOLE
 	BPF_FIB_LKUP_RET_UNREACHABLE               = C.BPF_FIB_LKUP_RET_UNREACHABLE
@@ -2937,6 +2962,7 @@ const (
 	BPF_CORE_ENUMVAL_EXISTS                    = C.BPF_CORE_ENUMVAL_EXISTS
 	BPF_CORE_ENUMVAL_VALUE                     = C.BPF_CORE_ENUMVAL_VALUE
 	BPF_CORE_TYPE_MATCHES                      = C.BPF_CORE_TYPE_MATCHES
+	BPF_F_TIMER_ABS                            = C.BPF_F_TIMER_ABS
 )
 
 // generated by:
