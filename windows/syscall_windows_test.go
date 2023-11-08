@@ -11,6 +11,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"runtime"
 	"strconv"
@@ -1220,5 +1221,57 @@ func TestGetStartupInfo(t *testing.T) {
 	if err != nil {
 		// see https://go.dev/issue/31316
 		t.Fatalf("GetStartupInfo: got error %v, want nil", err)
+	}
+}
+
+func TestAddRemoveDllDirectory(t *testing.T) {
+	if _, err := exec.LookPath("gcc"); err != nil {
+		t.Skip("skipping test: gcc is missing")
+	}
+	dllSrc := `#include <stdint.h>
+#include <windows.h>
+
+uintptr_t beep(void) {
+   return 5;
+}`
+	tmpdir := t.TempDir()
+	srcname := "beep.c"
+	err := os.WriteFile(filepath.Join(tmpdir, srcname), []byte(dllSrc), 0)
+	if err != nil {
+		t.Fatal(err)
+	}
+	name := "beep.dll"
+	cmd := exec.Command("gcc", "-shared", "-s", "-Werror", "-o", name, srcname)
+	cmd.Dir = tmpdir
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		t.Fatalf("failed to build dll: %v - %v", err, string(out))
+	}
+
+	if _, err := windows.LoadLibraryEx("beep.dll", 0, windows.LOAD_LIBRARY_SEARCH_USER_DIRS); err == nil {
+		t.Fatal("LoadLibraryEx unexpectedly found beep.dll")
+	}
+
+	dllCookie, err := windows.AddDllDirectory(windows.StringToUTF16Ptr(tmpdir))
+	if err != nil {
+		t.Fatalf("AddDllDirectory failed: %s", err)
+	}
+
+	handle, err := windows.LoadLibraryEx("beep.dll", 0, windows.LOAD_LIBRARY_SEARCH_USER_DIRS)
+	if err != nil {
+		t.Fatalf("LoadLibraryEx failed: %s", err)
+	}
+
+	if err := windows.FreeLibrary(handle); err != nil {
+		t.Fatalf("FreeLibrary failed: %s", err)
+	}
+
+	if err := windows.RemoveDllDirectory(dllCookie); err != nil {
+		t.Fatalf("RemoveDllDirectory failed: %s", err)
+	}
+
+	_, err = windows.LoadLibraryEx("beep.dll", 0, windows.LOAD_LIBRARY_SEARCH_USER_DIRS)
+	if err == nil {
+		t.Fatal("LoadLibraryEx unexpectedly found beep.dll")
 	}
 }
