@@ -284,24 +284,12 @@ struct ltchars {
 #include <asm/termbits.h>
 #endif
 
-#ifndef MSG_FASTOPEN
-#define MSG_FASTOPEN    0x20000000
-#endif
-
 #ifndef PTRACE_GETREGS
 #define PTRACE_GETREGS	0xc
 #endif
 
 #ifndef PTRACE_SETREGS
 #define PTRACE_SETREGS	0xd
-#endif
-
-#ifndef SOL_NETLINK
-#define SOL_NETLINK	270
-#endif
-
-#ifndef SOL_SMC
-#define SOL_SMC 286
 #endif
 
 #ifdef SOL_BLUETOOTH
@@ -319,11 +307,6 @@ struct ltchars {
 // for the tipc_subscr timeout __u32 field.
 #undef TIPC_WAIT_FOREVER
 #define TIPC_WAIT_FOREVER 0xffffffff
-
-// Copied from linux/l2tp.h
-// Including linux/l2tp.h here causes conflicts between linux/in.h
-// and netinet/in.h included via net/route.h above.
-#define IPPROTO_L2TP		115
 
 // Copied from linux/netfilter/nf_nat.h
 // Including linux/netfilter/nf_nat.h here causes conflicts between linux/in.h
