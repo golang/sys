@@ -1275,3 +1275,58 @@ uintptr_t beep(void) {
 		t.Fatal("LoadLibraryEx unexpectedly found beep.dll")
 	}
 }
+
+func TestReadWriteFileOverlapped(t *testing.T) {
+	name := filepath.Join(t.TempDir(), "test.txt")
+	fd, err := windows.CreateFile(windows.StringToUTF16Ptr(name), windows.GENERIC_READ|windows.GENERIC_WRITE, 0, nil, windows.CREATE_NEW, windows.FILE_FLAG_OVERLAPPED, 0)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer windows.CloseHandle(fd)
+
+	content := []byte("hello")
+	// Test that we can write to a file using overlapped I/O.
+	var ow windows.Overlapped
+	ow.HEvent, err = windows.CreateEvent(nil, 0, 0, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer windows.CloseHandle(ow.HEvent)
+	if err := windows.WriteFile(fd, content, nil, &ow); err != nil && err != windows.ERROR_IO_PENDING {
+		t.Fatal(err)
+	}
+	if _, err := windows.WaitForSingleObject(ow.HEvent, windows.INFINITE); err != nil {
+		t.Fatal(err)
+	}
+	var n uint32
+	if err := windows.GetOverlappedResult(fd, &ow, &n, true); err != nil {
+		t.Fatal(err)
+	}
+	if n != uint32(len(content)) {
+		t.Fatalf("got %d bytes written; want %d", n, len(content))
+	}
+
+	// Test that we can read from a file using overlapped I/O.
+	var or windows.Overlapped
+	or.HEvent, err = windows.CreateEvent(nil, 0, 0, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer windows.CloseHandle(ow.HEvent)
+	buf := make([]byte, len(content))
+	if err := windows.ReadFile(fd, buf, nil, &or); err != nil && err != windows.ERROR_IO_PENDING {
+		t.Fatal(err)
+	}
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := windows.WaitForSingleObject(or.HEvent, windows.INFINITE); err != nil {
+		t.Fatal(err)
+	}
+	if err := windows.GetOverlappedResult(fd, &or, &n, true); err != nil {
+		t.Fatal(err)
+	}
+	if string(buf) != string(content) {
+		t.Fatalf("got %q; want %q", buf, content)
+	}
+}

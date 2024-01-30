@@ -572,12 +572,16 @@ func Write(fd Handle, p []byte) (n int, err error) {
 }
 
 func ReadFile(fd Handle, p []byte, done *uint32, overlapped *Overlapped) error {
-	err := readFile(fd, p, done, overlapped)
+	var n uint32
+	err := readFile(fd, p, &n, overlapped)
 	if raceenabled {
-		if *done > 0 {
-			raceWriteRange(unsafe.Pointer(&p[0]), int(*done))
+		if n > 0 {
+			raceWriteRange(unsafe.Pointer(&p[0]), int(n))
 		}
 		raceAcquire(unsafe.Pointer(&ioSync))
+	}
+	if done != nil {
+		*done = n
 	}
 	return err
 }
@@ -586,9 +590,13 @@ func WriteFile(fd Handle, p []byte, done *uint32, overlapped *Overlapped) error 
 	if raceenabled {
 		raceReleaseMerge(unsafe.Pointer(&ioSync))
 	}
-	err := writeFile(fd, p, done, overlapped)
-	if raceenabled && *done > 0 {
-		raceReadRange(unsafe.Pointer(&p[0]), int(*done))
+	var n uint32
+	err := writeFile(fd, p, &n, overlapped)
+	if raceenabled && n > 0 {
+		raceReadRange(unsafe.Pointer(&p[0]), int(n))
+	}
+	if done != nil {
+		*done = n
 	}
 	return err
 }
