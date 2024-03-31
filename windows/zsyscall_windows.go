@@ -188,6 +188,7 @@ var (
 	procAssignProcessToJobObject                             = modkernel32.NewProc("AssignProcessToJobObject")
 	procCancelIo                                             = modkernel32.NewProc("CancelIo")
 	procCancelIoEx                                           = modkernel32.NewProc("CancelIoEx")
+	procClearCommBreak                                       = modkernel32.NewProc("ClearCommBreak")
 	procClearCommError                                       = modkernel32.NewProc("ClearCommError")
 	procCloseHandle                                          = modkernel32.NewProc("CloseHandle")
 	procClosePseudoConsole                                   = modkernel32.NewProc("ClosePseudoConsole")
@@ -341,6 +342,7 @@ var (
 	procResetEvent                                           = modkernel32.NewProc("ResetEvent")
 	procResizePseudoConsole                                  = modkernel32.NewProc("ResizePseudoConsole")
 	procResumeThread                                         = modkernel32.NewProc("ResumeThread")
+	procSetCommBreak                                         = modkernel32.NewProc("SetCommBreak")
 	procSetCommMask                                          = modkernel32.NewProc("SetCommMask")
 	procSetCommState                                         = modkernel32.NewProc("SetCommState")
 	procSetCommTimeouts                                      = modkernel32.NewProc("SetCommTimeouts")
@@ -1645,6 +1647,14 @@ func CancelIo(s Handle) (err error) {
 
 func CancelIoEx(s Handle, o *Overlapped) (err error) {
 	r1, _, e1 := syscall.Syscall(procCancelIoEx.Addr(), 2, uintptr(s), uintptr(unsafe.Pointer(o)), 0)
+	if r1 == 0 {
+		err = errnoErr(e1)
+	}
+	return
+}
+
+func ClearCommBreak(handle Handle) (err error) {
+	r1, _, e1 := syscall.Syscall(procClearCommBreak.Addr(), 1, uintptr(handle), 0, 0)
 	if r1 == 0 {
 		err = errnoErr(e1)
 	}
@@ -2977,6 +2987,14 @@ func ResumeThread(thread Handle) (ret uint32, err error) {
 	r0, _, e1 := syscall.Syscall(procResumeThread.Addr(), 1, uintptr(thread), 0, 0)
 	ret = uint32(r0)
 	if ret == 0xffffffff {
+		err = errnoErr(e1)
+	}
+	return
+}
+
+func SetCommBreak(handle Handle) (err error) {
+	r1, _, e1 := syscall.Syscall(procSetCommBreak.Addr(), 1, uintptr(handle), 0, 0)
+	if r1 == 0 {
 		err = errnoErr(e1)
 	}
 	return
