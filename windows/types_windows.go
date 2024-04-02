@@ -3382,7 +3382,7 @@ type BLOB struct {
 }
 
 type ComStat struct {
-	Flags    [4]uint8
+	Flags    uint32
 	CBInQue  uint32
 	CBOutQue uint32
 }
@@ -3390,7 +3390,7 @@ type ComStat struct {
 type DCB struct {
 	DCBlength  uint32
 	BaudRate   uint32
-	Flags      [4]uint8
+	Flags      uint32
 	wReserved  uint16
 	XonLim     uint16
 	XoffLim    uint16
