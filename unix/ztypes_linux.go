@@ -6001,3 +6001,34 @@ type CachestatRange struct {
 	Off uint64
 	Len uint64
 }
+
+const (
+	SK_MEMINFO_RMEM_ALLOC          = 0x0
+	SK_MEMINFO_RCVBUF              = 0x1
+	SK_MEMINFO_WMEM_ALLOC          = 0x2
+	SK_MEMINFO_SNDBUF              = 0x3
+	SK_MEMINFO_FWD_ALLOC           = 0x4
+	SK_MEMINFO_WMEM_QUEUED         = 0x5
+	SK_MEMINFO_OPTMEM              = 0x6
+	SK_MEMINFO_BACKLOG             = 0x7
+	SK_MEMINFO_DROPS               = 0x8
+	SK_MEMINFO_VARS                = 0x9
+	SKNLGRP_NONE                   = 0x0
+	SKNLGRP_INET_TCP_DESTROY       = 0x1
+	SKNLGRP_INET_UDP_DESTROY       = 0x2
+	SKNLGRP_INET6_TCP_DESTROY      = 0x3
+	SKNLGRP_INET6_UDP_DESTROY      = 0x4
+	SK_DIAG_BPF_STORAGE_REQ_NONE   = 0x0
+	SK_DIAG_BPF_STORAGE_REQ_MAP_FD = 0x1
+	SK_DIAG_BPF_STORAGE_REP_NONE   = 0x0
+	SK_DIAG_BPF_STORAGE            = 0x1
+	SK_DIAG_BPF_STORAGE_NONE       = 0x0
+	SK_DIAG_BPF_STORAGE_PAD        = 0x1
+	SK_DIAG_BPF_STORAGE_MAP_ID     = 0x2
+	SK_DIAG_BPF_STORAGE_MAP_VALUE  = 0x3
+)
+
+type SockDiagReq struct {
+	Family   uint8
+	Protocol uint8
+}

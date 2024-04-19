@@ -3051,6 +3051,8 @@ const (
 	SIOCSMIIREG                                 = 0x8949
 	SIOCSRARP                                   = 0x8962
 	SIOCWANDEV                                  = 0x894a
+	SK_DIAG_BPF_STORAGE_MAX                     = 0x3
+	SK_DIAG_BPF_STORAGE_REQ_MAX                 = 0x1
 	SMACK_MAGIC                                 = 0x43415d53
 	SMART_AUTOSAVE                              = 0xd2
 	SMART_AUTO_OFFLINE                          = 0xdb
@@ -3071,6 +3073,8 @@ const (
 	SOCKFS_MAGIC                                = 0x534f434b
 	SOCK_BUF_LOCK_MASK                          = 0x3
 	SOCK_DCCP                                   = 0x6
+	SOCK_DESTROY                                = 0x15
+	SOCK_DIAG_BY_FAMILY                         = 0x14
 	SOCK_IOC_TYPE                               = 0x89
 	SOCK_PACKET                                 = 0xa
 	SOCK_RAW                                    = 0x3
