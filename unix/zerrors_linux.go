@@ -1343,6 +1343,7 @@ const (
 	F_OFD_SETLK                                 = 0x25
 	F_OFD_SETLKW                                = 0x26
 	F_OK                                        = 0x0
+	F_SEAL_EXEC                                 = 0x20
 	F_SEAL_FUTURE_WRITE                         = 0x10
 	F_SEAL_GROW                                 = 0x4
 	F_SEAL_SEAL                                 = 0x1
@@ -1631,6 +1632,7 @@ const (
 	IP_FREEBIND                                 = 0xf
 	IP_HDRINCL                                  = 0x3
 	IP_IPSEC_POLICY                             = 0x10
+	IP_LOCAL_PORT_RANGE                         = 0x33
 	IP_MAXPACKET                                = 0xffff
 	IP_MAX_MEMBERSHIPS                          = 0x14
 	IP_MF                                       = 0x2000
@@ -1657,6 +1659,7 @@ const (
 	IP_PMTUDISC_OMIT                            = 0x5
 	IP_PMTUDISC_PROBE                           = 0x3
 	IP_PMTUDISC_WANT                            = 0x1
+	IP_PROTOCOL                                 = 0x34
 	IP_RECVERR                                  = 0xb
 	IP_RECVERR_RFC4884                          = 0x1a
 	IP_RECVFRAGSIZE                             = 0x19
@@ -2924,7 +2927,9 @@ const (
 	SCHED_RESET_ON_FORK                         = 0x40000000
 	SCHED_RR                                    = 0x2
 	SCM_CREDENTIALS                             = 0x2
+	SCM_PIDFD                                   = 0x4
 	SCM_RIGHTS                                  = 0x1
+	SCM_SECURITY                                = 0x3
 	SCM_TIMESTAMP                               = 0x1d
 	SC_LOG_FLUSH                                = 0x100000
 	SECCOMP_ADDFD_FLAG_SEND                     = 0x2
@@ -3270,6 +3275,7 @@ const (
 	TCP_MAX_WINSHIFT                            = 0xe
 	TCP_MD5SIG                                  = 0xe
 	TCP_MD5SIG_EXT                              = 0x20
+	TCP_MD5SIG_FLAG_IFINDEX                     = 0x2
 	TCP_MD5SIG_FLAG_PREFIX                      = 0x1
 	TCP_MD5SIG_MAXKEYLEN                        = 0x50
 	TCP_MSS                                     = 0x200
