@@ -502,6 +502,7 @@ const (
 	BPF_IMM                                     = 0x0
 	BPF_IND                                     = 0x40
 	BPF_JA                                      = 0x0
+	BPF_JCOND                                   = 0xe0
 	BPF_JEQ                                     = 0x10
 	BPF_JGE                                     = 0x30
 	BPF_JGT                                     = 0x20
@@ -657,6 +658,9 @@ const (
 	CAN_NPROTO                                  = 0x8
 	CAN_RAW                                     = 0x1
 	CAN_RAW_FILTER_MAX                          = 0x200
+	CAN_RAW_XL_VCID_RX_FILTER                   = 0x4
+	CAN_RAW_XL_VCID_TX_PASS                     = 0x2
+	CAN_RAW_XL_VCID_TX_SET                      = 0x1
 	CAN_RTR_FLAG                                = 0x40000000
 	CAN_SFF_ID_BITS                             = 0xb
 	CAN_SFF_MASK                                = 0x7ff
@@ -2172,7 +2176,7 @@ const (
 	NFT_SECMARK_CTX_MAXLEN                      = 0x100
 	NFT_SET_MAXNAMELEN                          = 0x100
 	NFT_SOCKET_MAX                              = 0x3
-	NFT_TABLE_F_MASK                            = 0x3
+	NFT_TABLE_F_MASK                            = 0x7
 	NFT_TABLE_MAXNAMELEN                        = 0x100
 	NFT_TRACETYPE_MAX                           = 0x3
 	NFT_TUNNEL_F_MASK                           = 0x7
@@ -2406,6 +2410,7 @@ const (
 	PERF_RECORD_MISC_USER                       = 0x2
 	PERF_SAMPLE_BRANCH_PLM_ALL                  = 0x7
 	PERF_SAMPLE_WEIGHT_TYPE                     = 0x1004000
+	PID_FS_MAGIC                                = 0x50494446
 	PIPEFS_MAGIC                                = 0x50495045
 	PPPIOCGNPMODE                               = 0xc008744c
 	PPPIOCNEWUNIT                               = 0xc004743e
@@ -2899,8 +2904,9 @@ const (
 	RWF_APPEND                                  = 0x10
 	RWF_DSYNC                                   = 0x2
 	RWF_HIPRI                                   = 0x1
+	RWF_NOAPPEND                                = 0x20
 	RWF_NOWAIT                                  = 0x8
-	RWF_SUPPORTED                               = 0x1f
+	RWF_SUPPORTED                               = 0x3f
 	RWF_SYNC                                    = 0x4
 	RWF_WRITE_LIFE_NOT_SET                      = 0x0
 	SCHED_BATCH                                 = 0x3

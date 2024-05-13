@@ -15,8 +15,9 @@ RUN apt-get update && apt-get install -y  --no-install-recommends \
 # Get the git sources. If not cached, this takes O(5 minutes).
 WORKDIR /git
 RUN git config --global advice.detachedHead false
-# Linux Kernel: Released 10 March 2024
-RUN git clone --branch v6.8 --depth 1 https://kernel.googlesource.com/pub/scm/linux/kernel/git/torvalds/linux
+
+# Linux Kernel: Released 12 May 2024
+RUN git clone --branch v6.9 --depth 1 https://kernel.googlesource.com/pub/scm/linux/kernel/git/torvalds/linux
 # GNU C library: Released 31 Jan 2024
 RUN git clone --branch release/2.39/master --depth 1 https://sourceware.org/git/glibc.git
 
