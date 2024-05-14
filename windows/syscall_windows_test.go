@@ -1275,3 +1275,32 @@ uintptr_t beep(void) {
 		t.Fatal("LoadLibraryEx unexpectedly found beep.dll")
 	}
 }
+
+func TestGetKeyboardLayout(t *testing.T) {
+	fg := windows.GetForegroundWindow()
+	tid, err := windows.GetWindowThreadProcessId(fg, nil)
+	if err != nil {
+		t.Fatalf("GetWindowThreadProcessId failed: %v", err)
+	}
+
+	_ = windows.GetKeyboardLayout(tid)
+}
+
+func TestToUnicodeEx(t *testing.T) {
+	var utf16Buf [16]uint16
+	const araLayout = windows.Handle(0x401)
+	ret := windows.ToUnicodeEx(
+		0x41, // 'A' vkCode
+		0x1e, // 'A' scanCode
+		utf16Buf[:],
+		0,
+		araLayout,
+	)
+
+	if ret != 1 {
+		t.Errorf("ToUnicodeEx failed, wanted 1, got %d", ret)
+	}
+	if utf16Buf[0] != 'ش' {
+		t.Errorf("ToUnicodeEx failed, wanted 'ش', got %q", utf16Buf[0])
+	}
+}
