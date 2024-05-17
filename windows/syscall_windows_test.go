@@ -1283,17 +1283,20 @@ func TestGetKeyboardLayout(t *testing.T) {
 		t.Fatalf("GetWindowThreadProcessId failed: %v", err)
 	}
 
+	// We don't care about the result, just that it doesn't crash.
 	_ = windows.GetKeyboardLayout(tid)
 }
 
 func TestToUnicodeEx(t *testing.T) {
 	var utf16Buf [16]uint16
 	const araLayout = windows.Handle(0x401)
+	var keyState [256]byte
 	ret := windows.ToUnicodeEx(
 		0x41, // 'A' vkCode
 		0x1e, // 'A' scanCode
+		keyState,
 		utf16Buf[:],
-		0,
+		0x4, // don't change keyboard state
 		araLayout,
 	)
 

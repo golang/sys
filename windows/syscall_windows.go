@@ -1925,10 +1925,9 @@ const (
 
 // ToUnicodeEx Translates the specified virtual-key code and keyboard state to
 // the corresponding Unicode character or characters.
-func ToUnicodeEx(virtualKey, scanCode uint32, buf []uint16, flags uint32, layout Handle) int32 {
+func ToUnicodeEx(virtualKey, scanCode uint32, keyState [256]byte, buf []uint16, flags uint32, layout Handle) int32 {
 	if len(buf) == 0 {
 		return 0
 	}
-	var keyState [256]byte
 	return toUnicodeEx(virtualKey, scanCode, &keyState[0], &buf[0], int32(len(buf)), flags, layout)
 }
