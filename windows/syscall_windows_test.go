@@ -1293,7 +1293,7 @@ func TestToUnicodeEx(t *testing.T) {
 	if err != nil {
 		t.Fatalf("UTF16PtrFromString failed: %v", err)
 	}
-	araLayout := windows.LoadKeyboardLayout(ara, 0)
+	araLayout := windows.LoadKeyboardLayout(ara, windows.KLF_ACTIVATE)
 	var keyState [256]byte
 	ret := windows.ToUnicodeEx(
 		0x41, // 'A' vkCode
