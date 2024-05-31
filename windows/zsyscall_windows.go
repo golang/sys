@@ -483,8 +483,10 @@ var (
 	procIsWindow                                             = moduser32.NewProc("IsWindow")
 	procIsWindowUnicode                                      = moduser32.NewProc("IsWindowUnicode")
 	procIsWindowVisible                                      = moduser32.NewProc("IsWindowVisible")
+	procLoadKeyboardLayoutW                                  = moduser32.NewProc("LoadKeyboardLayoutW")
 	procMessageBoxW                                          = moduser32.NewProc("MessageBoxW")
 	procToUnicodeEx                                          = moduser32.NewProc("ToUnicodeEx")
+	procUnloadKeyboardLayout                                 = moduser32.NewProc("UnloadKeyboardLayout")
 	procCreateEnvironmentBlock                               = moduserenv.NewProc("CreateEnvironmentBlock")
 	procDestroyEnvironmentBlock                              = moduserenv.NewProc("DestroyEnvironmentBlock")
 	procGetUserProfileDirectoryW                             = moduserenv.NewProc("GetUserProfileDirectoryW")
@@ -4114,6 +4116,12 @@ func IsWindowVisible(hwnd HWND) (isVisible bool) {
 	return
 }
 
+func LoadKeyboardLayout(name *uint16, flags uint32) (hkl Handle) {
+	r0, _, _ := syscall.Syscall(procLoadKeyboardLayoutW.Addr(), 2, uintptr(unsafe.Pointer(name)), uintptr(flags), 0)
+	hkl = Handle(r0)
+	return
+}
+
 func MessageBox(hwnd HWND, text *uint16, caption *uint16, boxtype uint32) (ret int32, err error) {
 	r0, _, e1 := syscall.Syscall6(procMessageBoxW.Addr(), 4, uintptr(hwnd), uintptr(unsafe.Pointer(text)), uintptr(unsafe.Pointer(caption)), uintptr(boxtype), 0, 0)
 	ret = int32(r0)
@@ -4126,6 +4134,12 @@ func MessageBox(hwnd HWND, text *uint16, caption *uint16, boxtype uint32) (ret i
 func toUnicodeEx(vkey uint32, scancode uint32, keystate *byte, pwszBuff *uint16, cchBuff int32, flags uint32, hkl Handle) (ret int32) {
 	r0, _, _ := syscall.Syscall9(procToUnicodeEx.Addr(), 7, uintptr(vkey), uintptr(scancode), uintptr(unsafe.Pointer(keystate)), uintptr(unsafe.Pointer(pwszBuff)), uintptr(cchBuff), uintptr(flags), uintptr(hkl), 0, 0)
 	ret = int32(r0)
+	return
+}
+
+func UnloadKeyboardLayout(hkl Handle) (v bool) {
+	r0, _, _ := syscall.Syscall(procUnloadKeyboardLayout.Addr(), 1, uintptr(hkl), 0, 0)
+	v = r0 != 0
 	return
 }
 
