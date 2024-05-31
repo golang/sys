@@ -216,7 +216,7 @@ func NewCallbackCDecl(fn interface{}) uintptr {
 //sys	LoadKeyboardLayout(name *uint16, flags uint32) (hkl Handle) = user32.LoadKeyboardLayoutW
 //sys	UnloadKeyboardLayout(hkl Handle) (v bool) = user32.UnloadKeyboardLayout
 //sys	GetKeyboardLayout(tid uint32) (hkl Handle) = user32.GetKeyboardLayout
-//sys	toUnicodeEx(vkey uint32, scancode uint32, keystate *byte, pwszBuff *uint16, cchBuff int32, flags uint32, hkl Handle) (ret int32) = user32.ToUnicodeEx
+//sys	ToUnicodeEx(vkey uint32, scancode uint32, keystate *byte, pwszBuff *uint16, cchBuff int32, flags uint32, hkl Handle) (ret int32) = user32.ToUnicodeEx
 //sys	GetShellWindow() (shellWindow HWND) = user32.GetShellWindow
 //sys	MessageBox(hwnd HWND, text *uint16, caption *uint16, boxtype uint32) (ret int32, err error) [failretval==0] = user32.MessageBoxW
 //sys	ExitWindowsEx(flags uint32, reason uint32) (err error) = user32.ExitWindowsEx
@@ -1924,12 +1924,3 @@ const (
 	EV_ERR     = 0x0080
 	EV_RING    = 0x0100
 )
-
-// ToUnicodeEx Translates the specified virtual-key code and keyboard state to
-// the corresponding Unicode character or characters.
-func ToUnicodeEx(virtualKey, scanCode uint32, keyState [256]byte, buf []uint16, flags uint32, layout Handle) int32 {
-	if len(buf) == 0 {
-		return 0
-	}
-	return toUnicodeEx(virtualKey, scanCode, &keyState[0], &buf[0], int32(len(buf)), flags, layout)
-}
