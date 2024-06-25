@@ -47,30 +47,31 @@ func TestMremap(t *testing.T) {
 }
 
 func TestMremapPtr(t *testing.T) {
-	mmapProt := unix.PROT_NONE
-	mmapPtrProt := unix.PROT_READ | unix.PROT_WRITE
-	b, err := unix.Mmap(-1, 0, 2*unix.Getpagesize(), mmapProt, unix.MAP_ANON|unix.MAP_PRIVATE)
+	p1, err := unix.MmapPtr(-1, 0, nil, uintptr(2*unix.Getpagesize()),
+		unix.PROT_READ|unix.PROT_WRITE, unix.MAP_ANON|unix.MAP_PRIVATE)
 	if err != nil {
-		t.Fatalf("Mmap: %v", err)
-	}
-	if _, err := unix.MmapPtr(-1, 0, unsafe.Pointer(&b[0]), uintptr(unix.Getpagesize()),
-		mmapPtrProt, unix.MAP_ANON|unix.MAP_PRIVATE|unix.MAP_FIXED); err != nil {
 		t.Fatalf("MmapPtr: %v", err)
 	}
 
-	b[0] = 42
+	p2 := unsafe.Add(p1, unix.Getpagesize())
+	if err := unix.MunmapPtr(p2, uintptr(unix.Getpagesize())); err != nil {
+		t.Fatalf("MunmapPtr: %v", err)
+	}
+
+	*(*byte)(p1) = 42
 
 	if _, err := unix.MremapPtr(
-		unsafe.Pointer(&b[0]), uintptr(unix.Getpagesize()),
-		unsafe.Pointer(&b[unix.Getpagesize()]), uintptr(unix.Getpagesize()),
+		p1, uintptr(unix.Getpagesize()),
+		p2, uintptr(unix.Getpagesize()),
 		unix.MremapFixed|unix.MremapMaymove); err != nil {
 		t.Fatalf("MremapPtr: %v", err)
 	}
-	if got := b[unix.Getpagesize()]; got != 42 {
+
+	if got := *(*byte)(p2); got != 42 {
 		t.Errorf("got %d, want 42", got)
 	}
 
-	if err := unix.Munmap(b); err != nil {
-		t.Fatalf("Munmap: %v", err)
+	if err := unix.MunmapPtr(p2, uintptr(unix.Getpagesize())); err != nil {
+		t.Fatalf("MunmapPtr: %v", err)
 	}
 }
