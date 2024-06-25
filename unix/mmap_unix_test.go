@@ -9,6 +9,7 @@ package unix_test
 import (
 	"runtime"
 	"testing"
+	"unsafe"
 
 	"golang.org/x/sys/unix"
 )
@@ -44,6 +45,28 @@ func TestMmap(t *testing.T) {
 
 	if err := unix.Madvise(b, unix.MADV_DONTNEED); err != nil {
 		t.Fatalf("Madvise: %v", err)
+	}
+	if err := unix.Munmap(b); err != nil {
+		t.Fatalf("Munmap: %v", err)
+	}
+}
+
+func TestMmapPtr(t *testing.T) {
+	mmapProt := unix.PROT_NONE
+	mmapPtrProt := unix.PROT_READ | unix.PROT_WRITE
+	b, err := unix.Mmap(-1, 0, 2*unix.Getpagesize(), mmapProt, unix.MAP_ANON|unix.MAP_PRIVATE)
+	if err != nil {
+		t.Fatalf("Mmap: %v", err)
+	}
+	if _, err := unix.MmapPtr(-1, 0, unsafe.Pointer(&b[0]), uintptr(unix.Getpagesize()),
+		mmapPtrProt, unix.MAP_ANON|unix.MAP_PRIVATE|unix.MAP_FIXED); err != nil {
+		t.Fatalf("MmapPtr: %v", err)
+	}
+
+	b[0] = 42
+
+	if err := unix.MunmapPtr(unsafe.Pointer(&b[0]), uintptr(unix.Getpagesize())); err != nil {
+		t.Fatalf("MunmapPtr: %v", err)
 	}
 	if err := unix.Munmap(b); err != nil {
 		t.Fatalf("Munmap: %v", err)
