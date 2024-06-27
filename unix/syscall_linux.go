@@ -1295,6 +1295,20 @@ func GetsockoptTCPInfo(fd, level, opt int) (*TCPInfo, error) {
 	return &value, err
 }
 
+// GetsockoptTCPCCInfo returns algorithm specific congestion control information for the socket.
+// It requires a type parameter to specify the type of congestion control algorithm being used. E.g. for BBR:
+//
+//	info, err := unix.GetsockoptTCPCCInfo[TCPBBRInfo](fd, unix.IPPROTO_TCP, unix.TCP_CC_INFO)
+//
+// The socket's congestion control algorighm can be retrieved via [GetsockoptString] with the [TCP_CONGESTION] option.
+func GetsockoptTCPCCInfo[T TCPVegasInfo | TCPDCTCPInfo | TCPBBRInfo](fd, level, opt int) (*T, error) {
+	var value tcpCCInfo
+	vallen := _Socklen(SizeofTCPCCInfo)
+	err := getsockopt(fd, level, opt, unsafe.Pointer(&value[0]), &vallen)
+	out := (*T)(unsafe.Pointer(&value[0]))
+	return out, err
+}
+
 // GetsockoptString returns the string value of the socket option opt for the
 // socket associated with fd at the given socket level.
 func GetsockoptString(fd, level, opt int) (string, error) {
