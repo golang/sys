@@ -112,6 +112,7 @@ struct termios2 {
 #include <linux/if_pppox.h>
 #include <linux/if_tun.h>
 #include <linux/if_xdp.h>
+#include <linux/inet_diag.h>
 #include <linux/ipc.h>
 #include <linux/kcm.h>
 #include <linux/keyctl.h>
@@ -757,6 +758,12 @@ type Ucred C.struct_ucred
 
 type TCPInfo C.struct_tcp_info
 
+type TCPVegasInfo C.struct_tcpvegas_info
+
+type TCPDCTCPInfo C.struct_tcp_dctcp_info
+
+type TCPBBRInfo C.struct_tcp_bbr_info
+
 type CanFilter C.struct_can_filter
 
 type ifreq C.struct_ifreq
@@ -798,6 +805,7 @@ const (
 	SizeofICMPv6Filter      = C.sizeof_struct_icmp6_filter
 	SizeofUcred             = C.sizeof_struct_ucred
 	SizeofTCPInfo           = C.sizeof_struct_tcp_info
+	SizeofTCPCCInfo         = C.sizeof_union_tcp_cc_info
 	SizeofCanFilter         = C.sizeof_struct_can_filter
 	SizeofTCPRepairOpt      = C.sizeof_struct_tcp_repair_opt
 )
