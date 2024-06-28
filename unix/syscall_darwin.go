@@ -542,6 +542,18 @@ func SysctlKinfoProcSlice(name string, args ...int) ([]KinfoProc, error) {
 	}
 }
 
+//sys	__pthread_chdir(path string) (err error)
+
+func PthreadChdir(path string) (err error) {
+	return __pthread_chdir(path)
+}
+
+//sys	__pthread_fchdir(fd int) (err error)
+
+func PthreadFchdir(fd int) (err error) {
+	return __pthread_fchdir(fd)
+}
+
 //sys	sendfile(infd int, outfd int, offset int64, len *int64, hdtr unsafe.Pointer, flags int) (err error)
 
 //sys	shmat(id int, addr uintptr, flag int) (ret uintptr, err error)

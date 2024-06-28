@@ -7,6 +7,8 @@ package unix
 
 // All the _trampoline functions in zsyscall_darwin_arm64.s.
 var darwinTests = [...]darwinTest{
+	{"__pthread_chdir", libc___pthread_chdir_trampoline_addr},
+	{"__pthread_fchdir", libc___pthread_fchdir_trampoline_addr},
 	{"accept", libc_accept_trampoline_addr},
 	{"access", libc_access_trampoline_addr},
 	{"adjtime", libc_adjtime_trampoline_addr},
