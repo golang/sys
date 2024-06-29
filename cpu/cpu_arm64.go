@@ -39,6 +39,7 @@ func initOptions() {
 		{Name: "asimddp", Feature: &ARM64.HasASIMDDP},
 		{Name: "asimdfhm", Feature: &ARM64.HasASIMDFHM},
 		{Name: "dit", Feature: &ARM64.HasDIT},
+		{Name: "i8mm", Feature: &ARM64.HasI8MM},
 	}
 }
 
@@ -144,6 +145,11 @@ func parseARM64SystemRegisters(isar0, isar1, pfr0 uint64) {
 	switch extractBits(isar1, 20, 23) {
 	case 1:
 		ARM64.HasLRCPC = true
+	}
+
+	switch extractBits(isar1, 52, 55) {
+	case 1:
+		ARM64.HasI8MM = true
 	}
 
 	// ID_AA64PFR0_EL1

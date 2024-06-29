@@ -38,6 +38,7 @@ const (
 	hwcap_DIT      = 1 << 24
 
 	hwcap2_SVE2 = 1 << 1
+	hwcap2_I8MM = 1 << 13
 )
 
 // linuxKernelCanEmulateCPUID reports whether we're running
@@ -112,6 +113,7 @@ func doinit() {
 
 	// HWCAP2 feature bits
 	ARM64.HasSVE2 = isSet(hwCap2, hwcap2_SVE2)
+	ARM64.HasI8MM = isSet(hwCap2, hwcap2_I8MM)
 }
 
 func isSet(hwc uint, value uint) bool {
