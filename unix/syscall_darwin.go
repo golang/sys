@@ -542,16 +542,16 @@ func SysctlKinfoProcSlice(name string, args ...int) ([]KinfoProc, error) {
 	}
 }
 
-//sys	__pthread_chdir(path string) (err error)
+//sys	pthread_chdir_np(path string) (err error)
 
 func PthreadChdir(path string) (err error) {
-	return __pthread_chdir(path)
+	return pthread_chdir_np(path)
 }
 
-//sys	__pthread_fchdir(fd int) (err error)
+//sys	pthread_fchdir_np(fd int) (err error)
 
 func PthreadFchdir(fd int) (err error) {
-	return __pthread_fchdir(fd)
+	return pthread_fchdir_np(fd)
 }
 
 //sys	sendfile(infd int, outfd int, offset int64, len *int64, hdtr unsafe.Pointer, flags int) (err error)
