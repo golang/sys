@@ -168,6 +168,11 @@ func parseARM64SystemRegisters(isar0, isar1, pfr0 uint64) {
 
 		parseARM64SVERegister(getzfr0())
 	}
+
+	switch extractBits(pfr0, 48, 51) {
+	case 1:
+		ARM64.HasDIT = true
+	}
 }
 
 func parseARM64SVERegister(zfr0 uint64) {
