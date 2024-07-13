@@ -1437,3 +1437,50 @@ uintptr_t beep(void) {
 		t.Fatal("LoadLibraryEx unexpectedly found beep.dll")
 	}
 }
+
+func TestGetKeyboardLayout(t *testing.T) {
+	fg := windows.GetForegroundWindow()
+	tid, err := windows.GetWindowThreadProcessId(fg, nil)
+	if err != nil {
+		t.Fatalf("GetWindowThreadProcessId failed: %v", err)
+	}
+
+	// We don't care about the result, just that it doesn't crash.
+	_ = windows.GetKeyboardLayout(tid)
+}
+
+func TestToUnicodeEx(t *testing.T) {
+	var utf16Buf [16]uint16
+
+	// Arabic (101) Keyboard Identifier
+	// See https://learn.microsoft.com/en-us/windows-hardware/manufacture/desktop/windows-language-pack-default-values
+	ara, err := windows.UTF16PtrFromString("00000401")
+	if err != nil {
+		t.Fatalf("UTF16PtrFromString failed: %v", err)
+	}
+	araLayout, err := windows.LoadKeyboardLayout(ara, windows.KLF_ACTIVATE)
+	if err != nil {
+		t.Fatalf("LoadKeyboardLayout failed: %v", err)
+	}
+
+	var keyState [256]byte
+	ret := windows.ToUnicodeEx(
+		0x41, // 'A' vkCode
+		0x1e, // 'A' scanCode
+		&keyState[0],
+		&utf16Buf[0],
+		int32(len(utf16Buf)),
+		0x4, // don't change keyboard state
+		araLayout,
+	)
+
+	if ret != 1 {
+		t.Errorf("ToUnicodeEx failed, wanted 1, got %d", ret)
+	}
+	if utf16Buf[0] != 'ش' {
+		t.Errorf("ToUnicodeEx failed, wanted 'ش', got %q", utf16Buf[0])
+	}
+	if err := windows.UnloadKeyboardLayout(araLayout); err != nil {
+		t.Errorf("UnloadKeyboardLayout failed: %v", err)
+	}
+}
