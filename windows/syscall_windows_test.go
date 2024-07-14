@@ -1289,11 +1289,18 @@ func TestGetKeyboardLayout(t *testing.T) {
 
 func TestToUnicodeEx(t *testing.T) {
 	var utf16Buf [16]uint16
-	ara, err := windows.UTF16PtrFromString("00000401") // ara layout 0x401
+
+	// Arabic (101) Keyboard Identifier
+	// See https://learn.microsoft.com/en-us/windows-hardware/manufacture/desktop/windows-language-pack-default-values
+	ara, err := windows.UTF16PtrFromString("00000401")
 	if err != nil {
 		t.Fatalf("UTF16PtrFromString failed: %v", err)
 	}
-	araLayout := windows.LoadKeyboardLayout(ara, windows.KLF_ACTIVATE)
+	araLayout, err := windows.LoadKeyboardLayout(ara, windows.KLF_ACTIVATE)
+	if err != nil {
+		t.Fatalf("LoadKeyboardLayout failed: %v", err)
+	}
+
 	var keyState [256]byte
 	ret := windows.ToUnicodeEx(
 		0x41, // 'A' vkCode
@@ -1311,7 +1318,7 @@ func TestToUnicodeEx(t *testing.T) {
 	if utf16Buf[0] != 'ش' {
 		t.Errorf("ToUnicodeEx failed, wanted 'ش', got %q", utf16Buf[0])
 	}
-	if !windows.UnloadKeyboardLayout(araLayout) {
-		t.Errorf("UnloadKeyboardLayout failed")
+	if err := windows.UnloadKeyboardLayout(araLayout); err != nil {
+		t.Errorf("UnloadKeyboardLayout failed: %v", err)
 	}
 }

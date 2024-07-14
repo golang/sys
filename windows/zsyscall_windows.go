@@ -4116,9 +4116,12 @@ func IsWindowVisible(hwnd HWND) (isVisible bool) {
 	return
 }
 
-func LoadKeyboardLayout(name *uint16, flags uint32) (hkl Handle) {
-	r0, _, _ := syscall.Syscall(procLoadKeyboardLayoutW.Addr(), 2, uintptr(unsafe.Pointer(name)), uintptr(flags), 0)
+func LoadKeyboardLayout(name *uint16, flags uint32) (hkl Handle, err error) {
+	r0, _, e1 := syscall.Syscall(procLoadKeyboardLayoutW.Addr(), 2, uintptr(unsafe.Pointer(name)), uintptr(flags), 0)
 	hkl = Handle(r0)
+	if hkl == 0 {
+		err = errnoErr(e1)
+	}
 	return
 }
 
@@ -4137,9 +4140,11 @@ func ToUnicodeEx(vkey uint32, scancode uint32, keystate *byte, pwszBuff *uint16,
 	return
 }
 
-func UnloadKeyboardLayout(hkl Handle) (v bool) {
-	r0, _, _ := syscall.Syscall(procUnloadKeyboardLayout.Addr(), 1, uintptr(hkl), 0, 0)
-	v = r0 != 0
+func UnloadKeyboardLayout(hkl Handle) (err error) {
+	r1, _, e1 := syscall.Syscall(procUnloadKeyboardLayout.Addr(), 1, uintptr(hkl), 0, 0)
+	if r1 == 0 {
+		err = errnoErr(e1)
+	}
 	return
 }
 
