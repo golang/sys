@@ -38,6 +38,7 @@ func initOptions() {
 		{Name: "dcpop", Feature: &ARM64.HasDCPOP},
 		{Name: "asimddp", Feature: &ARM64.HasASIMDDP},
 		{Name: "asimdfhm", Feature: &ARM64.HasASIMDFHM},
+		{Name: "dit", Feature: &ARM64.HasDIT},
 	}
 }
 
