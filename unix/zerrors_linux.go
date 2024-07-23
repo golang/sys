@@ -457,6 +457,7 @@ const (
 	B600                                        = 0x8
 	B75                                         = 0x2
 	B9600                                       = 0xd
+	BCACHEFS_SUPER_MAGIC                        = 0xca451a4e
 	BDEVFS_MAGIC                                = 0x62646576
 	BINDERFS_SUPER_MAGIC                        = 0x6c6f6f70
 	BINFMTFS_MAGIC                              = 0x42494e4d
@@ -941,9 +942,6 @@ const (
 	ETHTOOL_FEC_OFF                             = 0x4
 	ETHTOOL_FEC_RS                              = 0x8
 	ETHTOOL_FLAG_ALL                            = 0x7
-	ETHTOOL_FLAG_COMPACT_BITSETS                = 0x1
-	ETHTOOL_FLAG_OMIT_REPLY                     = 0x2
-	ETHTOOL_FLAG_STATS                          = 0x4
 	ETHTOOL_FLASHDEV                            = 0x33
 	ETHTOOL_FLASH_MAX_FILENAME                  = 0x80
 	ETHTOOL_FWVERS_LEN                          = 0x20
@@ -1705,6 +1703,7 @@ const (
 	KEXEC_ARCH_S390                             = 0x160000
 	KEXEC_ARCH_SH                               = 0x2a0000
 	KEXEC_ARCH_X86_64                           = 0x3e0000
+	KEXEC_CRASH_HOTPLUG_SUPPORT                 = 0x8
 	KEXEC_FILE_DEBUG                            = 0x8
 	KEXEC_FILE_NO_INITRAMFS                     = 0x4
 	KEXEC_FILE_ON_CRASH                         = 0x2
@@ -1780,6 +1779,7 @@ const (
 	KEY_SPEC_USER_KEYRING                       = -0x4
 	KEY_SPEC_USER_SESSION_KEYRING               = -0x5
 	LANDLOCK_ACCESS_FS_EXECUTE                  = 0x1
+	LANDLOCK_ACCESS_FS_IOCTL_DEV                = 0x8000
 	LANDLOCK_ACCESS_FS_MAKE_BLOCK               = 0x800
 	LANDLOCK_ACCESS_FS_MAKE_CHAR                = 0x40
 	LANDLOCK_ACCESS_FS_MAKE_DIR                 = 0x80
@@ -2498,6 +2498,23 @@ const (
 	PR_PAC_GET_ENABLED_KEYS                     = 0x3d
 	PR_PAC_RESET_KEYS                           = 0x36
 	PR_PAC_SET_ENABLED_KEYS                     = 0x3c
+	PR_PPC_DEXCR_CTRL_CLEAR                     = 0x4
+	PR_PPC_DEXCR_CTRL_CLEAR_ONEXEC              = 0x10
+	PR_PPC_DEXCR_CTRL_EDITABLE                  = 0x1
+	PR_PPC_DEXCR_CTRL_MASK                      = 0x1f
+	PR_PPC_DEXCR_CTRL_SET                       = 0x2
+	PR_PPC_DEXCR_CTRL_SET_ONEXEC                = 0x8
+	PR_PPC_DEXCR_IBRTPD                         = 0x1
+	PR_PPC_DEXCR_NPHIE                          = 0x3
+	PR_PPC_DEXCR_SBHE                           = 0x0
+	PR_PPC_DEXCR_SRAPD                          = 0x2
+	PR_PPC_GET_DEXCR                            = 0x48
+	PR_PPC_SET_DEXCR                            = 0x49
+	PR_RISCV_CTX_SW_FENCEI_OFF                  = 0x1
+	PR_RISCV_CTX_SW_FENCEI_ON                   = 0x0
+	PR_RISCV_SCOPE_PER_PROCESS                  = 0x0
+	PR_RISCV_SCOPE_PER_THREAD                   = 0x1
+	PR_RISCV_SET_ICACHE_FLUSH_CTX               = 0x47
 	PR_RISCV_V_GET_CONTROL                      = 0x46
 	PR_RISCV_V_SET_CONTROL                      = 0x45
 	PR_RISCV_V_VSTATE_CTRL_CUR_MASK             = 0x3
@@ -3192,6 +3209,7 @@ const (
 	STATX_MTIME                                 = 0x40
 	STATX_NLINK                                 = 0x4
 	STATX_SIZE                                  = 0x200
+	STATX_SUBVOL                                = 0x8000
 	STATX_TYPE                                  = 0x1
 	STATX_UID                                   = 0x8
 	STATX__RESERVED                             = 0x80000000
