@@ -928,6 +928,7 @@ const (
 	EPOLL_CTL_ADD                               = 0x1
 	EPOLL_CTL_DEL                               = 0x2
 	EPOLL_CTL_MOD                               = 0x3
+	EPOLL_IOC_TYPE                              = 0x8a
 	EROFS_SUPER_MAGIC_V1                        = 0xe0f5e1e2
 	ESP_V4_FLOW                                 = 0xa
 	ESP_V6_FLOW                                 = 0xc
@@ -1861,6 +1862,19 @@ const (
 	MAP_FILE                                    = 0x0
 	MAP_FIXED                                   = 0x10
 	MAP_FIXED_NOREPLACE                         = 0x100000
+	MAP_HUGE_16GB                               = 0x88000000
+	MAP_HUGE_16KB                               = 0x38000000
+	MAP_HUGE_16MB                               = 0x60000000
+	MAP_HUGE_1GB                                = 0x78000000
+	MAP_HUGE_1MB                                = 0x50000000
+	MAP_HUGE_256MB                              = 0x70000000
+	MAP_HUGE_2GB                                = 0x7c000000
+	MAP_HUGE_2MB                                = 0x54000000
+	MAP_HUGE_32MB                               = 0x64000000
+	MAP_HUGE_512KB                              = 0x4c000000
+	MAP_HUGE_512MB                              = 0x74000000
+	MAP_HUGE_64KB                               = 0x40000000
+	MAP_HUGE_8MB                                = 0x5c000000
 	MAP_HUGE_MASK                               = 0x3f
 	MAP_HUGE_SHIFT                              = 0x1a
 	MAP_PRIVATE                                 = 0x2
