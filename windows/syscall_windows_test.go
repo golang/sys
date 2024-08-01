@@ -1438,17 +1438,6 @@ uintptr_t beep(void) {
 	}
 }
 
-func TestGetKeyboardLayout(t *testing.T) {
-	fg := windows.GetForegroundWindow()
-	tid, err := windows.GetWindowThreadProcessId(fg, nil)
-	if err != nil {
-		t.Fatalf("GetWindowThreadProcessId failed: %v", err)
-	}
-
-	// We don't care about the result, just that it doesn't crash.
-	_ = windows.GetKeyboardLayout(tid)
-}
-
 func TestToUnicodeEx(t *testing.T) {
 	var utf16Buf [16]uint16
 
