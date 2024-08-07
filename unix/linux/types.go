@@ -3551,8 +3551,8 @@ const (
 
 // ethtool and its netlink interface, generated using:
 //
-// perl -nlE '/^\s*(ETHTOOL_\w+)/ && say "$1 = C.$1"' ethtool.h
-// perl -nlE '/^\s*(ETHTOOL_\w+)/ && say "$1 = C.$1"' ethtool_netlink.h
+// perl -nlE '/^\s*(ETHTOOL_\w+)/ && say "$1 = C.$1"' /usr/include/linux/ethtool.h
+// perl -nlE '/^\s*(ETHTOOL_\w+)/ && say "$1 = C.$1"' /usr/include/linux/ethtool_netlink.h
 //
 // Note that a couple of constants produced by this command will be duplicated
 // by mkerrors.sh, so some manual pruning was necessary.
@@ -3787,6 +3787,9 @@ const (
 	ETHTOOL_MSG_PSE_GET_REPLY                 = C.ETHTOOL_MSG_PSE_GET_REPLY
 	ETHTOOL_MSG_RSS_GET_REPLY                 = C.ETHTOOL_MSG_RSS_GET_REPLY
 	ETHTOOL_MSG_KERNEL_MAX                    = C.ETHTOOL_MSG_KERNEL_MAX
+	ETHTOOL_FLAG_COMPACT_BITSETS              = C.ETHTOOL_FLAG_COMPACT_BITSETS
+	ETHTOOL_FLAG_OMIT_REPLY                   = C.ETHTOOL_FLAG_OMIT_REPLY
+	ETHTOOL_FLAG_STATS                        = C.ETHTOOL_FLAG_STATS
 	ETHTOOL_A_HEADER_UNSPEC                   = C.ETHTOOL_A_HEADER_UNSPEC
 	ETHTOOL_A_HEADER_DEV_INDEX                = C.ETHTOOL_A_HEADER_DEV_INDEX
 	ETHTOOL_A_HEADER_DEV_NAME                 = C.ETHTOOL_A_HEADER_DEV_NAME
