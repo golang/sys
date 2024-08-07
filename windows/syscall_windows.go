@@ -890,6 +890,11 @@ const socket_error = uintptr(^uint32(0))
 //sys	GetACP() (acp uint32) = kernel32.GetACP
 //sys	MultiByteToWideChar(codePage uint32, dwFlags uint32, str *byte, nstr int32, wchar *uint16, nwchar int32) (nwrite int32, err error) = kernel32.MultiByteToWideChar
 //sys	getBestInterfaceEx(sockaddr unsafe.Pointer, pdwBestIfIndex *uint32) (errcode error) = iphlpapi.GetBestInterfaceEx
+//sys   GetIfEntry2Ex(level uint32, row *MibIfRow2) (errcode error) = iphlpapi.GetIfEntry2Ex
+//sys   GetUnicastIpAddressEntry(row *MibUnicastIpAddressRow) (errcode error) = iphlpapi.GetUnicastIpAddressEntry
+//sys   NotifyIpInterfaceChange(family uint16, callback uintptr, callerContext unsafe.Pointer, initialNotification bool, notificationHandle *Handle) (errcode error) = iphlpapi.NotifyIpInterfaceChange
+//sys   NotifyUnicastIpAddressChange(family uint16, callback uintptr, callerContext unsafe.Pointer, initialNotification bool, notificationHandle *Handle) (errcode error) = iphlpapi.NotifyUnicastIpAddressChange
+//sys   CancelMibChangeNotify2(notificationHandle Handle) (errcode error) = iphlpapi.CancelMibChangeNotify2
 
 // For testing: clients can set this flag to force
 // creation of IPv6 sockets to return EAFNOSUPPORT.
