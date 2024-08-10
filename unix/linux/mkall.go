@@ -40,7 +40,7 @@ const TempDir = "/tmp"
 
 const GOOS = "linux"       // Only for Linux targets
 const BuildArch = "amd64"  // Must be built on this architecture
-const MinKernel = "2.6.23" // https://golang.org/doc/install#requirements
+const MinKernel = "2.6.32" // https://go.dev/wiki/MinimumRequirements#linuxlinux
 
 type target struct {
 	GoArch     string // Architecture name according to Go
