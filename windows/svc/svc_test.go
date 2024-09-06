@@ -178,7 +178,7 @@ func TestIsWindowsServiceWhenParentExits(t *testing.T) {
 		child.Env = append(os.Environ(), "GO_WANT_HELPER_PROCESS=child")
 		err := child.Start()
 		if err != nil {
-			fmt.Fprintf(os.Stderr, fmt.Sprintf("child start failed: %v", err))
+			fmt.Fprintf(os.Stderr, "child start failed: %v", err)
 			os.Exit(1)
 		}
 		os.Exit(0)
