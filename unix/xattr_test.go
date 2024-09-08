@@ -56,8 +56,9 @@ func TestXattr(t *testing.T) {
 	xattrs := stringsFromByteSlice(buf[:read])
 
 	xattrWant := xattrName
-	if runtime.GOOS == "freebsd" {
-		// On FreeBSD, the namespace is stored separately from the xattr
+	switch runtime.GOOS {
+	case "freebsd", "netbsd":
+		// On FreeBSD and NetBSD, the namespace is stored separately from the xattr
 		// name and Listxattr doesn't return the namespace prefix.
 		xattrWant = strings.TrimPrefix(xattrWant, "user.")
 	}
@@ -65,11 +66,12 @@ func TestXattr(t *testing.T) {
 	for _, name := range xattrs {
 		if name == xattrWant {
 			found = true
+			break
 		}
 	}
 
 	if !found {
-		t.Errorf("Listxattr did not return previously set attribute '%s'", xattrName)
+		t.Errorf("Listxattr did not return previously set attribute %q in attributes %v", xattrName, xattrs)
 	}
 
 	// find size
@@ -162,8 +164,9 @@ func TestFdXattr(t *testing.T) {
 	xattrs := stringsFromByteSlice(buf[:read])
 
 	xattrWant := xattrName
-	if runtime.GOOS == "freebsd" {
-		// On FreeBSD, the namespace is stored separately from the xattr
+	switch runtime.GOOS {
+	case "freebsd", "netbsd":
+		// On FreeBSD and NetBSD, the namespace is stored separately from the xattr
 		// name and Listxattr doesn't return the namespace prefix.
 		xattrWant = strings.TrimPrefix(xattrWant, "user.")
 	}
@@ -171,11 +174,12 @@ func TestFdXattr(t *testing.T) {
 	for _, name := range xattrs {
 		if name == xattrWant {
 			found = true
+			break
 		}
 	}
 
 	if !found {
-		t.Errorf("Flistxattr did not return previously set attribute '%s'", xattrName)
+		t.Errorf("Flistxattr did not return previously set attribute %q in attributes %v", xattrName, xattrs)
 	}
 
 	// find size
