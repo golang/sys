@@ -214,7 +214,7 @@ func enumerateValues(t *testing.T, k registry.Key) {
 		}
 	}
 	for n, v := range haveNames {
-		t.Errorf("value %s (%v) is found while enumerating, but has not been cretaed", n, v)
+		t.Errorf("value %s (%v) is found while enumerating, but has not been created", n, v)
 	}
 }
 

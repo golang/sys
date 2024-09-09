@@ -830,9 +830,9 @@ func FuzzComposeCommandLine(f *testing.F) {
 					// If args[0] contains a space or control character, we must quote it
 					// to avoid it being split into multiple arguments.
 					// If args[0] already starts with a quote character, we have no way
-					// to indicate that that character is part of the literal argument.
+					// to indicate that character is part of the literal argument.
 					// In either case, if the string already contains a quote character
-					// we must avoid misinterpriting that character as the end of the
+					// we must avoid misinterpreting that character as the end of the
 					// quoted argument string.
 					//
 					// Unfortunately, ComposeCommandLine does not return an error, so we
