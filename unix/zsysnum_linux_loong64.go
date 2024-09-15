@@ -84,6 +84,8 @@ const (
 	SYS_SPLICE                  = 76
 	SYS_TEE                     = 77
 	SYS_READLINKAT              = 78
+	SYS_NEWFSTATAT              = 79
+	SYS_FSTAT                   = 80
 	SYS_SYNC                    = 81
 	SYS_FSYNC                   = 82
 	SYS_FDATASYNC               = 83
@@ -245,7 +247,6 @@ const (
 	SYS_PERF_EVENT_OPEN         = 241
 	SYS_ACCEPT4                 = 242
 	SYS_RECVMMSG                = 243
-	SYS_ARCH_SPECIFIC_SYSCALL   = 244
 	SYS_WAIT4                   = 260
 	SYS_PRLIMIT64               = 261
 	SYS_FANOTIFY_INIT           = 262
