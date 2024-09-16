@@ -516,6 +516,29 @@ type TCPInfo struct {
 	Total_rto_time       uint32
 }
 
+type TCPVegasInfo struct {
+	Enabled uint32
+	Rttcnt  uint32
+	Rtt     uint32
+	Minrtt  uint32
+}
+
+type TCPDCTCPInfo struct {
+	Enabled  uint16
+	Ce_state uint16
+	Alpha    uint32
+	Ab_ecn   uint32
+	Ab_tot   uint32
+}
+
+type TCPBBRInfo struct {
+	Bw_lo       uint32
+	Bw_hi       uint32
+	Min_rtt     uint32
+	Pacing_gain uint32
+	Cwnd_gain   uint32
+}
+
 type CanFilter struct {
 	Id   uint32
 	Mask uint32
@@ -557,6 +580,7 @@ const (
 	SizeofICMPv6Filter      = 0x20
 	SizeofUcred             = 0xc
 	SizeofTCPInfo           = 0xf8
+	SizeofTCPCCInfo         = 0x14
 	SizeofCanFilter         = 0x8
 	SizeofTCPRepairOpt      = 0x8
 )
