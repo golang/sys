@@ -542,8 +542,8 @@ func (f *Fn) ParamPrintList() string {
 	return join(f.Params, func(p *Param) string { return fmt.Sprintf(`"%s=", %s, `, p.Name, p.Name) }, `", ", `)
 }
 
-// Syscall determines which SyscallX function to use for function f.
-func (f *Fn) Syscall() string {
+// SyscallN returns a string representing the SyscallN function
+func (f *Fn) SyscallN() string {
 	return syscalldot() + "SyscallN"
 }
 
@@ -979,7 +979,7 @@ func {{.HelperName}}({{.HelperParamList}}) {{template "results" .}}{
 
 {{define "results"}}{{if .Rets.List}}{{.Rets.List}} {{end}}{{end}}
 
-{{define "syscall"}}{{.Rets.SetReturnValuesCode}}{{.Syscall}}(proc{{.DLLFuncName}}.Addr(), {{.SyscallParamList}}){{end}}
+{{define "syscall"}}{{.Rets.SetReturnValuesCode}}{{.SyscallN}}(proc{{.DLLFuncName}}.Addr(), {{.SyscallParamList}}){{end}}
 
 {{define "tmpvarsreadback"}}{{range .Params}}{{if .TmpVarReadbackCode}}
 {{.TmpVarReadbackCode}}{{end}}{{end}}{{end}}
