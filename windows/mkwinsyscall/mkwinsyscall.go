@@ -1007,7 +1007,7 @@ func {{.HelperName}}({{.HelperParamList}}) {{template "results" .}}{
 
 {{define "results"}}{{if .Rets.List}}{{.Rets.List}} {{end}}{{end}}
 
-{{define "syscall"}}{{.Rets.SetReturnValuesCode}}{{.Syscall}}(proc{{.DLLFuncName}}.Addr(),{{if le .ParamCount 15}} {{.ParamCount}},{{end}} {{.SyscallParamList}}){{end}}
+{{define "syscall"}}{{.Rets.SetReturnValuesCode}}{{.Syscall}}(proc{{.DLLFuncName}}.Addr(), {{.SyscallParamList}}){{end}}
 
 {{define "tmpvarsreadback"}}{{range .Params}}{{if .TmpVarReadbackCode}}
 {{.TmpVarReadbackCode}}{{end}}{{end}}{{end}}
