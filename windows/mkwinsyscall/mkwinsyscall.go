@@ -542,7 +542,7 @@ func (f *Fn) ParamPrintList() string {
 	return join(f.Params, func(p *Param) string { return fmt.Sprintf(`"%s=", %s, `, p.Name, p.Name) }, `", ", `)
 }
 
-// SyscallN returns a string representing the SyscallN function
+// SyscallN returns a string representing the SyscallN function.
 func (f *Fn) SyscallN() string {
 	return syscalldot() + "SyscallN"
 }
