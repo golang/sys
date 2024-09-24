@@ -2001,7 +2001,26 @@ func Getpgrp() (pid int) {
 //sysnb	Getpid() (pid int)
 //sysnb	Getppid() (ppid int)
 //sys	Getpriority(which int, who int) (prio int, err error)
-//sys	Getrandom(buf []byte, flags int) (n int, err error)
+
+func Getrandom(buf []byte, flags int) (n int, err error) {
+	vdsoRet, supported := vgetrandom(buf, uint32(flags))
+	if supported {
+		if vdsoRet < 0 {
+			return 0, errnoErr(syscall.Errno(-vdsoRet))
+		}
+		return vdsoRet, nil
+	}
+	var p *byte
+	if len(buf) > 0 {
+		p = &buf[0]
+	}
+	r, _, e := Syscall(SYS_GETRANDOM, uintptr(unsafe.Pointer(p)), uintptr(len(buf)), uintptr(flags))
+	if e != 0 {
+		return 0, errnoErr(e)
+	}
+	return int(r), nil
+}
+
 //sysnb	Getrusage(who int, rusage *Rusage) (err error)
 //sysnb	Getsid(pid int) (sid int, err error)
 //sysnb	Gettid() (tid int)
