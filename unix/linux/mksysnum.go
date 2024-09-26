@@ -12,6 +12,7 @@ import (
 	"os"
 	"os/exec"
 	"regexp"
+	"slices"
 	"sort"
 	"strconv"
 	"strings"
@@ -125,6 +126,21 @@ func main() {
 		fmt.Fprintf(os.Stderr, "can't run %s", cc)
 		os.Exit(1)
 	}
+
+	if slices.Contains([]string{"riscv64", "loong64", "arm64"}, goarch) {
+		// Kernel linux v6.11 removed some __NR_* constants that only
+		// existed on some architectures as an implementation detail. In
+		// order to keep backwards compatibility we add them back.
+		//
+		// See https://lkml.org/lkml/2024/8/5/1283
+		if !strings.Contains(string(cmd), "#define __NR_arch_specific_syscall") {
+			cmd = append(cmd, []byte("#define __NR_arch_specific_syscall 244\n")...)
+		}
+		if !strings.Contains(string(cmd), "#define __NR_fstatat") {
+			cmd = append(cmd, []byte("#define __NR_fstatat 79\n")...)
+		}
+	}
+
 	s := bufio.NewScanner(strings.NewReader(string(cmd)))
 	var offset, prev, asOffset int
 	var nums syscallNums
