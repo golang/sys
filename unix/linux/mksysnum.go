@@ -137,9 +137,6 @@ func main() {
 		if !bytes.Contains(cmd, []byte("#define __NR_arch_specific_syscall")) {
 			cmd = append(cmd, []byte("#define __NR_arch_specific_syscall 244\n")...)
 		}
-		if !bytes.Contains(cmd, []byte("#define __NR_fstatat")) {
-			cmd = append(cmd, []byte("#define __NR_fstatat 79\n")...)
-		}
 	}
 
 	s := bufio.NewScanner(strings.NewReader(string(cmd)))
