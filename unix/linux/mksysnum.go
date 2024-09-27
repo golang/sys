@@ -8,6 +8,7 @@ package main
 
 import (
 	"bufio"
+	"bytes"
 	"fmt"
 	"os"
 	"os/exec"
@@ -125,6 +126,19 @@ func main() {
 		fmt.Fprintf(os.Stderr, "can't run %s", cc)
 		os.Exit(1)
 	}
+
+	switch goarch {
+	case "riscv64", "loong64", "arm64":
+		// Kernel linux v6.11 removed some __NR_* macros that only
+		// existed on some architectures as an implementation detail. In
+		// order to keep backwards compatibility we add them back.
+		//
+		// See https://lkml.org/lkml/2024/8/5/1283.
+		if !bytes.Contains(cmd, []byte("#define __NR_arch_specific_syscall")) {
+			cmd = append(cmd, []byte("#define __NR_arch_specific_syscall 244\n")...)
+		}
+	}
+
 	s := bufio.NewScanner(strings.NewReader(string(cmd)))
 	var offset, prev, asOffset int
 	var nums syscallNums
