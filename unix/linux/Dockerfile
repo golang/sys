@@ -1,4 +1,4 @@
-FROM ubuntu:20.04
+FROM ubuntu:24.10
 
 # Disable interactive prompts on package installation
 ENV DEBIAN_FRONTEND noninteractive
@@ -48,23 +48,9 @@ RUN apt-get update && apt-get install -y \
         gcc-powerpc-linux-gnu       gcc-powerpc64-linux-gnu   \
         gcc-powerpc64le-linux-gnu   gcc-riscv64-linux-gnu     \
         gcc-s390x-linux-gnu         gcc-sparc64-linux-gnu     \
+        gcc-loongarch64-linux-gnu \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
-
-# Only for loong64, getting tools of qemu-user and gcc-cross-compiler
-ENV LOONG64_BASE_URL https://github.com/loongson/build-tools/releases/download/2023.08.08
-ENV LOONG64_GCC  CLFS-loongarch64-8.1-x86_64-cross-tools-gcc-glibc.tar.xz
-ENV LOONG64_QEMU qemu-loongarch64
-ENV LOONG64_GCC_DOWNLOAD_URL  $LOONG64_BASE_URL/$LOONG64_GCC
-ENV LOONG64_QEMU_DOWNLOAD_URL $LOONG64_BASE_URL/$LOONG64_QEMU
-
-RUN apt-get update && apt-get install xz-utils -y && mkdir /loong64 && cd /loong64 \
-    && curl -fsSL "$LOONG64_QEMU_DOWNLOAD_URL" -o /usr/bin/"$LOONG64_QEMU" \
-    && chmod +x /usr/bin/"$LOONG64_QEMU" \
-    && curl -fsSL "$LOONG64_GCC_DOWNLOAD_URL" -o "$LOONG64_GCC" \
-    && tar xf "$LOONG64_GCC" -C /usr/local/ \
-    && ln -s /usr/local/cross-tools/bin/loongarch64-unknown-linux-gnu-gcc /usr/bin/loongarch64-linux-gnu-gcc \
-    && rm -rf /loong64
 
 # Let the scripts know they are in the docker environment
 ENV GOLANG_SYS_BUILD docker

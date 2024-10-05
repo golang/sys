@@ -20,6 +20,21 @@ package unix
 #define _FILE_OFFSET_BITS 64
 #define _GNU_SOURCE
 
+// Ref: include/linux/time32.h
+//
+// On Linux, in order to solve the overflow problem of time_t type variables on
+// 32-bit arm, mips, and powerpc in 2038, the definition of time_t is switched
+// from a 32-bit field to a 64-bit field. For backward compatibility, we force
+// the use of 32-bit fields.
+#if defined(__ARM_EABI__) || \
+	(defined(__mips__) && (_MIPS_SIM == _ABIO32)) || \
+	(defined(__powerpc__) && (!defined(__powerpc64__)))
+# ifdef  _TIME_BITS
+#  undef _TIME_BITS
+# endif
+# define _TIME_BITS 32
+#endif
+
 #include <dirent.h>
 #include <fcntl.h>
 #include <poll.h>

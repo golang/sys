@@ -158,6 +158,16 @@ includes_Linux='
 #endif
 #define _GNU_SOURCE
 
+// See the description in unix/linux/types.go
+#if defined(__ARM_EABI__) || \
+	(defined(__mips__) && (_MIPS_SIM == _ABIO32)) || \
+	(defined(__powerpc__) && (!defined(__powerpc64__)))
+# ifdef   _TIME_BITS
+#  undef  _TIME_BITS
+# endif
+# define  _TIME_BITS 32
+#endif
+
 // <sys/ioctl.h> is broken on powerpc64, as it fails to include definitions of
 // these structures. We just include them copied from <bits/termios.h>.
 #if defined(__powerpc__)
