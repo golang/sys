@@ -1685,13 +1685,16 @@ func (s NTStatus) Error() string {
 // do not use NTUnicodeString, and instead UTF16PtrFromString should be used for
 // the more common *uint16 string type.
 func NewNTUnicodeString(s string) (*NTUnicodeString, error) {
-	var u NTUnicodeString
-	s16, err := UTF16PtrFromString(s)
+	s16, err := UTF16FromString(s)
 	if err != nil {
 		return nil, err
 	}
-	RtlInitUnicodeString(&u, s16)
-	return &u, nil
+	n := uint16(len(s16) * 2)
+	return &NTUnicodeString{
+		Length:        n - 2, // subtract 2 bytes for the NULL terminator
+		MaximumLength: n,
+		Buffer:        &s16[0],
+	}, nil
 }
 
 // Slice returns a uint16 slice that aliases the data in the NTUnicodeString.
