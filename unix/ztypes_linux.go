@@ -2586,8 +2586,8 @@ const (
 	SOF_TIMESTAMPING_BIND_PHC     = 0x8000
 	SOF_TIMESTAMPING_OPT_ID_TCP   = 0x10000
 
-	SOF_TIMESTAMPING_LAST = 0x10000
-	SOF_TIMESTAMPING_MASK = 0x1ffff
+	SOF_TIMESTAMPING_LAST = 0x20000
+	SOF_TIMESTAMPING_MASK = 0x3ffff
 
 	SCM_TSTAMP_SND   = 0x0
 	SCM_TSTAMP_SCHED = 0x1
@@ -3533,7 +3533,7 @@ type Nhmsg struct {
 type NexthopGrp struct {
 	Id     uint32
 	Weight uint8
-	Resvd1 uint8
+	High   uint8
 	Resvd2 uint16
 }
 
@@ -3794,7 +3794,7 @@ const (
 	ETHTOOL_MSG_PSE_GET                       = 0x24
 	ETHTOOL_MSG_PSE_SET                       = 0x25
 	ETHTOOL_MSG_RSS_GET                       = 0x26
-	ETHTOOL_MSG_USER_MAX                      = 0x2c
+	ETHTOOL_MSG_USER_MAX                      = 0x2d
 	ETHTOOL_MSG_KERNEL_NONE                   = 0x0
 	ETHTOOL_MSG_STRSET_GET_REPLY              = 0x1
 	ETHTOOL_MSG_LINKINFO_GET_REPLY            = 0x2
@@ -3834,7 +3834,7 @@ const (
 	ETHTOOL_MSG_MODULE_NTF                    = 0x24
 	ETHTOOL_MSG_PSE_GET_REPLY                 = 0x25
 	ETHTOOL_MSG_RSS_GET_REPLY                 = 0x26
-	ETHTOOL_MSG_KERNEL_MAX                    = 0x2c
+	ETHTOOL_MSG_KERNEL_MAX                    = 0x2e
 	ETHTOOL_FLAG_COMPACT_BITSETS              = 0x1
 	ETHTOOL_FLAG_OMIT_REPLY                   = 0x2
 	ETHTOOL_FLAG_STATS                        = 0x4
@@ -3842,7 +3842,7 @@ const (
 	ETHTOOL_A_HEADER_DEV_INDEX                = 0x1
 	ETHTOOL_A_HEADER_DEV_NAME                 = 0x2
 	ETHTOOL_A_HEADER_FLAGS                    = 0x3
-	ETHTOOL_A_HEADER_MAX                      = 0x3
+	ETHTOOL_A_HEADER_MAX                      = 0x4
 	ETHTOOL_A_BITSET_BIT_UNSPEC               = 0x0
 	ETHTOOL_A_BITSET_BIT_INDEX                = 0x1
 	ETHTOOL_A_BITSET_BIT_NAME                 = 0x2
@@ -4023,11 +4023,11 @@ const (
 	ETHTOOL_A_CABLE_RESULT_UNSPEC             = 0x0
 	ETHTOOL_A_CABLE_RESULT_PAIR               = 0x1
 	ETHTOOL_A_CABLE_RESULT_CODE               = 0x2
-	ETHTOOL_A_CABLE_RESULT_MAX                = 0x2
+	ETHTOOL_A_CABLE_RESULT_MAX                = 0x3
 	ETHTOOL_A_CABLE_FAULT_LENGTH_UNSPEC       = 0x0
 	ETHTOOL_A_CABLE_FAULT_LENGTH_PAIR         = 0x1
 	ETHTOOL_A_CABLE_FAULT_LENGTH_CM           = 0x2
-	ETHTOOL_A_CABLE_FAULT_LENGTH_MAX          = 0x2
+	ETHTOOL_A_CABLE_FAULT_LENGTH_MAX          = 0x3
 	ETHTOOL_A_CABLE_TEST_NTF_STATUS_UNSPEC    = 0x0
 	ETHTOOL_A_CABLE_TEST_NTF_STATUS_STARTED   = 0x1
 	ETHTOOL_A_CABLE_TEST_NTF_STATUS_COMPLETED = 0x2
@@ -4291,6 +4291,7 @@ const (
 type LandlockRulesetAttr struct {
 	Access_fs  uint64
 	Access_net uint64
+	Scoped     uint64
 }
 
 type LandlockPathBeneathAttr struct {

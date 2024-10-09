@@ -16,7 +16,7 @@ RUN apt-get update && apt-get install -y  --no-install-recommends \
 WORKDIR /git
 RUN git config --global advice.detachedHead false
 # Linux Kernel: Released 15 Sep 2024
-RUN git clone --branch v6.11 --depth 1 https://kernel.googlesource.com/pub/scm/linux/kernel/git/torvalds/linux
+RUN git clone --branch v6.12-rc4 --depth 1 https://kernel.googlesource.com/pub/scm/linux/kernel/git/torvalds/linux
 # GNU C library: Released 21 July 2024
 RUN git clone --branch release/2.40/master --depth 1 https://sourceware.org/git/glibc.git
 
