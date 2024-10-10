@@ -4090,6 +4090,8 @@ const SPEED_UNKNOWN = C.SPEED_UNKNOWN
 
 type EthtoolDrvinfo C.struct_ethtool_drvinfo
 
+type EthtoolTsInfo C.struct_ethtool_ts_info
+
 type (
 	HIDRawReportDescriptor C.struct_hidraw_report_descriptor
 	HIDRawDevInfo          C.struct_hidraw_devinfo
