@@ -4110,6 +4110,16 @@ type EthtoolDrvinfo struct {
 	Regdump_len  uint32
 }
 
+type EthtoolTsInfo struct {
+	Cmd             uint32
+	So_timestamping uint32
+	Phc_index       int32
+	Tx_types        uint32
+	Tx_reserved     [3]uint32
+	Rx_filters      uint32
+	Rx_reserved     [3]uint32
+}
+
 type (
 	HIDRawReportDescriptor struct {
 		Size  uint32

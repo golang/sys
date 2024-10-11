@@ -58,6 +58,21 @@ func IoctlGetEthtoolDrvinfo(fd int, ifname string) (*EthtoolDrvinfo, error) {
 	return &value, err
 }
 
+// IoctlGetEthtoolTsInfo fetches ethtool timestamping and PHC
+// association for the network device specified by ifname.
+func IoctlGetEthtoolTsInfo(fd int, ifname string) (*EthtoolTsInfo, error) {
+	ifr, err := NewIfreq(ifname)
+	if err != nil {
+		return nil, err
+	}
+
+	value := EthtoolTsInfo{Cmd: ETHTOOL_GET_TS_INFO}
+	ifrd := ifr.withData(unsafe.Pointer(&value))
+
+	err = ioctlIfreqData(fd, SIOCETHTOOL, &ifrd)
+	return &value, err
+}
+
 // IoctlGetWatchdogInfo fetches information about a watchdog device from the
 // Linux watchdog API. For more information, see:
 // https://www.kernel.org/doc/html/latest/watchdog/watchdog-api.html.
