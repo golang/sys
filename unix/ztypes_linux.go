@@ -4120,6 +4120,28 @@ type EthtoolTsInfo struct {
 	Rx_reserved     [3]uint32
 }
 
+type HwTstampConfig struct {
+	Flags     int32
+	Tx_type   int32
+	Rx_filter int32
+}
+
+const (
+	HWTSTAMP_FILTER_NONE            = 0x0
+	HWTSTAMP_FILTER_ALL             = 0x1
+	HWTSTAMP_FILTER_SOME            = 0x2
+	HWTSTAMP_FILTER_PTP_V1_L4_EVENT = 0x3
+	HWTSTAMP_FILTER_PTP_V2_L4_EVENT = 0x6
+	HWTSTAMP_FILTER_PTP_V2_L2_EVENT = 0x9
+	HWTSTAMP_FILTER_PTP_V2_EVENT    = 0xc
+)
+
+const (
+	HWTSTAMP_TX_OFF          = 0x0
+	HWTSTAMP_TX_ON           = 0x1
+	HWTSTAMP_TX_ONESTEP_SYNC = 0x2
+)
+
 type (
 	HIDRawReportDescriptor struct {
 		Size  uint32

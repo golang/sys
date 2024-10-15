@@ -144,6 +144,7 @@ struct termios2 {
 #include <linux/netfilter.h>
 #include <linux/netfilter_ipv4.h>
 #include <linux/netlink.h>
+#include <linux/net_tstamp.h>
 #include <linux/nexthop.h>
 #include <linux/nfc.h>
 #include <linux/nl80211.h>
@@ -4106,6 +4107,24 @@ const SPEED_UNKNOWN = C.SPEED_UNKNOWN
 type EthtoolDrvinfo C.struct_ethtool_drvinfo
 
 type EthtoolTsInfo C.struct_ethtool_ts_info
+
+type HwTstampConfig C.struct_hwtstamp_config
+
+const (
+	HWTSTAMP_FILTER_NONE            = C.HWTSTAMP_FILTER_NONE
+	HWTSTAMP_FILTER_ALL             = C.HWTSTAMP_FILTER_ALL
+	HWTSTAMP_FILTER_SOME            = C.HWTSTAMP_FILTER_SOME
+	HWTSTAMP_FILTER_PTP_V1_L4_EVENT = C.HWTSTAMP_FILTER_PTP_V1_L4_EVENT
+	HWTSTAMP_FILTER_PTP_V2_L4_EVENT = C.HWTSTAMP_FILTER_PTP_V2_L4_EVENT
+	HWTSTAMP_FILTER_PTP_V2_L2_EVENT = C.HWTSTAMP_FILTER_PTP_V2_L2_EVENT
+	HWTSTAMP_FILTER_PTP_V2_EVENT    = C.HWTSTAMP_FILTER_PTP_V2_EVENT
+)
+
+const (
+	HWTSTAMP_TX_OFF          = C.HWTSTAMP_TX_OFF
+	HWTSTAMP_TX_ON           = C.HWTSTAMP_TX_ON
+	HWTSTAMP_TX_ONESTEP_SYNC = C.HWTSTAMP_TX_ONESTEP_SYNC
+)
 
 type (
 	HIDRawReportDescriptor C.struct_hidraw_report_descriptor

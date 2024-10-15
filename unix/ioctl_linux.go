@@ -73,6 +73,32 @@ func IoctlGetEthtoolTsInfo(fd int, ifname string) (*EthtoolTsInfo, error) {
 	return &value, err
 }
 
+// IoctlGetHwTstamp retrieves the hardware timestamping configuration
+// for the network device specified by ifname.
+func IoctlGetHwTstamp(fd int, ifname string) (*HwTstampConfig, error) {
+	ifr, err := NewIfreq(ifname)
+	if err != nil {
+		return nil, err
+	}
+
+	value := HwTstampConfig{}
+	ifrd := ifr.withData(unsafe.Pointer(&value))
+
+	err = ioctlIfreqData(fd, SIOCGHWTSTAMP, &ifrd)
+	return &value, err
+}
+
+// IoctlSetHwTstamp updates the hardware timestamping configuration for
+// the network device specified by ifname.
+func IoctlSetHwTstamp(fd int, ifname string, cfg *HwTstampConfig) error {
+	ifr, err := NewIfreq(ifname)
+	if err != nil {
+		return err
+	}
+	ifrd := ifr.withData(unsafe.Pointer(cfg))
+	return ioctlIfreqData(fd, SIOCSHWTSTAMP, &ifrd)
+}
+
 // IoctlGetWatchdogInfo fetches information about a watchdog device from the
 // Linux watchdog API. For more information, see:
 // https://www.kernel.org/doc/html/latest/watchdog/watchdog-api.html.
