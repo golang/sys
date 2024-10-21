@@ -151,6 +151,7 @@ struct termios2 {
 #include <linux/openat2.h>
 #include <linux/perf_event.h>
 #include <linux/pps.h>
+#include <linux/ptp_clock.h>
 #include <linux/random.h>
 #include <linux/rtc.h>
 #include <linux/rtnetlink.h>
@@ -524,6 +525,15 @@ struct cachestat {
 	__u64 nr_writeback;
 	__u64 nr_evicted;
 	__u64 nr_recently_evicted;
+};
+
+// the one defined in linux/ptp_clock.h has unions
+struct my_ptp_perout_request {
+	struct ptp_clock_time startOrPhase;	// start or phase
+	struct ptp_clock_time period;
+	unsigned int index;
+	unsigned int flags;
+	struct ptp_clock_time on;
 };
 */
 import "C"
@@ -4124,6 +4134,18 @@ const (
 	HWTSTAMP_TX_OFF          = C.HWTSTAMP_TX_OFF
 	HWTSTAMP_TX_ON           = C.HWTSTAMP_TX_ON
 	HWTSTAMP_TX_ONESTEP_SYNC = C.HWTSTAMP_TX_ONESTEP_SYNC
+)
+
+type (
+	PtpClockCaps C.struct_ptp_clock_caps
+	PtpClockTime C.struct_ptp_clock_time
+	PtpExttsEvent C.struct_ptp_extts_event
+	PtpExttsRequest C.struct_ptp_extts_request
+	PtpPeroutRequest C.struct_my_ptp_perout_request
+	PtpPinDesc C.struct_ptp_pin_desc
+	PtpSysOffset C.struct_ptp_sys_offset
+	PtpSysOffsetExtended C.struct_ptp_sys_offset_extended
+	PtpSysOffsetPrecise C.struct_ptp_sys_offset_precise
 )
 
 type (

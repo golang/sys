@@ -4143,6 +4143,67 @@ const (
 )
 
 type (
+	PtpClockCaps struct {
+		Max_adj            int32
+		N_alarm            int32
+		N_ext_ts           int32
+		N_per_out          int32
+		Pps                int32
+		N_pins             int32
+		Cross_timestamping int32
+		Adjust_phase       int32
+		Max_phase_adj      int32
+		Rsv                [11]int32
+	}
+	PtpClockTime struct {
+		Sec      int64
+		Nsec     uint32
+		Reserved uint32
+	}
+	PtpExttsEvent struct {
+		T     PtpClockTime
+		Index uint32
+		Flags uint32
+		Rsv   [2]uint32
+	}
+	PtpExttsRequest struct {
+		Index uint32
+		Flags uint32
+		Rsv   [2]uint32
+	}
+	PtpPeroutRequest struct {
+		StartOrPhase PtpClockTime
+		Period       PtpClockTime
+		Index        uint32
+		Flags        uint32
+		On           PtpClockTime
+	}
+	PtpPinDesc struct {
+		Name  [64]byte
+		Index uint32
+		Func  uint32
+		Chan  uint32
+		Rsv   [5]uint32
+	}
+	PtpSysOffset struct {
+		Samples uint32
+		Rsv     [3]uint32
+		Ts      [51]PtpClockTime
+	}
+	PtpSysOffsetExtended struct {
+		Samples uint32
+		Rsv     [3]uint32
+		Ts      [25][3]PtpClockTime
+	}
+	PtpSysOffsetPrecise struct {
+		Device   PtpClockTime
+		Realtime PtpClockTime
+		Monoraw  PtpClockTime
+		Rsv      [4]uint32
+	}
+)
+
+type (
 	HIDRawReportDescriptor struct {
 		Size  uint32
 		Value [4096]uint8
