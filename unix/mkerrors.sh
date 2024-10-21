@@ -266,6 +266,7 @@ struct ltchars {
 #include <linux/nsfs.h>
 #include <linux/perf_event.h>
 #include <linux/pps.h>
+#include <linux/ptp_clock.h>
 #include <linux/ptrace.h>
 #include <linux/random.h>
 #include <linux/reboot.h>
@@ -537,6 +538,7 @@ ccflags="$@"
 		$2 ~ /^(AF|SOCK|SO|SOL|IPPROTO|IP|IPV6|TCP|MCAST|EVFILT|NOTE|SHUT|PROT|MAP|MREMAP|MFD|T?PACKET|MSG|SCM|MCL|DT|MADV|PR|LOCAL|TCPOPT|UDP)_/ ||
 		$2 ~ /^NFC_(GENL|PROTO|COMM|RF|SE|DIRECTION|LLCP|SOCKPROTO)_/ ||
 		$2 ~ /^NFC_.*_(MAX)?SIZE$/ ||
+		$2 ~ /^PTP_/ ||
 		$2 ~ /^RAW_PAYLOAD_/ ||
 		$2 ~ /^[US]F_/ ||
 		$2 ~ /^TP_STATUS_/ ||
