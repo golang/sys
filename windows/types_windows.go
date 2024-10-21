@@ -5,6 +5,7 @@
 package windows
 
 import (
+	"encoding/binary"
 	"net"
 	"syscall"
 	"unsafe"
@@ -3560,4 +3561,51 @@ type InputRecord struct {
 
 	// Event holds the actual event data.
 	Event [16]byte
+}
+
+// FocusEvent returns the event as a FOCUS_EVENT_RECORD.
+func (ir InputRecord) FocusEvent() FocusEventRecord {
+	return FocusEventRecord{SetFocus: ir.Event[0] > 0}
+}
+
+// KeyEvent returns the event as a KEY_EVENT_RECORD.
+func (ir InputRecord) KeyEvent() KeyEventRecord {
+	return KeyEventRecord{
+		KeyDown:         binary.LittleEndian.Uint32(ir.Event[0:4]) > 0,
+		RepeatCount:     binary.LittleEndian.Uint16(ir.Event[4:6]),
+		VirtualKeyCode:  binary.LittleEndian.Uint16(ir.Event[6:8]),
+		VirtualScanCode: binary.LittleEndian.Uint16(ir.Event[8:10]),
+		Char:            rune(binary.LittleEndian.Uint16(ir.Event[10:12])),
+		ControlKeyState: binary.LittleEndian.Uint32(ir.Event[12:16]),
+	}
+}
+
+// MouseEvent returns the event as a MOUSE_EVENT_RECORD.
+func (ir InputRecord) MouseEvent() MouseEventRecord {
+	return MouseEventRecord{
+		MousePositon: Coord{
+			X: int16(binary.LittleEndian.Uint16(ir.Event[0:2])),
+			Y: int16(binary.LittleEndian.Uint16(ir.Event[2:4])),
+		},
+		ButtonState:     binary.LittleEndian.Uint32(ir.Event[4:8]),
+		ControlKeyState: binary.LittleEndian.Uint32(ir.Event[8:12]),
+		EventFlags:      binary.LittleEndian.Uint32(ir.Event[12:16]),
+	}
+}
+
+// WindowBufferSizeEvent returns the event as a WINDOW_BUFFER_SIZE_RECORD.
+func (ir InputRecord) WindowBufferSizeEvent() WindowBufferSizeRecord {
+	return WindowBufferSizeRecord{
+		Size: Coord{
+			X: int16(binary.LittleEndian.Uint16(ir.Event[0:2])),
+			Y: int16(binary.LittleEndian.Uint16(ir.Event[2:4])),
+		},
+	}
+}
+
+// MenuEvent returns the event as a MENU_EVENT_RECORD.
+func (ir InputRecord) MenuEvent() MenuEventRecord {
+	return MenuEventRecord{
+		CommandID: binary.LittleEndian.Uint32(ir.Event[0:4]),
+	}
 }
