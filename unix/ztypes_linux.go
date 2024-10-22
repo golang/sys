@@ -4203,6 +4203,13 @@ type (
 	}
 )
 
+const (
+	PTP_PF_NONE    = 0x0
+	PTP_PF_EXTTS   = 0x1
+	PTP_PF_PEROUT  = 0x2
+	PTP_PF_PHYSYNC = 0x3
+)
+
 type (
 	HIDRawReportDescriptor struct {
 		Size  uint32

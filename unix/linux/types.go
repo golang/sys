@@ -4148,6 +4148,13 @@ type (
 	PtpSysOffsetPrecise C.struct_ptp_sys_offset_precise
 )
 
+const (
+	PTP_PF_NONE    = C.PTP_PF_NONE
+	PTP_PF_EXTTS   = C.PTP_PF_EXTTS
+	PTP_PF_PEROUT  = C.PTP_PF_PEROUT
+	PTP_PF_PHYSYNC = C.PTP_PF_PHYSYNC
+)
+
 type (
 	HIDRawReportDescriptor C.struct_hidraw_report_descriptor
 	HIDRawDevInfo          C.struct_hidraw_devinfo
