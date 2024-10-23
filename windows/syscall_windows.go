@@ -725,20 +725,12 @@ func DurationSinceBoot() time.Duration {
 }
 
 func Ftruncate(fd Handle, length int64) (err error) {
-	curoffset, e := Seek(fd, 0, 1)
-	if e != nil {
-		return e
+	type _FILE_END_OF_FILE_INFO struct {
+		EndOfFile int64
 	}
-	defer Seek(fd, curoffset, 0)
-	_, e = Seek(fd, length, 0)
-	if e != nil {
-		return e
-	}
-	e = SetEndOfFile(fd)
-	if e != nil {
-		return e
-	}
-	return nil
+	var info _FILE_END_OF_FILE_INFO
+	info.EndOfFile = length
+	return SetFileInformationByHandle(fd, FileEndOfFileInfo, (*byte)(unsafe.Pointer(&info)), uint32(unsafe.Sizeof(info)))
 }
 
 func Gettimeofday(tv *Timeval) (err error) {
