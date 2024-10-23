@@ -4137,15 +4137,15 @@ const (
 )
 
 type (
-	PtpClockCaps C.struct_ptp_clock_caps
-	PtpClockTime C.struct_ptp_clock_time
-	PtpExttsEvent C.struct_ptp_extts_event
-	PtpExttsRequest C.struct_ptp_extts_request
-	PtpPeroutRequest C.struct_my_ptp_perout_request
-	PtpPinDesc C.struct_ptp_pin_desc
-	PtpSysOffset C.struct_ptp_sys_offset
+	PtpClockCaps         C.struct_ptp_clock_caps
+	PtpClockTime         C.struct_ptp_clock_time
+	PtpExttsEvent        C.struct_ptp_extts_event
+	PtpExttsRequest      C.struct_ptp_extts_request
+	PtpPeroutRequest     C.struct_my_ptp_perout_request
+	PtpPinDesc           C.struct_ptp_pin_desc
+	PtpSysOffset         C.struct_ptp_sys_offset
 	PtpSysOffsetExtended C.struct_ptp_sys_offset_extended
-	PtpSysOffsetPrecise C.struct_ptp_sys_offset_precise
+	PtpSysOffsetPrecise  C.struct_ptp_sys_offset_precise
 )
 
 const (
