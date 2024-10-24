@@ -45,25 +45,29 @@ func (l *Log) Close() error {
 	return windows.DeregisterEventSource(l.Handle)
 }
 
-func (l *Log) report(etype uint16, eid uint32, msg string) error {
-	ss := []*uint16{syscall.StringToUTF16Ptr(msg)}
-	return windows.ReportEvent(l.Handle, etype, 0, eid, 0, 1, 0, &ss[0], nil)
+func (l *Log) report(etype uint16, eid uint32, msgs ...string) error {
+	var ss []*uint16
+
+	for _, msg := range msgs {
+		ss = append(ss, syscall.StringToUTF16Ptr(msg))
+	}
+	return windows.ReportEvent(l.Handle, etype, 0, eid, 0, uint16(len(ss)), 0, &ss[0], nil)
 }
 
 // Info writes an information event msg with event id eid to the end of event log l.
 // When EventCreate.exe is used, eid must be between 1 and 1000.
-func (l *Log) Info(eid uint32, msg string) error {
-	return l.report(windows.EVENTLOG_INFORMATION_TYPE, eid, msg)
+func (l *Log) Info(eid uint32, msgs ...string) error {
+	return l.report(windows.EVENTLOG_INFORMATION_TYPE, eid, msgs...)
 }
 
 // Warning writes an warning event msg with event id eid to the end of event log l.
 // When EventCreate.exe is used, eid must be between 1 and 1000.
-func (l *Log) Warning(eid uint32, msg string) error {
-	return l.report(windows.EVENTLOG_WARNING_TYPE, eid, msg)
+func (l *Log) Warning(eid uint32, msgs ...string) error {
+	return l.report(windows.EVENTLOG_WARNING_TYPE, eid, msgs...)
 }
 
 // Error writes an error event msg with event id eid to the end of event log l.
 // When EventCreate.exe is used, eid must be between 1 and 1000.
-func (l *Log) Error(eid uint32, msg string) error {
-	return l.report(windows.EVENTLOG_ERROR_TYPE, eid, msg)
+func (l *Log) Error(eid uint32, msgs ...string) error {
+	return l.report(windows.EVENTLOG_ERROR_TYPE, eid, msgs...)
 }
