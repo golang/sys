@@ -62,7 +62,6 @@ import (
 	"path/filepath"
 	"runtime"
 	"sort"
-	"strconv"
 	"strings"
 	"text/template"
 )
@@ -543,47 +542,9 @@ func (f *Fn) ParamPrintList() string {
 	return join(f.Params, func(p *Param) string { return fmt.Sprintf(`"%s=", %s, `, p.Name, p.Name) }, `", ", `)
 }
 
-// ParamCount return number of syscall parameters for function f.
-func (f *Fn) ParamCount() int {
-	n := 0
-	for _, p := range f.Params {
-		n += len(p.SyscallArgList())
-	}
-	return n
-}
-
-// SyscallParamCount determines which version of Syscall/Syscall6/Syscall9/...
-// to use. It returns parameter count for correspondent SyscallX function.
-func (f *Fn) SyscallParamCount() int {
-	n := f.ParamCount()
-	switch {
-	case n <= 3:
-		return 3
-	case n <= 6:
-		return 6
-	case n <= 9:
-		return 9
-	case n <= 12:
-		return 12
-	case n <= 15:
-		return 15
-	case n <= 42: // current SyscallN limit
-		return n
-	default:
-		panic("too many arguments to system call")
-	}
-}
-
-// Syscall determines which SyscallX function to use for function f.
-func (f *Fn) Syscall() string {
-	c := f.SyscallParamCount()
-	if c == 3 {
-		return syscalldot() + "Syscall"
-	}
-	if c > 15 {
-		return syscalldot() + "SyscallN"
-	}
-	return syscalldot() + "Syscall" + strconv.Itoa(c)
+// SyscallN returns a string representing the SyscallN function.
+func (f *Fn) SyscallN() string {
+	return syscalldot() + "SyscallN"
 }
 
 // SyscallParamList returns source code for SyscallX parameters for function f.
@@ -592,9 +553,12 @@ func (f *Fn) SyscallParamList() string {
 	for _, p := range f.Params {
 		a = append(a, p.SyscallArgList()...)
 	}
-	for len(a) < f.SyscallParamCount() {
-		a = append(a, "0")
+
+	// Check if the number exceeds the current SyscallN limit
+	if len(a) > 42 {
+		panic("too many arguments to system call")
 	}
+
 	return strings.Join(a, ", ")
 }
 
@@ -1015,7 +979,7 @@ func {{.HelperName}}({{.HelperParamList}}) {{template "results" .}}{
 
 {{define "results"}}{{if .Rets.List}}{{.Rets.List}} {{end}}{{end}}
 
-{{define "syscall"}}{{.Rets.SetReturnValuesCode}}{{.Syscall}}(proc{{.DLLFuncName}}.Addr(),{{if le .ParamCount 15}} {{.ParamCount}},{{end}} {{.SyscallParamList}}){{end}}
+{{define "syscall"}}{{.Rets.SetReturnValuesCode}}{{.SyscallN}}(proc{{.DLLFuncName}}.Addr(), {{.SyscallParamList}}){{end}}
 
 {{define "tmpvarsreadback"}}{{range .Params}}{{if .TmpVarReadbackCode}}
 {{.TmpVarReadbackCode}}{{end}}{{end}}{{end}}

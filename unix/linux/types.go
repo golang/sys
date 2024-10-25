@@ -20,6 +20,21 @@ package unix
 #define _FILE_OFFSET_BITS 64
 #define _GNU_SOURCE
 
+// Ref: include/linux/time32.h
+//
+// On Linux, in order to solve the overflow problem of time_t type variables on
+// 32-bit arm, mips, and powerpc in 2038, the definition of time_t is switched
+// from a 32-bit field to a 64-bit field. For backward compatibility, we force
+// the use of 32-bit fields.
+#if defined(__ARM_EABI__) || \
+	(defined(__mips__) && (_MIPS_SIM == _ABIO32)) || \
+	(defined(__powerpc__) && (!defined(__powerpc64__)))
+# ifdef  _TIME_BITS
+#  undef _TIME_BITS
+# endif
+# define _TIME_BITS 32
+#endif
+
 #include <dirent.h>
 #include <fcntl.h>
 #include <poll.h>
@@ -129,12 +144,14 @@ struct termios2 {
 #include <linux/netfilter.h>
 #include <linux/netfilter_ipv4.h>
 #include <linux/netlink.h>
+#include <linux/net_tstamp.h>
 #include <linux/nexthop.h>
 #include <linux/nfc.h>
 #include <linux/nl80211.h>
 #include <linux/openat2.h>
 #include <linux/perf_event.h>
 #include <linux/pps.h>
+#include <linux/ptp_clock.h>
 #include <linux/random.h>
 #include <linux/rtc.h>
 #include <linux/rtnetlink.h>
@@ -508,6 +525,15 @@ struct cachestat {
 	__u64 nr_writeback;
 	__u64 nr_evicted;
 	__u64 nr_recently_evicted;
+};
+
+// the one defined in linux/ptp_clock.h has unions
+struct my_ptp_perout_request {
+	struct ptp_clock_time startOrPhase;	// start or phase
+	struct ptp_clock_time period;
+	unsigned int index;
+	unsigned int flags;
+	struct ptp_clock_time on;
 };
 */
 import "C"
@@ -4089,6 +4115,45 @@ const (
 const SPEED_UNKNOWN = C.SPEED_UNKNOWN
 
 type EthtoolDrvinfo C.struct_ethtool_drvinfo
+
+type EthtoolTsInfo C.struct_ethtool_ts_info
+
+type HwTstampConfig C.struct_hwtstamp_config
+
+const (
+	HWTSTAMP_FILTER_NONE            = C.HWTSTAMP_FILTER_NONE
+	HWTSTAMP_FILTER_ALL             = C.HWTSTAMP_FILTER_ALL
+	HWTSTAMP_FILTER_SOME            = C.HWTSTAMP_FILTER_SOME
+	HWTSTAMP_FILTER_PTP_V1_L4_EVENT = C.HWTSTAMP_FILTER_PTP_V1_L4_EVENT
+	HWTSTAMP_FILTER_PTP_V2_L4_EVENT = C.HWTSTAMP_FILTER_PTP_V2_L4_EVENT
+	HWTSTAMP_FILTER_PTP_V2_L2_EVENT = C.HWTSTAMP_FILTER_PTP_V2_L2_EVENT
+	HWTSTAMP_FILTER_PTP_V2_EVENT    = C.HWTSTAMP_FILTER_PTP_V2_EVENT
+)
+
+const (
+	HWTSTAMP_TX_OFF          = C.HWTSTAMP_TX_OFF
+	HWTSTAMP_TX_ON           = C.HWTSTAMP_TX_ON
+	HWTSTAMP_TX_ONESTEP_SYNC = C.HWTSTAMP_TX_ONESTEP_SYNC
+)
+
+type (
+	PtpClockCaps         C.struct_ptp_clock_caps
+	PtpClockTime         C.struct_ptp_clock_time
+	PtpExttsEvent        C.struct_ptp_extts_event
+	PtpExttsRequest      C.struct_ptp_extts_request
+	PtpPeroutRequest     C.struct_my_ptp_perout_request
+	PtpPinDesc           C.struct_ptp_pin_desc
+	PtpSysOffset         C.struct_ptp_sys_offset
+	PtpSysOffsetExtended C.struct_ptp_sys_offset_extended
+	PtpSysOffsetPrecise  C.struct_ptp_sys_offset_precise
+)
+
+const (
+	PTP_PF_NONE    = C.PTP_PF_NONE
+	PTP_PF_EXTTS   = C.PTP_PF_EXTTS
+	PTP_PF_PEROUT  = C.PTP_PF_PEROUT
+	PTP_PF_PHYSYNC = C.PTP_PF_PHYSYNC
+)
 
 type (
 	HIDRawReportDescriptor C.struct_hidraw_report_descriptor
