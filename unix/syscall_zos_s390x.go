@@ -777,7 +777,6 @@ func MunmapPtr(addr unsafe.Pointer, length uintptr) (err error) {
 	return mapper.munmap(uintptr(addr), length)
 }
 
-
 //sys   Gethostname(buf []byte) (err error) = SYS___GETHOSTNAME_A
 //sysnb	Getgid() (gid int)
 //sysnb	Getpid() (pid int)
@@ -3142,7 +3141,7 @@ func Fcntl(fd uintptr, cmd int, op interface{}) (ret int, err error) {
 	case *Flock_t:
 		err = FcntlFlock(fd, cmd, op.(*Flock_t))
 		if err != nil {
-                    ret = -1
+			ret = -1
 		}
 		return
 	case int:

@@ -378,9 +378,9 @@ type Flock_t struct {
 }
 
 type F_cnvrt struct {
-       Cvtcmd int32
-       Pccsid int16
-       Fccsid int16
+	Cvtcmd int32
+	Pccsid int16
+	Fccsid int16
 }
 
 type Termios struct {
