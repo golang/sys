@@ -3155,3 +3155,59 @@ func Fcntl(fd uintptr, cmd int, op interface{}) (ret int, err error) {
 	}
 	return
 }
+
+func Sendfile(outfd int, infd int, offset *int64, count int) (written int, err error) {
+	if raceenabled {
+		raceReleaseMerge(unsafe.Pointer(&ioSync))
+	}
+	return sendfile(outfd, infd, offset, count)
+}
+
+func sendfile(outfd int, infd int, offset *int64, count int) (written int, err error) {
+	// TODO: use LE call instead if the call is implemented
+	originalOffset, err := Seek(infd, 0, SEEK_CUR)
+	if err != nil {
+		return -1, err
+	}
+	//start reading data from in_fd
+	if offset != nil {
+		_, err := Seek(infd, *offset, SEEK_SET)
+		if err != nil {
+			return -1, err
+		}
+	}
+
+	buf := make([]byte, count)
+	readBuf := make([]byte, 0)
+	var n int = 0
+	for i := 0; i < count; i += n {
+		n, err := Read(infd, buf)
+		if n == 0 {
+			if err != nil {
+				return -1, err
+			} else { // EOF
+				break
+			}
+		}
+		readBuf = append(readBuf, buf...)
+		buf = buf[0:0]
+	}
+
+	n2, err := Write(outfd, readBuf)
+	if err != nil {
+		return -1, err
+	}
+
+	//When sendfile() returns, this variable will be set to the
+	// offset of the byte following the last byte that was read.
+	if offset != nil {
+		*offset = *offset + int64(n)
+		// If offset is not NULL, then sendfile() does not modify the file
+		// offset of in_fd
+		_, err := Seek(infd, originalOffset, SEEK_SET)
+		if err != nil {
+			return -1, err
+		}
+	}
+	return n2, nil
+}

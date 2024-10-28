@@ -295,7 +295,11 @@ func TestPassFD(t *testing.T) {
 	defer writeFile.Close()
 	defer readFile.Close()
 
-	cmd := exec.Command(os.Args[0], "-test.run=^TestPassFD$", "--", t.TempDir())
+	exe, err := os.Executable()
+	if err != nil {
+		t.Fatal(err)
+	}
+	cmd := exec.Command(exe, "-test.run=^TestPassFD$", "--", t.TempDir())
 	cmd.Env = []string{"GO_WANT_HELPER_PROCESS=1"}
 	if lp := os.Getenv("LD_LIBRARY_PATH"); lp != "" {
 		cmd.Env = append(cmd.Env, "LD_LIBRARY_PATH="+lp)
@@ -940,7 +944,11 @@ func TestFlock(t *testing.T) {
 			p2status := BLOCKED
 			done := make(chan bool)
 			execP2 := func(isBlock bool) {
-				cmd := exec.Command(os.Args[0], "-test.run=^TestFlock$", strconv.Itoa(c.p2mode), f.Name())
+				exe, err := os.Executable()
+				if err != nil {
+					t.Fatal(err)
+				}
+				cmd := exec.Command(exe, "-test.run=^TestFlock$", strconv.Itoa(c.p2mode), f.Name())
 				cmd.Env = append(os.Environ(), "TEST_FLOCK_HELPER=1")
 				out, _ := cmd.CombinedOutput()
 				if p2status, err = strconv.Atoi(string(out)); err != nil {
@@ -1007,7 +1015,11 @@ func TestLegacyFlock(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Flock: %s", err.Error())
 		}
-		cmd := exec.Command(os.Args[0], "-test.run=TestLegacyFlock", f.Name())
+		exe, err := os.Executable()
+		if err != nil {
+			t.Fatal(err)
+		}
+		cmd := exec.Command(exe, "-test.run=TestLegacyFlock", f.Name())
 		cmd.Env = append(os.Environ(), "GO_WANT_HELPER_PROCESS=1")
 		out, err := cmd.CombinedOutput()
 		if len(out) > 0 || err != nil {
@@ -2375,7 +2387,11 @@ func TestWait4(t *testing.T) {
 
 	for _, c := range testCases {
 		t.Run(c.name, func(t *testing.T) {
-			cmd := exec.Command(os.Args[0], "-test.run=^TestWait4$", fmt.Sprint(c.exitCode))
+			exe, err := os.Executable()
+			if err != nil {
+				t.Fatal(err)
+			}
+			cmd := exec.Command(exe, "-test.run=^TestWait4$", fmt.Sprint(c.exitCode))
 			cmd.Env = []string{"TEST_WAIT4_HELPER=1"}
 			if err := cmd.Start(); err != nil {
 				t.Fatal(err)
@@ -2676,7 +2692,11 @@ func TestMountNamespace(t *testing.T) {
 	defer os.Remove(f.Name())
 	f.Close()
 
-	cmd := exec.Command(os.Args[0], "-test.v", "-test.run=^TestMountNamespace$")
+	exe, err := os.Executable()
+	if err != nil {
+		t.Fatal(err)
+	}
+	cmd := exec.Command(exe, "-test.v", "-test.run=^TestMountNamespace$")
 	cmd.Env = append(os.Environ(), "SETNS_HELPER_PROCESS=1")
 	cmd.Env = append(cmd.Env, "MNT_NS_FILE="+f.Name())
 
@@ -3670,7 +3690,11 @@ func TestSetns(t *testing.T) {
 		}
 	}
 
-	cmd := exec.Command(os.Args[0], "-test.run=^TestSetns$")
+	exe, err := os.Executable()
+	if err != nil {
+		t.Fatal(err)
+	}
+	cmd := exec.Command(exe, "-test.run=^TestSetns$")
 	cmd.Env = append(os.Environ(), "SETNS_HELPER_PROCESS=1")
 	stdin, err := cmd.StdinPipe()
 	if err != nil {
@@ -3869,5 +3893,126 @@ func TestTty(t *testing.T) {
 
 	if !bytes.Equal(text, buffer[:n]) {
 		t.Fatalf("Expected %+v, read %+v\n", text, buffer[:n])
+
 	}
+
+}
+
+func TestSendfile(t *testing.T) {
+	srcContent := "hello, world"
+	srcFile, err := os.Create(filepath.Join(t.TempDir(), "source"))
+	if err != nil {
+		t.Fatal("error: ", err)
+	}
+	defer srcFile.Close()
+
+	dstFile, err := os.Create(filepath.Join(t.TempDir(), "dst"))
+	if err != nil {
+		t.Fatal("error: ", err)
+	}
+	defer dstFile.Close()
+
+	err = os.WriteFile(srcFile.Name(), []byte(srcContent), 0644)
+	if err != nil {
+		t.Fatal("error: ", err)
+	}
+
+	n, err := unix.Sendfile(int(dstFile.Fd()), int(srcFile.Fd()), nil, len(srcContent))
+	if n != len(srcContent) {
+		t.Fatal("error: mismatch content length want ", len(srcContent), " got ", n)
+	}
+	if err != nil {
+		t.Fatal("error: ", err)
+	}
+
+	b, err := os.ReadFile(dstFile.Name())
+	if err != nil {
+		t.Fatal("error: ", err)
+	}
+
+	content := string(b)
+	if content != srcContent {
+		t.Fatal("content mismatch: ", content, " vs ", srcContent)
+	}
+}
+
+func TestSendfileSocket(t *testing.T) {
+	// Set up source data file.
+	name := filepath.Join(t.TempDir(), "source")
+	const contents = "contents"
+	err := os.WriteFile(name, []byte(contents), 0666)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	done := make(chan bool)
+
+	// Start server listening on a socket.
+	ln, err := net.Listen("tcp", "127.0.0.1:0")
+	if err != nil {
+		t.Skipf("listen failed: %s\n", err)
+	}
+	defer ln.Close()
+	go func() {
+		conn, err := ln.Accept()
+		if err != nil {
+			t.Errorf("failed to accept: %v", err)
+			return
+		}
+		defer conn.Close()
+		b, err := io.ReadAll(conn)
+		if err != nil {
+			t.Errorf("failed to read: %v", err)
+			return
+		}
+		if string(b) != contents {
+			t.Errorf("contents not transmitted: got %s (len=%d), want %s", string(b), len(b), contents)
+		}
+		done <- true
+	}()
+
+	// Open source file.
+	src, err := os.Open(name)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Send source file to server.
+	conn, err := net.Dial("tcp", ln.Addr().String())
+	if err != nil {
+		t.Fatal(err)
+	}
+	file, err := conn.(*net.TCPConn).File()
+	if err != nil {
+		t.Fatal(err)
+	}
+	var off int64
+	n, err := unix.Sendfile(int(file.Fd()), int(src.Fd()), &off, len(contents))
+	if err != nil {
+		t.Errorf("Sendfile failed %s\n", err)
+	}
+	if n != len(contents) {
+		t.Errorf("written count wrong: want %d, got %d", len(contents), n)
+	}
+	// Note: off is updated on some systems and not others. Oh well.
+	// Linux: increments off by the amount sent.
+	// Darwin: leaves off unchanged.
+	// It would be nice to fix Darwin if we can.
+	if off != 0 && off != int64(len(contents)) {
+		t.Errorf("offset wrong: god %d, want %d or %d", off, 0, len(contents))
+	}
+	// The cursor position should be unchanged.
+	pos, err := src.Seek(0, 1)
+	if err != nil {
+		t.Errorf("can't get cursor position %s\n", err)
+	}
+	if pos != 0 {
+		t.Errorf("cursor position wrong: got %d, want 0", pos)
+	}
+
+	file.Close() // Note: required to have the close below really send EOF to the server.
+	conn.Close()
+
+	// Wait for server to close.
+	<-done
 }
