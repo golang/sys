@@ -4192,7 +4192,8 @@ type (
 	}
 	PtpSysOffsetExtended struct {
 		Samples uint32
-		Rsv     [3]uint32
+		Clockid int32
+		Rsv     [2]uint32
 		Ts      [25][3]PtpClockTime
 	}
 	PtpSysOffsetPrecise struct {
