@@ -277,6 +277,8 @@ var (
 	procGetModuleHandleExW                                   = modkernel32.NewProc("GetModuleHandleExW")
 	procGetNamedPipeHandleStateW                             = modkernel32.NewProc("GetNamedPipeHandleStateW")
 	procGetNamedPipeInfo                                     = modkernel32.NewProc("GetNamedPipeInfo")
+	procGetNamedPipeClientProcessId                          = modkernel32.NewProc("GetNamedPipeClientProcessId")
+	procGetNamedPipeServerProcessId                          = modkernel32.NewProc("GetNamedPipeServerProcessId")
 	procGetOverlappedResult                                  = modkernel32.NewProc("GetOverlappedResult")
 	procGetPriorityClass                                     = modkernel32.NewProc("GetPriorityClass")
 	procGetProcAddress                                       = modkernel32.NewProc("GetProcAddress")
@@ -2407,6 +2409,22 @@ func GetNamedPipeInfo(pipe Handle, flags *uint32, outSize *uint32, inSize *uint3
 		err = errnoErr(e1)
 	}
 	return
+}
+
+func GetNamedPipeClientProcessID(pipe Handle, clientProcessID *int32) (err error) {
+	r1, _, e1 := syscall.SyscallN(procGetNamedPipeClientProcessId.Addr(), uintptr(pipe), uintptr(unsafe.Pointer(clientProcessID)))
+	if r1 == 0 {
+		return e1
+	}
+	return nil
+}
+
+func GetNamedPipeServerProcessID(pipe Handle, clientProcessID *int32) (err error) {
+	r1, _, e1 := syscall.SyscallN(procGetNamedPipeServerProcessId.Addr(), uintptr(pipe), uintptr(unsafe.Pointer(clientProcessID)))
+	if r1 == 0 {
+		return e1
+	}
+	return nil
 }
 
 func GetOverlappedResult(handle Handle, overlapped *Overlapped, done *uint32, wait bool) (err error) {
