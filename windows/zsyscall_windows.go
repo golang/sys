@@ -275,10 +275,10 @@ var (
 	procGetMaximumProcessorCount                             = modkernel32.NewProc("GetMaximumProcessorCount")
 	procGetModuleFileNameW                                   = modkernel32.NewProc("GetModuleFileNameW")
 	procGetModuleHandleExW                                   = modkernel32.NewProc("GetModuleHandleExW")
+	procGetNamedPipeClientProcessId                          = modkernel32.NewProc("GetNamedPipeClientProcessId")
 	procGetNamedPipeHandleStateW                             = modkernel32.NewProc("GetNamedPipeHandleStateW")
 	procGetNamedPipeInfo                                     = modkernel32.NewProc("GetNamedPipeInfo")
-	procGetNamedPipeClientProcessId                          = modkernel32.NewProc("GetNamedPipeClientProcessId")
-	procGetNamedPipeServerProcessId                          = modkernel32.NewProc("GetNamedPipeServerProcessId")
+	procGetNamedPipeServerProcessID                          = modkernel32.NewProc("GetNamedPipeServerProcessID")
 	procGetOverlappedResult                                  = modkernel32.NewProc("GetOverlappedResult")
 	procGetPriorityClass                                     = modkernel32.NewProc("GetPriorityClass")
 	procGetProcAddress                                       = modkernel32.NewProc("GetProcAddress")
@@ -2395,6 +2395,14 @@ func GetModuleHandleEx(flags uint32, moduleName *uint16, module *Handle) (err er
 	return
 }
 
+func GetNamedPipeClientProcessId(pipe Handle, clientProcessID *uint32) (err error) {
+	r1, _, e1 := syscall.SyscallN(procGetNamedPipeClientProcessId.Addr(), uintptr(pipe), uintptr(unsafe.Pointer(clientProcessID)))
+	if r1 == 0 {
+		err = errnoErr(e1)
+	}
+	return
+}
+
 func GetNamedPipeHandleState(pipe Handle, state *uint32, curInstances *uint32, maxCollectionCount *uint32, collectDataTimeout *uint32, userName *uint16, maxUserNameSize uint32) (err error) {
 	r1, _, e1 := syscall.SyscallN(procGetNamedPipeHandleStateW.Addr(), uintptr(pipe), uintptr(unsafe.Pointer(state)), uintptr(unsafe.Pointer(curInstances)), uintptr(unsafe.Pointer(maxCollectionCount)), uintptr(unsafe.Pointer(collectDataTimeout)), uintptr(unsafe.Pointer(userName)), uintptr(maxUserNameSize))
 	if r1 == 0 {
@@ -2411,20 +2419,12 @@ func GetNamedPipeInfo(pipe Handle, flags *uint32, outSize *uint32, inSize *uint3
 	return
 }
 
-func GetNamedPipeClientProcessID(pipe Handle, clientProcessID *int32) (err error) {
-	r1, _, e1 := syscall.SyscallN(procGetNamedPipeClientProcessId.Addr(), uintptr(pipe), uintptr(unsafe.Pointer(clientProcessID)))
+func GetNamedPipeServerProcessID(pipe Handle, serverProcessID *uint32) (err error) {
+	r1, _, e1 := syscall.SyscallN(procGetNamedPipeServerProcessID.Addr(), uintptr(pipe), uintptr(unsafe.Pointer(serverProcessID)))
 	if r1 == 0 {
-		return e1
+		err = errnoErr(e1)
 	}
-	return nil
-}
-
-func GetNamedPipeServerProcessID(pipe Handle, clientProcessID *int32) (err error) {
-	r1, _, e1 := syscall.SyscallN(procGetNamedPipeServerProcessId.Addr(), uintptr(pipe), uintptr(unsafe.Pointer(clientProcessID)))
-	if r1 == 0 {
-		return e1
-	}
-	return nil
+	return
 }
 
 func GetOverlappedResult(handle Handle, overlapped *Overlapped, done *uint32, wait bool) (err error) {
