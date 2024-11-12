@@ -1612,7 +1612,7 @@ func DwmSetWindowAttribute(hwnd HWND, attribute uint32, value unsafe.Pointer, si
 }
 
 func CancelMibChangeNotify2(notificationHandle Handle) (errcode error) {
-	r0, _, _ := syscall.SyscallN(procCancelMibChangeNotify2.Addr(), uintptr(notificationHandle))
+	r0, _, _ := syscall.Syscall(procCancelMibChangeNotify2.Addr(), 1, uintptr(notificationHandle), 0, 0)
 	if r0 != 0 {
 		errcode = syscall.Errno(r0)
 	}
@@ -1652,7 +1652,7 @@ func GetIfEntry(pIfRow *MibIfRow) (errcode error) {
 }
 
 func GetIfEntry2Ex(level uint32, row *MibIfRow2) (errcode error) {
-	r0, _, _ := syscall.SyscallN(procGetIfEntry2Ex.Addr(), uintptr(level), uintptr(unsafe.Pointer(row)))
+	r0, _, _ := syscall.Syscall(procGetIfEntry2Ex.Addr(), 2, uintptr(level), uintptr(unsafe.Pointer(row)), 0)
 	if r0 != 0 {
 		errcode = syscall.Errno(r0)
 	}
@@ -1660,7 +1660,7 @@ func GetIfEntry2Ex(level uint32, row *MibIfRow2) (errcode error) {
 }
 
 func GetUnicastIpAddressEntry(row *MibUnicastIpAddressRow) (errcode error) {
-	r0, _, _ := syscall.SyscallN(procGetUnicastIpAddressEntry.Addr(), uintptr(unsafe.Pointer(row)))
+	r0, _, _ := syscall.Syscall(procGetUnicastIpAddressEntry.Addr(), 1, uintptr(unsafe.Pointer(row)), 0, 0)
 	if r0 != 0 {
 		errcode = syscall.Errno(r0)
 	}
@@ -1672,7 +1672,7 @@ func NotifyIpInterfaceChange(family uint16, callback uintptr, callerContext unsa
 	if initialNotification {
 		_p0 = 1
 	}
-	r0, _, _ := syscall.SyscallN(procNotifyIpInterfaceChange.Addr(), uintptr(family), uintptr(callback), uintptr(callerContext), uintptr(_p0), uintptr(unsafe.Pointer(notificationHandle)))
+	r0, _, _ := syscall.Syscall6(procNotifyIpInterfaceChange.Addr(), 5, uintptr(family), uintptr(callback), uintptr(callerContext), uintptr(_p0), uintptr(unsafe.Pointer(notificationHandle)), 0)
 	if r0 != 0 {
 		errcode = syscall.Errno(r0)
 	}
@@ -1684,7 +1684,7 @@ func NotifyUnicastIpAddressChange(family uint16, callback uintptr, callerContext
 	if initialNotification {
 		_p0 = 1
 	}
-	r0, _, _ := syscall.SyscallN(procNotifyUnicastIpAddressChange.Addr(), uintptr(family), uintptr(callback), uintptr(callerContext), uintptr(_p0), uintptr(unsafe.Pointer(notificationHandle)))
+	r0, _, _ := syscall.Syscall6(procNotifyUnicastIpAddressChange.Addr(), 5, uintptr(family), uintptr(callback), uintptr(callerContext), uintptr(_p0), uintptr(unsafe.Pointer(notificationHandle)), 0)
 	if r0 != 0 {
 		errcode = syscall.Errno(r0)
 	}
