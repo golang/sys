@@ -100,7 +100,7 @@ var ARM64 struct {
 	HasSHA3     bool // SHA3 hardware implementation
 	HasSM3      bool // SM3 hardware implementation
 	HasSM4      bool // SM4 hardware implementation
-	HasASIMDDP  bool // Advanced SIMD double precision instruction set
+	HasASIMDDP  bool // Advanced SIMD dot product instruction set
 	HasSHA512   bool // SHA512 hardware implementation
 	HasSVE      bool // Scalable Vector Extensions
 	HasSVE2     bool // Scalable Vector Extensions 2
