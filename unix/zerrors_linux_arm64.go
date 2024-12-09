@@ -109,6 +109,7 @@ const (
 	F_SETOWN                         = 0x8
 	F_UNLCK                          = 0x2
 	F_WRLCK                          = 0x1
+	GCS_MAGIC                        = 0x47435300
 	HIDIOCGRAWINFO                   = 0x80084803
 	HIDIOCGRDESC                     = 0x90044802
 	HIDIOCGRDESCSIZE                 = 0x80044801
@@ -302,6 +303,7 @@ const (
 	SCM_TIMESTAMPING_OPT_STATS       = 0x36
 	SCM_TIMESTAMPING_PKTINFO         = 0x3a
 	SCM_TIMESTAMPNS                  = 0x23
+	SCM_TS_OPT_ID                    = 0x51
 	SCM_TXTIME                       = 0x3d
 	SCM_WIFI_STATUS                  = 0x29
 	SECCOMP_IOCTL_NOTIF_ADDFD        = 0x40182103
