@@ -410,7 +410,3 @@ func loadLibraryEx(name string, system bool) (*DLL, error) {
 	}
 	return &DLL{Name: name, Handle: h}, nil
 }
-
-type errString string
-
-func (s errString) Error() string { return string(s) }
