@@ -44,7 +44,7 @@ type DLL struct {
 //
 // Warning: using LoadDLL without an absolute path name is subject to
 // DLL preloading attacks. To safely load a system DLL, use [NewLazySystemDLL],
-// [LazyDLL] with System set to true, or use [LoadLibraryEx] directly.
+// or use [LoadLibraryEx] directly.
 func LoadDLL(name string) (dll *DLL, err error) {
 	namep, err := UTF16PtrFromString(name)
 	if err != nil {
