@@ -9,6 +9,7 @@ package svc
 
 import (
 	"errors"
+	"fmt"
 	"sync"
 	"unsafe"
 
@@ -132,15 +133,24 @@ type ctlEvent struct {
 
 // service provides access to windows service api.
 type service struct {
-	name    string
-	h       windows.Handle
-	c       chan ctlEvent
-	handler Handler
+	name     string
+	h        windows.Handle
+	c        chan ctlEvent
+	handler  Handler
+	exitCode uint32
 }
 
 type exitCode struct {
 	isSvcSpecific bool
 	errno         uint32
+}
+
+type ExitError struct {
+	Code uint32
+}
+
+func (e *ExitError) Error() string {
+	return fmt.Sprintf("service exited with error code %d", e.Code)
 }
 
 func (s *service) updateStatus(status *Status, ec *exitCode) error {
@@ -274,6 +284,7 @@ loop:
 	}
 
 	theService.updateStatus(&Status{State: Stopped}, &ec)
+	theService.exitCode = ec.errno
 
 	return windows.NO_ERROR
 }
