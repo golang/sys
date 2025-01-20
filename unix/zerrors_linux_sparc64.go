@@ -357,6 +357,7 @@ const (
 	SCM_TIMESTAMPING_OPT_STATS       = 0x38
 	SCM_TIMESTAMPING_PKTINFO         = 0x3c
 	SCM_TIMESTAMPNS                  = 0x21
+	SCM_TS_OPT_ID                    = 0x5a
 	SCM_TXTIME                       = 0x3f
 	SCM_WIFI_STATUS                  = 0x25
 	SECCOMP_IOCTL_NOTIF_ADDFD        = 0x80182103
