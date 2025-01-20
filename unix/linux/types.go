@@ -6100,3 +6100,6 @@ const (
 )
 
 type SockDiagReq C.struct_sock_diag_req
+
+// Removed in Linux 6.13, kept for backwards compatibility.
+const RTM_NEWNVLAN = 0x70

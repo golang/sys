@@ -6174,3 +6174,5 @@ type SockDiagReq struct {
 	Family   uint8
 	Protocol uint8
 }
+
+const RTM_NEWNVLAN = 0x70
