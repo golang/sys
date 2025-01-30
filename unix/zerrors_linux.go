@@ -1331,8 +1331,10 @@ const (
 	FUSE_SUPER_MAGIC                            = 0x65735546
 	FUTEXFS_SUPER_MAGIC                         = 0xbad1dea
 	F_ADD_SEALS                                 = 0x409
+	F_CREATED_QUERY                             = 0x404
 	F_DUPFD                                     = 0x0
 	F_DUPFD_CLOEXEC                             = 0x406
+	F_DUPFD_QUERY                               = 0x403
 	F_EXLCK                                     = 0x4
 	F_GETFD                                     = 0x1
 	F_GETFL                                     = 0x3
@@ -1552,6 +1554,7 @@ const (
 	IPPROTO_ROUTING                             = 0x2b
 	IPPROTO_RSVP                                = 0x2e
 	IPPROTO_SCTP                                = 0x84
+	IPPROTO_SMC                                 = 0x100
 	IPPROTO_TCP                                 = 0x6
 	IPPROTO_TP                                  = 0x1d
 	IPPROTO_UDP                                 = 0x11
@@ -1624,6 +1627,8 @@ const (
 	IPV6_UNICAST_IF                             = 0x4c
 	IPV6_USER_FLOW                              = 0xe
 	IPV6_V6ONLY                                 = 0x1a
+	IPV6_VERSION                                = 0x60
+	IPV6_VERSION_MASK                           = 0xf0
 	IPV6_XFRM_POLICY                            = 0x23
 	IP_ADD_MEMBERSHIP                           = 0x23
 	IP_ADD_SOURCE_MEMBERSHIP                    = 0x27
@@ -1868,6 +1873,7 @@ const (
 	MADV_UNMERGEABLE                            = 0xd
 	MADV_WILLNEED                               = 0x3
 	MADV_WIPEONFORK                             = 0x12
+	MAP_DROPPABLE                               = 0x8
 	MAP_FILE                                    = 0x0
 	MAP_FIXED                                   = 0x10
 	MAP_FIXED_NOREPLACE                         = 0x100000
@@ -1968,6 +1974,7 @@ const (
 	MSG_PEEK                                    = 0x2
 	MSG_PROXY                                   = 0x10
 	MSG_RST                                     = 0x1000
+	MSG_SOCK_DEVMEM                             = 0x2000000
 	MSG_SYN                                     = 0x400
 	MSG_TRUNC                                   = 0x20
 	MSG_TRYHARD                                 = 0x4

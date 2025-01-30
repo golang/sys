@@ -115,6 +115,8 @@ const (
 	IN_CLOEXEC                       = 0x80000
 	IN_NONBLOCK                      = 0x80
 	IOCTL_VM_SOCKETS_GET_LOCAL_CID   = 0x200007b9
+	IPV6_FLOWINFO_MASK               = 0xffffff0f
+	IPV6_FLOWLABEL_MASK              = 0xffff0f00
 	ISIG                             = 0x1
 	IUCLC                            = 0x200
 	IXOFF                            = 0x1000
