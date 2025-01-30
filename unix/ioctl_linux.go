@@ -99,6 +99,61 @@ func IoctlSetHwTstamp(fd int, ifname string, cfg *HwTstampConfig) error {
 	return ioctlIfreqData(fd, SIOCSHWTSTAMP, &ifrd)
 }
 
+// FdToClockID derives the clock ID from the file descriptor number
+// - see clock_gettime(3), FD_TO_CLOCKID macros. The resulting ID is
+// suitable for system calls like ClockGettime.
+func FdToClockID(fd int) int32 { return int32((int(^fd) << 3) | 3) }
+
+// IoctlPtpClockGetcaps returns the description of a given PTP device.
+func IoctlPtpClockGetcaps(fd int) (*PtpClockCaps, error) {
+	var value PtpClockCaps
+	err := ioctlPtr(fd, PTP_CLOCK_GETCAPS2, unsafe.Pointer(&value))
+	return &value, err
+}
+
+// IoctlPtpSysOffsetPrecise returns a description of the clock
+// offset compared to the system clock.
+func IoctlPtpSysOffsetPrecise(fd int) (*PtpSysOffsetPrecise, error) {
+	var value PtpSysOffsetPrecise
+	err := ioctlPtr(fd, PTP_SYS_OFFSET_PRECISE2, unsafe.Pointer(&value))
+	return &value, err
+}
+
+// IoctlPtpSysOffsetExtended returns an extended description of the
+// clock offset compared to the system clock. The samples parameter
+// specifies the desired number of measurements.
+func IoctlPtpSysOffsetExtended(fd int, samples uint) (*PtpSysOffsetExtended, error) {
+	value := PtpSysOffsetExtended{Samples: uint32(samples)}
+	err := ioctlPtr(fd, PTP_SYS_OFFSET_EXTENDED2, unsafe.Pointer(&value))
+	return &value, err
+}
+
+// IoctlPtpPinGetfunc returns the configuration of the specified
+// I/O pin on given PTP device.
+func IoctlPtpPinGetfunc(fd int, index uint) (*PtpPinDesc, error) {
+	value := PtpPinDesc{Index: uint32(index)}
+	err := ioctlPtr(fd, PTP_PIN_GETFUNC2, unsafe.Pointer(&value))
+	return &value, err
+}
+
+// IoctlPtpPinSetfunc updates configuration of the specified PTP
+// I/O pin.
+func IoctlPtpPinSetfunc(fd int, pd *PtpPinDesc) error {
+	return ioctlPtr(fd, PTP_PIN_SETFUNC2, unsafe.Pointer(pd))
+}
+
+// IoctlPtpPeroutRequest configures the periodic output mode of the
+// PTP I/O pins.
+func IoctlPtpPeroutRequest(fd int, r *PtpPeroutRequest) error {
+	return ioctlPtr(fd, PTP_PEROUT_REQUEST2, unsafe.Pointer(r))
+}
+
+// IoctlPtpExttsRequest configures the external timestamping mode
+// of the PTP I/O pins.
+func IoctlPtpExttsRequest(fd int, r *PtpExttsRequest) error {
+	return ioctlPtr(fd, PTP_EXTTS_REQUEST2, unsafe.Pointer(r))
+}
+
 // IoctlGetWatchdogInfo fetches information about a watchdog device from the
 // Linux watchdog API. For more information, see:
 // https://www.kernel.org/doc/html/latest/watchdog/watchdog-api.html.

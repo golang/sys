@@ -337,15 +337,21 @@ func TestPpoll(t *testing.T) {
 
 	fds := []unix.PollFd{{Fd: int32(f.Fd()), Events: unix.POLLIN}}
 	timeoutTs := unix.NsecToTimespec(int64(timeout))
-	n, err := unix.Ppoll(fds, &timeoutTs, nil)
-	ok <- true
-	if err != nil {
-		t.Errorf("Ppoll: unexpected error: %v", err)
-		return
-	}
-	if n != 0 {
-		t.Errorf("Ppoll: wrong number of events: got %v, expected %v", n, 0)
-		return
+	for {
+		n, err := unix.Ppoll(fds, &timeoutTs, nil)
+		ok <- true
+		if err == unix.EINTR {
+			t.Log("Ppoll interrupted")
+			continue
+		} else if err != nil {
+			t.Errorf("Ppoll: unexpected error: %v", err)
+			return
+		}
+		if n != 0 {
+			t.Errorf("Ppoll: wrong number of events: got %v, expected %v", n, 0)
+			return
+		}
+		break
 	}
 }
 
