@@ -1074,6 +1074,7 @@ const (
 	IP_ADD_MEMBERSHIP  = 0xc
 	IP_DROP_MEMBERSHIP = 0xd
 	IP_PKTINFO         = 0x13
+	IP_MTU_DISCOVER    = 0x47
 
 	IPV6_V6ONLY         = 0x1b
 	IPV6_UNICAST_HOPS   = 0x4
@@ -1083,6 +1084,7 @@ const (
 	IPV6_JOIN_GROUP     = 0xc
 	IPV6_LEAVE_GROUP    = 0xd
 	IPV6_PKTINFO        = 0x13
+	IPV6_MTU_DISCOVER   = 0x47
 
 	MSG_OOB       = 0x1
 	MSG_PEEK      = 0x2
@@ -1130,6 +1132,15 @@ const (
 
 	WSADESCRIPTION_LEN = 256
 	WSASYS_STATUS_LEN  = 128
+)
+
+// enum PMTUD_STATE from ws2ipdef.h
+const (
+	IP_PMTUDISC_NOT_SET = 0
+	IP_PMTUDISC_DO      = 1
+	IP_PMTUDISC_DONT    = 2
+	IP_PMTUDISC_PROBE   = 3
+	IP_PMTUDISC_MAX     = 4
 )
 
 type WSABuf struct {
