@@ -239,3 +239,106 @@ func TestIsWindowsServiceWhenParentExits(t *testing.T) {
 		}
 	}
 }
+
+func TestServiceRestart(t *testing.T) {
+	if os.Getenv("GO_BUILDER_NAME") == "" {
+		// Don't install services on arbitrary users' machines.
+		t.Skip("Skipping test that modifies system services: GO_BUILDER_NAME not set")
+	}
+	if testing.Short() {
+		t.Skip("Skipping test in short mode that modifies system services")
+	}
+
+	const name = "svctestservice"
+
+	m, err := mgr.Connect()
+	if err != nil {
+		t.Fatalf("SCM connection failed: %v", err)
+	}
+	defer m.Disconnect()
+
+	// Build the service executable
+	exepath := filepath.Join(t.TempDir(), "a.exe")
+	o, err := exec.Command("go", "build", "-o", exepath, "golang.org/x/sys/windows/svc/example").CombinedOutput()
+	if err != nil {
+		t.Fatalf("Failed to build service program: %v\n%v", err, string(o))
+	}
+
+	// Ensure any existing service is stopped and deleted
+	stopAndDeleteIfInstalled(t, m, name)
+
+	// Create the service
+	s, err := m.CreateService(name, exepath, mgr.Config{DisplayName: "x-sys svc test service"})
+	if err != nil {
+		t.Fatalf("CreateService(%s) failed: %v", name, err)
+	}
+	defer s.Close()
+
+	// Set the service to restart on failure
+	actions := []mgr.RecoveryAction{
+		{Type: mgr.ServiceRestart, Delay: 1 * time.Second}, // Restart after 1 second
+	}
+	err = s.SetRecoveryActions(actions, 0)
+	if err != nil {
+		t.Fatalf("Failed to set service recovery actions: %v", err)
+	}
+
+	// Set the flag to perform recovery actions on non-crash failures
+	err = s.SetRecoveryActionsOnNonCrashFailures(true)
+	if err != nil {
+		t.Fatalf("Failed to set RecoveryActionsOnNonCrashFailures: %v", err)
+	}
+
+	// Start the service
+	testState(t, s, svc.Stopped)
+	err = s.Start()
+	if err != nil {
+		t.Fatalf("Start(%s) failed: %v", s.Name, err)
+	}
+
+	// Wait for the service to start
+	waitState(t, s, svc.Running)
+
+	// Get the initial process ID
+	status, err := s.Query()
+	if err != nil {
+		t.Fatalf("Query(%s) failed: %v", s.Name, err)
+	}
+	initialPID := status.ProcessId
+	t.Logf("Initial PID: %d", initialPID)
+
+	// Wait up to 30 seconds for the PID to change, indicating a restart
+	var newPID uint32
+	success := false
+	for i := 0; i < 30; i++ {
+		time.Sleep(1 * time.Second)
+
+		status, err = s.Query()
+		if err != nil {
+			t.Fatalf("Query(%s) failed: %v", s.Name, err)
+		}
+		newPID = status.ProcessId
+
+		if newPID != 0 && newPID != initialPID {
+			success = true
+			t.Logf("Service restarted successfully, new PID: %d", newPID)
+			break
+		}
+	}
+
+	if !success {
+		t.Fatalf("Service did not restart within the expected time")
+	}
+
+	// Cleanup: Stop and delete the service
+	_, err = s.Control(svc.Stop)
+	if err != nil {
+		t.Fatalf("Control(%s) failed: %v", s.Name, err)
+	}
+	waitState(t, s, svc.Stopped)
+
+	err = s.Delete()
+	if err != nil {
+		t.Fatalf("Delete failed: %v", err)
+	}
+}
