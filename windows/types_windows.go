@@ -1157,6 +1157,22 @@ type WSAMsg struct {
 	Flags       uint32
 }
 
+type Cmsghdr struct {
+	Len   uintptr
+	Level int32
+	Type  int32
+}
+
+type Inet4Pktinfo struct {
+	Addr    [4]byte
+	Ifindex uint32
+}
+
+type Inet6Pktinfo struct {
+	Addr    [16]byte
+	Ifindex uint32
+}
+
 // Flags for WSASocket
 const (
 	WSA_FLAG_OVERLAPPED             = 0x01
