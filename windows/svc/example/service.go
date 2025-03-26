@@ -8,9 +8,11 @@ package main
 
 import (
 	"fmt"
+	"os"
 	"strings"
 	"time"
 
+	"golang.org/x/sys/windows"
 	"golang.org/x/sys/windows/svc"
 	"golang.org/x/sys/windows/svc/debug"
 	"golang.org/x/sys/windows/svc/eventlog"
@@ -27,9 +29,17 @@ func (m *exampleService) Execute(args []string, r <-chan svc.ChangeRequest, chan
 	slowtick := time.Tick(2 * time.Second)
 	tick := fasttick
 	changes <- svc.Status{State: svc.Running, Accepts: cmdsAccepted}
+
+	// Simulate failure after 5 seconds
+	failureTimer := time.NewTimer(5 * time.Second)
+	defer failureTimer.Stop()
+
 loop:
 	for {
 		select {
+		case <-failureTimer.C:
+			// Simulate failure by returning a non-zero exit code
+			return false, uint32(windows.ERROR_UNEXP_NET_ERR)
 		case <-tick:
 			beep()
 			elog.Info(1, "beep")
@@ -81,6 +91,11 @@ func runService(name string, isDebug bool) {
 	err = run(name, &exampleService{})
 	if err != nil {
 		elog.Error(1, fmt.Sprintf("%s service failed: %v", name, err))
+		if exitErr, ok := err.(*svc.ExitError); ok {
+			os.Exit(int(exitErr.Code))
+		} else {
+			os.Exit(1)
+		}
 		return
 	}
 	elog.Info(1, fmt.Sprintf("%s service stopped", name))
