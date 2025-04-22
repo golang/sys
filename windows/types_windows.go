@@ -2700,6 +2700,8 @@ type CommTimeouts struct {
 
 // NTUnicodeString is a UTF-16 string for NT native APIs, corresponding to UNICODE_STRING.
 type NTUnicodeString struct {
+	// Note: Length and MaximumLength are in *bytes*, not uint16s.
+	// They should always be even.
 	Length        uint16
 	MaximumLength uint16
 	Buffer        *uint16

@@ -1698,8 +1698,9 @@ func NewNTUnicodeString(s string) (*NTUnicodeString, error) {
 
 // Slice returns a uint16 slice that aliases the data in the NTUnicodeString.
 func (s *NTUnicodeString) Slice() []uint16 {
-	slice := unsafe.Slice(s.Buffer, s.MaximumLength)
-	return slice[:s.Length]
+	// Note: this rounds the length down, if it happens
+	// to (incorrectly) be odd. Probably safer than rounding up.
+	return unsafe.Slice(s.Buffer, s.MaximumLength/2)[:s.Length/2]
 }
 
 func (s *NTUnicodeString) String() string {

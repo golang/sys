@@ -1473,3 +1473,23 @@ func TestToUnicodeEx(t *testing.T) {
 		t.Errorf("UnloadKeyboardLayout failed: %v", err)
 	}
 }
+
+func TestRoundtripNTUnicodeString(t *testing.T) {
+	for _, s := range []string{
+		"",
+		"hello",
+		"Ƀ",
+		strings.Repeat("*", 32000), // NTUnicodeString works up to 2^16 byte lengths == 32768 uint16s.
+		// TODO: various encoding errors?
+	} {
+		ntus, err := windows.NewNTUnicodeString(s)
+		if err != nil {
+			t.Errorf("encoding %q failed: %v", s, err)
+			continue
+		}
+		s2 := ntus.String()
+		if s != s2 {
+			t.Errorf("round trip of %q = %q, wanted original", s, s2)
+		}
+	}
+}
