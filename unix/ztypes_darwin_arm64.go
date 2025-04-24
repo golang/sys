@@ -125,11 +125,7 @@ type Radvisory_t struct {
 	_      [4]byte
 }
 
-type Fbootstraptransfer_t struct {
-	Offset int64
-	Length uint64
-	Buffer *byte
-}
+type Fbootstraptransfer_t _cgopackage.Incomplete
 
 type Log2phys_t struct {
 	Flags uint32
@@ -628,8 +624,7 @@ type RtMetrics struct {
 	Rtt      uint32
 	Rttvar   uint32
 	Pksent   uint32
-	State    uint32
-	Filler   [3]uint32
+	Filler   [4]uint32
 }
 
 const (
