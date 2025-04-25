@@ -871,3 +871,11 @@ const (
 	SHM_RDONLY = 0x1000
 	SHM_RND    = 0x2000
 )
+
+const RTF_LLDATA = 0x400
+
+type Fbootstraptransfer_t struct {
+	Offset int64
+	Length uint64
+	Buffer *byte
+}

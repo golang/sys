@@ -394,3 +394,13 @@ const (
 	SHM_RDONLY = C.SHM_RDONLY
 	SHM_RND    = C.SHM_RND
 )
+
+// Removed in xnu-10002.41.9
+const RTF_LLDATA = 0x400
+
+// Removed in xnu-8792.41.9
+type Fbootstraptransfer_t struct {
+	Offset int64
+	Length uint64
+	Buffer *byte
+}
