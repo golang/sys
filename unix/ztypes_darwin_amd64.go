@@ -125,8 +125,6 @@ type Radvisory_t struct {
 	_      [4]byte
 }
 
-type Fbootstraptransfer_t _cgopackage.Incomplete
-
 type Log2phys_t struct {
 	Flags uint32
 	_     [16]byte

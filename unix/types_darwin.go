@@ -131,8 +131,6 @@ type Fstore_t C.struct_fstore
 
 type Radvisory_t C.struct_radvisory
 
-type Fbootstraptransfer_t C.struct_fbootstraptransfer
-
 type Log2phys_t C.struct_log2phys
 
 type Fsid C.struct_fsid
