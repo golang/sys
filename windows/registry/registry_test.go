@@ -9,6 +9,7 @@ package registry_test
 import (
 	"bytes"
 	"crypto/rand"
+	"errors"
 	"os"
 	"syscall"
 	"testing"
@@ -673,4 +674,31 @@ func GetDynamicTimeZoneInformation(dtzi *DynamicTimezoneinformation) (rc uint32,
 		}
 	}
 	return
+}
+
+func TestModTimeZeroValue(t *testing.T) {
+	k, err := registry.OpenKey(registry.LOCAL_MACHINE, `SOFTWARE\Microsoft\Windows NT\CurrentVersion\Perflib\009`, registry.READ)
+	if err != nil {
+		if errors.Is(err, syscall.ERROR_FILE_NOT_FOUND) {
+			t.Skip("Perflib key not found; skipping")
+		}
+		t.Fatal(err)
+	}
+	defer k.Close()
+
+	// Modification time of Perflib keys is known to be set to
+	// Filetime's zero value: get stats and check.
+	stats, err := k.Stat()
+	if err != nil {
+		t.Fatal(err)
+	}
+	// First verify input is zero (assume ModTimeZero uses it directly).
+	if !stats.ModTimeZero() {
+		t.Error("Modification time of Perflib key should be zero")
+	}
+	// Then check ModTime directly thus conversion implicitly.
+	modTime := stats.ModTime()
+	if !modTime.Equal(time.Date(1601, time.January, 1, 0, 0, 0, 0, time.UTC)) {
+		t.Errorf("ModTime should be 1601-01-01, but is %v", modTime)
+	}
 }
