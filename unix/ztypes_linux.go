@@ -629,6 +629,8 @@ const (
 	IFA_FLAGS          = 0x8
 	IFA_RT_PRIORITY    = 0x9
 	IFA_TARGET_NETNSID = 0xa
+	IFAL_LABEL         = 0x2
+	IFAL_ADDRESS       = 0x1
 	RT_SCOPE_UNIVERSE  = 0x0
 	RT_SCOPE_SITE      = 0xc8
 	RT_SCOPE_LINK      = 0xfd
@@ -686,6 +688,7 @@ const (
 	SizeofRtAttr       = 0x4
 	SizeofIfInfomsg    = 0x10
 	SizeofIfAddrmsg    = 0x8
+	SizeofIfAddrmsg    = 0xc
 	SizeofIfaCacheinfo = 0x10
 	SizeofRtMsg        = 0xc
 	SizeofRtNexthop    = 0x8
@@ -735,6 +738,15 @@ type IfAddrmsg struct {
 	Flags     uint8
 	Scope     uint8
 	Index     uint32
+}
+
+type IfAddrlabelmsg struct {
+	Family    uint8
+	_         uint8
+	Prefixlen uint8
+	Flags     uint8
+	Index     uint32
+	Seq       uint32
 }
 
 type IfaCacheinfo struct {
