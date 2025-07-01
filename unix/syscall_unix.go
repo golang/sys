@@ -369,7 +369,7 @@ func Recvmsg(fd int, p, oob []byte, flags int) (n, oobn int, recvflags int, from
 	var rsa RawSockaddrAny
 	n, oobn, recvflags, err = recvmsgRaw(fd, iov[:], oob, flags, &rsa)
 	// source address is only specified if the socket is unconnected
-	if rsa.Addr.Family != AF_UNSPEC {
+	if err == nil && rsa.Addr.Family != AF_UNSPEC {
 		from, err = anyToSockaddr(fd, &rsa)
 	}
 	return
