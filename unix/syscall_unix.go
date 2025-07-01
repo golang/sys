@@ -375,6 +375,17 @@ func Recvmsg(fd int, p, oob []byte, flags int) (n, oobn int, recvflags int, from
 	return
 }
 
+// RecvmsgAnon is like Recvmsg but does not return the sender address.
+func RecvmsgAnon(fd int, p, oob []byte, flags int) (n, oobn int, recvflags int, err error) {
+	var iov [1]Iovec
+	if len(p) > 0 {
+		iov[0].Base = &p[0]
+		iov[0].SetLen(len(p))
+	}
+	n, oobn, recvflags, err = recvmsgRaw(fd, iov[:], oob, flags, nil)
+	return
+}
+
 // RecvmsgBuffers receives a message from a socket using the recvmsg system
 // call. This function is equivalent to Recvmsg, but non-control data read is
 // scattered into the buffers slices.
