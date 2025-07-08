@@ -1782,7 +1782,7 @@ func LoadResourceData(module, resInfo Handle) (data []byte, err error) {
 }
 
 // PSAPI_WORKING_SET_EX_BLOCK contains extended working set information for a page.
-type PSAPI_WORKING_SET_EX_BLOCK uint64
+type PSAPI_WORKING_SET_EX_BLOCK uintptr
 
 // Valid returns the validity of this page.
 // If this bit is 1, the subsequent members are valid; otherwise they should be ignored.
@@ -1844,7 +1844,7 @@ func (b PSAPI_WORKING_SET_EX_BLOCK) intField(start, length int) uint64 {
 // PSAPI_WORKING_SET_EX_INFORMATION contains extended working set information for a process.
 type PSAPI_WORKING_SET_EX_INFORMATION struct {
 	// The virtual address.
-	VirtualAddress Pointer
+	VirtualAddress uintptr
 	// A PSAPI_WORKING_SET_EX_BLOCK union that indicates the attributes of the page at VirtualAddress.
 	VirtualAttributes PSAPI_WORKING_SET_EX_BLOCK
 }

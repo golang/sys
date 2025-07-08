@@ -1026,7 +1026,7 @@ func TestQueryWorkingSetEx(t *testing.T) {
 
 	process := windows.CurrentProcess()
 	information := windows.PSAPI_WORKING_SET_EX_INFORMATION{
-		VirtualAddress: windows.Pointer(unsafe.Pointer(&a)),
+		VirtualAddress: uintptr(unsafe.Pointer(&a)),
 	}
 	infos := []windows.PSAPI_WORKING_SET_EX_INFORMATION{information}
 
