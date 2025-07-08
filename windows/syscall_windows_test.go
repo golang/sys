@@ -1022,11 +1022,34 @@ func TestProcessModules(t *testing.T) {
 }
 
 func TestQueryWorkingSetEx(t *testing.T) {
-	var a int
+	// alloc a shared page
+	sharedMemSize := os.Getpagesize()
+	handle, err := windows.CreateFileMapping(
+		windows.InvalidHandle,
+		nil,
+		windows.PAGE_READWRITE,
+		0,
+		uint32(sharedMemSize),
+		nil,
+	)
+	if err != nil {
+		t.Fatalf("%+v", err)
+	}
+	defer windows.CloseHandle(handle)
+
+	addr, err := windows.MapViewOfFile(handle, windows.FILE_MAP_WRITE, 0, 0, uintptr(sharedMemSize))
+	if err != nil {
+		t.Fatalf("%+v", err)
+	}
+	defer windows.UnmapViewOfFile(addr)
+
+	// accessing it to paging it in
+	memSlice := unsafe.Slice((*byte)(unsafe.Pointer(addr)), sharedMemSize)
+	memSlice[0] = 1
 
 	process := windows.CurrentProcess()
 	information := windows.PSAPI_WORKING_SET_EX_INFORMATION{
-		VirtualAddress: uintptr(unsafe.Pointer(&a)),
+		VirtualAddress: addr,
 	}
 	infos := []windows.PSAPI_WORKING_SET_EX_INFORMATION{information}
 
@@ -1037,6 +1060,9 @@ func TestQueryWorkingSetEx(t *testing.T) {
 
 	if !infos[0].VirtualAttributes.Valid() {
 		t.Errorf("memory location not valid")
+	}
+	if !infos[0].VirtualAttributes.Shared() {
+		t.Errorf("memory location not shared")
 	}
 }
 
