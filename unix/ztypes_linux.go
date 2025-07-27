@@ -2317,6 +2317,11 @@ const (
 	NFT_CT_AVGPKT                     = 0x10
 	NFT_CT_ZONE                       = 0x11
 	NFT_CT_EVENTMASK                  = 0x12
+	NFT_CT_SRC_IP                     = 0x13
+	NFT_CT_DST_IP                     = 0x14
+	NFT_CT_SRC_IP6                    = 0x15
+	NFT_CT_DST_IP6                    = 0x16
+	NFT_CT_ID                         = 0x17
 	NFTA_CT_UNSPEC                    = 0x0
 	NFTA_CT_DREG                      = 0x1
 	NFTA_CT_KEY                       = 0x2

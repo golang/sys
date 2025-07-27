@@ -2384,6 +2384,11 @@ const (
 	NFT_CT_AVGPKT                     = C.NFT_CT_AVGPKT
 	NFT_CT_ZONE                       = C.NFT_CT_ZONE
 	NFT_CT_EVENTMASK                  = C.NFT_CT_EVENTMASK
+	NFT_CT_SRC_IP                     = C.NFT_CT_SRC_IP
+	NFT_CT_DST_IP                     = C.NFT_CT_DST_IP
+	NFT_CT_SRC_IP6                    = C.NFT_CT_SRC_IP6
+	NFT_CT_DST_IP6                    = C.NFT_CT_DST_IP6
+	NFT_CT_ID                         = C.NFT_CT_ID
 	NFTA_CT_UNSPEC                    = C.NFTA_CT_UNSPEC
 	NFTA_CT_DREG                      = C.NFTA_CT_DREG
 	NFTA_CT_KEY                       = C.NFTA_CT_KEY
