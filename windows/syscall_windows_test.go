@@ -1022,8 +1022,9 @@ func TestProcessModules(t *testing.T) {
 }
 
 func TestQueryWorkingSetEx(t *testing.T) {
-	// alloc a shared page
-	sharedMemSize := os.Getpagesize()
+	// alloc some shared pages
+	pageNum := 100
+	sharedMemSize := os.Getpagesize() * pageNum
 	handle, err := windows.CreateFileMapping(
 		windows.InvalidHandle,
 		nil,
@@ -1045,24 +1046,28 @@ func TestQueryWorkingSetEx(t *testing.T) {
 
 	// accessing it to paging it in
 	memSlice := unsafe.Slice((*byte)(unsafe.Pointer(addr)), sharedMemSize)
-	memSlice[0] = 1
+	for i := range memSlice {
+		memSlice[i] = 1
+	}
 
 	process := windows.CurrentProcess()
-	information := windows.PSAPI_WORKING_SET_EX_INFORMATION{
-		VirtualAddress: addr,
+	infos := make([]windows.PSAPI_WORKING_SET_EX_INFORMATION, pageNum)
+	for i := 0; i < pageNum; i++ {
+		infos[i].VirtualAddress = addr + uintptr(i*os.Getpagesize())
 	}
-	infos := []windows.PSAPI_WORKING_SET_EX_INFORMATION{information}
 
 	cb := uint32(uintptr(len(infos)) * unsafe.Sizeof(infos[0]))
 	if err := windows.QueryWorkingSetEx(process, uintptr(unsafe.Pointer(&infos[0])), cb); err != nil {
 		t.Fatalf("%+v", err)
 	}
 
-	if !infos[0].VirtualAttributes.Valid() {
-		t.Errorf("memory location not valid")
-	}
-	if !infos[0].VirtualAttributes.Shared() {
-		t.Errorf("memory location not shared")
+	for i := 0; i < pageNum; i++ {
+		if !infos[i].VirtualAttributes.Valid() {
+			t.Errorf("memory location not valid")
+		}
+		if !infos[i].VirtualAttributes.Shared() {
+			t.Errorf("memory location not shared")
+		}
 	}
 }
 
