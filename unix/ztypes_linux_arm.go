@@ -91,7 +91,7 @@ type Stat_t struct {
 	Gid     uint32
 	Rdev    uint64
 	_       uint16
-	_       [4]byte
+	_       [6]byte
 	Size    int64
 	Blksize int32
 	_       [4]byte
@@ -273,7 +273,7 @@ type Taskstats struct {
 	Ac_exitcode               uint32
 	Ac_flag                   uint8
 	Ac_nice                   uint8
-	_                         [4]byte
+	_                         [6]byte
 	Cpu_count                 uint64
 	Cpu_delay_total           uint64
 	Cpu_delay_max             uint64

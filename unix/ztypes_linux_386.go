@@ -282,7 +282,7 @@ type Taskstats struct {
 	Ac_exitcode               uint32
 	Ac_flag                   uint8
 	Ac_nice                   uint8
-	_                         [4]byte
+	_                         [6]byte
 	Cpu_count                 uint64
 	Cpu_delay_total           uint64
 	Cpu_delay_max             uint64
