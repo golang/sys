@@ -202,7 +202,8 @@ type Xucred struct {
 	Uid     uint32
 	Ngroups int16
 	Groups  [16]uint32
-	_       *byte
+	_       byte
+	Pid		uint32
 }
 
 type Linger struct {
@@ -267,7 +268,7 @@ const (
 	SizeofSockaddrAny      = 0x6c
 	SizeofSockaddrUnix     = 0x6a
 	SizeofSockaddrDatalink = 0x36
-	SizeofXucred           = 0x50
+	SizeofXucred           = 0x54
 	SizeofLinger           = 0x8
 	SizeofIovec            = 0x8
 	SizeofIPMreq           = 0x8
