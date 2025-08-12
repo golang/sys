@@ -121,6 +121,7 @@ struct termios2 {
 #include <linux/hidraw.h>
 #include <linux/icmp.h>
 #include <linux/icmpv6.h>
+#include <linux/if_addrlabel.h>
 #include <linux/if_alg.h>
 #include <linux/if_bridge.h>
 #include <linux/if_packet.h>
@@ -878,6 +879,8 @@ const (
 	IFA_FLAGS          = C.IFA_FLAGS
 	IFA_RT_PRIORITY    = C.IFA_RT_PRIORITY
 	IFA_TARGET_NETNSID = C.IFA_TARGET_NETNSID
+	IFAL_LABEL         = C.IFAL_LABEL
+	IFAL_ADDRESS       = C.IFAL_ADDRESS
 	RT_SCOPE_UNIVERSE  = C.RT_SCOPE_UNIVERSE
 	RT_SCOPE_SITE      = C.RT_SCOPE_SITE
 	RT_SCOPE_LINK      = C.RT_SCOPE_LINK
@@ -935,6 +938,7 @@ const (
 	SizeofRtAttr       = C.sizeof_struct_rtattr
 	SizeofIfInfomsg    = C.sizeof_struct_ifinfomsg
 	SizeofIfAddrmsg    = C.sizeof_struct_ifaddrmsg
+	SizeofIfAddrlblmsg = C.sizeof_struct_ifaddrlblmsg
 	SizeofIfaCacheinfo = C.sizeof_struct_ifa_cacheinfo
 	SizeofRtMsg        = C.sizeof_struct_rtmsg
 	SizeofRtNexthop    = C.sizeof_struct_rtnexthop
@@ -955,6 +959,8 @@ type RtAttr C.struct_rtattr
 type IfInfomsg C.struct_ifinfomsg
 
 type IfAddrmsg C.struct_ifaddrmsg
+
+type IfAddrlblmsg C.struct_ifaddrlblmsg
 
 type IfaCacheinfo C.struct_ifa_cacheinfo
 
