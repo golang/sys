@@ -3052,6 +3052,23 @@ const (
 )
 
 const (
+	TCA_UNSPEC            = 0x0
+	TCA_KIND              = 0x1
+	TCA_OPTIONS           = 0x2
+	TCA_STATS             = 0x3
+	TCA_XSTATS            = 0x4
+	TCA_RATE              = 0x5
+	TCA_FCNT              = 0x6
+	TCA_STATS2            = 0x7
+	TCA_STAB              = 0x8
+	TCA_PAD               = 0x9
+	TCA_DUMP_INVISIBLE    = 0xa
+	TCA_CHAIN             = 0xb
+	TCA_HW_OFFLOAD        = 0xc
+	TCA_INGRESS_BLOCK     = 0xd
+	TCA_EGRESS_BLOCK      = 0xe
+	TCA_DUMP_FLAGS        = 0xf
+	TCA_EXT_WARN_MSG      = 0x10
 	RTNLGRP_NONE          = 0x0
 	RTNLGRP_LINK          = 0x1
 	RTNLGRP_NOTIFY        = 0x2
@@ -3086,6 +3103,18 @@ const (
 	RTNLGRP_IPV6_MROUTE_R = 0x1f
 	RTNLGRP_NEXTHOP       = 0x20
 	RTNLGRP_BRVLAN        = 0x21
+	RTNLGRP_MCTP_IFADDR   = 0x22
+	RTNLGRP_TUNNEL        = 0x23
+	RTNLGRP_STATS         = 0x24
+	RTNLGRP_IPV4_MCADDR   = 0x25
+	RTNLGRP_IPV6_MCADDR   = 0x26
+	RTNLGRP_IPV6_ACADDR   = 0x27
+	TCA_ROOT_UNSPEC       = 0x0
+	TCA_ROOT_TAB          = 0x1
+	TCA_ROOT_FLAGS        = 0x2
+	TCA_ROOT_COUNT        = 0x3
+	TCA_ROOT_TIME_DELTA   = 0x4
+	TCA_ROOT_EXT_WARN_MSG = 0x5
 )
 
 type CapUserHeader struct {
