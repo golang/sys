@@ -43,6 +43,15 @@ func (s *CPUSet) Zero() {
 	}
 }
 
+// Fill adds all possible CPU bits to the set s. On Linux, [SchedSetaffinity]
+// will silently ignore any invalid CPU bits in [CPUSet] so this is an
+// efficient way of resetting the CPU affinity of a process.
+func (s *CPUSet) Fill() {
+	for i := range s {
+		s[i] = ^cpuMask(0)
+	}
+}
+
 func cpuBitsIndex(cpu int) int {
 	return cpu / _NCPUBITS
 }
