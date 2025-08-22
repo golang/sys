@@ -1896,7 +1896,7 @@ type TCPKeepalive struct {
 	Interval uint32
 }
 
-type symbolicLinkReparseBuffer struct {
+type SymbolicLinkReparseBuffer struct {
 	SubstituteNameOffset uint16
 	SubstituteNameLength uint16
 	PrintNameOffset      uint16
@@ -1905,7 +1905,14 @@ type symbolicLinkReparseBuffer struct {
 	PathBuffer           [1]uint16
 }
 
-type mountPointReparseBuffer struct {
+// Path returns path stored in rb.
+func (rb *SymbolicLinkReparseBuffer) Path() string {
+	n1 := rb.SubstituteNameOffset / 2
+	n2 := (rb.SubstituteNameOffset + rb.SubstituteNameLength) / 2
+	return syscall.UTF16ToString((*[0xffff]uint16)(unsafe.Pointer(&rb.PathBuffer[0]))[n1:n2:n2])
+}
+
+type MountPointReparseBuffer struct {
 	SubstituteNameOffset uint16
 	SubstituteNameLength uint16
 	PrintNameOffset      uint16
@@ -1913,7 +1920,13 @@ type mountPointReparseBuffer struct {
 	PathBuffer           [1]uint16
 }
 
-type reparseDataBuffer struct {
+type ReparseDataBufferHeader struct {
+	ReparseTag        uint32
+	ReparseDataLength uint16
+	Reserved          uint16
+}
+
+type ReparseDataBuffer struct {
 	ReparseTag        uint32
 	ReparseDataLength uint16
 	Reserved          uint16
@@ -1974,6 +1987,7 @@ const (
 	IO_REPARSE_TAG_MOUNT_POINT       = 0xA0000003
 	IO_REPARSE_TAG_SYMLINK           = 0xA000000C
 	SYMBOLIC_LINK_FLAG_DIRECTORY     = 0x1
+	SYMBOLIC_LINK_FLAG_RELATIVE      = 1
 )
 
 const (
