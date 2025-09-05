@@ -238,6 +238,7 @@ var (
 	procFindResourceW                                        = modkernel32.NewProc("FindResourceW")
 	procFindVolumeClose                                      = modkernel32.NewProc("FindVolumeClose")
 	procFindVolumeMountPointClose                            = modkernel32.NewProc("FindVolumeMountPointClose")
+	procFlushConsoleInputBuffer                              = modkernel32.NewProc("FlushConsoleInputBuffer")
 	procFlushFileBuffers                                     = modkernel32.NewProc("FlushFileBuffers")
 	procFlushViewOfFile                                      = modkernel32.NewProc("FlushViewOfFile")
 	procFormatMessageW                                       = modkernel32.NewProc("FormatMessageW")
@@ -283,6 +284,7 @@ var (
 	procGetNamedPipeClientProcessId                          = modkernel32.NewProc("GetNamedPipeClientProcessId")
 	procGetNamedPipeHandleStateW                             = modkernel32.NewProc("GetNamedPipeHandleStateW")
 	procGetNamedPipeInfo                                     = modkernel32.NewProc("GetNamedPipeInfo")
+	procGetNumberOfConsoleInputEvents                        = modkernel32.NewProc("GetNumberOfConsoleInputEvents")
 	procGetNamedPipeServerProcessId                          = modkernel32.NewProc("GetNamedPipeServerProcessId")
 	procGetOverlappedResult                                  = modkernel32.NewProc("GetOverlappedResult")
 	procGetPriorityClass                                     = modkernel32.NewProc("GetPriorityClass")
@@ -333,6 +335,7 @@ var (
 	procOpenMutexW                                           = modkernel32.NewProc("OpenMutexW")
 	procOpenProcess                                          = modkernel32.NewProc("OpenProcess")
 	procOpenThread                                           = modkernel32.NewProc("OpenThread")
+	procPeekConsoleInputW                                    = modkernel32.NewProc("PeekConsoleInputW")
 	procPostQueuedCompletionStatus                           = modkernel32.NewProc("PostQueuedCompletionStatus")
 	procProcess32FirstW                                      = modkernel32.NewProc("Process32FirstW")
 	procProcess32NextW                                       = modkernel32.NewProc("Process32NextW")
@@ -342,6 +345,7 @@ var (
 	procQueryDosDeviceW                                      = modkernel32.NewProc("QueryDosDeviceW")
 	procQueryFullProcessImageNameW                           = modkernel32.NewProc("QueryFullProcessImageNameW")
 	procQueryInformationJobObject                            = modkernel32.NewProc("QueryInformationJobObject")
+	procReadConsoleInputW                                    = modkernel32.NewProc("ReadConsoleInputW")
 	procReadConsoleW                                         = modkernel32.NewProc("ReadConsoleW")
 	procReadDirectoryChangesW                                = modkernel32.NewProc("ReadDirectoryChangesW")
 	procReadFile                                             = modkernel32.NewProc("ReadFile")
@@ -2111,6 +2115,14 @@ func FindVolumeMountPointClose(findVolumeMountPoint Handle) (err error) {
 	return
 }
 
+func FlushConsoleInputBuffer(console Handle) (err error) {
+	r1, _, e1 := syscall.SyscallN(procFlushConsoleInputBuffer.Addr(), uintptr(console))
+	if r1 == 0 {
+		err = errnoErr(e1)
+	}
+	return
+}
+
 func FlushFileBuffers(handle Handle) (err error) {
 	r1, _, e1 := syscall.SyscallN(procFlushFileBuffers.Addr(), uintptr(handle))
 	if r1 == 0 {
@@ -2475,6 +2487,14 @@ func GetNamedPipeInfo(pipe Handle, flags *uint32, outSize *uint32, inSize *uint3
 
 func GetNamedPipeServerProcessId(pipe Handle, serverProcessID *uint32) (err error) {
 	r1, _, e1 := syscall.SyscallN(procGetNamedPipeServerProcessId.Addr(), uintptr(pipe), uintptr(unsafe.Pointer(serverProcessID)))
+	if r1 == 0 {
+		err = errnoErr(e1)
+	}
+	return
+}
+
+func GetNumberOfConsoleInputEvents(console Handle, numevents *uint32) (err error) {
+	r1, _, e1 := syscall.SyscallN(procGetNumberOfConsoleInputEvents.Addr(), uintptr(console), uintptr(unsafe.Pointer(numevents)))
 	if r1 == 0 {
 		err = errnoErr(e1)
 	}
@@ -2938,6 +2958,14 @@ func OpenThread(desiredAccess uint32, inheritHandle bool, threadId uint32) (hand
 	return
 }
 
+func PeekConsoleInput(console Handle, buf *InputRecord, toread uint32, read *uint32) (err error) {
+	r1, _, e1 := syscall.SyscallN(procPeekConsoleInputW.Addr(), uintptr(console), uintptr(unsafe.Pointer(buf)), uintptr(toread), uintptr(unsafe.Pointer(read)))
+	if r1 == 0 {
+		err = errnoErr(e1)
+	}
+	return
+}
+
 func PostQueuedCompletionStatus(cphandle Handle, qty uint32, key uintptr, overlapped *Overlapped) (err error) {
 	r1, _, e1 := syscall.SyscallN(procPostQueuedCompletionStatus.Addr(), uintptr(cphandle), uintptr(qty), uintptr(key), uintptr(unsafe.Pointer(overlapped)))
 	if r1 == 0 {
@@ -3005,6 +3033,14 @@ func QueryFullProcessImageName(proc Handle, flags uint32, exeName *uint16, size 
 
 func QueryInformationJobObject(job Handle, JobObjectInformationClass int32, JobObjectInformation uintptr, JobObjectInformationLength uint32, retlen *uint32) (err error) {
 	r1, _, e1 := syscall.SyscallN(procQueryInformationJobObject.Addr(), uintptr(job), uintptr(JobObjectInformationClass), uintptr(JobObjectInformation), uintptr(JobObjectInformationLength), uintptr(unsafe.Pointer(retlen)))
+	if r1 == 0 {
+		err = errnoErr(e1)
+	}
+	return
+}
+
+func ReadConsoleInput(console Handle, buf *InputRecord, toread uint32, read *uint32) (err error) {
+	r1, _, e1 := syscall.SyscallN(procReadConsoleInputW.Addr(), uintptr(console), uintptr(unsafe.Pointer(buf)), uintptr(toread), uintptr(unsafe.Pointer(read)))
 	if r1 == 0 {
 		err = errnoErr(e1)
 	}
