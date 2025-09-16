@@ -19,6 +19,7 @@ const (
 	// From OpenBSD's machine/cpu.h.
 	_CPU_ID_AA64ISAR0 = 2
 	_CPU_ID_AA64ISAR1 = 3
+	_CPU_ID_AA64PFR0  = 8
 )
 
 // Implemented in the runtime package (runtime/sys_openbsd3.go)
@@ -59,7 +60,11 @@ func doinit() {
 	if !ok {
 		return
 	}
-	parseARM64SystemRegisters(isar0, isar1, 0)
+	pfr0, ok := sysctlUint64([]uint32{_CTL_MACHDEP, _CPU_ID_AA64PFR0})
+	if !ok {
+		return
+	}
+	parseARM64SystemRegisters(isar0, isar1, 0, pfr0)
 
 	Initialized = true
 }
