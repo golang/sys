@@ -26,6 +26,8 @@ import (
 	"runtime"
 	"syscall"
 	"time"
+
+	"golang.org/x/sys/windows"
 )
 
 const (
@@ -193,18 +195,23 @@ type KeyInfo struct {
 	ValueCount      uint32
 	MaxValueNameLen uint32 // size of the key's longest value name, in Unicode characters, not including the terminating zero byte
 	MaxValueLen     uint32 // longest data component among the key's values, in bytes
-	lastWriteTime   syscall.Filetime
+	lastWriteTime   windows.Filetime
 }
 
 // ModTime returns the key's last write time.
 func (ki *KeyInfo) ModTime() time.Time {
-	return time.Unix(0, ki.lastWriteTime.Nanoseconds())
+	return time.Unix(ki.lastWriteTime.Unix())
+}
+
+// ModTimeZero reports whether the key's last write time is zero.
+func (ki *KeyInfo) ModTimeZero() bool {
+	return ki.lastWriteTime.LowDateTime == 0 && ki.lastWriteTime.HighDateTime == 0
 }
 
 // Stat retrieves information about the open key k.
 func (k Key) Stat() (*KeyInfo, error) {
 	var ki KeyInfo
-	err := syscall.RegQueryInfoKey(syscall.Handle(k), nil, nil, nil,
+	err := windows.RegQueryInfoKey(windows.Handle(k), nil, nil, nil,
 		&ki.SubKeyCount, &ki.MaxSubKeyLen, nil, &ki.ValueCount,
 		&ki.MaxValueNameLen, &ki.MaxValueLen, nil, &ki.lastWriteTime)
 	if err != nil {
