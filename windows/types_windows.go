@@ -779,10 +779,33 @@ func (tv *Timeval) Nanoseconds() int64 {
 	return (int64(tv.Sec)*1e6 + int64(tv.Usec)) * 1e3
 }
 
+func TimevalToFiletime(tv Timeval) Filetime {
+	// Convert to 100-nanosecond intervals
+	hsec := uint64(tv.Sec)*1e7 + uint64(tv.Usec)/100
+	// Change starting time to January 1, 1601
+	// Note: No overflow here (11644473600*1e7 < math.MaxUint64/1e2)
+	hsec += 116444736000000000
+	// Split into high / low.
+	return Filetime{
+		LowDateTime:  uint32(hsec & 0xffffffff),
+		HighDateTime: uint32(hsec >> 32 & 0xffffffff),
+	}
+}
+
+// NsecToTimeval converts a nanosecond value nsec to a Timeval tv. The result is
+// undefined if the nanosecond value cannot be represented by a Timeval (values
+// equivalent to dates before the year 1901 or after the year 2038).
 func NsecToTimeval(nsec int64) (tv Timeval) {
-	tv.Sec = int32(nsec / 1e9)
-	tv.Usec = int32(nsec % 1e9 / 1e3)
-	return
+	// Ignore overflow (math.MaxInt64/1e9 > math.MaxInt32)
+	sec := int32(nsec / 1e9)
+	usec := int32(nsec % 1e9 / 1e3)
+	if usec < 0 {
+		usec += 1e6
+		sec--
+	}
+	tv.Sec = sec
+	tv.Usec = usec
+	return tv
 }
 
 type Overlapped struct {
@@ -805,22 +828,48 @@ type Filetime struct {
 	HighDateTime uint32
 }
 
-// Nanoseconds returns Filetime ft in nanoseconds
+// Unix returns ft in seconds and nanoseconds
 // since Epoch (00:00:00 UTC, January 1, 1970).
-func (ft *Filetime) Nanoseconds() int64 {
+func (ft *Filetime) Unix() (sec, nsec int64) {
 	// 100-nanosecond intervals since January 1, 1601
-	nsec := int64(ft.HighDateTime)<<32 + int64(ft.LowDateTime)
-	// change starting time to the Epoch (00:00:00 UTC, January 1, 1970)
-	nsec -= 116444736000000000
-	// convert into nanoseconds
-	nsec *= 100
-	return nsec
+	hsec := uint64(ft.HighDateTime)<<32 + uint64(ft.LowDateTime)
+	// Convert _before_ gauging; the nanosecond difference between Epoch (00:00:00
+	// UTC, January 1, 1970) and Filetime's zero offset (January 1, 1601) is out
+	// of bounds for int64: -11644473600*1e7*1e2 < math.MinInt64
+	sec = int64(hsec/1e7) - 11644473600
+	nsec = int64(hsec%1e7) * 100
+	return sec, nsec
+}
+
+// Nanoseconds returns ft in nanoseconds since Epoch (00:00:00 UTC,
+// January 1, 1970). The result is undefined if the Filetime cannot be
+// represented by an int64 (values equivalent to dates before the year
+// 1677 or after the year 2262). Note that this explicitly excludes the
+// zero value of Filetime, which is equivalent to January 1, 1601.
+//
+// Deprecated: use Unix instead, which returns both seconds and
+// nanoseconds thus covers the full available range of Filetime.
+func (ft *Filetime) Nanoseconds() int64 {
+	sec, nsec := ft.Unix()
+	return (sec*1e9 + nsec)
+}
+
+// FiletimeToTimeval converts a Filetime ft to a Timeval tv. The result is
+// undefined if the Filetime cannot be represented by a Timeval (values
+// equivalent to dates before the year 1901 or after the year 2038).
+func FiletimeToTimeval(ft Filetime) (tv Timeval) {
+	sec, nsec := ft.Unix()
+	// Ignore overflow (math.MaxUint64*1e2/1e9 > math.MaxInt32)
+	tv.Sec = int32(sec)
+	tv.Usec = int32(nsec / 1e3)
+	return tv
 }
 
 func NsecToFiletime(nsec int64) (ft Filetime) {
 	// convert into 100-nanosecond
 	nsec /= 100
 	// change starting time to January 1, 1601
+	// note: no overflow here (11644473600*1e7 < math.MaxInt64/1e1)
 	nsec += 116444736000000000
 	// split into high / low
 	ft.LowDateTime = uint32(nsec & 0xffffffff)
