@@ -79,7 +79,7 @@ var X86 struct {
 }
 
 // ARM64 contains the supported CPU features of the
-// current ARMv8(aarch64) platform. If the current platform
+// current ARMv8 (aarch64) platform. If the current platform
 // is not arm64 then all feature flags are false.
 var ARM64 struct {
 	_           CacheLinePad
