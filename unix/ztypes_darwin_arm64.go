@@ -125,12 +125,6 @@ type Radvisory_t struct {
 	_      [4]byte
 }
 
-type Fbootstraptransfer_t struct {
-	Offset int64
-	Length uint64
-	Buffer *byte
-}
-
 type Log2phys_t struct {
 	Flags uint32
 	_     [16]byte
@@ -628,8 +622,7 @@ type RtMetrics struct {
 	Rtt      uint32
 	Rttvar   uint32
 	Pksent   uint32
-	State    uint32
-	Filler   [3]uint32
+	Filler   [4]uint32
 }
 
 const (
@@ -876,3 +869,11 @@ const (
 	SHM_RDONLY = 0x1000
 	SHM_RND    = 0x2000
 )
+
+const RTF_LLDATA = 0x400
+
+type Fbootstraptransfer_t struct {
+	Offset int64
+	Length uint64
+	Buffer *byte
+}
