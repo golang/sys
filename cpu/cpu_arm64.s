@@ -22,6 +22,14 @@ TEXT ·getisar1(SB),NOSPLIT,$0-8
 	MOVD	R0, ret+0(FP)
 	RET
 
+// func getmmfr1() uint64
+TEXT ·getmmfr1(SB),NOSPLIT,$0-8
+	// get Memory Model Feature Register 1 into x0
+	// mrs	x0, ID_AA64MMFR1_EL1 = d5380720
+	WORD $0xd5380720
+	MOVD	R0, ret+0(FP)
+	RET
+
 // func getpfr0() uint64
 TEXT ·getpfr0(SB),NOSPLIT,$0-8
 	// get Processor Feature Register 0 into x0
