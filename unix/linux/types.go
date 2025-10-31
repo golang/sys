@@ -3600,7 +3600,11 @@ type FsverityEnableArg C.struct_fsverity_enable_arg
 
 type Nhmsg C.struct_nhmsg
 
+const SizeofNhmsg = C.sizeof_struct_nhmsg
+
 type NexthopGrp C.struct_nexthop_grp
+
+const SizeofNexthopGrp = C.sizeof_struct_nexthop_grp
 
 const (
 	NHA_UNSPEC     = C.NHA_UNSPEC

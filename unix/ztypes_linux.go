@@ -3590,12 +3590,16 @@ type Nhmsg struct {
 	Flags    uint32
 }
 
+const SizeofNhmsg = 0x8
+
 type NexthopGrp struct {
 	Id     uint32
 	Weight uint8
 	High   uint8
 	Resvd2 uint16
 }
+
+const SizeofNexthopGrp = 0x8
 
 const (
 	NHA_UNSPEC     = 0x0
