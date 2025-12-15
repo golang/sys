@@ -328,14 +328,23 @@ func PtraceSingleStep(pid int) (err error) {
 }
 
 func Dup3(oldfd, newfd, flags int) error {
-	if oldfd == newfd || flags&^O_CLOEXEC != 0 {
+	if oldfd == newfd || flags&^(O_CLOEXEC|O_CLOFORK) != 0 {
 		return EINVAL
 	}
-	how := F_DUP2FD
-	if flags&O_CLOEXEC != 0 {
-		how = F_DUP2FD_CLOEXEC
+	if flags&O_CLOFORK == 0 {
+		// F_DUP3FD requires FreeBSD 15.0, so avoid it when possible.
+		how := F_DUP2FD
+		if flags&O_CLOEXEC != 0 {
+			how = F_DUP2FD_CLOEXEC
+		}
+		_, err := fcntl(oldfd, how, newfd)
+		return err
 	}
-	_, err := fcntl(oldfd, how, newfd)
+	fdflags := FD_CLOFORK
+	if flags&O_CLOEXEC != 0 {
+		fdflags |= FD_CLOEXEC
+	}
+	_, err := fcntl(oldfd, F_DUP3FD|fdflags<<F_DUP3FD_SHIFT, newfd)
 	return err
 }
 
