@@ -64,6 +64,7 @@ func initOptions() {
 
 func archInit() {
 
+	// From internal/cpu
 	const (
 		// eax bits
 		cpuid_AVXVNNI = 1 << 4
@@ -112,6 +113,30 @@ func archInit() {
 		// edx bits for CPUID 0x80000001
 		cpuid_RDTSCP = 1 << 27
 	)
+	// Additional constants not in internal/cpu
+	const (
+		// eax=1: edx
+		cpuid_SSE2 = 1 << 26
+		// eax=1: ecx
+		cpuid_CX16   = 1 << 13
+		cpuid_RDRAND = 1 << 30
+		// eax=7,ecx=0: ebx
+		cpuid_RDSEED     = 1 << 18
+		cpuid_AVX512IFMA = 1 << 21
+		cpuid_AVX512PF   = 1 << 26
+		cpuid_AVX512ER   = 1 << 27
+		// eax=7,ecx=0: edx
+		cpuid_AVX5124VNNIW = 1 << 2
+		cpuid_AVX5124FMAPS = 1 << 3
+		cpuid_AMXBF16      = 1 << 22
+		cpuid_AMXTile      = 1 << 24
+		cpuid_AMXInt8      = 1 << 25
+		// eax=7,ecx=1: eax
+		cpuid_AVX512BF16 = 1 << 5
+		cpuid_AVXIFMA    = 1 << 23
+		// eax=7,ecx=1: edx
+		cpuid_AVXVNNIInt8 = 1 << 4
+	)
 
 	Initialized = true
 
@@ -122,19 +147,19 @@ func archInit() {
 	}
 
 	_, _, ecx1, edx1 := cpuid(1, 0)
-	X86.HasSSE2 = isSet(edx1, 1<<26)
+	X86.HasSSE2 = isSet(edx1, cpuid_SSE2)
 
 	X86.HasSSE3 = isSet(ecx1, cpuid_SSE3)
 	X86.HasPCLMULQDQ = isSet(ecx1, cpuid_PCLMULQDQ)
 	X86.HasSSSE3 = isSet(ecx1, cpuid_SSSE3)
 	X86.HasFMA = isSet(ecx1, cpuid_FMA)
-	X86.HasCX16 = isSet(ecx1, 1<<13)
+	X86.HasCX16 = isSet(ecx1, cpuid_CX16)
 	X86.HasSSE41 = isSet(ecx1, cpuid_SSE41)
 	X86.HasSSE42 = isSet(ecx1, cpuid_SSE42)
 	X86.HasPOPCNT = isSet(ecx1, cpuid_POPCNT)
 	X86.HasAES = isSet(ecx1, cpuid_AES)
 	X86.HasOSXSAVE = isSet(ecx1, cpuid_OSXSAVE)
-	X86.HasRDRAND = isSet(ecx1, 1<<30)
+	X86.HasRDRAND = isSet(ecx1, cpuid_RDRAND)
 
 	var osSupportsAVX, osSupportsAVX512 bool
 	// For XGETBV, OSXSAVE bit is required and sufficient.
@@ -163,22 +188,22 @@ func archInit() {
 	X86.HasAVX2 = isSet(ebx7, cpuid_AVX2) && osSupportsAVX
 	X86.HasBMI2 = isSet(ebx7, cpuid_BMI2)
 	X86.HasERMS = isSet(ebx7, cpuid_ERMS)
-	X86.HasRDSEED = isSet(ebx7, 1<<18)
+	X86.HasRDSEED = isSet(ebx7, cpuid_RDSEED)
 	X86.HasADX = isSet(ebx7, cpuid_ADX)
 
 	X86.HasAVX512 = isSet(ebx7, cpuid_AVX512F) && osSupportsAVX512 // Because avx-512 foundation is the core required extension
 	if X86.HasAVX512 {
 		X86.HasAVX512F = true
 		X86.HasAVX512CD = isSet(ebx7, cpuid_AVX512CD)
-		X86.HasAVX512ER = isSet(ebx7, 1<<27)
-		X86.HasAVX512PF = isSet(ebx7, 1<<26)
+		X86.HasAVX512ER = isSet(ebx7, cpuid_AVX512ER)
+		X86.HasAVX512PF = isSet(ebx7, cpuid_AVX512PF)
 		X86.HasAVX512VL = isSet(ebx7, cpuid_AVX512VL)
 		X86.HasAVX512BW = isSet(ebx7, cpuid_AVX512BW)
 		X86.HasAVX512DQ = isSet(ebx7, cpuid_AVX512DQ)
-		X86.HasAVX512IFMA = isSet(ebx7, 1<<21)
+		X86.HasAVX512IFMA = isSet(ebx7, cpuid_AVX512IFMA)
 		X86.HasAVX512VBMI = isSet(ecx7, cpuid_AVX512_VBMI)
-		X86.HasAVX5124VNNIW = isSet(edx7, 1<<2)
-		X86.HasAVX5124FMAPS = isSet(edx7, 1<<3)
+		X86.HasAVX5124VNNIW = isSet(edx7, cpuid_AVX5124VNNIW)
+		X86.HasAVX5124FMAPS = isSet(edx7, cpuid_AVX5124FMAPS)
 		X86.HasAVX512VPOPCNTDQ = isSet(ecx7, cpuid_AVX512VPOPCNTDQ)
 		X86.HasAVX512VPCLMULQDQ = isSet(ecx7, cpuid_AVX512VPCLMULQDQ)
 		X86.HasAVX512VNNI = isSet(ecx7, cpuid_AVX512VNNI)
@@ -188,20 +213,20 @@ func archInit() {
 		X86.HasAVX512BITALG = isSet(ecx7, cpuid_AVX512BITALG)
 	}
 
-	X86.HasAMXTile = isSet(edx7, 1<<24)
-	X86.HasAMXInt8 = isSet(edx7, 1<<25)
-	X86.HasAMXBF16 = isSet(edx7, 1<<22)
+	X86.HasAMXTile = isSet(edx7, cpuid_AMXTile)
+	X86.HasAMXInt8 = isSet(edx7, cpuid_AMXInt8)
+	X86.HasAMXBF16 = isSet(edx7, cpuid_AMXBF16)
 
 	// These features depend on the second level of extended features.
 	if eax7 >= 1 {
 		eax71, _, _, edx71 := cpuid(7, 1)
 		if X86.HasAVX512 {
-			X86.HasAVX512BF16 = isSet(eax71, 1<<5)
+			X86.HasAVX512BF16 = isSet(eax71, cpuid_AVX512BF16)
 		}
 		if X86.HasAVX {
-			X86.HasAVXIFMA = isSet(eax71, 1<<23)
+			X86.HasAVXIFMA = isSet(eax71, cpuid_AVXIFMA)
 			X86.HasAVXVNNI = isSet(eax71, cpuid_AVXVNNI)
-			X86.HasAVXVNNIInt8 = isSet(edx71, 1<<4)
+			X86.HasAVXVNNIInt8 = isSet(edx71, cpuid_AVXVNNIInt8)
 		}
 	}
 }
