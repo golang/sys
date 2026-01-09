@@ -1799,12 +1799,12 @@ func LoadResourceData(module, resInfo Handle) (data []byte, err error) {
 }
 
 // PSAPI_WORKING_SET_EX_BLOCK contains extended working set information for a page.
-type PSAPI_WORKING_SET_EX_BLOCK uint64
+type PSAPI_WORKING_SET_EX_BLOCK uintptr
 
 // Valid returns the validity of this page.
 // If this bit is 1, the subsequent members are valid; otherwise they should be ignored.
 func (b PSAPI_WORKING_SET_EX_BLOCK) Valid() bool {
-	return (b & 1) == 1
+	return (b & 1) != 0
 }
 
 // ShareCount is the number of processes that share this page. The maximum value of this member is 7.
@@ -1821,7 +1821,7 @@ func (b PSAPI_WORKING_SET_EX_BLOCK) Win32Protection() uint64 {
 // Shared returns the shared status of this page.
 // If this bit is 1, the page can be shared.
 func (b PSAPI_WORKING_SET_EX_BLOCK) Shared() bool {
-	return (b & (1 << 15)) == 1
+	return (b & (1 << 15)) != 0
 }
 
 // Node is the NUMA node. The maximum value of this member is 63.
@@ -1832,19 +1832,19 @@ func (b PSAPI_WORKING_SET_EX_BLOCK) Node() uint64 {
 // Locked returns the locked status of this page.
 // If this bit is 1, the virtual page is locked in physical memory.
 func (b PSAPI_WORKING_SET_EX_BLOCK) Locked() bool {
-	return (b & (1 << 22)) == 1
+	return (b & (1 << 22)) != 0
 }
 
 // LargePage returns the large page status of this page.
 // If this bit is 1, the page is a large page.
 func (b PSAPI_WORKING_SET_EX_BLOCK) LargePage() bool {
-	return (b & (1 << 23)) == 1
+	return (b & (1 << 23)) != 0
 }
 
 // Bad returns the bad status of this page.
 // If this bit is 1, the page is has been reported as bad.
 func (b PSAPI_WORKING_SET_EX_BLOCK) Bad() bool {
-	return (b & (1 << 31)) == 1
+	return (b & (1 << 31)) != 0
 }
 
 // intField extracts an integer field in the PSAPI_WORKING_SET_EX_BLOCK union.
@@ -1861,7 +1861,7 @@ func (b PSAPI_WORKING_SET_EX_BLOCK) intField(start, length int) uint64 {
 // PSAPI_WORKING_SET_EX_INFORMATION contains extended working set information for a process.
 type PSAPI_WORKING_SET_EX_INFORMATION struct {
 	// The virtual address.
-	VirtualAddress Pointer
+	VirtualAddress uintptr
 	// A PSAPI_WORKING_SET_EX_BLOCK union that indicates the attributes of the page at VirtualAddress.
 	VirtualAttributes PSAPI_WORKING_SET_EX_BLOCK
 }
