@@ -417,12 +417,16 @@ const (
 	EXTEXIT_SIMPLE                    = 0x0
 	EXTPROC                           = 0x800
 	FD_CLOEXEC                        = 0x1
+	FD_CLOFORK                        = 0x2
 	FD_SETSIZE                        = 0x400
 	FLUSHO                            = 0x800000
 	F_DUP2FD                          = 0xa
 	F_DUP2FD_CLOEXEC                  = 0x12
+	F_DUP2FD_CLOFORK                  = 0x16
+	F_DUP3FD                          = 0x17
 	F_DUPFD                           = 0x0
 	F_DUPFD_CLOEXEC                   = 0x11
+	F_DUPFD_CLOFORK                   = 0x15
 	F_GETFD                           = 0x1
 	F_GETFL                           = 0x3
 	F_GETLK                           = 0x7
@@ -1002,6 +1006,7 @@ const (
 	MNT_VISFLAGMASK                   = 0xf1f0ffff
 	MNT_WAIT                          = 0x1
 	MSG_CMSG_CLOEXEC                  = 0x1000
+	MSG_CMSG_CLOFORK                  = 0x2000
 	MSG_CTRUNC                        = 0x20
 	MSG_DONTROUTE                     = 0x4
 	MSG_DONTWAIT                      = 0x80
@@ -1063,6 +1068,7 @@ const (
 	O_APPEND                          = 0x8
 	O_ASYNC                           = 0x40
 	O_CLOEXEC                         = 0x20000
+	O_CLOFORK                         = 0x1000000
 	O_CREAT                           = 0x200
 	O_DIRECT                          = 0x10000
 	O_DIRECTORY                       = 0x8000000
@@ -1258,6 +1264,7 @@ const (
 	SIOCSLOWAT                        = 0x80047302
 	SIOCSPGRP                         = 0x80047308
 	SOCK_CLOEXEC                      = 0x10000000
+	SOCK_CLOFORK                      = 0x40000000
 	SOCK_DGRAM                        = 0x2
 	SOCK_MAXADDRLEN                   = 0xff
 	SOCK_NONBLOCK                     = 0x20000000
