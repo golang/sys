@@ -131,8 +131,6 @@ type Fstore_t C.struct_fstore
 
 type Radvisory_t C.struct_radvisory
 
-type Fbootstraptransfer_t C.struct_fbootstraptransfer
-
 type Log2phys_t C.struct_log2phys
 
 type Fsid C.struct_fsid
@@ -394,3 +392,13 @@ const (
 	SHM_RDONLY = C.SHM_RDONLY
 	SHM_RND    = C.SHM_RND
 )
+
+// Removed in xnu-10002.41.9
+const RTF_LLDATA = 0x400
+
+// Removed in xnu-8792.41.9
+type Fbootstraptransfer_t struct {
+	Offset int64
+	Length uint64
+	Buffer *byte
+}
