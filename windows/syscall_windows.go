@@ -1443,7 +1443,7 @@ func FindNextFile(handle Handle, data *Win32finddata) (err error) {
 	return
 }
 
-func getProcessEntry(pid int) (*ProcessEntry32, error) {
+func GetProcessEntry(pid int) (*ProcessEntry32, error) {
 	snapshot, err := CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0)
 	if err != nil {
 		return nil, err
@@ -1466,7 +1466,7 @@ func getProcessEntry(pid int) (*ProcessEntry32, error) {
 }
 
 func Getppid() (ppid int) {
-	pe, err := getProcessEntry(Getpid())
+	pe, err := GetProcessEntry(Getpid())
 	if err != nil {
 		return -1
 	}
