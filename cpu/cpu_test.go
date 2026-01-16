@@ -76,7 +76,7 @@ func TestAVXVNNIInt8HasAVXVNNIAndAVX(t *testing.T) {
 }
 
 func TestARM64minimalFeatures(t *testing.T) {
-	if runtime.GOARCH != "arm64" || runtime.GOOS == "ios" {
+	if runtime.GOARCH != "arm64" {
 		return
 	}
 	if !cpu.ARM64.HasASIMD {
