@@ -728,3 +728,22 @@ type SysvShmDesc struct {
 const (
 	GPIO_GET_CHIPINFO_IOCTL = 0x4044b401
 )
+
+const (
+	IPMICTL_SEND_COMMAND = 0x4028690d
+	IPMICTL_RECEIVE_MSG  = 0xc030690c
+)
+
+type IPMIReq struct {
+	Addr  *uint8
+	Len   uint32
+	Msgid int64
+	Msg   IPMIMsg
+}
+type IPMIRecv struct {
+	Recv_type int32
+	Addr      *uint8
+	Addr_len  uint32
+	Msgid     int64
+	Msg       IPMIMsg
+}

@@ -132,6 +132,7 @@ struct termios2 {
 #include <linux/if_xdp.h>
 #include <linux/inet_diag.h>
 #include <linux/ipc.h>
+#include <linux/ipmi.h>
 #include <linux/kcm.h>
 #include <linux/keyctl.h>
 #include <linux/landlock.h>
@@ -6376,3 +6377,19 @@ type GPIOV2LineRequest C.struct_gpio_v2_line_request
 type GPIOV2LineInfo C.struct_gpio_v2_line_info
 type GPIOV2LineInfoChanged C.struct_gpio_v2_line_info_changed
 type GPIOV2LineEvent C.struct_gpio_v2_line_event
+
+// IPMI SI
+const (
+	IPMI_MAX_ADDR_SIZE              = C.IPMI_MAX_ADDR_SIZE
+	IPMI_SYSTEM_INTERFACE_ADDR_TYPE = C.IPMI_SYSTEM_INTERFACE_ADDR_TYPE
+	IPMI_BMC_CHANNEL                = C.IPMI_BMC_CHANNEL
+	IPMI_RESPONSE_RECV_TYPE         = C.IPMI_RESPONSE_RECV_TYPE
+
+	IPMICTL_SEND_COMMAND = C.IPMICTL_SEND_COMMAND
+	IPMICTL_RECEIVE_MSG  = C.IPMICTL_RECEIVE_MSG
+)
+
+type IPMISystemInterfaceAddr C.struct_ipmi_system_interface_addr
+type IPMIMsg C.struct_ipmi_msg
+type IPMIReq C.struct_ipmi_req
+type IPMIRecv C.struct_ipmi_recv

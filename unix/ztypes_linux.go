@@ -6525,3 +6525,23 @@ type GPIOV2LineEvent struct {
 	Line_seqno   uint32
 	_            [6]uint32
 }
+
+const (
+	IPMI_MAX_ADDR_SIZE              = 0x20
+	IPMI_SYSTEM_INTERFACE_ADDR_TYPE = 0xc
+	IPMI_BMC_CHANNEL                = 0xf
+	IPMI_RESPONSE_RECV_TYPE         = 0x1
+)
+
+type IPMISystemInterfaceAddr struct {
+	Type    int32
+	Channel int16
+	Lun     uint8
+	_       [1]byte
+}
+type IPMIMsg struct {
+	Netfn uint8
+	Cmd   uint8
+	Len   uint16
+	Data  *uint8
+}
