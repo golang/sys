@@ -117,6 +117,7 @@ struct termios2 {
 #include <linux/fs.h>
 #include <linux/fsverity.h>
 #include <linux/genetlink.h>
+#include <linux/gpio.h>
 #include <linux/hdreg.h>
 #include <linux/hidraw.h>
 #include <linux/icmp.h>
@@ -6297,3 +6298,34 @@ const (
 	MPOL_PREFERRED_MANY      = C.MPOL_PREFERRED_MANY
 	MPOL_WEIGHTED_INTERLEAVE = C.MPOL_WEIGHTED_INTERLEAVE
 )
+
+// GPIO API
+const (
+	GPIO_GET_CHIPINFO_IOCTL          = C.GPIO_GET_CHIPINFO_IOCTL
+	GPIO_V2_GET_LINEINFO_IOCTL       = C.GPIO_V2_GET_LINEINFO_IOCTL
+	GPIO_V2_GET_LINE_IOCTL           = C.GPIO_V2_GET_LINE_IOCTL
+	GPIO_V2_LINE_GET_VALUES_IOCTL    = C.GPIO_V2_LINE_GET_VALUES_IOCTL
+	GPIO_V2_LINE_SET_VALUES_IOCTL    = C.GPIO_V2_LINE_SET_VALUES_IOCTL
+	GPIO_V2_GET_LINEINFO_WATCH_IOCTL = C.GPIO_V2_GET_LINEINFO_WATCH_IOCTL
+	GPIO_GET_LINEINFO_UNWATCH_IOCTL  = C.GPIO_GET_LINEINFO_UNWATCH_IOCTL
+)
+const (
+	GPIO_V2_LINE_ATTR_ID_FLAGS         = C.GPIO_V2_LINE_ATTR_ID_FLAGS
+	GPIO_V2_LINE_ATTR_ID_OUTPUT_VALUES = C.GPIO_V2_LINE_ATTR_ID_OUTPUT_VALUES
+	GPIO_V2_LINE_ATTR_ID_DEBOUNCE      = C.GPIO_V2_LINE_ATTR_ID_DEBOUNCE
+	GPIO_V2_LINE_CHANGED_REQUESTED     = C.GPIO_V2_LINE_CHANGED_REQUESTED
+	GPIO_V2_LINE_CHANGED_RELEASED      = C.GPIO_V2_LINE_CHANGED_RELEASED
+	GPIO_V2_LINE_CHANGED_CONFIG        = C.GPIO_V2_LINE_CHANGED_CONFIG
+	GPIO_V2_LINE_EVENT_RISING_EDGE     = C.GPIO_V2_LINE_EVENT_RISING_EDGE
+	GPIO_V2_LINE_EVENT_FALLING_EDGE    = C.GPIO_V2_LINE_EVENT_FALLING_EDGE
+)
+
+type GPIOChipInfo C.struct_gpiochip_info
+type GPIOV2LineValues C.struct_gpio_v2_line_values
+type GPIOV2LineAttribute C.struct_gpio_v2_line_attribute
+type GPIOV2LineConfigAttribute C.struct_gpio_v2_line_config_attribute
+type GPIOV2LineConfig C.struct_gpio_v2_line_config
+type GPIOV2LineRequest C.struct_gpio_v2_line_request
+type GPIOV2LineInfo C.struct_gpio_v2_line_info
+type GPIOV2LineInfoChanged C.struct_gpio_v2_line_info_changed
+type GPIOV2LineEvent C.struct_gpio_v2_line_event
