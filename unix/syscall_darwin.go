@@ -576,6 +576,10 @@ func PthreadFchdir(fd int) (err error) {
 //
 // On success, Connectx returns the number of bytes enqueued for transmission.
 func Connectx(fd int, srcIf uint32, srcAddr, dstAddr Sockaddr, associd SaeAssocID, flags uint32, iov []Iovec, connid *SaeConnID) (n uintptr, err error) {
+	if !darwinKernelVersionMin(15, 0, 0) {
+		return 0, ENOSYS
+	}
+
 	endpoints := SaEndpoints{
 		Srcif: srcIf,
 	}
@@ -798,3 +802,4 @@ func readvRacedetect(iovecs []Iovec, n int, err error) {
 //sys	preadv(fd int, iovecs []Iovec, offset int64) (n int, err error)
 //sys	writev(fd int, iovecs []Iovec) (n int, err error)
 //sys	pwritev(fd int, iovecs []Iovec, offset int64) (n int, err error)
+//sys	connectx(fd int, endpoints *SaEndpoints, associd SaeAssocID, flags uint32, iov []Iovec, n *uintptr, connid *SaeConnID) (err error)
