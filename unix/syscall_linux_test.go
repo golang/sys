@@ -913,7 +913,7 @@ func TestClockNanosleep(t *testing.T) {
 }
 
 func TestOpenByHandleAt(t *testing.T) {
-	skipIfNotSupported := func(t *testing.T, name string, err error) {
+	skipIfNotSupported := func(t *testing.T, name, flags string, err error) {
 		if err == unix.EPERM {
 			t.Skipf("skipping %s test without CAP_DAC_READ_SEARCH", name)
 		}
@@ -923,15 +923,18 @@ func TestOpenByHandleAt(t *testing.T) {
 		if err == unix.EOPNOTSUPP {
 			t.Skipf("%s not supported on this filesystem", name)
 		}
+		if err == unix.EINVAL {
+			t.Skipf("%s flags %s are not supported", name, flags)
+		}
 	}
 
 	h, mountID, err := unix.NameToHandleAt(unix.AT_FDCWD, "syscall_linux_test.go", 0)
 	if err != nil {
-		skipIfNotSupported(t, "name_to_handle_at", err)
+		skipIfNotSupported(t, "name_to_handle_at", "<none>", err)
 		t.Fatalf("NameToHandleAt: %v", err)
 	}
-	t.Logf("mountID: %v, handle: size=%d, type=%d, bytes=%q", mountID,
-		h.Size(), h.Type(), h.Bytes())
+	t.Logf("mountID: %v (%#x), handle: size=%d, type=%d, bytes=%q",
+		mountID, mountID, h.Size(), h.Type(), h.Bytes())
 	mount, err := openMountByID(mountID)
 	if err != nil {
 		t.Fatalf("openMountByID: %v", err)
@@ -944,8 +947,8 @@ func TestOpenByHandleAt(t *testing.T) {
 				h = unix.NewFileHandle(h.Type(), h.Bytes())
 			}
 			fd, err := unix.OpenByHandleAt(int(mount.Fd()), h, unix.O_RDONLY)
-			skipIfNotSupported(t, "open_by_handle_at", err)
 			if err != nil {
+				skipIfNotSupported(t, "open_by_handle_at", "O_RDONLY", err)
 				t.Fatalf("OpenByHandleAt: %v", err)
 			}
 			t.Logf("opened fd %v", fd)
@@ -962,6 +965,86 @@ func TestOpenByHandleAt(t *testing.T) {
 			}
 		})
 	}
+
+	t.Run("AT_HANDLE_MNT_ID_UNIQUE", func(t *testing.T) {
+		// AT_HANDLE_MNT_ID_UNIQUE needs to be implicitly cleared as it would
+		// produce unusable information (and on pre-AT_HANDLE_MNT_ID_UNIQUE
+		// implementations, possible stack corruption).
+		h, mountID, err := unix.NameToHandleAt(unix.AT_FDCWD, ".", unix.AT_HANDLE_MNT_ID_UNIQUE)
+		if err != nil {
+			skipIfNotSupported(t, "name_to_handle_at", "AT_HANDLE_MNT_ID_UNIQUE", err)
+			t.Fatalf("NameToHandleAt: %v", err)
+		}
+		t.Logf("mountID: %v (%#x), handle: size=%d, type=%d, bytes=%q",
+			mountID, mountID, h.Size(), h.Type(), h.Bytes())
+		if uint64(mountID) >= 1<<31 {
+			t.Errorf("classic NameToHandleAt must return classic mount id, but got %d (%#x) which is larger than 2^31 (%#x)", mountID, mountID, 1<<31)
+		}
+	})
+}
+
+func TestNameToHandleAt64(t *testing.T) {
+	skipIfNotSupported := func(t *testing.T, name, flags string, err error) {
+		if err == unix.EPERM {
+			t.Skipf("skipping %s test without CAP_DAC_READ_SEARCH", name)
+		}
+		if err == unix.ENOSYS {
+			t.Skipf("%s system call not available", name)
+		}
+		if err == unix.EOPNOTSUPP {
+			t.Skipf("%s not supported on this filesystem", name)
+		}
+		if err == unix.EINVAL {
+			t.Skipf("%s flags %s are not supported", name, flags)
+		}
+	}
+	t.Run("0", func(t *testing.T) {
+		h, mountID, err := unix.NameToHandleAt64(unix.AT_FDCWD, ".", 0)
+		if err != nil {
+			skipIfNotSupported(t, "name_to_handle_at", "<none>", err)
+			t.Fatalf("NameToHandleAt64: %v", err)
+		}
+		t.Logf("mountID: %v (%#x), handle: size=%d, type=%d, bytes=%q",
+			mountID, mountID, h.Size(), h.Type(), h.Bytes())
+		if mountID >= 1<<31 {
+			t.Errorf("classic mount id %d (%#x) must not be larger than 2^31 (%#x)", mountID, mountID, 1<<31)
+		}
+		if len(h.Bytes()) != h.Size() {
+			t.Errorf("file handle bytes should match expected length %d but got %d", h.Size(), len(h.Bytes()))
+		}
+	})
+	t.Run("AT_HANDLE_FID", func(t *testing.T) {
+		h, mountID, err := unix.NameToHandleAt64(unix.AT_FDCWD, ".", unix.AT_HANDLE_FID)
+		if err != nil {
+			// EOPNOTSUPP is not valid for AT_HANDLE_FID.
+			if err != unix.EOPNOTSUPP {
+				skipIfNotSupported(t, "name_to_handle_at", "AT_HANDLE_FID", err)
+			}
+			t.Fatalf("NameToHandleAt64: %v", err)
+		}
+		t.Logf("mountID: %d (%#x) handle: size=%d type=%d bytes=%q",
+			mountID, mountID, h.Size(), h.Type(), h.Bytes())
+		if len(h.Bytes()) != h.Size() {
+			t.Errorf("file handle bytes should match expected length %d but got %d", h.Size(), len(h.Bytes()))
+		}
+		if mountID >= 1<<31 {
+			t.Fatalf("classic mount id %d (%#x) must not be larger than 2^31 (%#x)", mountID, mountID, 1<<31)
+		}
+	})
+	t.Run("AT_HANDLE_MNT_ID_UNIQUE", func(t *testing.T) {
+		h, mountID, err := unix.NameToHandleAt64(unix.AT_FDCWD, ".", unix.AT_HANDLE_FID|unix.AT_HANDLE_MNT_ID_UNIQUE)
+		if err != nil {
+			t.Skip("name_to_handle_at(AT_HANDLE_FID):", err)
+		}
+		t.Logf("mountID: %d (%#x) handle: size=%d type=%d bytes=%q",
+			mountID, mountID, h.Size(), h.Type(), h.Bytes())
+		if len(h.Bytes()) != h.Size() {
+			t.Errorf("file handle bytes should match expected length %d but got %d", h.Size(), len(h.Bytes()))
+		}
+		if mountID < 1<<31 {
+			t.Fatalf("unique mount id %d (%#x) must be at least 2^31 (%#x)", mountID, mountID, 1<<31)
+		}
+	})
 }
 
 func openMountByID(mountID int) (f *os.File, err error) {

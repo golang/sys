@@ -2449,8 +2449,28 @@ func (fh *FileHandle) Bytes() []byte {
 
 // NameToHandleAt wraps the name_to_handle_at system call; it obtains
 // a handle for a path name.
+//
+// Deprecated: This method can only return int-sized mount IDs and will thus
+// silently ignore [AT_HANDLE_MNT_ID_UNIQUE]. Use [NameToHandleAt64] instead.
 func NameToHandleAt(dirfd int, path string, flags int) (handle FileHandle, mountID int, err error) {
-	var mid _C_int
+	flags &= ^AT_HANDLE_MNT_ID_UNIQUE
+	handle, mid, err := NameToHandleAt64(dirfd, path, flags)
+	return handle, int(mid), err
+}
+
+// NameToHandleAt64 is effectively identical to [NameToHandleAt] except that it
+// supports returning 64-bit mount IDs with [AT_HANDLE_MNT_ID_UNIQUE].
+func NameToHandleAt64(dirfd int, path string, flags int) (handle FileHandle, mountID uint64, err error) {
+	uniqueMntId := flags&AT_HANDLE_MNT_ID_UNIQUE != 0
+	var (
+		midInt _C_int
+		mid64  uint64
+	)
+	midPtr := &midInt
+	if uniqueMntId {
+		midPtr = (*_C_int)(unsafe.Pointer(&mid64))
+	}
+
 	// Try first with a small buffer, assuming the handle will
 	// only be 32 bytes.
 	size := uint32(32 + unsafe.Sizeof(fileHandle{}))
@@ -2459,7 +2479,7 @@ func NameToHandleAt(dirfd int, path string, flags int) (handle FileHandle, mount
 		buf := make([]byte, size)
 		fh := (*fileHandle)(unsafe.Pointer(&buf[0]))
 		fh.Bytes = size - uint32(unsafe.Sizeof(fileHandle{}))
-		err = nameToHandleAt(dirfd, path, fh, &mid, flags)
+		err = nameToHandleAt(dirfd, path, fh, midPtr, flags)
 		if err == EOVERFLOW {
 			if didResize {
 				// We shouldn't need to resize more than once
@@ -2472,7 +2492,11 @@ func NameToHandleAt(dirfd int, path string, flags int) (handle FileHandle, mount
 		if err != nil {
 			return
 		}
-		return FileHandle{fh}, int(mid), nil
+		mountID = uint64(midInt)
+		if uniqueMntId {
+			mountID = mid64
+		}
+		return FileHandle{fh}, mountID, nil
 	}
 }
 
