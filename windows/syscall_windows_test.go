@@ -10,6 +10,7 @@ import (
 	"debug/pe"
 	"errors"
 	"fmt"
+	"math"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -1475,21 +1476,37 @@ func TestToUnicodeEx(t *testing.T) {
 }
 
 func TestRoundtripNTUnicodeString(t *testing.T) {
-	for _, s := range []string{
-		"",
-		"hello",
-		"Ƀ",
-		strings.Repeat("*", 32000), // NTUnicodeString works up to 2^16 byte lengths == 32768 uint16s.
-		// TODO: various encoding errors?
-	} {
-		ntus, err := windows.NewNTUnicodeString(s)
+	// NTUnicodeString maximum string length must fit in a uint16, less for terminal NUL.
+	maxString := strings.Repeat("*", (math.MaxUint16/2)-1)
+	for _, test := range []struct {
+		s       string
+		wantErr bool
+	}{{
+		s: "",
+	}, {
+		s: "hello",
+	}, {
+		s: "Ƀ",
+	}, {
+		s: maxString,
+	}, {
+		s:       maxString + "*",
+		wantErr: true,
+	}, {
+		s:       "a\x00a",
+		wantErr: true,
+	}} {
+		ntus, err := windows.NewNTUnicodeString(test.s)
+		if (err != nil) != test.wantErr {
+			t.Errorf("NewNTUnicodeString(%q): %v, wantErr:%v", test.s, err, test.wantErr)
+			continue
+		}
 		if err != nil {
-			t.Errorf("encoding %q failed: %v", s, err)
 			continue
 		}
 		s2 := ntus.String()
-		if s != s2 {
-			t.Errorf("round trip of %q = %q, wanted original", s, s2)
+		if test.s != s2 {
+			t.Errorf("round trip of %q = %q, wanted original", test.s, s2)
 		}
 	}
 }

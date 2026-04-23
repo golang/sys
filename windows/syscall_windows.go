@@ -1697,10 +1697,13 @@ func NewNTUnicodeString(s string) (*NTUnicodeString, error) {
 	if err != nil {
 		return nil, err
 	}
-	n := uint16(len(s16) * 2)
+	n := len(s16) * 2
+	if n > (1<<16)-1 {
+		return nil, syscall.EINVAL
+	}
 	return &NTUnicodeString{
-		Length:        n - 2, // subtract 2 bytes for the NULL terminator
-		MaximumLength: n,
+		Length:        uint16(n) - 2, // subtract 2 bytes for the NULL terminator
+		MaximumLength: uint16(n),
 		Buffer:        &s16[0],
 	}, nil
 }
