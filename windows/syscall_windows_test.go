@@ -1512,3 +1512,64 @@ func TestIsProcessorFeaturePresent(t *testing.T) {
 		t.Fatal("IsProcessorFeaturePresent failed, but should succeed")
 	}
 }
+
+func TestReadlink(t *testing.T) {
+	tmpdir := t.TempDir()
+
+	// Test 1: Symlink to a file.
+	// When Windows creates a symlink, SubstituteName typically precedes
+	// PrintName in PathBuffer, making PrintNameOffset > 0.
+	target := filepath.Join(tmpdir, "target")
+	if err := os.WriteFile(target, []byte("hello"), 0666); err != nil {
+		t.Fatal(err)
+	}
+	symlink := filepath.Join(tmpdir, "symlink")
+	if err := os.Symlink(target, symlink); err != nil {
+		t.Fatalf("os.Symlink failed: %v", err)
+	}
+	buf := make([]byte, windows.MAXIMUM_REPARSE_DATA_BUFFER_SIZE)
+	n, err := windows.Readlink(symlink, buf)
+	if err != nil {
+		t.Fatalf("Readlink(%q) failed: %v", symlink, err)
+	}
+	got := string(buf[:n])
+	if got != target {
+		t.Errorf("Readlink(%q) = %q, want %q", symlink, got, target)
+	}
+
+	// Test 2: Symlink to a directory.
+	targetDir := filepath.Join(tmpdir, "targetdir")
+	if err := os.Mkdir(targetDir, 0777); err != nil {
+		t.Fatal(err)
+	}
+	symlinkDir := filepath.Join(tmpdir, "symlinkdir")
+	if err := os.Symlink(targetDir, symlinkDir); err != nil {
+		t.Fatalf("os.Symlink failed: %v", err)
+	}
+	n, err = windows.Readlink(symlinkDir, buf)
+	if err != nil {
+		t.Fatalf("Readlink(%q) failed: %v", symlinkDir, err)
+	}
+	got = string(buf[:n])
+	if got != targetDir {
+		t.Errorf("Readlink(%q) = %q, want %q", symlinkDir, got, targetDir)
+	}
+
+	// Test 3: Directory junction (IO_REPARSE_TAG_MOUNT_POINT).
+	// Junctions also store SubstituteName before PrintName in PathBuffer,
+	// so PrintNameOffset > 0, exercising the same code path.
+	junction := filepath.Join(tmpdir, "junction")
+	cmd := exec.Command("cmd", "/c", "mklink", "/J", junction, targetDir)
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		t.Fatalf("mklink /J failed: %v - %s", err, out)
+	}
+	n, err = windows.Readlink(junction, buf)
+	if err != nil {
+		t.Fatalf("Readlink(%q) failed: %v", junction, err)
+	}
+	got = string(buf[:n])
+	if got != targetDir {
+		t.Errorf("Readlink(%q) = %q, want %q", junction, got, targetDir)
+	}
+}
