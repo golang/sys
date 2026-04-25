@@ -26,5 +26,3 @@ TEXT ·RawSyscall6(SB),NOSPLIT,$0-40
 TEXT ·seek(SB),NOSPLIT,$0-36
 	JMP	syscall·seek(SB)
 
-TEXT ·exit(SB),NOSPLIT,$4-4
-	JMP	syscall·exit(SB)
