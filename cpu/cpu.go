@@ -236,6 +236,7 @@ var RISCV64 struct {
 	HasZba            bool // Address generation instructions extension
 	HasZbb            bool // Basic bit-manipulation extension
 	HasZbs            bool // Single-bit instructions extension
+	HasZbc            bool // Carryless multiplication extension
 	HasZvbb           bool // Vector Basic Bit-manipulation
 	HasZvbc           bool // Vector Carryless Multiplication
 	HasZvkb           bool // Vector Cryptography Bit-manipulation
