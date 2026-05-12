@@ -933,6 +933,29 @@ type OpenHow struct {
 
 const SizeofOpenHow = 0x18
 
+type NsIdReq struct {
+	Size       uint32
+	Spare      uint32
+	Ns_id      uint64
+	Ns_type    uint32
+	Spare2     uint32
+	User_ns_id uint64
+}
+
+const (
+	NS_ID_REQ_SIZE_VER0 = 0x20
+	LISTNS_CURRENT_USER = 0xffffffffffffffff
+
+	TIME_NS   = 0x80
+	MNT_NS    = 0x20000
+	CGROUP_NS = 0x2000000
+	UTS_NS    = 0x4000000
+	IPC_NS    = 0x8000000
+	USER_NS   = 0x10000000
+	PID_NS    = 0x20000000
+	NET_NS    = 0x40000000
+)
+
 const (
 	RESOLVE_BENEATH       = 0x8
 	RESOLVE_IN_ROOT       = 0x10

@@ -141,6 +141,108 @@ func TestIoctlRetInt(t *testing.T) {
 	}
 }
 
+func TestListns(t *testing.T) {
+	callListns := func(tb testing.TB, req *unix.NsIdReq, nsIDs []uint64, flags uint, context string) int {
+		tb.Helper()
+		n, err := unix.Listns(req, nsIDs, flags)
+		if err != nil {
+			if errors.Is(err, unix.ENOSYS) {
+				tb.Skipf("listns syscall is not available (need Linux >= 6.19), skipping test: %v", err)
+			}
+			if errors.Is(err, unix.EPERM) || errors.Is(err, unix.EACCES) {
+				tb.Skipf("listns requires additional privileges in this environment, skipping test: %v", err)
+			}
+			tb.Fatalf("%s: Listns failed: %v", context, err)
+		}
+		if n < 0 || n > len(nsIDs) {
+			tb.Fatalf("%s: Listns returned unexpected count %d, want [0, %d]", context, n, len(nsIDs))
+		}
+		return n
+	}
+
+	t.Run("all namespaces", func(t *testing.T) {
+		req := &unix.NsIdReq{
+			Size:       unix.NS_ID_REQ_SIZE_VER0,
+			Ns_id:      0,
+			Ns_type:    0,
+			User_ns_id: 0,
+		}
+		ids := make([]uint64, 64)
+		callListns(t, req, ids, 0, "all namespaces")
+	})
+
+	t.Run("network namespaces only", func(t *testing.T) {
+		req := &unix.NsIdReq{
+			Size:       unix.NS_ID_REQ_SIZE_VER0,
+			Ns_id:      0,
+			Ns_type:    uint32(unix.NET_NS),
+			User_ns_id: 0,
+		}
+		ids := make([]uint64, 64)
+		callListns(t, req, ids, 0, "network namespaces only")
+	})
+
+	t.Run("current user namespace owner", func(t *testing.T) {
+		req := &unix.NsIdReq{
+			Size:       unix.NS_ID_REQ_SIZE_VER0,
+			Ns_id:      0,
+			Ns_type:    0,
+			User_ns_id: unix.LISTNS_CURRENT_USER,
+		}
+		ids := make([]uint64, 64)
+		callListns(t, req, ids, 0, "current user namespace owner")
+	})
+
+	t.Run("network and mount namespaces", func(t *testing.T) {
+		req := &unix.NsIdReq{
+			Size:       unix.NS_ID_REQ_SIZE_VER0,
+			Ns_id:      0,
+			Ns_type:    uint32(unix.NET_NS | unix.MNT_NS),
+			User_ns_id: 0,
+		}
+		ids := make([]uint64, 64)
+		callListns(t, req, ids, 0, "network and mount namespaces")
+	})
+
+	t.Run("pagination via ns_id", func(t *testing.T) {
+		const pageSize = 10
+		req := &unix.NsIdReq{
+			Size:       unix.NS_ID_REQ_SIZE_VER0,
+			Ns_id:      0,
+			Ns_type:    0,
+			User_ns_id: 0,
+		}
+		ids := make([]uint64, pageSize)
+
+		total := 0
+		for {
+			n := callListns(t, req, ids, 0, "pagination")
+			if n == 0 {
+				break
+			}
+
+			// Continue from the last seen namespace ID.
+			last := ids[n-1]
+			if last == req.Ns_id {
+				t.Fatalf("pagination did not advance: last=%d", last)
+			}
+			total += n
+			req.Ns_id = last
+
+			// Partial batch means we've exhausted all results.
+			if n < pageSize {
+				break
+			}
+		}
+
+		t.Logf("total ns: %d", total)
+		if total == 0 {
+			t.Fatalf("pagination should return at least one namespace")
+		}
+	})
+
+}
+
 func TestIoctlGetRTCTime(t *testing.T) {
 	f, err := os.Open("/dev/rtc0")
 	if err != nil {

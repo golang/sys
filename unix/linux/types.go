@@ -150,6 +150,7 @@ struct termios2 {
 #include <linux/nexthop.h>
 #include <linux/nfc.h>
 #include <linux/nl80211.h>
+#include <linux/nsfs.h>
 #include <linux/openat2.h>
 #include <linux/perf_event.h>
 #include <linux/pps.h>
@@ -536,6 +537,16 @@ struct my_ptp_perout_request {
 	unsigned int index;
 	unsigned int flags;
 	struct ptp_clock_time on;
+};
+
+// the one defined in linux/nsfs.h has anonymous nested struct
+struct my_ns_id_req {
+	__u32 size;
+	__u32 spare;
+	__u64 ns_id;
+	__u32 ns_type;
+	__u32 spare2;
+	__u64 user_ns_id;
 };
 */
 import "C"
@@ -1089,6 +1100,22 @@ const (
 type OpenHow C.struct_open_how
 
 const SizeofOpenHow = C.sizeof_struct_open_how
+
+type NsIdReq C.struct_my_ns_id_req
+
+const (
+	NS_ID_REQ_SIZE_VER0 = C.NS_ID_REQ_SIZE_VER0
+	LISTNS_CURRENT_USER = C.LISTNS_CURRENT_USER
+
+	TIME_NS   = C.TIME_NS
+	MNT_NS    = C.MNT_NS
+	CGROUP_NS = C.CGROUP_NS
+	UTS_NS    = C.UTS_NS
+	IPC_NS    = C.IPC_NS
+	USER_NS   = C.USER_NS
+	PID_NS    = C.PID_NS
+	NET_NS    = C.NET_NS
+)
 
 const (
 	RESOLVE_BENEATH       = C.RESOLVE_BENEATH
