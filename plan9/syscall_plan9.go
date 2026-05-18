@@ -13,6 +13,7 @@ package plan9
 
 import (
 	"bytes"
+	"os"
 	"syscall"
 	"unsafe"
 )
@@ -61,10 +62,10 @@ func errstr() string {
 	return cstring(buf[:])
 }
 
-// Implemented in assembly to import from runtime.
-func exit(code int)
-
-func Exit(code int) { exit(code) }
+// Exit causes the current process to exit with the given status code.
+// Previously implemented in assembly referencing syscall.exit, which does
+// not exist on Plan 9, causing build failures on plan9/amd64.
+func Exit(code int) { os.Exit(code) }
 
 func readnum(path string) (uint, error) {
 	var b [12]byte
