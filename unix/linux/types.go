@@ -564,6 +564,8 @@ type (
 
 type Timespec C.struct_timespec
 
+type KernelTimespec C.struct___kernel_timespec
+
 type Timeval C.struct_timeval
 
 type Timex C.struct_timex
