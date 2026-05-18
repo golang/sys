@@ -70,6 +70,7 @@ includes_Darwin='
 #include <sys/stat.h>
 #include <sys/un.h>
 #include <sys/sockio.h>
+#include <sys/stat.h>
 #include <sys/sys_domain.h>
 #include <sys/sysctl.h>
 #include <sys/mman.h>
@@ -367,6 +368,7 @@ includes_NetBSD='
 #include <sys/select.h>
 #include <sys/socket.h>
 #include <sys/sockio.h>
+#include <sys/stat.h>
 #include <sys/sysctl.h>
 #include <sys/termios.h>
 #include <sys/ttycom.h>
