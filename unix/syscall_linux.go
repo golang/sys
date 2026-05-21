@@ -1637,9 +1637,12 @@ func Recvmmsg(fd int, ps, oobs [][]byte, flags int) (n int, ns, oobns, recvflags
 		return 0, nil, nil, nil, nil, EINVAL
 	}
 
-	msghdrs := make([]Mmsghdr, vlen)
-	iovecs := make([]Iovec, vlen)
-	names := make([]byte, SizeofSockaddrAny*vlen)
+	hdrEnd := SizeofMmsghdr * vlen
+	iovEnd := hdrEnd + SizeofIovec*vlen
+	buf := make([]byte, iovEnd+SizeofSockaddrAny*vlen)
+	msghdrs := unsafe.Slice((*Mmsghdr)(unsafe.Pointer(&buf[0])), vlen)
+	iovecs := unsafe.Slice((*Iovec)(unsafe.Pointer(uintptr(unsafe.Pointer(&buf[0]))+uintptr(hdrEnd))), vlen)
+	names := buf[iovEnd:]
 
 	for i := range vlen {
 		if len(ps[i]) > 0 {
