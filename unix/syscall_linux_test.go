@@ -1364,3 +1364,59 @@ func TestSockaddrALG(t *testing.T) {
 		t.Fatalf("got: %q, want: %q", got, exp)
 	}
 }
+
+func TestRecvmmsg(t *testing.T) {
+	fds, err := unix.Socketpair(unix.AF_UNIX, unix.SOCK_DGRAM, 0)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer unix.Close(fds[0])
+	defer unix.Close(fds[1])
+
+	expected := []string{"msg1", "msg2", "msg3"}
+	vlen := len(expected)
+
+	for _, msg := range expected {
+		if _, err := unix.Write(fds[1], []byte(msg)); err != nil {
+			t.Fatalf("Write: %v", err)
+		}
+	}
+
+	ps := make([][]byte, vlen)
+	oobs := make([][]byte, vlen)
+	for i := range ps {
+		ps[i] = make([]byte, 64)
+	}
+
+	n, ns, oobns, recvflags, from, err := unix.Recvmmsg(fds[0], ps, oobs, 0)
+	if err != nil {
+		if errors.Is(err, unix.ENOSYS) {
+			t.Skipf("recvmmsg not available: %v", err)
+		}
+		t.Fatalf("Recvmmsg: %v", err)
+	}
+
+	if n != vlen {
+		t.Errorf("Recvmmsg: got %d messages, want %d", n, vlen)
+		return
+	}
+
+	for i := range n {
+		got := string(ps[i][:ns[i]])
+		if got != expected[i] {
+			t.Errorf("message %d: got %q, want %q", i, got, expected[i])
+		}
+		if ns[i] != len(expected[i]) {
+			t.Errorf("message %d: got ns=%d, want %d", i, ns[i], len(expected[i]))
+		}
+		if oobns[i] != 0 {
+			t.Errorf("message %d: got oobns=%d, want 0", i, oobns[i])
+		}
+		if recvflags[i] != 0 {
+			t.Errorf("message %d: got recvflags=%#x, want 0", i, recvflags[i])
+		}
+		if from[i] != nil {
+			t.Errorf("message %d: got non-nil from", i)
+		}
+	}
+}
