@@ -10,7 +10,7 @@ the operating system.
 This repository uses Gerrit for code changes. To learn how to submit changes to
 this repository, see https://go.dev/doc/contribute.
 
-The git repository is https://go.googlesource.com/sys.
+The source repository is https://go.googlesource.com/sys.
 
 The main issue tracker for the sys repository is located at
 https://go.dev/issues. Prefix your issue with "x/sys:" in the
