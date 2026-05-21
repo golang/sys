@@ -2,8 +2,7 @@
 
 [![Go Reference](https://pkg.go.dev/badge/golang.org/x/sys.svg)](https://pkg.go.dev/golang.org/x/sys)
 
-This repository holds supplemental Go packages for low-level interactions with
-the operating system.
+This repository holds supplemental Go packages for low-level interactions with the operating system.
 
 ## Report Issues / Send Patches
 
