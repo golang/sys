@@ -1664,9 +1664,10 @@ func Recvmmsg(fd int, ps, oobs [][]byte, flags int) (n int, ns, oobns, recvflags
 		return 0, nil, nil, nil, nil, err
 	}
 
-	ns = make([]int, n)
-	oobns = make([]int, n)
-	recvflags = make([]int, n)
+	rbuf := make([]int, 3*n)
+	ns = rbuf[0:n:n]
+	oobns = rbuf[n : 2*n : 2*n]
+	recvflags = rbuf[2*n : 3*n : 3*n]
 	from = make([]Sockaddr, n)
 
 	for i := range n {
