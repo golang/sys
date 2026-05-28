@@ -1366,57 +1366,87 @@ func TestSockaddrALG(t *testing.T) {
 }
 
 func TestRecvmmsg(t *testing.T) {
-	fds, err := unix.Socketpair(unix.AF_UNIX, unix.SOCK_DGRAM, 0)
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer unix.Close(fds[0])
-	defer unix.Close(fds[1])
-
-	expected := []string{"msg1", "msg2", "msg3"}
-	vlen := len(expected)
-
-	for _, msg := range expected {
-		if _, err := unix.Write(fds[1], []byte(msg)); err != nil {
-			t.Fatalf("Write: %v", err)
-		}
-	}
-
-	ps := make([][]byte, vlen)
-	oobs := make([][]byte, vlen)
-	for i := range ps {
-		ps[i] = make([]byte, 64)
-	}
-
-	n, ns, oobns, recvflags, from, err := unix.Recvmmsg(fds[0], ps, oobs, 0)
-	if err != nil {
-		if errors.Is(err, unix.ENOSYS) {
-			t.Skipf("recvmmsg not available: %v", err)
-		}
-		t.Fatalf("Recvmmsg: %v", err)
+	tests := []struct {
+		name      string
+		messages  int
+		batchSize int
+	}{
+		{
+			name:      "equal_messages_and_batch",
+			messages:  3,
+			batchSize: 3,
+		},
+		{
+			name:      "fewer_messages_than_batch",
+			messages:  2,
+			batchSize: 6,
+		},
+		{
+			name:      "more_messages_than_batch",
+			messages:  5,
+			batchSize: 2,
+		},
 	}
 
-	if n != vlen {
-		t.Errorf("Recvmmsg: got %d messages, want %d", n, vlen)
-		return
-	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			fds, err := unix.Socketpair(unix.AF_UNIX, unix.SOCK_DGRAM, 0)
+			if err != nil {
+				t.Fatal(err)
+			}
+			defer unix.Close(fds[0])
+			defer unix.Close(fds[1])
 
-	for i := range n {
-		got := string(ps[i][:ns[i]])
-		if got != expected[i] {
-			t.Errorf("message %d: got %q, want %q", i, got, expected[i])
-		}
-		if ns[i] != len(expected[i]) {
-			t.Errorf("message %d: got ns=%d, want %d", i, ns[i], len(expected[i]))
-		}
-		if oobns[i] != 0 {
-			t.Errorf("message %d: got oobns=%d, want 0", i, oobns[i])
-		}
-		if recvflags[i] != 0 {
-			t.Errorf("message %d: got recvflags=%#x, want 0", i, recvflags[i])
-		}
-		if from[i] != nil {
-			t.Errorf("message %d: got non-nil from", i)
-		}
+			for i := 0; i < tt.messages; i++ {
+				msg := fmt.Sprintf("msg%d", i+1)
+				if _, err := unix.Write(fds[1], []byte(msg)); err != nil {
+					t.Fatalf("Write: %v", err)
+				}
+			}
+
+			read := 0
+			for read < tt.messages {
+				ps := make([][]byte, tt.batchSize)
+				oobs := make([][]byte, tt.batchSize)
+				for i := range ps {
+					ps[i] = make([]byte, 64)
+				}
+
+				n, ns, oobns, recvflags, from, err := unix.Recvmmsg(fds[0], ps, oobs, unix.MSG_DONTWAIT)
+				if err != nil {
+					if errors.Is(err, unix.ENOSYS) {
+						t.Skipf("recvmmsg not available: %v", err)
+					}
+					t.Fatalf("Recvmmsg: %v", err)
+				}
+
+				wantBatchSize := min(tt.messages-read, tt.batchSize)
+				if n != wantBatchSize {
+					t.Fatalf("Recvmmsg: got %d messages, want %d", n, wantBatchSize)
+				}
+
+				for i := range n {
+					got := string(ps[i][:ns[i]])
+					want := fmt.Sprintf("msg%d", read+i+1)
+					if got != want {
+						t.Errorf("message %d: got %q, want %q", i, got, want)
+					}
+					if ns[i] != len(want) {
+						t.Errorf("message %d: got ns=%d, want %d", i, ns[i], len(want))
+					}
+					if oobns[i] != 0 {
+						t.Errorf("message %d: got oobns=%d, want 0", i, oobns[i])
+					}
+					if recvflags[i] != 0 {
+						t.Errorf("message %d: got recvflags=%#x, want 0", i, recvflags[i])
+					}
+					if from[i] != nil {
+						t.Errorf("message %d: got non-nil from", i)
+					}
+				}
+
+				read += n
+			}
+		})
 	}
 }
