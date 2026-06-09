@@ -294,6 +294,11 @@ func TestBuildSecurityDescriptor(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	var pinner runtime.Pinner
+	defer pinner.Unpin()
+	pinner.Pin(adminSid)
+	pinner.Pin(systemSid)
+
 	access := []windows.EXPLICIT_ACCESS{{
 		AccessPermissions: windows.GENERIC_ALL,
 		AccessMode:        windows.GRANT_ACCESS,
