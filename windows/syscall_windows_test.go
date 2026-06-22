@@ -1516,6 +1516,43 @@ func TestRoundtripNTUnicodeString(t *testing.T) {
 	}
 }
 
+func TestRoundtripNTString(t *testing.T) {
+	// NTString maximum string length must fit in a uint16, less for terminal NUL.
+	maxString := strings.Repeat("*", windows.MAX_USHORT-1)
+	for _, test := range []struct {
+		s       string
+		wantErr bool
+	}{{
+		s: "",
+	}, {
+		s: "hello",
+	}, {
+		s: maxString,
+	}, {
+		s:       maxString + "*",
+		wantErr: true,
+	}, {
+		s:       "a\x00a",
+		wantErr: true,
+	}} {
+		nts, err := windows.NewNTString(test.s)
+		if (err != nil) != test.wantErr {
+			t.Errorf("NewNTString(%q): %v, wantErr:%v", test.s, err, test.wantErr)
+			continue
+		}
+		if err != nil {
+			if !errors.Is(err, syscall.EINVAL) {
+				t.Errorf("NewNTString(%q): %v, want %v", test.s, err, syscall.EINVAL)
+			}
+			continue
+		}
+		s2 := nts.String()
+		if test.s != s2 {
+			t.Errorf("round trip of %q = %q, wanted original", test.s, s2)
+		}
+	}
+}
+
 func TestIsProcessorFeaturePresent(t *testing.T) {
 	// according to
 	// https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-isprocessorfeaturepresent
