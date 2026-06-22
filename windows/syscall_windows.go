@@ -1727,13 +1727,19 @@ func (s *NTUnicodeString) String() string {
 // do not use NTString, and instead UTF16PtrFromString should be used for
 // the more common *uint16 string type.
 func NewNTString(s string) (*NTString, error) {
-	var nts NTString
-	s8, err := BytePtrFromString(s)
+	if len(s) > (1<<16)-2 {
+		return nil, syscall.EINVAL
+	}
+	s8, err := ByteSliceFromString(s)
 	if err != nil {
 		return nil, err
 	}
-	RtlInitString(&nts, s8)
-	return &nts, nil
+	n := len(s8)
+	return &NTString{
+		Length:        uint16(n) - 1, // subtract 1 byte for the NULL terminator
+		MaximumLength: uint16(n),
+		Buffer:        &s8[0],
+	}, nil
 }
 
 // Slice returns a byte slice that aliases the data in the NTString.
