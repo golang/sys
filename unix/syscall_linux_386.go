@@ -253,6 +253,14 @@ func sendmsg(s int, msg *Msghdr, flags int) (n int, err error) {
 	return
 }
 
+func recvmmsg(s int, mmsg *Mmsghdr, vlen int, flags int, timeout *Timespec) (n int, err error) {
+	n, e := socketcall(_RECVMMSG, uintptr(s), uintptr(unsafe.Pointer(mmsg)), uintptr(vlen), uintptr(flags), uintptr(unsafe.Pointer(timeout)), 0)
+	if e != 0 {
+		err = e
+	}
+	return
+}
+
 func Listen(s int, n int) (err error) {
 	_, e := socketcall(_LISTEN, uintptr(s), uintptr(n), 0, 0, 0, 0)
 	if e != 0 {

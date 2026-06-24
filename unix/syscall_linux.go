@@ -1617,6 +1617,75 @@ func sendmsgN(fd int, iov []Iovec, oob []byte, ptr unsafe.Pointer, salen _Sockle
 	return n, nil
 }
 
+// Recvmmsg receives multiple messages from a socket using the recvmmsg system
+// call. ps holds the payload buffers and oobs the optional out-of-band control
+// buffers, one entry per message; vlen is derived from len(ps). Pass a nil or
+// zero-length oobs to receive no control data.
+//
+// The results are:
+//   - n is the number of messages received
+//   - ns[i] is the number of non-control bytes read into ps[i]
+//   - oobns[i] is the number of control bytes read into oobs[i]; interpret with [ParseSocketControlMessage]
+//   - recvflags[i] is the per-message flags returned by recvmmsg
+//   - from[i] is the sender address for message i, or nil for connected sockets
+func Recvmmsg(fd int, ps, oobs [][]byte, flags int) (n int, ns, oobns, recvflags []int, from []Sockaddr, err error) {
+	vlen := len(ps)
+	if vlen == 0 {
+		return 0, nil, nil, nil, nil, EINVAL
+	}
+	if len(oobs) > 0 && len(oobs) != vlen {
+		return 0, nil, nil, nil, nil, EINVAL
+	}
+
+	hdrEnd := SizeofMmsghdr * vlen
+	iovEnd := hdrEnd + SizeofIovec*vlen
+	buf := make([]byte, iovEnd+SizeofSockaddrAny*vlen)
+	msghdrs := unsafe.Slice((*Mmsghdr)(unsafe.Pointer(&buf[0])), vlen)
+	iovecs := unsafe.Slice((*Iovec)(unsafe.Pointer(uintptr(unsafe.Pointer(&buf[0]))+uintptr(hdrEnd))), vlen)
+	names := buf[iovEnd:]
+
+	for i := range vlen {
+		if len(ps[i]) > 0 {
+			iovecs[i].Base = &ps[i][0]
+			iovecs[i].SetLen(len(ps[i]))
+			msghdrs[i].Hdr.Iov = &iovecs[i]
+			msghdrs[i].Hdr.SetIovlen(1)
+		}
+		if i < len(oobs) && len(oobs[i]) > 0 {
+			msghdrs[i].Hdr.Control = &oobs[i][0]
+			msghdrs[i].Hdr.SetControllen(len(oobs[i]))
+		}
+		msghdrs[i].Hdr.Name = &names[i*SizeofSockaddrAny]
+		msghdrs[i].Hdr.Namelen = uint32(SizeofSockaddrAny)
+	}
+
+	n, err = recvmmsg(fd, &msghdrs[0], vlen, flags, nil)
+	if err != nil {
+		return 0, nil, nil, nil, nil, err
+	}
+
+	rbuf := make([]int, 3*n)
+	ns = rbuf[0:n:n]
+	oobns = rbuf[n : 2*n : 2*n]
+	recvflags = rbuf[2*n : 3*n : 3*n]
+	from = make([]Sockaddr, n)
+
+	for i := range n {
+		ns[i] = int(msghdrs[i].Len)
+		oobns[i] = int(msghdrs[i].Hdr.Controllen)
+		recvflags[i] = int(msghdrs[i].Hdr.Flags)
+		rsa := (*RawSockaddrAny)(unsafe.Pointer(&names[i*SizeofSockaddrAny]))
+		if rsa.Addr.Family != AF_UNSPEC {
+			from[i], err = anyToSockaddr(fd, rsa)
+			if err != nil {
+				return
+			}
+		}
+	}
+
+	return
+}
+
 // BindToDevice binds the socket associated with fd to device.
 func BindToDevice(fd int, device string) (err error) {
 	return SetsockoptString(fd, SOL_SOCKET, SO_BINDTODEVICE, device)
