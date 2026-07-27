@@ -107,6 +107,7 @@ var darwinTests = [...]darwinTest{
 	{"pthread_fchdir_np", libc_pthread_fchdir_np_trampoline_addr},
 	{"ptrace", libc_ptrace_trampoline_addr},
 	{"pwrite", libc_pwrite_trampoline_addr},
+	{"pwritev", libc_pwritev_trampoline_addr},
 	{"read", libc_read_trampoline_addr},
 	{"readdir_r", libc_readdir_r_trampoline_addr},
 	{"readlink", libc_readlink_trampoline_addr},
