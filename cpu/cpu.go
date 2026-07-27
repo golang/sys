@@ -248,13 +248,21 @@ var RISCV64 struct {
 	HasZvks           bool // ShangMi Algorithm Suite
 	HasZvksc          bool // ShangMi Algorithm Suite with carryless multiplication
 	HasZvksg          bool // ShangMi Algorithm Suite with GCM
+	VLENB             uint // Vector register length in bytes, 0 if undetected
 	_                 CacheLinePad
 }
+
+// doDerived, if non-nil, is called after processing GODEBUG to set "derived"
+// feature flags.
+var doDerived func()
 
 func init() {
 	archInit()
 	initOptions()
 	processOptions()
+	if doDerived != nil {
+		doDerived()
+	}
 }
 
 // options contains the cpu debug options that can be used in GODEBUG.

@@ -111,6 +111,12 @@ func TestRISCV64Initialized(t *testing.T) {
 	}
 }
 
+func TestRISCV64VectorLength(t *testing.T) {
+	if runtime.GOARCH == "riscv64" && cpu.RISCV64.HasV && cpu.RISCV64.VLENB == 0 {
+		t.Fatal("VLENB should be non-zero when HasV is true")
+	}
+}
+
 // On ppc64x, the ISA bit for POWER8 should always be set on POWER8 and beyond.
 func TestPPC64minimalFeatures(t *testing.T) {
 	// Do not run this with gccgo on ppc64, as it doesn't have POWER8 as a minimum
