@@ -73,6 +73,13 @@ func main() {
 	}
 
 	if goos == "freebsd" {
+		// Where struct fp_extended_precision is not declared, cgo -godefs
+		// now renders FpExtendedPrecision as _cgopackage.Incomplete, which
+		// does not compile. The files generated for those platforms carry
+		// an empty struct, so keep producing that.
+		incompleteFpExtended := regexp.MustCompile(`type FpExtendedPrecision _cgopackage\.Incomplete`)
+		b = incompleteFpExtended.ReplaceAll(b, []byte("type FpExtendedPrecision struct{}"))
+
 		// Inside PtraceLwpInfoStruct replace __Siginfo with __PtraceSiginfo,
 		// Create __PtraceSiginfo as a copy of __Siginfo where every *byte instance is replaced by uintptr
 		ptraceLwpInfoStruct := regexp.MustCompile(`(?s:type PtraceLwpInfoStruct struct \{.*?\})`)
