@@ -283,6 +283,19 @@ func TestPidfd(t *testing.T) {
 	}
 	defer unix.Close(fd)
 
+	info := unix.PidfdInfo{
+		Mask: unix.PIDFD_INFO_PID,
+	}
+	if err := unix.IoctlPidfdInfo(fd, &info); err != nil {
+		if err != unix.ENOSYS && err != unix.ENOTTY && err != unix.EINVAL {
+			t.Errorf("PIDFD_INFO_PID ioctl failed: %v", err)
+		}
+	} else {
+		if int(info.Pid) != cmd.Process.Pid {
+			t.Errorf("got pid %d, want %d", info.Pid, cmd.Process.Pid)
+		}
+	}
+
 	// Child is running but not terminated.
 	if err := unix.Waitid(unix.P_PIDFD, fd, nil, unix.WEXITED|unix.WNOHANG, nil); err != nil {
 		if errors.Is(err, unix.EINVAL) {
