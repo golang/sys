@@ -4542,6 +4542,48 @@ const (
 )
 
 const (
+	PIDFD_SIGNAL_THREAD        = 0x1
+	PIDFD_SIGNAL_THREAD_GROUP  = 0x2
+	PIDFD_SIGNAL_PROCESS_GROUP = 0x4
+	PIDFD_SELF_THREAD          = -0x2710
+	PIDFD_SELF_THREAD_GROUP    = -0x2711
+	PIDFD_SELF                 = -0x2710
+	PIDFD_SELF_PROCESS         = -0x2711
+	PIDFD_INFO_PID             = 0x1
+	PIDFD_INFO_CREDS           = 0x2
+	PIDFD_INFO_CGROUPID        = 0x4
+	PIDFD_INFO_EXIT            = 0x8
+	PIDFD_INFO_COREDUMP        = 0x10
+	PIDFD_COREDUMPED           = 0x1
+	PIDFD_COREDUMP_SKIP        = 0x2
+	PIDFD_COREDUMP_USER        = 0x4
+	PIDFD_COREDUMP_ROOT        = 0x8
+	PIDFD_INFO_SIZE_VER0       = 0x40
+	PIDFD_GET_INFO             = 0xc048ff0b
+)
+
+const SizeofPidfdInfo = 0x48
+
+type PidfdInfo struct {
+	Mask          uint64
+	Cgroupid      uint64
+	Pid           uint32
+	Tgid          uint32
+	Ppid          uint32
+	Ruid          uint32
+	Rgid          uint32
+	Euid          uint32
+	Egid          uint32
+	Suid          uint32
+	Sgid          uint32
+	Fsuid         uint32
+	Fsgid         uint32
+	Exit_code     int32
+	Coredump_mask uint32
+	_             uint32
+}
+
+const (
 	IPC_CREAT   = 0x200
 	IPC_EXCL    = 0x400
 	IPC_NOWAIT  = 0x800

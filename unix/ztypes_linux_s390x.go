@@ -700,7 +700,18 @@ const (
 )
 
 const (
-	PIDFD_NONBLOCK = 0x800
+	PIDFD_NONBLOCK                        = 0x800
+	PIDFD_THREAD                          = 0x80
+	PIDFD_GET_CGROUP_NAMESPACE            = 0xff01
+	PIDFD_GET_IPC_NAMESPACE               = 0xff02
+	PIDFD_GET_MNT_NAMESPACE               = 0xff03
+	PIDFD_GET_NET_NAMESPACE               = 0xff04
+	PIDFD_GET_PID_NAMESPACE               = 0xff05
+	PIDFD_GET_PID_FOR_CHILDREN_NAMESPACE  = 0xff06
+	PIDFD_GET_TIME_NAMESPACE              = 0xff07
+	PIDFD_GET_TIME_FOR_CHILDREN_NAMESPACE = 0xff08
+	PIDFD_GET_USER_NAMESPACE              = 0xff09
+	PIDFD_GET_UTS_NAMESPACE               = 0xff0a
 )
 
 type SysvIpcPerm struct {
