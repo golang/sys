@@ -50,7 +50,6 @@ type target struct {
 	SignedChar bool   // Is -fsigned-char needed (default no)
 	Bits       int
 	env        []string
-	stderrBuf  bytes.Buffer
 	compiler   string
 }
 
@@ -251,20 +250,33 @@ func main() {
 	}
 }
 
-func (t *target) printAndResetBuilder() {
-	if t.stderrBuf.Len() > 0 {
-		for _, l := range bytes.Split(t.stderrBuf.Bytes(), []byte{'\n'}) {
-			fmt.Printf("arch %s: stderr: %s\n", t.GoArch, l)
-		}
-		t.stderrBuf.Reset()
-	}
-}
-
 // Makes an exec.Cmd with Stderr attached to the target string Builder, and target environment
 func (t *target) makeCommand(name string, args ...string) *exec.Cmd {
 	cmd := exec.Command(name, args...)
 	cmd.Env = t.env
-	cmd.Stderr = &t.stderrBuf
+
+	stderr, err := cmd.StderrPipe()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "arch %s: StderrPipe failed: %v\n", t.GoArch, err)
+		cmd.Stderr = os.Stderr
+	} else {
+		go func() {
+			defer stderr.Close()
+			buf := bufio.NewReader(stderr)
+			for {
+				s, err := buf.ReadString('\n')
+				if err != nil {
+					if err != io.EOF {
+						fmt.Fprintf(os.Stderr, "arch %s: reading from stderr pipe failed: %v\n", t.GoArch, err)
+					}
+					return
+				}
+				// Note that s has a trailing newline.
+				fmt.Printf("arch %s: %s", t.GoArch, s)
+			}
+		}()
+	}
+
 	return cmd
 }
 
@@ -307,8 +319,6 @@ func (t *target) commandFormatOutput(formatter string, outputFile string,
 			return err
 		}
 	}
-
-	defer t.printAndResetBuilder()
 
 	// mainCmd | fmtCmd > outputFile
 	if fmtCmd.Stdin, err = mainCmd.StdoutPipe(); err != nil {
@@ -391,8 +401,6 @@ func (t *target) generateFiles() error {
 
 // Create the Linux, glibc and ABI (C compiler convention) headers in the include directory.
 func (t *target) makeHeaders() error {
-	defer t.printAndResetBuilder()
-
 	// Make the Linux headers we need for this architecture
 	linuxMake := t.makeCommand("make", "headers_install", "ARCH="+t.LinuxArch, "INSTALL_HDR_PATH="+filepath.Join(TempDir, t.GoArch))
 	linuxMake.Dir = LinuxDir
@@ -502,7 +510,6 @@ func (t *target) buildELF(cc, src, path string) (*elf.File, error) {
 	ccCmd := t.makeCommand(cc, "-o", path, "-gdwarf", "-x", "c", "-c", "-")
 	ccCmd.Stdin = strings.NewReader(src)
 	ccCmd.Stdout = os.Stdout
-	defer t.printAndResetBuilder()
 	if err := ccCmd.Run(); err != nil {
 		return nil, fmt.Errorf("compiler error: %v", err)
 	}
