@@ -1473,7 +1473,7 @@ func TestToUnicodeEx(t *testing.T) {
 		t.Errorf("ToUnicodeEx failed, wanted 1, got %d", ret)
 	}
 	if utf16Buf[0] != 'ش' {
-		t.Errorf("ToUnicodeEx failed, wanted 'ش', got %q", utf16Buf[0])
+		t.Errorf("ToUnicodeEx failed, wanted 'ش', got %q", rune(utf16Buf[0]))
 	}
 	if err := windows.UnloadKeyboardLayout(araLayout); err != nil {
 		t.Errorf("UnloadKeyboardLayout failed: %v", err)
