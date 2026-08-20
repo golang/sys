@@ -776,6 +776,8 @@ type PacketMreq C.struct_packet_mreq
 
 type Msghdr C.struct_msghdr
 
+type Mmsghdr C.struct_mmsghdr
+
 type Cmsghdr C.struct_cmsghdr
 
 type Inet4Pktinfo C.struct_in_pktinfo
@@ -830,6 +832,7 @@ const (
 	SizeofIPv6Mreq          = C.sizeof_struct_ipv6_mreq
 	SizeofPacketMreq        = C.sizeof_struct_packet_mreq
 	SizeofMsghdr            = C.sizeof_struct_msghdr
+	SizeofMmsghdr           = C.sizeof_struct_mmsghdr
 	SizeofCmsghdr           = C.sizeof_struct_cmsghdr
 	SizeofInet4Pktinfo      = C.sizeof_struct_in_pktinfo
 	SizeofInet6Pktinfo      = C.sizeof_struct_in6_pktinfo
