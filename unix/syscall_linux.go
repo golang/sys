@@ -2033,6 +2033,7 @@ func Getrandom(buf []byte, flags int) (n int, err error) {
 //sysnb	Kill(pid int, sig syscall.Signal) (err error)
 //sys	Klogctl(typ int, buf []byte) (n int, err error) = SYS_SYSLOG
 //sys	Lgetxattr(path string, attr string, dest []byte) (sz int, err error)
+//sys	Listns(req *NsIdReq, nsIds []uint64, flags uint) (n int, err error)
 //sys	Listxattr(path string, dest []byte) (sz int, err error)
 //sys	Llistxattr(path string, dest []byte) (sz int, err error)
 //sys	Lremovexattr(path string, attr string) (err error)
