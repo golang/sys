@@ -167,6 +167,7 @@ func NewCallbackCDecl(fn interface{}) uintptr {
 //sys	CreateFile(name *uint16, access uint32, mode uint32, sa *SecurityAttributes, createmode uint32, attrs uint32, templatefile Handle) (handle Handle, err error) [failretval==InvalidHandle] = CreateFileW
 //sys	CreateNamedPipe(name *uint16, flags uint32, pipeMode uint32, maxInstances uint32, outSize uint32, inSize uint32, defaultTimeout uint32, sa *SecurityAttributes) (handle Handle, err error)  [failretval==InvalidHandle] = CreateNamedPipeW
 //sys	ConnectNamedPipe(pipe Handle, overlapped *Overlapped) (err error)
+//sys   GetHandleInformation (handle Handle, flags *uint32) (err error)
 //sys	DisconnectNamedPipe(pipe Handle) (err error)
 //sys   GetNamedPipeClientProcessId(pipe Handle, clientProcessID *uint32) (err error)
 //sys   GetNamedPipeServerProcessId(pipe Handle, serverProcessID *uint32) (err error)
