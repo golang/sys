@@ -247,14 +247,18 @@ func Sendfile(outfd int, infd int, offset *int64, count int) (written int, err e
 }
 
 func Dup3(oldfd, newfd, flags int) error {
-	if oldfd == newfd || flags&^O_CLOEXEC != 0 {
+	if oldfd == newfd || flags&^(O_CLOEXEC|O_CLOFORK) != 0 {
 		return EINVAL
 	}
-	how := F_DUP2FD
+	fdflags := 0
 	if flags&O_CLOEXEC != 0 {
-		how = F_DUP2FD_CLOEXEC
+		fdflags |= FD_CLOEXEC
 	}
-	_, err := fcntl(oldfd, how, newfd)
+	if flags&O_CLOFORK != 0 {
+		fdflags |= FD_CLOFORK
+	}
+	cmd := F_DUP3FD | (fdflags << 16)
+	_, err := fcntl(oldfd, cmd, newfd)
 	return err
 }
 
