@@ -3289,19 +3289,19 @@ int main() {
 	tmpDir := t.TempDir()
 	srcFile := tmpDir + "/ptrace_test.c"
 	binFile := tmpDir + "/ptrace_test"
-	
+
 	err := os.WriteFile(srcFile, []byte(testProg), 0644)
 	if err != nil {
 		t.Fatalf("Failed to write test program: %v", err)
 	}
-	
+
 	// Compile test program as 64-bit to test full 64-bit address support
 	compileCmd := exec.Command("xlc", "-q64", "-o", binFile, srcFile)
 	compileOut, err := compileCmd.CombinedOutput()
 	if err != nil {
 		t.Fatalf("Failed to compile test program: %v\nOutput: %s", err, compileOut)
 	}
-	
+
 	// Verify the executable is actually AMODE 64
 	fileCmd := exec.Command("/bin/file", binFile)
 	fileOut, err := fileCmd.CombinedOutput()
@@ -3310,7 +3310,7 @@ int main() {
 	} else {
 		t.Logf("Executable type: %s", string(fileOut))
 	}
-	
+
 	// Start the test program with STEPLIB set for 64-bit runtime libraries
 	cmd := exec.Command(binFile)
 	cmd.Stdout = os.Stdout
@@ -3324,7 +3324,7 @@ int main() {
 
 	pid := cmd.Process.Pid
 	attached := false
-	
+
 	// Give the process a moment to start executing user code
 	time.Sleep(50 * time.Millisecond)
 
@@ -3376,41 +3376,41 @@ int main() {
 		if nonZeroCount == 0 {
 			t.Error("All GPRs are zero, which is unlikely")
 		}
-		
+
 		// Check PSW format and determine AMODE
 		// z/OS ptrace returns ESA/390 format, but PtraceGetRegs converts it to z/Architecture format.
 		// After conversion:
 		//   - Bit 12 (ECMODE31BIT) should be 0 (z/Architecture format)
 		//   - AMODE is in bits 31-32 of PSW Mask (0x0000000180000000 for AMODE64)
 		const ECMODE31BIT = 0x0000000000080000
-		const AMODE31BIT_MASK = 0x0000000080000000  // Bit 32 of mask = AMODE 31
-		const AMODE64BIT_MASK = 0x0000000180000000  // Bits 31-32 of mask = EA+BA = AMODE 64
-		
+		const AMODE31BIT_MASK = 0x0000000080000000 // Bit 32 of mask = AMODE 31
+		const AMODE64BIT_MASK = 0x0000000180000000 // Bits 31-32 of mask = EA+BA = AMODE 64
+
 		// Verify we got z/Architecture format (bit 12 should be clear after conversion)
 		if (regs.Psw.Mask & ECMODE31BIT) != 0 {
 			t.Logf("WARNING: Expected z/Architecture format PSW (bit 12=0) after conversion")
 		}
-		
+
 		// Check AMODE from bits 31-32 of PSW Mask
 		isAmode64 := (regs.Psw.Mask & AMODE64BIT_MASK) == AMODE64BIT_MASK
 		isAmode31 := (regs.Psw.Mask & AMODE31BIT_MASK) == AMODE31BIT_MASK
-		t.Logf("PSW Format: z/Architecture (converted from ESA/390), AMODE 64: %v, AMODE 31: %v (Mask bits 31-32 = 0x%x)", 
-			isAmode64, isAmode31, (regs.Psw.Mask >> 32) & 0x3)
+		t.Logf("PSW Format: z/Architecture (converted from ESA/390), AMODE 64: %v, AMODE 31: %v (Mask bits 31-32 = 0x%x)",
+			isAmode64, isAmode31, (regs.Psw.Mask>>32)&0x3)
 		t.Logf("High bits set in %d registers", highBitsSet)
-		
+
 		if isAmode64 && highBitsSet == 0 {
 			t.Logf("WARNING: AMODE 64 program but no high bits set in any register - PT_READ_GPRH may not be working")
 		}
 
 		t.Logf("PSW Mask: 0x%016x", regs.Psw.Mask)
 		t.Logf("PSW Addr: 0x%016x (31-bit: 0x%08x)", regs.Psw.Addr, pswAddr)
-		
+
 		// Dump memory around PSW address to verify it points to real code
 		pc := regs.Psw.Addr
 		if !isAmode64 {
 			pc = pc & 0x7FFFFFFF
 		}
-		
+
 		// Read 64 bytes: 32 bytes before PC and 32 bytes after PC
 		memBuf := make([]byte, 64)
 		startAddr := pc - 32
@@ -3458,14 +3458,14 @@ int main() {
 			isAmode64 = (regs.Psw.Mask & AMODE64BIT_MASK) == AMODE64BIT_MASK
 
 		}
-		
+
 		pc := regs.Psw.Addr
 		// In 31-bit mode, the high bit (0x80000000) is the addressing mode indicator
 		// and must be masked off to get the actual address
 		if !isAmode64 {
 			pc = pc & 0x7FFFFFFF
 		}
-		
+
 		buf := make([]byte, 16)
 		n, err := unix.PtracePeekText(pid, uintptr(pc), buf)
 		if err != nil {
@@ -3537,13 +3537,13 @@ int main() {
 			isAmode64 = (regs.Psw.Mask & AMODE64BIT_MASK) == AMODE64BIT_MASK
 
 		}
-		
+
 		pc := regs.Psw.Addr
 		// In 31-bit mode, mask off the addressing mode indicator bit
 		if !isAmode64 {
 			pc = pc & 0x7FFFFFFF
 		}
-		
+
 		// Read original data
 		origBuf := make([]byte, 4)
 		n, err := unix.PtracePeekText(pid, uintptr(pc), origBuf)
@@ -3581,7 +3581,7 @@ int main() {
 
 		// Save original GPR[15] value
 		origGPR15 := regs.Gprs[15]
-		
+
 		// Test 1: Write same values back (no-op modification)
 		err = unix.PtraceSetRegs(pid, &regs)
 		if err != nil {
@@ -3606,40 +3606,40 @@ int main() {
 		if verifyPswAddr != origPswAddr {
 			t.Errorf("PSW Addr changed: 0x%08x -> 0x%08x", origPswAddr, verifyPswAddr)
 		}
-		
+
 		// Test 2: Modify GPR[15] to a value >4GB and verify high bits are preserved
 		testValue := uint64(0x0000005012345678) // High bits: 0x00000050
 		regs.Gprs[15] = testValue
-		
+
 		err = unix.PtraceSetRegs(pid, &regs)
 		if err != nil {
 			t.Fatalf("PtraceSetRegs (with >4GB value) failed: %v", err)
 		}
-		
+
 		// Read back and verify
 		var regs64 unix.PtraceRegs
 		err = unix.PtraceGetRegs(pid, &regs64)
 		if err != nil {
 			t.Fatalf("PtraceGetRegs (verify >4GB) failed: %v", err)
 		}
-		
+
 		if regs64.Gprs[15] != testValue {
-			t.Errorf("GPR[15] >4GB value not preserved: wrote 0x%016x, read 0x%016x", 
+			t.Errorf("GPR[15] >4GB value not preserved: wrote 0x%016x, read 0x%016x",
 				testValue, regs64.Gprs[15])
-			t.Errorf("  High 32 bits: wrote 0x%08x, read 0x%08x", 
+			t.Errorf("  High 32 bits: wrote 0x%08x, read 0x%08x",
 				uint32(testValue>>32), uint32(regs64.Gprs[15]>>32))
 		} else {
-			t.Logf("GPR[15] >4GB value preserved: 0x%016x (high: 0x%08x)", 
+			t.Logf("GPR[15] >4GB value preserved: 0x%016x (high: 0x%08x)",
 				regs64.Gprs[15], uint32(regs64.Gprs[15]>>32))
 		}
-		
+
 		// Restore original value
 		regs.Gprs[15] = origGPR15
 		err = unix.PtraceSetRegs(pid, &regs)
 		if err != nil {
 			t.Logf("Warning: Failed to restore GPR[15]: %v", err)
 		}
-		
+
 		t.Logf("PtraceSetRegs successful - all registers preserved, >4GB values work")
 	})
 
@@ -3674,10 +3674,10 @@ int main() {
 		// A7F4 0010 = BRC 15,+16 (unconditional branch forward 16 bytes)
 		insn := []byte{0xA7, 0xF4, 0x00, 0x10, 0x00, 0x00}
 		pc := uint64(0x10000)
-		
+
 		dest := unix.CalculateBranchDest(pid, pc, insn)
 		expected := uint64(pc + (0x10 * 2)) // Displacement is in halfwords
-		
+
 		if dest != expected && dest != unix.NO_BRANCH_DEST {
 			t.Logf("CalculateBranchDest: got 0x%x, expected 0x%x (may vary based on register values)", dest, expected)
 		}
@@ -3708,17 +3708,17 @@ int main() {
 				return 0, fmt.Errorf("failed to start new process: %v", err)
 			}
 			newPid := newCmd.Process.Pid
-			
+
 			// Give it time to start
 			time.Sleep(50 * time.Millisecond)
-			
+
 			// Attach to new process
 			err = unix.PtraceAttach(newPid)
 			if err != nil {
 				newCmd.Process.Kill()
 				return 0, fmt.Errorf("failed to attach to new process: %v", err)
 			}
-			
+
 			// Wait for attach to complete
 			var status unix.WaitStatus
 			_, err = unix.Wait4(newPid, &status, 0, nil)
@@ -3727,13 +3727,13 @@ int main() {
 				newCmd.Process.Kill()
 				return 0, fmt.Errorf("wait after attach failed: %v", err)
 			}
-			
+
 			return newPid, nil
 		}
 
 		// Declare status before any goto statements
 		var status unix.WaitStatus
-		
+
 		// Continue execution briefly to get out of LE/system library code
 		err := unix.PtraceCont(pid, 0)
 		if err != nil {
@@ -3748,7 +3748,7 @@ int main() {
 				pid = newPid
 				attached = true
 				t.Logf("Respawned process with PID %d (already stopped and attached)", pid)
-				
+
 				// Respawned process is already stopped after attach, skip to single-step
 				goto skipContinue
 			} else {
@@ -3818,7 +3818,7 @@ int main() {
 		if err != nil {
 			t.Fatalf("PtraceGetRegs failed: %v", err)
 		}
-		
+
 		// Check PSW format and AMODE
 		const ECMODE31BIT = 0x0000000000080000
 		const AMODE31BIT_ADDR = 0x0000000080000000
@@ -3875,7 +3875,7 @@ int main() {
 
 		// Verify PC moved to one of the expected addresses
 		if pc2 != nextPC && pc2 != branchDest {
-			t.Errorf("PC after step (0x%x) is neither nextPC (0x%x) nor branchDest (0x%x)", 
+			t.Errorf("PC after step (0x%x) is neither nextPC (0x%x) nor branchDest (0x%x)",
 				pc2, nextPC, branchDest)
 		} else {
 			t.Logf("Single step successful: PC moved from 0x%x to 0x%x", pc1, pc2)
@@ -3900,12 +3900,12 @@ int main() {
 				// z/Architecture format: check EA+BA bits
 				isAmode64 = (regs.Psw.Mask & AMODE64BIT_MASK) == AMODE64BIT_MASK
 			}
-			
+
 			prevPC := pc2
 			if !isAmode64 {
 				prevPC = prevPC & 0x7FFFFFFF
 			}
-			
+
 			for i := 0; i < 5; i++ {
 				err := unix.PtraceSingleStep(pid)
 				if err != nil {
@@ -3936,7 +3936,7 @@ int main() {
 			t.Skip("Process not attached")
 			return
 		}
-		
+
 		// Detach directly without continuing (process is already stopped)
 		err := unix.PtraceDetach(pid)
 		if err != nil && err != unix.EINTR && err != unix.ESRCH {
@@ -3949,7 +3949,7 @@ int main() {
 			t.Logf("Process already exited, detach not needed")
 		}
 		attached = false
-		
+
 		t.Logf("Successfully detached from process (or process exited)")
 	})
 
@@ -3974,7 +3974,7 @@ int main() {
 			t.Run(tc.name, func(t *testing.T) {
 				length := unix.GetInstructionLength(tc.firstByte)
 				if length != tc.expected {
-					t.Errorf("GetInstructionLength(0x%02x) = %d, expected %d", 
+					t.Errorf("GetInstructionLength(0x%02x) = %d, expected %d",
 						tc.firstByte, length, tc.expected)
 				}
 			})
@@ -4059,7 +4059,7 @@ int main() {
 		for _, tc := range testCases {
 			t.Run(tc.name, func(t *testing.T) {
 				dest := unix.CalculateBranchDest(pid, tc.pc, tc.insn)
-				
+
 				if tc.wantDest {
 					if dest == unix.NO_BRANCH_DEST {
 						t.Errorf("Expected branch destination, got NO_BRANCH_DEST")

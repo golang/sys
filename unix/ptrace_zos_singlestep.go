@@ -62,7 +62,7 @@ type tempBreakpoint struct {
 
 // singleStepState manages temporary breakpoints for a process
 type singleStepState struct {
-	mu         sync.Mutex
+	mu          sync.Mutex
 	breakpoints [MAX_TEMP_BREAKPOINTS]tempBreakpoint
 }
 
@@ -407,7 +407,7 @@ func PtraceSingleStep(pid int) error {
 	// Use direct PSW write like ztrace does, not full register set
 	hitAddr := regs.Psw.Addr
 	if state.isTempBreakpoint(hitAddr - 2) {
-		if err := ptraceWritePSW(pid, uint32(hitAddr - 2)); err != nil {
+		if err := ptraceWritePSW(pid, uint32(hitAddr-2)); err != nil {
 			return err
 		}
 	}
