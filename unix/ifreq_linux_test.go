@@ -172,3 +172,18 @@ func testIfreq(t *testing.T) *Ifreq {
 
 	return ifr
 }
+
+func TestIfreqAlignment(t *testing.T) {
+	// The accessors cast the union in place, so it must be aligned for the
+	// widest type they use. Merely slow on amd64; a fault on sparc64.
+	want := unsafe.Alignof(uint32(0))
+	if a := unsafe.Alignof(RawSockaddrInet4{}); a > want {
+		want = a
+	}
+	if got := unsafe.Alignof(Ifreq{}); got%want != 0 {
+		t.Errorf("unsafe.Alignof(Ifreq{}) = %d, want a multiple of %d", got, want)
+	}
+	if off := unsafe.Offsetof(Ifreq{}.raw) + unsafe.Offsetof(ifreq{}.Ifru); off%want != 0 {
+		t.Errorf("union lies at offset %d within Ifreq, want a multiple of %d", off, want)
+	}
+}
