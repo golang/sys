@@ -87,9 +87,25 @@ func ptrace(request int, pid int, addr uintptr, data uintptr) (err error) {
 }
 
 // ptracePtr is a variant that accepts unsafe.Pointer for the data parameter.
+// addr is a target-process address (a raw integer), not a Go-managed pointer.
+// We must not pass it to Bpx4ptr as unsafe.Pointer(addr); instead we inline the
+// parms array and place &addr at parms[2], exactly as ptrace() does for data.
 func ptracePtr(request int, pid int, addr uintptr, data unsafe.Pointer) (err error) {
-	rv, rc, rn := Bpx4ptr(int32(request), int32(pid),
-		unsafe.Pointer(addr), data, nil)
+	req32 := int32(request)
+	pid32 := int32(pid)
+	var rv, rc, rn int32
+	var buffer unsafe.Pointer
+	parms := [8]unsafe.Pointer{
+		unsafe.Pointer(&req32),
+		unsafe.Pointer(&pid32),
+		unsafe.Pointer(&addr), // &addr, not unsafe.Pointer(addr)
+		unsafe.Pointer(&data),
+		unsafe.Pointer(&buffer),
+		unsafe.Pointer(&rv),
+		unsafe.Pointer(&rc),
+		unsafe.Pointer(&rn),
+	}
+	bpxcall(parms[:], BPX4PTR)
 	if rv != 0 {
 		err = errnoErr2(Errno(rc), uintptr(rn))
 	}
@@ -97,9 +113,22 @@ func ptracePtr(request int, pid int, addr uintptr, data unsafe.Pointer) (err err
 }
 
 // ptracePtrWithBuffer is used for operations that require the buffer parameter.
+// addr is a target-process address; same &addr treatment as ptracePtr.
 func ptracePtrWithBuffer(request int, pid int, addr uintptr, data unsafe.Pointer, buffer unsafe.Pointer) (err error) {
-	rv, rc, rn := Bpx4ptr(int32(request), int32(pid),
-		unsafe.Pointer(addr), data, buffer)
+	req32 := int32(request)
+	pid32 := int32(pid)
+	var rv, rc, rn int32
+	parms := [8]unsafe.Pointer{
+		unsafe.Pointer(&req32),
+		unsafe.Pointer(&pid32),
+		unsafe.Pointer(&addr), // &addr, not unsafe.Pointer(addr)
+		unsafe.Pointer(&data),
+		unsafe.Pointer(&buffer),
+		unsafe.Pointer(&rv),
+		unsafe.Pointer(&rc),
+		unsafe.Pointer(&rn),
+	}
+	bpxcall(parms[:], BPX4PTR)
 	if rv != 0 {
 		err = errnoErr2(Errno(rc), uintptr(rn))
 	}
