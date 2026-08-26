@@ -182,12 +182,13 @@ var MIPS64X struct {
 // require kernel support to work (DARN, SCV), so there are feature bits for
 // those as well. The struct is padded to avoid false sharing.
 var PPC64 struct {
-	_        CacheLinePad
-	HasDARN  bool // Hardware random number generator (requires kernel enablement)
-	HasSCV   bool // Syscall vectored (requires kernel enablement)
-	IsPOWER8 bool // ISA v2.07 (POWER8)
-	IsPOWER9 bool // ISA v3.00 (POWER9), implies IsPOWER8
-	_        CacheLinePad
+	_         CacheLinePad
+	HasDARN   bool // Hardware random number generator (requires kernel enablement)
+	HasSCV    bool // Syscall vectored (requires kernel enablement)
+	IsPOWER8  bool // ISA v2.07 (POWER8)
+	IsPOWER9  bool // ISA v3.00 (POWER9), implies IsPOWER8
+	IsPOWER10 bool // ISA v3.1 (POWER10 and POWER11; POWER11 did not add a new architected level), implies IsPOWER9
+	_         CacheLinePad
 }
 
 // S390X contains the supported CPU features of the current IBM Z
