@@ -290,7 +290,7 @@ const (
 
 	// Generate source code for different "architectures"
 	var inFiles, outFiles []srcFile
-	for _, arch := range strings.Fields("A B C D") {
+	for arch := range strings.FieldsSeq("A B C D") {
 		buf := new(bytes.Buffer)
 		err := inTmpl.Execute(buf, arch)
 		if err != nil {

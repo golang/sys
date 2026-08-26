@@ -967,9 +967,7 @@ func TestSendmsgBuffers(t *testing.T) {
 	defer unix.Close(fds[1])
 
 	var wg sync.WaitGroup
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
+	wg.Go(func() {
 		bufs := [][]byte{
 			make([]byte, 5),
 			nil,
@@ -997,7 +995,7 @@ func TestSendmsgBuffers(t *testing.T) {
 		if !reflect.DeepEqual(bufs, want) {
 			t.Errorf("got data %q, want %q", bufs, want)
 		}
-	}()
+	})
 
 	defer wg.Wait()
 

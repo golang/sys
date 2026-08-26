@@ -30,7 +30,7 @@ func testGetdirentries(t *testing.T, count int) {
 	d := t.TempDir()
 
 	var names []string
-	for i := 0; i < count; i++ {
+	for i := range count {
 		names = append(names, fmt.Sprintf("file%03d", i))
 	}
 

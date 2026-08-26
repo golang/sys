@@ -1188,7 +1188,7 @@ func TestIoctlFileDedupeRange(t *testing.T) {
 	// Test deduplication with two blocks of zeros
 	data := make([]byte, 4096)
 
-	for i := 0; i < 2; i += 1 {
+	for range 2 {
 		_, err = f1.Write(data)
 		if err != nil {
 			t.Fatal(err)
@@ -1201,7 +1201,7 @@ func TestIoctlFileDedupeRange(t *testing.T) {
 	}
 	defer f2.Close()
 
-	for i := 0; i < 2; i += 1 {
+	for i := range 2 {
 		// Make the 2nd block different
 		if i == 1 {
 			data[1] = 1
