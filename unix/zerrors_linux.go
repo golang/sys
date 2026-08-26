@@ -3862,6 +3862,7 @@ const (
 	TIOCPKT_NOSTOP                              = 0x10
 	TIOCPKT_START                               = 0x8
 	TIOCPKT_STOP                                = 0x4
+	TIOCSER_TEMT                                = 0x1
 	TIPC_ADDR_ID                                = 0x3
 	TIPC_ADDR_MCAST                             = 0x1
 	TIPC_ADDR_NAME                              = 0x2
