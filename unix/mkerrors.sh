@@ -290,14 +290,7 @@ struct ltchars {
 #include <mtd/mtd-user.h>
 #include <net/route.h>
 
-#if defined(__sparc__)
-// On sparc{,64}, the kernel defines struct termios2 itself which clashes with the
-// definition in glibc. As only the error constants are needed here, include the
-// generic termibits.h (which is included by termbits.h on sparc).
-#include <asm-generic/termbits.h>
-#else
 #include <asm/termbits.h>
-#endif
 
 #ifndef PTRACE_GETREGS
 #define PTRACE_GETREGS	0xc
