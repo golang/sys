@@ -84,22 +84,20 @@ type Rusage struct {
 
 type Stat_t struct {
 	Dev     uint64
-	_       uint16
 	Ino     uint64
+	Nlink   uint64
 	Mode    uint32
-	Nlink   uint32
 	Uid     uint32
 	Gid     uint32
+	_       uint32
 	Rdev    uint64
-	_       uint16
 	Size    int64
 	Blksize int64
 	Blocks  int64
 	Atim    Timespec
 	Mtim    Timespec
 	Ctim    Timespec
-	_       uint64
-	_       uint64
+	_       [3]int64
 }
 
 type Dirent struct {
