@@ -2048,6 +2048,7 @@ const (
 	MINIX3_SUPER_MAGIC                          = 0x4d5a
 	MINIX_SUPER_MAGIC                           = 0x137f
 	MINIX_SUPER_MAGIC2                          = 0x138f
+	MLOCK_ONFAULT                               = 0x1
 	MNT_DETACH                                  = 0x2
 	MNT_EXPIRE                                  = 0x4
 	MNT_FORCE                                   = 0x1
