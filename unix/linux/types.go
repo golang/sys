@@ -217,6 +217,34 @@ typedef struct {
 
 	long			st_blocks;
 } my_stat;
+#elif defined(__sparc__) && defined(__arch64__)
+
+// The glibc and kernel stat do not agree on sparc64 either: glibc puts st_ino
+// at offset 16 and st_nlink at 28, the kernel at 8 and 16. The raw syscalls
+// fill the kernel's struct stat64, so use that, with the same adjustments as
+// above.
+typedef struct {
+	unsigned long		st_dev;
+	unsigned long		st_ino;
+	unsigned long		st_nlink;
+
+	unsigned int		st_mode;
+	unsigned int		st_uid;
+	unsigned int		st_gid;
+	unsigned int		__pad0;
+
+	unsigned long		st_rdev;
+	long			st_size;
+	long			st_blksize;
+	long			st_blocks;
+
+	// Declared as six separate longs in the kernel.
+	struct timespec		st_atim;
+	struct timespec		st_mtim;
+	struct timespec		st_ctim;
+
+	long			__unused[3];
+} my_stat;
 #else
 typedef struct stat my_stat;
 #endif
