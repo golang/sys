@@ -1991,7 +1991,24 @@ func FsconfigReconfigure(fd int) (err error) {
 	return fsconfig(fd, FSCONFIG_CMD_RECONFIGURE, nil, nil, 0)
 }
 
-//sys	Getdents(fd int, buf []byte) (n int, err error) = SYS_GETDENTS64
+//sys	getdents(fd int, buf []byte) (n int, err error) = SYS_GETDENTS64
+
+// Getdents reads directory entries from fd into buf.
+func Getdents(fd int, buf []byte) (n int, err error) {
+	// getdents64 stores d_ino with a 64-bit write, which faults on
+	// strict-alignment targets unless buf is 8-aligned.
+	if len(buf) > 0 {
+		if off := int(-uintptr(unsafe.Pointer(&buf[0])) & 7); off > 0 && off < len(buf) {
+			n, err = getdents(fd, buf[off:])
+			if n > 0 {
+				copy(buf, buf[off:off+n])
+			}
+			return n, err
+		}
+	}
+	return getdents(fd, buf)
+}
+
 //sysnb	Getpgid(pid int) (pgid int, err error)
 
 func Getpgrp() (pid int) {
