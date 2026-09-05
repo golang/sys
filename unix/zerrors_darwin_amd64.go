@@ -1147,6 +1147,10 @@ const (
 	PARMRK                                  = 0x8
 	PARODD                                  = 0x2000
 	PENDIN                                  = 0x20000000
+	PRIO_DARWIN_BG                          = 0x1000
+	PRIO_DARWIN_NONUI                       = 0x1001
+	PRIO_DARWIN_PROCESS                     = 0x4
+	PRIO_DARWIN_THREAD                      = 0x3
 	PRIO_PGRP                               = 0x1
 	PRIO_PROCESS                            = 0x0
 	PRIO_USER                               = 0x2
