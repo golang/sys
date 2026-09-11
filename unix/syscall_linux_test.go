@@ -1377,3 +1377,190 @@ func TestSockaddrALG(t *testing.T) {
 		t.Fatalf("got: %q, want: %q", got, exp)
 	}
 }
+
+func TestRecvmmsg(t *testing.T) {
+	tests := []struct {
+		name      string
+		messages  int
+		batchSize int
+	}{
+		{
+			name:      "equal_messages_and_batch",
+			messages:  3,
+			batchSize: 3,
+		},
+		{
+			name:      "fewer_messages_than_batch",
+			messages:  2,
+			batchSize: 6,
+		},
+		{
+			name:      "more_messages_than_batch",
+			messages:  5,
+			batchSize: 2,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			fds, err := unix.Socketpair(unix.AF_UNIX, unix.SOCK_DGRAM, 0)
+			if err != nil {
+				t.Fatal(err)
+			}
+			defer unix.Close(fds[0])
+			defer unix.Close(fds[1])
+
+			for i := 0; i < tt.messages; i++ {
+				msg := fmt.Sprintf("msg%d", i+1)
+				if _, err := unix.Write(fds[1], []byte(msg)); err != nil {
+					t.Fatalf("Write: %v", err)
+				}
+			}
+
+			msgs := make([]unix.RecvmmsgData, tt.batchSize)
+			for i := range msgs {
+				msgs[i].Data = [][]byte{make([]byte, 64)}
+			}
+
+			read := 0
+			for read < tt.messages {
+				n, err := unix.Recvmmsg(fds[0], msgs, unix.MSG_DONTWAIT)
+				if err != nil {
+					if errors.Is(err, unix.ENOSYS) {
+						t.Skipf("recvmmsg not available: %v", err)
+					}
+					t.Fatalf("Recvmmsg: %v", err)
+				}
+
+				wantBatchSize := min(tt.messages-read, tt.batchSize)
+				if n != wantBatchSize {
+					t.Fatalf("Recvmmsg: got %d messages, want %d", n, wantBatchSize)
+				}
+
+				for i := range n {
+					got := string(msgs[i].Data[0][:msgs[i].N])
+					want := fmt.Sprintf("msg%d", read+i+1)
+					if got != want {
+						t.Errorf("message %d: got %q, want %q", i, got, want)
+					}
+					if msgs[i].N != len(want) {
+						t.Errorf("message %d: got N=%d, want %d", i, msgs[i].N, len(want))
+					}
+					if msgs[i].OOBN != 0 {
+						t.Errorf("message %d: got OOBN=%d, want 0", i, msgs[i].OOBN)
+					}
+					if msgs[i].Flags != 0 {
+						t.Errorf("message %d: got Flags=%#x, want 0", i, msgs[i].Flags)
+					}
+					// socketpair is connected; kernel does not fill sender address
+					if msgs[i].From.Addr.Family != unix.AF_UNSPEC {
+						t.Errorf("message %d: got From.Addr.Family=%d, want AF_UNSPEC", i, msgs[i].From.Addr.Family)
+					}
+				}
+
+				read += n
+			}
+		})
+	}
+}
+
+func TestRecvmmsgScatterGather(t *testing.T) {
+	fds, err := unix.Socketpair(unix.AF_UNIX, unix.SOCK_DGRAM, 0)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer unix.Close(fds[0])
+	defer unix.Close(fds[1])
+
+	// Send two messages; each will be received into two separate buffers.
+	for i := range 2 {
+		msg := fmt.Sprintf("abcd%d", i)
+		if _, err := unix.Write(fds[1], []byte(msg)); err != nil {
+			t.Fatalf("Write: %v", err)
+		}
+	}
+
+	msgs := []unix.RecvmmsgData{
+		{Data: [][]byte{make([]byte, 2), make([]byte, 3)}},
+		{Data: [][]byte{make([]byte, 2), make([]byte, 3)}},
+	}
+	n, err := unix.Recvmmsg(fds[0], msgs, unix.MSG_DONTWAIT)
+	if err != nil {
+		if errors.Is(err, unix.ENOSYS) {
+			t.Skipf("recvmmsg not available: %v", err)
+		}
+		t.Fatalf("Recvmmsg: %v", err)
+	}
+	if n != 2 {
+		t.Fatalf("got %d messages, want 2", n)
+	}
+	for i := range n {
+		want := fmt.Sprintf("abcd%d", i)
+		// N is total bytes across both scatter buffers.
+		if msgs[i].N != len(want) {
+			t.Errorf("message %d: got N=%d, want %d", i, msgs[i].N, len(want))
+		}
+		got := string(msgs[i].Data[0]) + string(msgs[i].Data[1][:msgs[i].N-len(msgs[i].Data[0])])
+		if got != want {
+			t.Errorf("message %d: got %q, want %q", i, got, want)
+		}
+	}
+}
+
+func TestRecvmmsgFrom(t *testing.T) {
+	// Use an unconnected UDP socket so the kernel fills in the sender address.
+	srv, err := unix.Socket(unix.AF_INET, unix.SOCK_DGRAM, 0)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer unix.Close(srv)
+	addr := unix.SockaddrInet4{Port: 0, Addr: [4]byte{127, 0, 0, 1}}
+	if err := unix.Bind(srv, &addr); err != nil {
+		t.Fatal(err)
+	}
+	sa, err := unix.Getsockname(srv)
+	if err != nil {
+		t.Fatal(err)
+	}
+	port := sa.(*unix.SockaddrInet4).Port
+
+	cli, err := unix.Socket(unix.AF_INET, unix.SOCK_DGRAM, 0)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer unix.Close(cli)
+
+	dst := &unix.SockaddrInet4{Port: port, Addr: [4]byte{127, 0, 0, 1}}
+	if err := unix.Sendto(cli, []byte("hello"), 0, dst); err != nil {
+		t.Fatal(err)
+	}
+
+	msgs := []unix.RecvmmsgData{{Data: [][]byte{make([]byte, 16)}}}
+	n, err := unix.Recvmmsg(srv, msgs, unix.MSG_DONTWAIT)
+	if err != nil {
+		if errors.Is(err, unix.ENOSYS) {
+			t.Skipf("recvmmsg not available: %v", err)
+		}
+		t.Fatal(err)
+	}
+	if n != 1 {
+		t.Fatalf("got %d messages, want 1", n)
+	}
+	if string(msgs[0].Data[0][:msgs[0].N]) != "hello" {
+		t.Errorf("got payload %q, want %q", msgs[0].Data[0][:msgs[0].N], "hello")
+	}
+	if msgs[0].From.Addr.Family == unix.AF_UNSPEC {
+		t.Fatal("From is AF_UNSPEC; expected sender address")
+	}
+	from, err := unix.AnyToSockaddr(srv, &msgs[0].From)
+	if err != nil {
+		t.Fatalf("AnyToSockaddr: %v", err)
+	}
+	fromInet, ok := from.(*unix.SockaddrInet4)
+	if !ok {
+		t.Fatalf("expected *SockaddrInet4, got %T", from)
+	}
+	if fromInet.Addr != ([4]byte{127, 0, 0, 1}) {
+		t.Errorf("got sender addr %v, want 127.0.0.1", fromInet.Addr)
+	}
+}
