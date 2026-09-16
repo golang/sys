@@ -1359,6 +1359,7 @@ const (
 	FAN_UNLIMITED_MARKS                         = 0x20
 	FAN_UNLIMITED_QUEUE                         = 0x10
 	FD_CLOEXEC                                  = 0x1
+	FD_NSFS_ROOT                                = -0x2713
 	FD_PIDFS_ROOT                               = -0x2712
 	FD_SETSIZE                                  = 0x400
 	FF0                                         = 0x0
@@ -1441,6 +1442,7 @@ const (
 	F_DUPFD_CLOEXEC                             = 0x406
 	F_DUPFD_QUERY                               = 0x403
 	F_EXLCK                                     = 0x4
+	F_GETDELEG                                  = 0x40f
 	F_GETFD                                     = 0x1
 	F_GETFL                                     = 0x3
 	F_GETLEASE                                  = 0x401
@@ -1462,6 +1464,7 @@ const (
 	F_SEAL_SEAL                                 = 0x1
 	F_SEAL_SHRINK                               = 0x2
 	F_SEAL_WRITE                                = 0x8
+	F_SETDELEG                                  = 0x410
 	F_SETFD                                     = 0x2
 	F_SETFL                                     = 0x4
 	F_SETLEASE                                  = 0x400
@@ -1632,6 +1635,7 @@ const (
 	IN_UNMOUNT                                  = 0x2000
 	IOCTL_MEI_CONNECT_CLIENT                    = 0xc0104801
 	IOCTL_MEI_CONNECT_CLIENT_VTAG               = 0xc0144804
+	IPPROTO_AGGFRAG                             = 0x90
 	IPPROTO_AH                                  = 0x33
 	IPPROTO_BEETPH                              = 0x5e
 	IPPROTO_COMP                                = 0x6c
@@ -3790,6 +3794,14 @@ const (
 	TCPOPT_TIMESTAMP                            = 0x8
 	TCPOPT_TSTAMP_HDR                           = 0x101080a
 	TCPOPT_WINDOW                               = 0x3
+	TCP_ACCECN_ACE_FAIL_RECV                    = 0x2
+	TCP_ACCECN_ACE_FAIL_SEND                    = 0x1
+	TCP_ACCECN_OPT_COUNTER_SEEN                 = 0x2
+	TCP_ACCECN_OPT_EMPTY_SEEN                   = 0x1
+	TCP_ACCECN_OPT_FAIL_RECV                    = 0x8
+	TCP_ACCECN_OPT_FAIL_SEEN                    = 0x3
+	TCP_ACCECN_OPT_FAIL_SEND                    = 0x4
+	TCP_ACCECN_OPT_NOT_SEEN                     = 0x0
 	TCP_AO_KEYF_EXCLUDE_OPT                     = 0x2
 	TCP_AO_KEYF_IFINDEX                         = 0x1
 	TCP_AO_MAXKEYLEN                            = 0x50
@@ -3804,6 +3816,7 @@ const (
 	TCP_COOKIE_TRANSACTIONS                     = 0xf
 	TCP_CORK                                    = 0x3
 	TCP_DEFER_ACCEPT                            = 0x9
+	TCP_DELACK_MAX_US                           = 0x2e
 	TCP_FASTOPEN                                = 0x17
 	TCP_FASTOPEN_CONNECT                        = 0x1e
 	TCP_FASTOPEN_KEY                            = 0x21
@@ -3836,6 +3849,8 @@ const (
 	TCP_REPAIR_OPTIONS                          = 0x16
 	TCP_REPAIR_QUEUE                            = 0x14
 	TCP_REPAIR_WINDOW                           = 0x1d
+	TCP_RTO_MAX_MS                              = 0x2c
+	TCP_RTO_MIN_US                              = 0x2d
 	TCP_SAVED_SYN                               = 0x1c
 	TCP_SAVE_SYN                                = 0x1b
 	TCP_SYNCNT                                  = 0x7

@@ -4592,28 +4592,31 @@ const (
 	PIDFD_COREDUMP_USER        = 0x4
 	PIDFD_COREDUMP_ROOT        = 0x8
 	PIDFD_INFO_SIZE_VER0       = 0x40
-	PIDFD_GET_INFO             = 0xc048ff0b
+	PIDFD_GET_INFO             = 0xc058ff0b
 )
 
-const SizeofPidfdInfo = 0x48
+const SizeofPidfdInfo = 0x58
 
 type PidfdInfo struct {
-	Mask          uint64
-	Cgroupid      uint64
-	Pid           uint32
-	Tgid          uint32
-	Ppid          uint32
-	Ruid          uint32
-	Rgid          uint32
-	Euid          uint32
-	Egid          uint32
-	Suid          uint32
-	Sgid          uint32
-	Fsuid         uint32
-	Fsgid         uint32
-	Exit_code     int32
-	Coredump_mask uint32
-	_             uint32
+	Mask            uint64
+	Cgroupid        uint64
+	Pid             uint32
+	Tgid            uint32
+	Ppid            uint32
+	Ruid            uint32
+	Rgid            uint32
+	Euid            uint32
+	Egid            uint32
+	Suid            uint32
+	Sgid            uint32
+	Fsuid           uint32
+	Fsgid           uint32
+	Exit_code       int32
+	Coredump_mask   uint32
+	Coredump_signal uint32
+	Coredump_code   uint32
+	Coredump_pad    uint32
+	Supported_mask  uint64
 }
 
 const (
