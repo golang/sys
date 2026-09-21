@@ -322,14 +322,17 @@ func (r *Rets) useLongHandleErrorCode(retvar string) string {
 
 // SetErrorCode returns source code that sets return parameters.
 func (r *Rets) SetErrorCode() string {
-	const code = `if r0 != 0 {
-		%s = %sErrno(r0)
+	const code = `if uint32(r0) != 0 {
+		%s = %sErrno(uint32(r0))
 	}`
-	const ntstatus = `if r0 != 0 {
-		ntstatus = %sNTStatus(r0)
+	const ntstatus = `if uint32(r0) != 0 {
+		ntstatus = %sNTStatus(uint32(r0))
 	}`
 	if r.Name == "" && !r.ReturnsError {
 		return ""
+	}
+	if r.Name == "" && r.FailCond == "" {
+		return r.useLongHandleErrorCode("uint32(r1)")
 	}
 	if r.Name == "" {
 		return r.useLongHandleErrorCode("r1")
@@ -345,7 +348,7 @@ func (r *Rets) SetErrorCode() string {
 	case r.Type[0] == '*':
 		s = fmt.Sprintf("%s = (%s)(unsafe.Pointer(r0))", r.Name, r.Type)
 	case r.Type == "bool":
-		s = fmt.Sprintf("%s = r0 != 0", r.Name)
+		s = fmt.Sprintf("%s = uint32(r0) != 0", r.Name)
 	default:
 		s = fmt.Sprintf("%s = %s(r0)", r.Name, r.Type)
 	}
