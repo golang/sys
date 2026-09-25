@@ -1176,6 +1176,19 @@ func TestPrctlRetInt(t *testing.T) {
 	}
 }
 
+func TestPrctlArg5Ptr(t *testing.T) {
+	var cookie uint64
+	err := unix.PrctlArg5Ptr(unix.PR_SCHED_CORE, unix.PR_SCHED_CORE_GET, 0, unix.PR_SCHED_CORE_SCOPE_THREAD, unsafe.Pointer(&cookie))
+	if err != nil {
+		if err == unix.ENOSYS || err == unix.EINVAL || err == unix.ENODEV {
+			t.Skip("PR_SCHED_CORE/PR_SCHED_CORE_GET not available")
+		}
+		t.Errorf("PR_SCHED_CORE/PR_SCHED_CORE_GET failed: %v", err)
+	} else {
+		t.Logf("CPU scheduling cookie %#x", cookie)
+	}
+}
+
 func TestTimerfd(t *testing.T) {
 	var now unix.Timespec
 	if err := unix.ClockGettime(unix.CLOCK_REALTIME, &now); err != nil {

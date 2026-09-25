@@ -2064,6 +2064,7 @@ func Getrandom(buf []byte, flags int) (n int, err error) {
 //sys	PerfEventOpen(attr *PerfEventAttr, pid int, cpu int, groupFd int, flags int) (fd int, err error)
 //sys	PivotRoot(newroot string, putold string) (err error) = SYS_PIVOT_ROOT
 //sys	Prctl(option int, arg2 uintptr, arg3 uintptr, arg4 uintptr, arg5 uintptr) (err error)
+//sys	PrctlArg5Ptr(option int, arg2 uintptr, arg3 uintptr, arg4 uintptr, arg5 unsafe.Pointer) (err error) = SYS_PRCTL
 //sys	pselect6(nfd int, r *FdSet, w *FdSet, e *FdSet, timeout *Timespec, sigmask *sigset_argpack) (n int, err error)
 //sys	read(fd int, p []byte) (n int, err error)
 //sys	Removexattr(path string, attr string) (err error)
