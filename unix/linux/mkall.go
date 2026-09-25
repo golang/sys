@@ -23,6 +23,7 @@ import (
 	"fmt"
 	"go/build/constraint"
 	"io"
+	"io/fs"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -266,7 +267,7 @@ func (t *target) makeCommand(name string, args ...string) *exec.Cmd {
 			for {
 				s, err := buf.ReadString('\n')
 				if err != nil {
-					if err != io.EOF {
+					if err != io.EOF && !errors.Is(err, fs.ErrClosed) {
 						fmt.Fprintf(os.Stderr, "arch %s: reading from stderr pipe failed: %v\n", t.GoArch, err)
 					}
 					return
