@@ -1028,21 +1028,95 @@ func TestProcessModules(t *testing.T) {
 }
 
 func TestQueryWorkingSetEx(t *testing.T) {
-	var a int
+	// Map a few pages of shared memory and page them in.
+	pageSize := os.Getpagesize()
+	pageNum := 4
+	size := pageSize * pageNum
+	handle, err := windows.CreateFileMapping(windows.InvalidHandle, nil, windows.PAGE_READWRITE, 0, uint32(size), nil)
+	if err != nil {
+		t.Fatalf("CreateFileMapping failed: %v", err)
+	}
+	defer windows.CloseHandle(handle)
+	addr, err := windows.MapViewOfFile(handle, windows.FILE_MAP_WRITE, 0, 0, uintptr(size))
+	if err != nil {
+		t.Fatalf("MapViewOfFile failed: %v", err)
+	}
+	defer windows.UnmapViewOfFile(addr)
+	mem := unsafe.Slice((*byte)(unsafe.Pointer(addr)), size)
+	for i := range mem {
+		mem[i] = 1
+	}
 
+	// Query one page per call. PSAPI_WORKING_SET_EX_INFORMATION has the
+	// wrong size on 386 (golang/go#74493), so a multi-entry query is not
+	// reliable there.
 	process := windows.CurrentProcess()
-	information := windows.PSAPI_WORKING_SET_EX_INFORMATION{
-		VirtualAddress: windows.Pointer(unsafe.Pointer(&a)),
+	for i := 0; i < pageNum; i++ {
+		infos := []windows.PSAPI_WORKING_SET_EX_INFORMATION{
+			{VirtualAddress: windows.Pointer(unsafe.Pointer(addr + uintptr(i*pageSize)))},
+		}
+		cb := uint32(uintptr(len(infos)) * unsafe.Sizeof(infos[0]))
+		if err := windows.QueryWorkingSetEx(process, uintptr(unsafe.Pointer(&infos[0])), cb); err != nil {
+			t.Fatalf("QueryWorkingSetEx failed: %v", err)
+		}
+		attrs := infos[0].VirtualAttributes
+		if !attrs.Valid() {
+			t.Errorf("page %d: memory location not valid: attributes %#x", i, uint64(attrs))
+		}
+		if !attrs.Shared() {
+			t.Errorf("page %d: memory location not shared: attributes %#x", i, uint64(attrs))
+		}
 	}
-	infos := []windows.PSAPI_WORKING_SET_EX_INFORMATION{information}
+}
 
+func TestPSAPIWorkingSetExBlockBits(t *testing.T) {
+	tests := []struct {
+		name string
+		bit  uint
+		get  func(windows.PSAPI_WORKING_SET_EX_BLOCK) bool
+	}{
+		{"Valid", 0, windows.PSAPI_WORKING_SET_EX_BLOCK.Valid},
+		{"Shared", 15, windows.PSAPI_WORKING_SET_EX_BLOCK.Shared},
+		{"Locked", 22, windows.PSAPI_WORKING_SET_EX_BLOCK.Locked},
+		{"LargePage", 23, windows.PSAPI_WORKING_SET_EX_BLOCK.LargePage},
+		{"Bad", 31, windows.PSAPI_WORKING_SET_EX_BLOCK.Bad},
+	}
+	for _, tt := range tests {
+		set := windows.PSAPI_WORKING_SET_EX_BLOCK(1) << tt.bit
+		if !tt.get(set) {
+			t.Errorf("%s() = false with bit %d set", tt.name, tt.bit)
+		}
+		if tt.get(^set) {
+			t.Errorf("%s() = true with only bit %d clear", tt.name, tt.bit)
+		}
+	}
+}
+
+func TestQueryWorkingSetExLocked(t *testing.T) {
+	size := uintptr(os.Getpagesize())
+	addr, err := windows.VirtualAlloc(0, size, windows.MEM_COMMIT|windows.MEM_RESERVE, windows.PAGE_READWRITE)
+	if err != nil {
+		t.Fatalf("VirtualAlloc failed: %v", err)
+	}
+	defer windows.VirtualFree(addr, 0, windows.MEM_RELEASE)
+	if err := windows.VirtualLock(addr, size); err != nil {
+		t.Skipf("VirtualLock failed: %v", err)
+	}
+	defer windows.VirtualUnlock(addr, size)
+
+	infos := []windows.PSAPI_WORKING_SET_EX_INFORMATION{
+		{VirtualAddress: windows.Pointer(unsafe.Pointer(addr))},
+	}
 	cb := uint32(uintptr(len(infos)) * unsafe.Sizeof(infos[0]))
-	if err := windows.QueryWorkingSetEx(process, uintptr(unsafe.Pointer(&infos[0])), cb); err != nil {
-		t.Fatalf("%+v", err)
+	if err := windows.QueryWorkingSetEx(windows.CurrentProcess(), uintptr(unsafe.Pointer(&infos[0])), cb); err != nil {
+		t.Fatalf("QueryWorkingSetEx failed: %v", err)
 	}
-
-	if !infos[0].VirtualAttributes.Valid() {
-		t.Errorf("memory location not valid")
+	attrs := infos[0].VirtualAttributes
+	if !attrs.Valid() {
+		t.Fatalf("locked page is not valid: attributes %#x", uint64(attrs))
+	}
+	if !attrs.Locked() {
+		t.Errorf("locked page is not reported as locked: attributes %#x", uint64(attrs))
 	}
 }
 
