@@ -1617,6 +1617,87 @@ func sendmsgN(fd int, iov []Iovec, oob []byte, ptr unsafe.Pointer, salen _Sockle
 	return n, nil
 }
 
+// RecvmmsgData holds the per-message buffers and results for [Recvmmsg].
+// A RecvmmsgData slice can be pre-allocated and reused across calls without
+// any per-call allocation.
+type RecvmmsgData struct {
+	Data  [][]byte       // payload buffers; each entry is a separate iovec
+	OOB   []byte         // control buffer
+	N     int            // set on return: payload bytes received into Data
+	OOBN  int            // set on return: OOB bytes received into OOB; interpret with [ParseSocketControlMessage]
+	Flags int            // set on return: per-message flags
+	From  RawSockaddrAny // set on return: raw sender address; zero (AF_UNSPEC) for connected sockets
+}
+
+// Recvmmsg receives multiple messages from a socket using the recvmmsg system
+// call. msgs is a caller-provided slice, one entry per message slot. Data and
+// OOB in each entry must be pre-allocated; the call writes N, OOBN, Flags,
+// and From back into each entry. n is the number of messages received.
+//
+// To convert From to a [Sockaddr], call [AnyToSockaddr].
+func Recvmmsg(fd int, msgs []RecvmmsgData, flags int) (n int, err error) {
+	vlen := len(msgs)
+	if vlen == 0 {
+		return 0, EINVAL
+	}
+
+	totalIovecs := 0
+	for i := range msgs {
+		totalIovecs += len(msgs[i].Data)
+	}
+
+	msghdrs := make([]Mmsghdr, vlen)
+	var iovecs []Iovec
+	if totalIovecs > 0 {
+		iovecs = make([]Iovec, totalIovecs)
+	}
+
+	iovIdx := 0
+	for i := range vlen {
+		m := &msgs[i]
+		// clear stale address from previous call on reuse
+		m.From = RawSockaddrAny{}
+		if len(m.Data) > 0 {
+			startIdx := iovIdx
+			for _, b := range m.Data {
+				if len(b) > 0 {
+					iovecs[iovIdx].Base = &b[0]
+					iovecs[iovIdx].SetLen(len(b))
+				} else {
+					iovecs[iovIdx].Base = (*byte)(unsafe.Pointer(&_zero))
+				}
+				iovIdx++
+			}
+			msghdrs[i].Hdr.Iov = &iovecs[startIdx]
+			msghdrs[i].Hdr.SetIovlen(len(m.Data))
+		}
+		if len(m.OOB) > 0 {
+			msghdrs[i].Hdr.Control = &m.OOB[0]
+			msghdrs[i].Hdr.SetControllen(len(m.OOB))
+		}
+		msghdrs[i].Hdr.Name = (*byte)(unsafe.Pointer(&m.From))
+		msghdrs[i].Hdr.Namelen = uint32(SizeofSockaddrAny)
+	}
+
+	n, err = recvmmsg(fd, &msghdrs[0], vlen, flags, nil)
+	if err != nil {
+		return 0, err
+	}
+
+	for i := range n {
+		msgs[i].N = int(msghdrs[i].Len)
+		msgs[i].OOBN = int(msghdrs[i].Hdr.Controllen)
+		msgs[i].Flags = int(msghdrs[i].Hdr.Flags)
+	}
+
+	return
+}
+
+// AnyToSockaddr converts a raw socket address to a [Sockaddr] interface.
+func AnyToSockaddr(fd int, rsa *RawSockaddrAny) (Sockaddr, error) {
+	return anyToSockaddr(fd, rsa)
+}
+
 // BindToDevice binds the socket associated with fd to device.
 func BindToDevice(fd int, device string) (err error) {
 	return SetsockoptString(fd, SOL_SOCKET, SO_BINDTODEVICE, device)
