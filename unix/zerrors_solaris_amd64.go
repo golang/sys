@@ -291,6 +291,7 @@ const (
 	EXTA                          = 0xe
 	EXTB                          = 0xf
 	FD_CLOEXEC                    = 0x1
+	FD_CLOFORK                    = 0x2
 	FD_NFDBITS                    = 0x40
 	FD_SETSIZE                    = 0x10000
 	FF0                           = 0x0
@@ -309,8 +310,10 @@ const (
 	F_COMPAT                      = 0x8
 	F_DUP2FD                      = 0x9
 	F_DUP2FD_CLOEXEC              = 0x24
+	F_DUP2FD_CLOFORK              = 0x32
 	F_DUPFD                       = 0x0
 	F_DUPFD_CLOEXEC               = 0x25
+	F_DUPFD_CLOFORK               = 0x31
 	F_FLOCK                       = 0x35
 	F_FLOCK64                     = 0x35
 	F_FLOCKW                      = 0x36
@@ -704,6 +707,7 @@ const (
 	O_ACCMODE                     = 0x600003
 	O_APPEND                      = 0x8
 	O_CLOEXEC                     = 0x800000
+	O_CLOFORK                     = 0x10000000
 	O_CREAT                       = 0x100
 	O_DIRECT                      = 0x2000000
 	O_DIRECTORY                   = 0x1000000
@@ -948,6 +952,7 @@ const (
 	SIOCX25XMT                    = -0x3fdf96c5
 	SIOCXPROTO                    = 0x20007337
 	SOCK_CLOEXEC                  = 0x80000
+	SOCK_CLOFORK                  = 0x400000
 	SOCK_DGRAM                    = 0x1
 	SOCK_NDELAY                   = 0x200000
 	SOCK_NONBLOCK                 = 0x100000
