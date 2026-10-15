@@ -438,8 +438,8 @@ type Winsize struct {
 type Ptmget struct {
 	Cfd int32
 	Sfd int32
-	Cn  [1024]byte
-	Sn  [1024]byte
+	Cn  [16]byte
+	Sn  [16]byte
 }
 
 const (
