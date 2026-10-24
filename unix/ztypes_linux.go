@@ -6574,3 +6574,561 @@ type IPMIMsg struct {
 	Len   uint16
 	Data  *uint8
 }
+
+const (
+	IB_USER_VERBS_ABI_VERSION                      = 0x6
+	IB_USER_VERBS_CMD_ALLOC_MW                     = 0xe
+	IB_USER_VERBS_CMD_ALLOC_PD                     = 0x3
+	IB_USER_VERBS_CMD_ATTACH_MCAST                 = 0x1e
+	IB_USER_VERBS_CMD_BIND_MW                      = 0xf
+	IB_USER_VERBS_CMD_CLOSE_XRCD                   = 0x26
+	IB_USER_VERBS_CMD_COMMAND_MASK                 = 0xff
+	IB_USER_VERBS_CMD_CREATE_AH                    = 0x5
+	IB_USER_VERBS_CMD_CREATE_COMP_CHANNEL          = 0x11
+	IB_USER_VERBS_CMD_CREATE_CQ                    = 0x12
+	IB_USER_VERBS_CMD_CREATE_QP                    = 0x18
+	IB_USER_VERBS_CMD_CREATE_SRQ                   = 0x20
+	IB_USER_VERBS_CMD_CREATE_XSRQ                  = 0x27
+	IB_USER_VERBS_CMD_DEALLOC_MW                   = 0x10
+	IB_USER_VERBS_CMD_DEALLOC_PD                   = 0x4
+	IB_USER_VERBS_CMD_DEREG_MR                     = 0xd
+	IB_USER_VERBS_CMD_DESTROY_AH                   = 0x8
+	IB_USER_VERBS_CMD_DESTROY_CQ                   = 0x14
+	IB_USER_VERBS_CMD_DESTROY_QP                   = 0x1b
+	IB_USER_VERBS_CMD_DESTROY_SRQ                  = 0x23
+	IB_USER_VERBS_CMD_DETACH_MCAST                 = 0x1f
+	IB_USER_VERBS_CMD_FLAG_EXTENDED                = 0x80000000
+	IB_USER_VERBS_CMD_GET_CONTEXT                  = 0x0
+	IB_USER_VERBS_CMD_MODIFY_AH                    = 0x6
+	IB_USER_VERBS_CMD_MODIFY_QP                    = 0x1a
+	IB_USER_VERBS_CMD_MODIFY_SRQ                   = 0x21
+	IB_USER_VERBS_CMD_OPEN_QP                      = 0x28
+	IB_USER_VERBS_CMD_OPEN_XRCD                    = 0x25
+	IB_USER_VERBS_CMD_PEEK_CQ                      = 0x16
+	IB_USER_VERBS_CMD_POLL_CQ                      = 0x15
+	IB_USER_VERBS_CMD_POST_RECV                    = 0x1d
+	IB_USER_VERBS_CMD_POST_SEND                    = 0x1c
+	IB_USER_VERBS_CMD_POST_SRQ_RECV                = 0x24
+	IB_USER_VERBS_CMD_QUERY_AH                     = 0x7
+	IB_USER_VERBS_CMD_QUERY_DEVICE                 = 0x1
+	IB_USER_VERBS_CMD_QUERY_MR                     = 0xc
+	IB_USER_VERBS_CMD_QUERY_PORT                   = 0x2
+	IB_USER_VERBS_CMD_QUERY_QP                     = 0x19
+	IB_USER_VERBS_CMD_QUERY_SRQ                    = 0x22
+	IB_USER_VERBS_CMD_REG_MR                       = 0x9
+	IB_USER_VERBS_CMD_REG_SMR                      = 0xa
+	IB_USER_VERBS_CMD_REQ_NOTIFY_CQ                = 0x17
+	IB_USER_VERBS_CMD_REREG_MR                     = 0xb
+	IB_USER_VERBS_CMD_RESIZE_CQ                    = 0x13
+	IB_USER_VERBS_CMD_THRESHOLD                    = 0x32
+	IB_USER_VERBS_EX_CMD_CREATE_CQ                 = 0x12
+	IB_USER_VERBS_EX_CMD_CREATE_FLOW               = 0x32
+	IB_USER_VERBS_EX_CMD_CREATE_QP                 = 0x18
+	IB_USER_VERBS_EX_CMD_CREATE_RWQ_IND_TBL        = 0x37
+	IB_USER_VERBS_EX_CMD_CREATE_WQ                 = 0x34
+	IB_USER_VERBS_EX_CMD_DESTROY_FLOW              = 0x33
+	IB_USER_VERBS_EX_CMD_DESTROY_RWQ_IND_TBL       = 0x38
+	IB_USER_VERBS_EX_CMD_DESTROY_WQ                = 0x36
+	IB_USER_VERBS_EX_CMD_MODIFY_CQ                 = 0x39
+	IB_USER_VERBS_EX_CMD_MODIFY_QP                 = 0x1a
+	IB_USER_VERBS_EX_CMD_MODIFY_WQ                 = 0x35
+	IB_USER_VERBS_EX_CMD_QUERY_DEVICE              = 0x1
+	IB_USER_VERBS_MAX_LOG_IND_TBL_SIZE             = 0xd
+	IB_UVERBS_ACCESS_FLUSH_GLOBAL                  = 0x100
+	IB_UVERBS_ACCESS_FLUSH_PERSISTENT              = 0x200
+	IB_UVERBS_ACCESS_HUGETLB                       = 0x80
+	IB_UVERBS_ACCESS_LOCAL_WRITE                   = 0x1
+	IB_UVERBS_ACCESS_MW_BIND                       = 0x10
+	IB_UVERBS_ACCESS_ON_DEMAND                     = 0x40
+	IB_UVERBS_ACCESS_OPTIONAL_FIRST                = 0x100000
+	IB_UVERBS_ACCESS_OPTIONAL_LAST                 = 0x20000000
+	IB_UVERBS_ACCESS_OPTIONAL_RANGE                = 0x3ff00000
+	IB_UVERBS_ACCESS_RELAXED_ORDERING              = 0x100000
+	IB_UVERBS_ACCESS_REMOTE_ATOMIC                 = 0x8
+	IB_UVERBS_ACCESS_REMOTE_READ                   = 0x4
+	IB_UVERBS_ACCESS_REMOTE_WRITE                  = 0x2
+	IB_UVERBS_ACCESS_ZERO_BASED                    = 0x20
+	IB_UVERBS_ADVISE_MR_ADVICE_PREFETCH            = 0x0
+	IB_UVERBS_ADVISE_MR_ADVICE_PREFETCH_NO_FAULT   = 0x2
+	IB_UVERBS_ADVISE_MR_ADVICE_PREFETCH_WRITE      = 0x1
+	IB_UVERBS_ADVISE_MR_FLAG_FLUSH                 = 0x1
+	IB_UVERBS_BUFFER_TYPE_DMABUF                   = 0x0
+	IB_UVERBS_BUFFER_TYPE_VA                       = 0x1
+	IB_UVERBS_CORE_SUPPORT_OPTIONAL_MR_ACCESS      = 0x1
+	IB_UVERBS_CORE_SUPPORT_ROBUST_UDATA            = 0x2
+	IB_UVERBS_CQ_FLAGS_IGNORE_OVERRUN              = 0x2
+	IB_UVERBS_CQ_FLAGS_TIMESTAMP_COMPLETION        = 0x1
+	IB_UVERBS_CREATE_QP_MASK_IND_TABLE             = 0x1
+	IB_UVERBS_CREATE_QP_SUP_COMP_MASK              = 0x1
+	IB_UVERBS_DEVICE_ATOMIC_WRITE                  = 0x10000000000
+	IB_UVERBS_DEVICE_AUTO_PATH_MIG                 = 0x10
+	IB_UVERBS_DEVICE_BAD_PKEY_CNTR                 = 0x2
+	IB_UVERBS_DEVICE_BAD_QKEY_CNTR                 = 0x4
+	IB_UVERBS_DEVICE_CC_DMA_BOUNCE                 = 0x20000000000
+	IB_UVERBS_DEVICE_CHANGE_PHY_PORT               = 0x20
+	IB_UVERBS_DEVICE_CURR_QP_STATE_MOD             = 0x80
+	IB_UVERBS_DEVICE_FLUSH_GLOBAL                  = 0x4000000000
+	IB_UVERBS_DEVICE_FLUSH_PERSISTENT              = 0x8000000000
+	IB_UVERBS_DEVICE_MANAGED_FLOW_STEERING         = 0x20000000
+	IB_UVERBS_DEVICE_MEM_MGT_EXTENSIONS            = 0x200000
+	IB_UVERBS_DEVICE_MEM_WINDOW                    = 0x20000
+	IB_UVERBS_DEVICE_MEM_WINDOW_TYPE_2A            = 0x800000
+	IB_UVERBS_DEVICE_MEM_WINDOW_TYPE_2B            = 0x1000000
+	IB_UVERBS_DEVICE_N_NOTIFY_CQ                   = 0x4000
+	IB_UVERBS_DEVICE_PCI_WRITE_END_PADDING         = 0x1000000000
+	IB_UVERBS_DEVICE_PORT_ACTIVE_EVENT             = 0x400
+	IB_UVERBS_DEVICE_RAW_IP_CSUM                   = 0x4000000
+	IB_UVERBS_DEVICE_RAW_MULTI                     = 0x8
+	IB_UVERBS_DEVICE_RAW_SCATTER_FCS               = 0x400000000
+	IB_UVERBS_DEVICE_RC_IP_CSUM                    = 0x2000000
+	IB_UVERBS_DEVICE_RC_RNR_NAK_GEN                = 0x1000
+	IB_UVERBS_DEVICE_RESIZE_MAX_WR                 = 0x1
+	IB_UVERBS_DEVICE_SHUTDOWN_PORT                 = 0x100
+	IB_UVERBS_DEVICE_SRQ_RESIZE                    = 0x2000
+	IB_UVERBS_DEVICE_SYS_IMAGE_GUID                = 0x800
+	IB_UVERBS_DEVICE_UD_AV_PORT_ENFORCE            = 0x40
+	IB_UVERBS_DEVICE_UD_IP_CSUM                    = 0x40000
+	IB_UVERBS_DEVICE_XRC                           = 0x100000
+	IB_UVERBS_FLOW_ACTION_ESP_FLAGS_DECRYPT        = 0x0
+	IB_UVERBS_FLOW_ACTION_ESP_FLAGS_ENCRYPT        = 0x4
+	IB_UVERBS_FLOW_ACTION_ESP_FLAGS_ESN_NEW_WINDOW = 0x8
+	IB_UVERBS_FLOW_ACTION_ESP_FLAGS_FULL_OFFLOAD   = 0x1
+	IB_UVERBS_FLOW_ACTION_ESP_FLAGS_INLINE_CRYPTO  = 0x0
+	IB_UVERBS_FLOW_ACTION_ESP_FLAGS_TRANSPORT      = 0x2
+	IB_UVERBS_FLOW_ACTION_ESP_FLAGS_TUNNEL         = 0x0
+	IB_UVERBS_FLOW_ACTION_ESP_KEYMAT_AES_GCM       = 0x0
+	IB_UVERBS_FLOW_ACTION_ESP_REPLAY_BMP           = 0x1
+	IB_UVERBS_FLOW_ACTION_ESP_REPLAY_NONE          = 0x0
+	IB_UVERBS_FLOW_ACTION_IV_ALGO_SEQ              = 0x0
+	IB_UVERBS_GID_TYPE_IB                          = 0x0
+	IB_UVERBS_GID_TYPE_ROCE_V1                     = 0x1
+	IB_UVERBS_GID_TYPE_ROCE_V2                     = 0x2
+	IB_UVERBS_ODP_SUPPORT_ATOMIC                   = 0x10
+	IB_UVERBS_ODP_SUPPORT_ATOMIC_WRITE             = 0x80
+	IB_UVERBS_ODP_SUPPORT                          = 0x1
+	IB_UVERBS_ODP_SUPPORT_FLUSH                    = 0x40
+	IB_UVERBS_ODP_SUPPORT_IMPLICIT                 = 0x2
+	IB_UVERBS_ODP_SUPPORT_READ                     = 0x8
+	IB_UVERBS_ODP_SUPPORT_RECV                     = 0x2
+	IB_UVERBS_ODP_SUPPORT_SEND                     = 0x1
+	IB_UVERBS_ODP_SUPPORT_SRQ_RECV                 = 0x20
+	IB_UVERBS_ODP_SUPPORT_WRITE                    = 0x4
+	IB_UVERBS_PCF_AUTO_MIGR_SUP                    = 0x20
+	IB_UVERBS_PCF_BOOT_MGMT_SUP                    = 0x800000
+	IB_UVERBS_PCF_CAP_MASK_NOTICE_SUP              = 0x400000
+	IB_UVERBS_PCF_CLIENT_REG_SUP                   = 0x2000000
+	IB_UVERBS_PCF_CM_SUP                           = 0x10000
+	IB_UVERBS_PCF_DEVICE_MGMT_SUP                  = 0x80000
+	IB_UVERBS_PCF_DR_NOTICE_SUP                    = 0x200000
+	IB_UVERBS_PCF_EXTENDED_SPEEDS_SUP              = 0x4000
+	IB_UVERBS_PCF_HIERARCHY_INFO_SUP               = 0x80000000
+	IB_UVERBS_PCF_IP_BASED_GIDS                    = 0x4000000
+	IB_UVERBS_PCF_LED_INFO_SUP                     = 0x200
+	IB_UVERBS_PCF_LINK_LATENCY_SUP                 = 0x1000000
+	IB_UVERBS_PCF_LINK_SPEED_WIDTH_TABLE_SUP       = 0x8000000
+	IB_UVERBS_PCF_MCAST_FDB_TOP_SUP                = 0x40000000
+	IB_UVERBS_PCF_MCAST_PKEY_TRAP_SUPPRESSION_SUP  = 0x20000000
+	IB_UVERBS_PCF_MKEY_NVRAM                       = 0x80
+	IB_UVERBS_PCF_NOTICE_SUP                       = 0x4
+	IB_UVERBS_PCF_OPT_IPD_SUP                      = 0x10
+	IB_UVERBS_PCF_PKEY_NVRAM                       = 0x100
+	IB_UVERBS_PCF_PKEY_SW_EXT_PORT_TRAP_SUP        = 0x1000
+	IB_UVERBS_PCF_REINIT_SUP                       = 0x40000
+	IB_UVERBS_PCF_SL_MAP_SUP                       = 0x40
+	IB_UVERBS_PCF_SM                               = 0x2
+	IB_UVERBS_PCF_SM_DISABLED                      = 0x400
+	IB_UVERBS_PCF_SNMP_TUNNEL_SUP                  = 0x20000
+	IB_UVERBS_PCF_SYS_IMAGE_GUID_SUP               = 0x800
+	IB_UVERBS_PCF_TRAP_SUP                         = 0x8
+	IB_UVERBS_PCF_VENDOR_CLASS_SUP                 = 0x100000
+	IB_UVERBS_PCF_VENDOR_SPECIFIC_MADS_TABLE_SUP   = 0x10000000
+	IB_UVERBS_QP_CREATE_BLOCK_MULTICAST_LOOPBACK   = 0x2
+	IB_UVERBS_QP_CREATE_CVLAN_STRIPPING            = 0x200
+	IB_UVERBS_QP_CREATE_PCI_WRITE_END_PADDING      = 0x800
+	IB_UVERBS_QP_CREATE_SCATTER_FCS                = 0x100
+	IB_UVERBS_QP_CREATE_SQ_SIG_ALL                 = 0x1000
+	IB_UVERBS_QPF_GRH_REQUIRED                     = 0x1
+	IB_UVERBS_QPT_DRIVER                           = 0xff
+	IB_UVERBS_QPT_RAW_PACKET                       = 0x8
+	IB_UVERBS_QPT_RC                               = 0x2
+	IB_UVERBS_QPT_UC                               = 0x3
+	IB_UVERBS_QPT_UD                               = 0x4
+	IB_UVERBS_QPT_XRC_INI                          = 0x9
+	IB_UVERBS_QPT_XRC_TGT                          = 0xa
+	IB_UVERBS_RAW_PACKET_CAP_CVLAN_STRIPPING       = 0x1
+	IB_UVERBS_RAW_PACKET_CAP_DELAY_DROP            = 0x8
+	IB_UVERBS_RAW_PACKET_CAP_IP_CSUM               = 0x4
+	IB_UVERBS_RAW_PACKET_CAP_SCATTER_FCS           = 0x2
+	IB_UVERBS_READ_COUNTERS_PREFER_CACHED          = 0x1
+	IB_UVERBS_SRQT_BASIC                           = 0x0
+	IB_UVERBS_SRQT_TM                              = 0x2
+	IB_UVERBS_SRQT_XRC                             = 0x1
+	IB_UVERBS_WC_ATOMIC_WRITE                      = 0x9
+	IB_UVERBS_WC_BIND_MW                           = 0x5
+	IB_UVERBS_WC_COMP_SWAP                         = 0x3
+	IB_UVERBS_WC_FETCH_ADD                         = 0x4
+	IB_UVERBS_WC_FLUSH                             = 0x8
+	IB_UVERBS_WC_LOCAL_INV                         = 0x6
+	IB_UVERBS_WC_RDMA_READ                         = 0x2
+	IB_UVERBS_WC_RDMA_WRITE                        = 0x1
+	IB_UVERBS_WC_SEND                              = 0x0
+	IB_UVERBS_WC_TSO                               = 0x7
+	IB_UVERBS_WQ_FLAGS_CVLAN_STRIPPING             = 0x1
+	IB_UVERBS_WQ_FLAGS_DELAY_DROP                  = 0x4
+	IB_UVERBS_WQ_FLAGS_PCI_WRITE_END_PADDING       = 0x8
+	IB_UVERBS_WQ_FLAGS_SCATTER_FCS                 = 0x2
+	IB_UVERBS_WQT_RQ                               = 0x0
+	IB_UVERBS_WR_ATOMIC_CMP_AND_SWP                = 0x5
+	IB_UVERBS_WR_ATOMIC_FETCH_AND_ADD              = 0x6
+	IB_UVERBS_WR_ATOMIC_WRITE                      = 0xf
+	IB_UVERBS_WR_BIND_MW                           = 0x8
+	IB_UVERBS_WR_FLUSH                             = 0xe
+	IB_UVERBS_WR_LOCAL_INV                         = 0x7
+	IB_UVERBS_WR_MASKED_ATOMIC_CMP_AND_SWP         = 0xc
+	IB_UVERBS_WR_MASKED_ATOMIC_FETCH_AND_ADD       = 0xd
+	IB_UVERBS_WR_RDMA_READ                         = 0x4
+	IB_UVERBS_WR_RDMA_READ_WITH_INV                = 0xb
+	IB_UVERBS_WR_RDMA_WRITE                        = 0x0
+	IB_UVERBS_WR_RDMA_WRITE_WITH_IMM               = 0x1
+	IB_UVERBS_WR_SEND                              = 0x2
+	IB_UVERBS_WR_SEND_WITH_IMM                     = 0x3
+	IB_UVERBS_WR_SEND_WITH_INV                     = 0x9
+	IB_UVERBS_WR_TSO                               = 0xa
+	RDMA_DRIVER_BNXT_RE                            = 0x6
+	RDMA_DRIVER_CXGB3                              = 0x3
+	RDMA_DRIVER_CXGB4                              = 0x4
+	RDMA_DRIVER_EFA                                = 0x11
+	RDMA_DRIVER_ERDMA                              = 0x13
+	RDMA_DRIVER_HFI1                               = 0xf
+	RDMA_DRIVER_HNS                                = 0xc
+	RDMA_DRIVER_I40IW                              = 0x9
+	RDMA_DRIVER_IONIC                              = 0x15
+	RDMA_DRIVER_IRDMA                              = 0x9
+	RDMA_DRIVER_MANA                               = 0x14
+	RDMA_DRIVER_MLX4                               = 0x2
+	RDMA_DRIVER_MLX5                               = 0x1
+	RDMA_DRIVER_MTHCA                              = 0x5
+	RDMA_DRIVER_NES                                = 0x8
+	RDMA_DRIVER_OCRDMA                             = 0x7
+	RDMA_DRIVER_QEDR                               = 0xb
+	RDMA_DRIVER_QIB                                = 0x10
+	RDMA_DRIVER_RXE                                = 0xe
+	RDMA_DRIVER_SIW                                = 0x12
+	RDMA_DRIVER_UNKNOWN                            = 0x0
+	RDMA_DRIVER_USNIC                              = 0xd
+	RDMA_DRIVER_VMW_PVRDMA                         = 0xa
+	RDMA_IOCTL_MAGIC                               = 0x1b
+	RDMA_VERBS_IOCTL                               = 0xc0181b01
+	UVERBS_ATTR_ADVISE_MR_ADVICE                   = 0x1
+	UVERBS_ATTR_ADVISE_MR_FLAGS                    = 0x2
+	UVERBS_ATTR_ADVISE_MR_PD_HANDLE                = 0x0
+	UVERBS_ATTR_ADVISE_MR_SGE_LIST                 = 0x3
+	UVERBS_ATTR_ALLOC_DMABUF_HANDLE                = 0x0
+	UVERBS_ATTR_ALLOC_DMABUF_PGOFF                 = 0x1
+	UVERBS_ATTR_ALLOC_DMAH_CPU_ID                  = 0x1
+	UVERBS_ATTR_ALLOC_DMAH_HANDLE                  = 0x0
+	UVERBS_ATTR_ALLOC_DMAH_PH                      = 0x3
+	UVERBS_ATTR_ALLOC_DMAH_TPH_MEM_TYPE            = 0x2
+	UVERBS_ATTR_ALLOC_DM_ALIGNMENT                 = 0x2
+	UVERBS_ATTR_ALLOC_DM_HANDLE                    = 0x0
+	UVERBS_ATTR_ALLOC_DM_LENGTH                    = 0x1
+	UVERBS_ATTR_ASYNC_EVENT_ALLOC_FD_HANDLE        = 0x0
+	UVERBS_ATTR_CORE_IN                            = 0x0
+	UVERBS_ATTR_CORE_OUT                           = 0x1
+	UVERBS_ATTR_CREATE_COUNTERS_HANDLE             = 0x0
+	UVERBS_ATTR_CREATE_CQ_BUFFER_FD                = 0xa
+	UVERBS_ATTR_CREATE_CQ_BUFFER_LENGTH            = 0x9
+	UVERBS_ATTR_CREATE_CQ_BUFFER_OFFSET            = 0xb
+	UVERBS_ATTR_CREATE_CQ_BUFFER_VA                = 0x8
+	UVERBS_ATTR_CREATE_CQ_BUF_UMEM                 = 0xc
+	UVERBS_ATTR_CREATE_CQ_COMP_CHANNEL             = 0x3
+	UVERBS_ATTR_CREATE_CQ_COMP_VECTOR              = 0x4
+	UVERBS_ATTR_CREATE_CQ_CQE                      = 0x1
+	UVERBS_ATTR_CREATE_CQ_EVENT_FD                 = 0x7
+	UVERBS_ATTR_CREATE_CQ_FLAGS                    = 0x5
+	UVERBS_ATTR_CREATE_CQ_HANDLE                   = 0x0
+	UVERBS_ATTR_CREATE_CQ_RESP_CQE                 = 0x6
+	UVERBS_ATTR_CREATE_CQ_USER_HANDLE              = 0x2
+	UVERBS_ATTR_CREATE_FLOW_ACTION_ESP_HANDLE      = 0x0
+	UVERBS_ATTR_CREATE_QP_BUF_UMEM                 = 0xf
+	UVERBS_ATTR_CREATE_QP_CAP                      = 0x8
+	UVERBS_ATTR_CREATE_QP_EVENT_FD                 = 0xc
+	UVERBS_ATTR_CREATE_QP_FLAGS                    = 0xa
+	UVERBS_ATTR_CREATE_QP_HANDLE                   = 0x0
+	UVERBS_ATTR_CREATE_QP_IND_TABLE_HANDLE         = 0x6
+	UVERBS_ATTR_CREATE_QP_PD_HANDLE                = 0x2
+	UVERBS_ATTR_CREATE_QP_RECV_CQ_HANDLE           = 0x5
+	UVERBS_ATTR_CREATE_QP_RESP_CAP                 = 0xd
+	UVERBS_ATTR_CREATE_QP_RESP_QP_NUM              = 0xe
+	UVERBS_ATTR_CREATE_QP_RQ_BUF_UMEM              = 0x10
+	UVERBS_ATTR_CREATE_QP_SEND_CQ_HANDLE           = 0x4
+	UVERBS_ATTR_CREATE_QP_SOURCE_QPN               = 0xb
+	UVERBS_ATTR_CREATE_QP_SQ_BUF_UMEM              = 0x11
+	UVERBS_ATTR_CREATE_QP_SRQ_HANDLE               = 0x3
+	UVERBS_ATTR_CREATE_QP_TYPE                     = 0x9
+	UVERBS_ATTR_CREATE_QP_USER_HANDLE              = 0x7
+	UVERBS_ATTR_CREATE_QP_XRCD_HANDLE              = 0x1
+	UVERBS_ATTR_CREATE_SRQ_CQ_HANDLE               = 0x3
+	UVERBS_ATTR_CREATE_SRQ_EVENT_FD                = 0xa
+	UVERBS_ATTR_CREATE_SRQ_HANDLE                  = 0x0
+	UVERBS_ATTR_CREATE_SRQ_LIMIT                   = 0x7
+	UVERBS_ATTR_CREATE_SRQ_MAX_NUM_TAGS            = 0x8
+	UVERBS_ATTR_CREATE_SRQ_MAX_SGE                 = 0x6
+	UVERBS_ATTR_CREATE_SRQ_MAX_WR                  = 0x5
+	UVERBS_ATTR_CREATE_SRQ_PD_HANDLE               = 0x1
+	UVERBS_ATTR_CREATE_SRQ_RESP_MAX_SGE            = 0xc
+	UVERBS_ATTR_CREATE_SRQ_RESP_MAX_WR             = 0xb
+	UVERBS_ATTR_CREATE_SRQ_RESP_SRQ_NUM            = 0xd
+	UVERBS_ATTR_CREATE_SRQ_TYPE                    = 0x9
+	UVERBS_ATTR_CREATE_SRQ_USER_HANDLE             = 0x4
+	UVERBS_ATTR_CREATE_SRQ_XRCD_HANDLE             = 0x2
+	UVERBS_ATTR_CREATE_WQ_CQ_HANDLE                = 0x2
+	UVERBS_ATTR_CREATE_WQ_EVENT_FD                 = 0x5
+	UVERBS_ATTR_CREATE_WQ_FLAGS                    = 0x8
+	UVERBS_ATTR_CREATE_WQ_HANDLE                   = 0x0
+	UVERBS_ATTR_CREATE_WQ_MAX_SGE                  = 0x7
+	UVERBS_ATTR_CREATE_WQ_MAX_WR                   = 0x6
+	UVERBS_ATTR_CREATE_WQ_PD_HANDLE                = 0x1
+	UVERBS_ATTR_CREATE_WQ_RESP_MAX_SGE             = 0xa
+	UVERBS_ATTR_CREATE_WQ_RESP_MAX_WR              = 0x9
+	UVERBS_ATTR_CREATE_WQ_RESP_WQ_NUM              = 0xb
+	UVERBS_ATTR_CREATE_WQ_TYPE                     = 0x4
+	UVERBS_ATTR_CREATE_WQ_USER_HANDLE              = 0x3
+	UVERBS_ATTR_DESTROY_AH_HANDLE                  = 0x0
+	UVERBS_ATTR_DESTROY_COUNTERS_HANDLE            = 0x0
+	UVERBS_ATTR_DESTROY_CQ_HANDLE                  = 0x0
+	UVERBS_ATTR_DESTROY_CQ_RESP                    = 0x1
+	UVERBS_ATTR_DESTROY_FLOW_ACTION_HANDLE         = 0x0
+	UVERBS_ATTR_DESTROY_FLOW_HANDLE                = 0x0
+	UVERBS_ATTR_DESTROY_MR_HANDLE                  = 0x0
+	UVERBS_ATTR_DESTROY_MW_HANDLE                  = 0x0
+	UVERBS_ATTR_DESTROY_PD_HANDLE                  = 0x0
+	UVERBS_ATTR_DESTROY_QP_HANDLE                  = 0x0
+	UVERBS_ATTR_DESTROY_QP_RESP                    = 0x1
+	UVERBS_ATTR_DESTROY_RWQ_IND_TBL_HANDLE         = 0x0
+	UVERBS_ATTR_DESTROY_SRQ_HANDLE                 = 0x0
+	UVERBS_ATTR_DESTROY_SRQ_RESP                   = 0x1
+	UVERBS_ATTR_DESTROY_WQ_HANDLE                  = 0x0
+	UVERBS_ATTR_DESTROY_WQ_RESP                    = 0x1
+	UVERBS_ATTR_DESTROY_XRCD_HANDLE                = 0x0
+	UVERBS_ATTR_FLOW_ACTION_ESP_ATTRS              = 0x1
+	UVERBS_ATTR_FLOW_ACTION_ESP_ENCAP              = 0x5
+	UVERBS_ATTR_FLOW_ACTION_ESP_ESN                = 0x2
+	UVERBS_ATTR_FLOW_ACTION_ESP_KEYMAT             = 0x3
+	UVERBS_ATTR_FLOW_ACTION_ESP_REPLAY             = 0x4
+	UVERBS_ATTR_F_MANDATORY                        = 0x1
+	UVERBS_ATTR_FREE_DMA_HANDLE                    = 0x0
+	UVERBS_ATTR_FREE_DM_HANDLE                     = 0x0
+	UVERBS_ATTR_F_VALID_OUTPUT                     = 0x2
+	UVERBS_ATTR_GET_CONTEXT_CORE_SUPPORT           = 0x1
+	UVERBS_ATTR_GET_CONTEXT_FD_ARR                 = 0x2
+	UVERBS_ATTR_GET_CONTEXT_NUM_COMP_VECTORS       = 0x0
+	UVERBS_ATTR_INFO_HANDLES_LIST                  = 0x2
+	UVERBS_ATTR_INFO_OBJECT_ID                     = 0x0
+	UVERBS_ATTR_INFO_TOTAL_HANDLES                 = 0x1
+	UVERBS_ATTR_MODIFY_FLOW_ACTION_ESP_HANDLE      = 0x0
+	UVERBS_ATTR_QUERY_CONTEXT_CORE_SUPPORT         = 0x1
+	UVERBS_ATTR_QUERY_CONTEXT_NUM_COMP_VECTORS     = 0x0
+	UVERBS_ATTR_QUERY_GID_ENTRY_FLAGS              = 0x2
+	UVERBS_ATTR_QUERY_GID_ENTRY_GID_INDEX          = 0x1
+	UVERBS_ATTR_QUERY_GID_ENTRY_PORT               = 0x0
+	UVERBS_ATTR_QUERY_GID_ENTRY_RESP_ENTRY         = 0x3
+	UVERBS_ATTR_QUERY_GID_TABLE_ENTRY_SIZE         = 0x0
+	UVERBS_ATTR_QUERY_GID_TABLE_FLAGS              = 0x1
+	UVERBS_ATTR_QUERY_GID_TABLE_RESP_ENTRIES       = 0x2
+	UVERBS_ATTR_QUERY_GID_TABLE_RESP_NUM_ENTRIES   = 0x3
+	UVERBS_ATTR_QUERY_MR_HANDLE                    = 0x0
+	UVERBS_ATTR_QUERY_MR_RESP_IOVA                 = 0x4
+	UVERBS_ATTR_QUERY_MR_RESP_LENGTH               = 0x3
+	UVERBS_ATTR_QUERY_MR_RESP_LKEY                 = 0x1
+	UVERBS_ATTR_QUERY_MR_RESP_RKEY                 = 0x2
+	UVERBS_ATTR_QUERY_PORT_PORT_NUM                = 0x0
+	UVERBS_ATTR_QUERY_PORT_RESP                    = 0x1
+	UVERBS_ATTR_QUERY_PORT_SPEED_PORT_NUM          = 0x0
+	UVERBS_ATTR_QUERY_PORT_SPEED_RESP              = 0x1
+	UVERBS_ATTR_READ_COUNTERS_BUFF                 = 0x1
+	UVERBS_ATTR_READ_COUNTERS_FLAGS                = 0x2
+	UVERBS_ATTR_READ_COUNTERS_HANDLE               = 0x0
+	UVERBS_ATTR_REG_DMABUF_MR_ACCESS_FLAGS         = 0x6
+	UVERBS_ATTR_REG_DMABUF_MR_FD                   = 0x5
+	UVERBS_ATTR_REG_DMABUF_MR_HANDLE               = 0x0
+	UVERBS_ATTR_REG_DMABUF_MR_IOVA                 = 0x4
+	UVERBS_ATTR_REG_DMABUF_MR_LENGTH               = 0x3
+	UVERBS_ATTR_REG_DMABUF_MR_OFFSET               = 0x2
+	UVERBS_ATTR_REG_DMABUF_MR_PD_HANDLE            = 0x1
+	UVERBS_ATTR_REG_DMABUF_MR_RESP_LKEY            = 0x7
+	UVERBS_ATTR_REG_DMABUF_MR_RESP_RKEY            = 0x8
+	UVERBS_ATTR_REG_DM_MR_ACCESS_FLAGS             = 0x4
+	UVERBS_ATTR_REG_DM_MR_DM_HANDLE                = 0x5
+	UVERBS_ATTR_REG_DM_MR_HANDLE                   = 0x0
+	UVERBS_ATTR_REG_DM_MR_LENGTH                   = 0x2
+	UVERBS_ATTR_REG_DM_MR_OFFSET                   = 0x1
+	UVERBS_ATTR_REG_DM_MR_PD_HANDLE                = 0x3
+	UVERBS_ATTR_REG_DM_MR_RESP_LKEY                = 0x6
+	UVERBS_ATTR_REG_DM_MR_RESP_RKEY                = 0x7
+	UVERBS_ATTR_REG_MR_ACCESS_FLAGS                = 0x6
+	UVERBS_ATTR_REG_MR_ADDR                        = 0x4
+	UVERBS_ATTR_REG_MR_DMA_HANDLE                  = 0x2
+	UVERBS_ATTR_REG_MR_FD                          = 0x7
+	UVERBS_ATTR_REG_MR_FD_OFFSET                   = 0x8
+	UVERBS_ATTR_REG_MR_HANDLE                      = 0x0
+	UVERBS_ATTR_REG_MR_IOVA                        = 0x3
+	UVERBS_ATTR_REG_MR_LENGTH                      = 0x5
+	UVERBS_ATTR_REG_MR_PD_HANDLE                   = 0x1
+	UVERBS_ATTR_REG_MR_RESP_LKEY                   = 0x9
+	UVERBS_ATTR_REG_MR_RESP_RKEY                   = 0xa
+	UVERBS_ATTR_UHW_IN                             = 0x1000
+	UVERBS_ATTR_UHW_OUT                            = 0x1001
+	UVERBS_ATTR_WRITE_CMD                          = 0x2
+	UVERBS_ID_DRIVER_NS                            = 0x1000
+	UVERBS_ID_DRIVER_NS_WITH_UHW                   = 0x1002
+	UVERBS_ID_NS_MASK                              = 0xf000
+	UVERBS_ID_NS_SHIFT                             = 0xc
+	UVERBS_METHOD_ADVISE_MR                        = 0x2
+	UVERBS_METHOD_AH_DESTROY                       = 0x0
+	UVERBS_METHOD_ASYNC_EVENT_ALLOC                = 0x0
+	UVERBS_METHOD_COUNTERS_CREATE                  = 0x0
+	UVERBS_METHOD_COUNTERS_DESTROY                 = 0x1
+	UVERBS_METHOD_COUNTERS_READ                    = 0x2
+	UVERBS_METHOD_CQ_CREATE                        = 0x0
+	UVERBS_METHOD_CQ_DESTROY                       = 0x1
+	UVERBS_METHOD_DMABUF_ALLOC                     = 0x0
+	UVERBS_METHOD_DMAH_ALLOC                       = 0x0
+	UVERBS_METHOD_DMAH_FREE                        = 0x1
+	UVERBS_METHOD_DM_ALLOC                         = 0x0
+	UVERBS_METHOD_DM_FREE                          = 0x1
+	UVERBS_METHOD_DM_MR_REG                        = 0x0
+	UVERBS_METHOD_FLOW_ACTION_DESTROY              = 0x1
+	UVERBS_METHOD_FLOW_ACTION_ESP_CREATE           = 0x0
+	UVERBS_METHOD_FLOW_ACTION_ESP_MODIFY           = 0x2
+	UVERBS_METHOD_FLOW_DESTROY                     = 0x0
+	UVERBS_METHOD_GET_CONTEXT                      = 0x3
+	UVERBS_METHOD_INFO_HANDLES                     = 0x1
+	UVERBS_METHOD_INVOKE_WRITE                     = 0x0
+	UVERBS_METHOD_MR_DESTROY                       = 0x1
+	UVERBS_METHOD_MW_DESTROY                       = 0x0
+	UVERBS_METHOD_PD_DESTROY                       = 0x0
+	UVERBS_METHOD_QP_CREATE                        = 0x0
+	UVERBS_METHOD_QP_DESTROY                       = 0x1
+	UVERBS_METHOD_QUERY_CONTEXT                    = 0x4
+	UVERBS_METHOD_QUERY_GID_ENTRY                  = 0x6
+	UVERBS_METHOD_QUERY_GID_TABLE                  = 0x5
+	UVERBS_METHOD_QUERY_MR                         = 0x3
+	UVERBS_METHOD_QUERY_PORT                       = 0x2
+	UVERBS_METHOD_QUERY_PORT_SPEED                 = 0x7
+	UVERBS_METHOD_REG_DMABUF_MR                    = 0x4
+	UVERBS_METHOD_REG_MR                           = 0x5
+	UVERBS_METHOD_RWQ_IND_TBL_DESTROY              = 0x0
+	UVERBS_METHOD_SRQ_CREATE                       = 0x0
+	UVERBS_METHOD_SRQ_DESTROY                      = 0x1
+	UVERBS_METHOD_WQ_CREATE                        = 0x0
+	UVERBS_METHOD_WQ_DESTROY                       = 0x1
+	UVERBS_METHOD_XRCD_DESTROY                     = 0x0
+	UVERBS_OBJECT_AH                               = 0x6
+	UVERBS_OBJECT_ASYNC_EVENT                      = 0x10
+	UVERBS_OBJECT_COMP_CHANNEL                     = 0x2
+	UVERBS_OBJECT_COUNTERS                         = 0xf
+	UVERBS_OBJECT_CQ                               = 0x3
+	UVERBS_OBJECT_DEVICE                           = 0x0
+	UVERBS_OBJECT_DMABUF                           = 0x12
+	UVERBS_OBJECT_DMAH                             = 0x11
+	UVERBS_OBJECT_DM                               = 0xe
+	UVERBS_OBJECT_FLOW_ACTION                      = 0xd
+	UVERBS_OBJECT_FLOW                             = 0x9
+	UVERBS_OBJECT_MR                               = 0x7
+	UVERBS_OBJECT_MW                               = 0x8
+	UVERBS_OBJECT_PD                               = 0x1
+	UVERBS_OBJECT_QP                               = 0x4
+	UVERBS_OBJECT_RWQ_IND_TBL                      = 0xb
+	UVERBS_OBJECT_SRQ                              = 0x5
+	UVERBS_OBJECT_WQ                               = 0xc
+	UVERBS_OBJECT_XRCD                             = 0xa
+)
+
+type IBUverbsAttr struct {
+	Attr_id   uint16
+	Len       uint16
+	Flags     uint16
+	Attr_data [2]byte
+	Data      uint64
+}
+type IBUverbsIoctlHdr struct {
+	Length    uint16
+	Object_id uint16
+	Method_id uint16
+	Num_attrs uint16
+	Reserved1 uint64
+	Driver_id uint32
+	Reserved2 uint32
+}
+
+type IBUverbsQueryPortResp struct {
+	Port_cap_flags  uint32
+	Max_msg_sz      uint32
+	Bad_pkey_cntr   uint32
+	Qkey_viol_cntr  uint32
+	Gid_tbl_len     uint32
+	Pkey_tbl_len    uint16
+	Lid             uint16
+	Sm_lid          uint16
+	State           uint8
+	Max_mtu         uint8
+	Active_mtu      uint8
+	Lmc             uint8
+	Max_vl_num      uint8
+	Sm_sl           uint8
+	Subnet_timeout  uint8
+	Init_type_reply uint8
+	Active_width    uint8
+	Active_speed    uint8
+	Phys_state      uint8
+	Link_layer      uint8
+	Flags           uint8
+	Reserved        uint8
+}
+type IBUverbsQueryPortRespEx struct {
+	Legacy_resp     IBUverbsQueryPortResp
+	Port_cap_flags2 uint16
+	Reserved        [2]uint8
+	Active_speed_ex uint32
+}
+type IBUverbsGIDEntry struct {
+	Gid            [2]uint64
+	Gid_index      uint32
+	Port_num       uint32
+	Gid_type       uint32
+	Netdev_ifindex uint32
+}
+type IBUverbsQPCap struct {
+	Max_send_wr     uint32
+	Max_recv_wr     uint32
+	Max_send_sge    uint32
+	Max_recv_sge    uint32
+	Max_inline_data uint32
+}
+type IBUverbsBufferDesc struct {
+	Type           uint32
+	Fd             int32
+	Flags          uint32
+	Optional_flags uint32
+	Addr           uint64
+	Length         uint64
+}
+type IBUverbsDestroyCQResp struct {
+	Comp_events_reported  uint32
+	Async_events_reported uint32
+}
+type IBUverbsDestroyQPResp struct {
+	Events_reported uint32
+}
+type IBUverbsDestroySRQResp struct {
+	Events_reported uint32
+}
+type IBUverbsAsyncEventDesc struct {
+	Element    uint64
+	Event_type uint32
+	Reserved   uint32
+}
+type IBUverbsCompEventDesc struct {
+	Cq_handle uint64
+}
