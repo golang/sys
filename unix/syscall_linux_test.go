@@ -796,6 +796,76 @@ func TestSchedSetaffinityDynamic(t *testing.T) {
 	}
 }
 
+func TestSetMemPolicy(t *testing.T) {
+	const maxnodes = 1024
+
+	getMemPolicy := func(mask unix.CPUSetDynamic, flags uintptr) (int, error) {
+		var mode int32
+		bits := uintptr(len(mask)) * unsafe.Sizeof(mask[0]) * 8
+		_, _, e := unix.Syscall6(unix.SYS_GET_MEMPOLICY, uintptr(unsafe.Pointer(&mode)), uintptr(unsafe.Pointer(&mask[0])), bits, 0, flags, 0)
+		if e != 0 {
+			return 0, e
+		}
+		return int(mode), nil
+	}
+
+	runtime.LockOSThread()
+	defer runtime.UnlockOSThread()
+
+	allowed := unix.NewCPUSet(maxnodes)
+	if _, err := getMemPolicy(allowed, unix.MPOL_F_MEMS_ALLOWED); err != nil {
+		t.Skipf("get_mempolicy: %v", err)
+	}
+	// Use the highest allowed node to check that the whole mask is passed.
+	node := -1
+	for i := range maxnodes {
+		if allowed.IsSet(i) {
+			node = i
+		}
+	}
+	if node == -1 {
+		t.Skip("no allowed NUMA nodes")
+	}
+	t.Logf("using NUMA node %d", node)
+
+	// Memory policy is per-thread, so no subtests here.
+	defer func() {
+		if err := unix.SetMemPolicy(unix.MPOL_DEFAULT, nil); err != nil {
+			t.Fatalf("SetMemPolicy(MPOL_DEFAULT): %v", err)
+		}
+	}()
+
+	check := func(name string) {
+		got := unix.NewCPUSet(maxnodes)
+		mode, err := getMemPolicy(got, 0)
+		if err != nil {
+			t.Fatalf("%s: get_mempolicy: %v", name, err)
+		}
+		if mode != unix.MPOL_BIND {
+			t.Errorf("%s: got mode %d, want %d (MPOL_BIND)", name, mode, unix.MPOL_BIND)
+		}
+		if got.Count() != 1 || !got.IsSet(node) {
+			t.Errorf("%s: got node mask %v, want only node %d set", name, got, node)
+		}
+	}
+
+	var mask unix.CPUSet
+	mask.Set(node)
+	if err := unix.SetMemPolicy(unix.MPOL_BIND, &mask); err != nil {
+		t.Errorf("SetMemPolicy: %v", err)
+	} else {
+		check("SetMemPolicy")
+	}
+
+	maskDyn := unix.NewCPUSet(node + 1)
+	maskDyn.Set(node)
+	if err := unix.SetMemPolicyDynamic(unix.MPOL_BIND, maskDyn); err != nil {
+		t.Errorf("SetMemPolicyDynamic: %v", err)
+	} else {
+		check("SetMemPolicyDynamic")
+	}
+}
+
 func TestStatx(t *testing.T) {
 	var stx unix.Statx_t
 	err := unix.Statx(unix.AT_FDCWD, ".", 0, 0, &stx)

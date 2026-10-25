@@ -2584,10 +2584,13 @@ func SchedGetAttr(pid int, flags uint) (*SchedAttr, error) {
 
 //sys	setMemPolicy(mode int, mask unsafe.Pointer, size uintptr) (err error) = SYS_SET_MEMPOLICY
 
+// The maxnode argument of set_mempolicy(2) is the number of bits in the mask
+// plus one, as the kernel decrements it before use (as does libnuma).
+
 func SetMemPolicy(mode int, mask *CPUSet) error {
-	return setMemPolicy(mode, unsafe.Pointer(mask), _CPU_SETSIZE)
+	return setMemPolicy(mode, unsafe.Pointer(mask), _CPU_SETSIZE+1)
 }
 
 func SetMemPolicyDynamic(mode int, mask CPUSetDynamic) error {
-	return setMemPolicy(mode, mask.pointer(), mask.size())
+	return setMemPolicy(mode, mask.pointer(), uintptr(len(mask))*_NCPUBITS+1)
 }
