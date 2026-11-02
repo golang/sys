@@ -293,3 +293,22 @@ func TestParseOrigDstAddr(t *testing.T) {
 		})
 	}
 }
+
+// TestParseUnixCredentialsShort checks that a SCM_CREDENTIALS message whose
+// payload is shorter than a Ucred is rejected rather than read past its end.
+// syscall.ParseUnixCredentials has had this check since #16475.
+func TestParseUnixCredentialsShort(t *testing.T) {
+	hdr := unix.Cmsghdr{Level: unix.SOL_SOCKET, Type: unix.SCM_CREDENTIALS}
+	full := unix.SizeofUcred
+
+	m := &unix.SocketControlMessage{Header: hdr, Data: make([]byte, full)}
+	if _, err := unix.ParseUnixCredentials(m); err != nil {
+		t.Fatalf("ParseUnixCredentials with a %d byte payload: %v, want nil", full, err)
+	}
+	for _, n := range []int{0, 1, full - 1} {
+		m := &unix.SocketControlMessage{Header: hdr, Data: make([]byte, n)}
+		if _, err := unix.ParseUnixCredentials(m); err != unix.EINVAL {
+			t.Errorf("ParseUnixCredentials with a %d byte payload: %v, want EINVAL", n, err)
+		}
+	}
+}
