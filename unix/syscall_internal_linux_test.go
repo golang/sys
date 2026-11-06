@@ -8,6 +8,7 @@ package unix
 
 import (
 	"reflect"
+	"slices"
 	"strings"
 	"testing"
 	"unsafe"
@@ -535,6 +536,18 @@ func TestSockaddrUnix_sockaddr(t *testing.T) {
 				Family: AF_UNIX,
 			},
 			slen: 3, // family (uint16) + NULL
+		},
+		{
+			name: "abstract_full_length_starting_with_null",
+			sa: &SockaddrUnix{
+				Name: "\x00" + strings.Repeat("a", 107),
+			},
+			raw: &RawSockaddrUnix{
+				Family: AF_UNIX,
+				// maximum-length abstract socket address starting with a NUL byte
+				Path: [108]int8(append([]int8{0}, slices.Repeat([]int8{'a'}, 107)...)),
+			},
+			slen: _Socklen(2 + 108), // family (uint16) + full path, no NUL
 		},
 		{
 			name: "named",
