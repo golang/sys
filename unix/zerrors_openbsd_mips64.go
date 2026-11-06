@@ -545,10 +545,12 @@ const (
 	EXTB                              = 0x9600
 	EXTPROC                           = 0x800
 	FD_CLOEXEC                        = 0x1
+	FD_CLOFORK                        = 0x4
 	FD_SETSIZE                        = 0x400
 	FLUSHO                            = 0x800000
 	F_DUPFD                           = 0x0
 	F_DUPFD_CLOEXEC                   = 0xa
+	F_DUPFD_CLOFORK                   = 0xc
 	F_GETFD                           = 0x1
 	F_GETFL                           = 0x3
 	F_GETLK                           = 0x7
@@ -1072,6 +1074,7 @@ const (
 	MOUNT_UFS                         = "ffs"
 	MSG_BCAST                         = 0x100
 	MSG_CMSG_CLOEXEC                  = 0x800
+	MSG_CMSG_CLOFORK                  = 0x2000
 	MSG_CTRUNC                        = 0x20
 	MSG_DONTROUTE                     = 0x4
 	MSG_DONTWAIT                      = 0x80
@@ -1130,6 +1133,7 @@ const (
 	O_APPEND                          = 0x8
 	O_ASYNC                           = 0x40
 	O_CLOEXEC                         = 0x10000
+	O_CLOFORK                         = 0x40000
 	O_CREAT                           = 0x200
 	O_DIRECTORY                       = 0x20000
 	O_DSYNC                           = 0x80
@@ -1414,6 +1418,7 @@ const (
 	SIOCSVNETFLOWID                   = 0x802069c3
 	SIOCSVNETID                       = 0x802069a6
 	SOCK_CLOEXEC                      = 0x8000
+	SOCK_CLOFORK                      = 0x800
 	SOCK_DGRAM                        = 0x2
 	SOCK_DNS                          = 0x1000
 	SOCK_NONBLOCK                     = 0x4000
