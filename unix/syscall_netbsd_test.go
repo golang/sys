@@ -38,7 +38,12 @@ func TestIoctlPtmget(t *testing.T) {
 		t.Fatalf("IoctlGetPtmget: %v\n", err)
 	}
 
-	t.Logf("sfd = %v, ptsname = %v", ptm.Sfd, unix.ByteSliceToString(ptm.Sn[:]))
+	ptsname := unix.ByteSliceToString(ptm.Sn[:])
+	if ptsname == "" {
+		t.Fatalf("IoctlGetPtmget: ptsname is empty string\n")
+	}
+
+	t.Logf("sfd = %v, ptsname = %v", ptm.Sfd, ptsname)
 }
 
 func TestStatvfs(t *testing.T) {
