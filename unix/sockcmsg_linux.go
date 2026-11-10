@@ -66,6 +66,9 @@ func PktInfo6(info *Inet6Pktinfo) []byte {
 func ParseOrigDstAddr(m *SocketControlMessage) (Sockaddr, error) {
 	switch {
 	case m.Header.Level == SOL_IP && m.Header.Type == IP_ORIGDSTADDR:
+		if len(m.Data) < SizeofSockaddrInet4 {
+			return nil, EINVAL
+		}
 		pp := (*RawSockaddrInet4)(unsafe.Pointer(&m.Data[0]))
 		sa := new(SockaddrInet4)
 		p := (*[2]byte)(unsafe.Pointer(&pp.Port))
@@ -74,6 +77,9 @@ func ParseOrigDstAddr(m *SocketControlMessage) (Sockaddr, error) {
 		return sa, nil
 
 	case m.Header.Level == SOL_IPV6 && m.Header.Type == IPV6_ORIGDSTADDR:
+		if len(m.Data) < SizeofSockaddrInet6 {
+			return nil, EINVAL
+		}
 		pp := (*RawSockaddrInet6)(unsafe.Pointer(&m.Data[0]))
 		sa := new(SockaddrInet6)
 		p := (*[2]byte)(unsafe.Pointer(&pp.Port))
