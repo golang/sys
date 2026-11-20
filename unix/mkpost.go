@@ -241,6 +241,30 @@ func main() {
 		b = bytes.Replace(b, s, newName, 1)
 	}
 
+	// Restore field names in RDMA uverbs structs that cgo shortened
+	// by stripping a prefix, e.g. Send_wr back to Max_send_wr.
+	uverbsFieldRenames := []struct {
+		typ    string
+		fields [][2]string
+	}{
+		{"IBUverbsQPCap", [][2]string{{"Send_wr", "Max_send_wr"}, {"Recv_wr", "Max_recv_wr"}, {"Send_sge", "Max_send_sge"}, {"Recv_sge", "Max_recv_sge"}, {"Inline_data", "Max_inline_data"}}},
+		{"IBUverbsDestroyQPResp", [][2]string{{"Reported", "Events_reported"}}},
+		{"IBUverbsDestroySRQResp", [][2]string{{"Reported", "Events_reported"}}},
+		{"IBUverbsAsyncEventDesc", [][2]string{{"Type", "Event_type"}}},
+		{"IBUverbsCompEventDesc", [][2]string{{"Handle", "Cq_handle"}}},
+	}
+	for _, r := range uverbsFieldRenames {
+		typeRegex := regexp.MustCompile(`type ` + r.typ + ` struct {[^}]*}`)
+		for _, s := range typeRegex.FindAll(b, -1) {
+			renamed := s
+			for _, f := range r.fields {
+				fieldRegex := regexp.MustCompile(`(\n\s+)` + f[0] + `(\s)`)
+				renamed = fieldRegex.ReplaceAll(renamed, []byte("${1}"+f[1]+"${2}"))
+			}
+			b = bytes.Replace(b, s, renamed, 1)
+		}
+	}
+
 	// Remove cgo padding fields
 	removePaddingFieldsRegex := regexp.MustCompile(`Pad_cgo_\d+`)
 	b = removePaddingFieldsRegex.ReplaceAll(b, []byte("_"))
