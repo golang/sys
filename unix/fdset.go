@@ -13,11 +13,17 @@ func (fds *FdSet) Set(fd int) {
 
 // Clear removes fd from the set fds.
 func (fds *FdSet) Clear(fd int) {
+	if fd < 0 || fd/NFDBITS >= len(fds.Bits) {
+		return
+	}
 	fds.Bits[fd/NFDBITS] &^= (1 << (uintptr(fd) % NFDBITS))
 }
 
 // IsSet returns whether fd is in the set fds.
 func (fds *FdSet) IsSet(fd int) bool {
+	if fd < 0 || fd/NFDBITS >= len(fds.Bits) {
+		return false
+	}
 	return fds.Bits[fd/NFDBITS]&(1<<(uintptr(fd)%NFDBITS)) != 0
 }
 
