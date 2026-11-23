@@ -11,6 +11,19 @@ package unix
 import "syscall"
 
 const (
+	AT_DCACHEBSIZE                   = 0x13
+	AT_ICACHEBSIZE                   = 0x14
+	AT_IGNOREPPC                     = 0x16
+	AT_L1D_CACHEGEOMETRY             = 0x2b
+	AT_L1D_CACHESIZE                 = 0x2a
+	AT_L1I_CACHEGEOMETRY             = 0x29
+	AT_L1I_CACHESIZE                 = 0x28
+	AT_L2_CACHEGEOMETRY              = 0x2d
+	AT_L2_CACHESIZE                  = 0x2c
+	AT_L3_CACHEGEOMETRY              = 0x2f
+	AT_L3_CACHESIZE                  = 0x2e
+	AT_UCACHEBSIZE                   = 0x15
+	AT_VECTOR_SIZE_ARCH              = 0xf
 	B1000000                         = 0x17
 	B115200                          = 0x11
 	B1152000                         = 0x18

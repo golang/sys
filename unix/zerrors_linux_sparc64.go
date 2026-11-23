@@ -14,6 +14,10 @@ const (
 	ASI_LEON_DFLUSH                  = 0x11
 	ASI_LEON_IFLUSH                  = 0x10
 	ASI_LEON_MMUFLUSH                = 0x18
+	AT_ADI_BLKSZ                     = 0x30
+	AT_ADI_NBITS                     = 0x31
+	AT_ADI_UEONADI                   = 0x32
+	AT_VECTOR_SIZE_ARCH              = 0x4
 	B1000000                         = 0x100c
 	B115200                          = 0x1002
 	B1152000                         = 0x100d
