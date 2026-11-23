@@ -11,6 +11,7 @@ package unix
 import "syscall"
 
 const (
+	AT_VECTOR_SIZE_ARCH              = 0x1
 	B1000000                         = 0x1008
 	B115200                          = 0x1002
 	B1152000                         = 0x1009

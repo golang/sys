@@ -217,6 +217,7 @@ struct ltchars {
 #include <sys/xattr.h>
 #include <netinet/udp.h>
 #include <linux/audit.h>
+#include <linux/auxvec.h>
 #include <linux/bpf.h>
 #include <linux/can.h>
 #include <linux/can/error.h>
@@ -614,6 +615,7 @@ ccflags="$@"
 		$2 ~ /^(TASKSTATS|TS)_/ ||
 		$2 ~ /^CGROUPSTATS_/ ||
 		$2 ~ /^GENL_/ ||
+		$2 ~ /^AT_/ ||
 		$2 ~ /^STATX_/ ||
 		$2 ~ /^RENAME/ ||
 		$2 ~ /^UBI_IOC[A-Z]/ ||
